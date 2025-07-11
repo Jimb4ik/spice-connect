@@ -255,7 +255,73 @@
         <div id="notifications" class="notifications"></div>
     </div>
 
-    <script src="app.js"></script>
+    <!-- Динамическая загрузка JS в зависимости от режима -->
+    <script>
+        // Проверяем выбранный режим и загружаем соответствующий файл
+        const mode = localStorage.getItem('spice_mode') || 'demo';
+        const apiKey = localStorage.getItem('spice_api_key');
+        
+        if (mode === 'production' && apiKey) {
+            // Production режим с API ключом
+            document.write('<script src="app-production.js"><\/script>');
+            
+            // Заменяем API ключ в загруженном скрипте
+            document.addEventListener('DOMContentLoaded', function() {
+                if (typeof API_CONFIG !== 'undefined') {
+                    API_CONFIG.API_KEY = apiKey;
+                    API_CONFIG.BASE_URL = localStorage.getItem('spice_api_url') || 'https://api.jetsetrdv.com';
+                }
+            });
+        } else {
+            // Демо режим
+            document.write('<script src="app.js"><\/script>');
+        }
+    </script>
+    
+    <!-- Добавляем ссылку на настройки API -->
+    <div id="api-settings-link" style="position: fixed; bottom: 10px; right: 10px; z-index: 2000;">
+        <a href="setup-api.html" style="
+            background: rgba(118, 75, 162, 0.9);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-size: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+        ">⚙️ Настройки API</a>
+    </div>
+    
+    <!-- Индикатор режима -->
+    <div id="mode-indicator" style="position: fixed; bottom: 10px; left: 10px; z-index: 2000;">
+        <span id="mode-badge" style="
+            background: rgba(231, 76, 60, 0.9);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+        ">🎮 ДЕМО</span>
+    </div>
+    
+    <script>
+        // Обновляем индикатор режима
+        document.addEventListener('DOMContentLoaded', function() {
+            const mode = localStorage.getItem('spice_mode') || 'demo';
+            const badge = document.getElementById('mode-badge');
+            
+            if (mode === 'production') {
+                badge.innerHTML = '🚀 LIVE';
+                badge.style.background = 'rgba(39, 174, 96, 0.9)';
+            } else {
+                badge.innerHTML = '🎮 ДЕМО';
+                badge.style.background = 'rgba(231, 76, 60, 0.9)';
+            }
+        });
+    </script>
+    
     <!-- Раскомментируйте для включения демо-скрипта -->
     <!-- <script src="demo.js"></script> -->
 </body>
