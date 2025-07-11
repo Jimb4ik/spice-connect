@@ -1,0 +1,44 @@
+{
+  "name": "spiceconnect",
+  "version": "1.0.0",
+  "description": "MVP приложение знакомств с использованием Spice API V2",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "dev": "npx http-server -p 3000 -o",
+    "build": "echo 'No build step required for static site'",
+    "test": "echo 'No tests specified'"
+  },
+  "keywords": [
+    "dating",
+    "spice-api",
+    "mvp",
+    "frontend",
+    "html",
+    "css",
+    "javascript",
+    "знакомства"
+  ],
+  "author": "SpiceConnect Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/spiceconnect.git"
+  },
+  "homepage": "https://spiceconnect.vercel.app",
+  "bugs": {
+    "url": "https://github.com/yourusername/spiceconnect/issues"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "not ie <= 11"
+  ]
+} 

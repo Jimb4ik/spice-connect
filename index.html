@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpiceConnect - Знакомства</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Навигация -->
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="nav-logo">
+                    <i class="fas fa-heart"></i>
+                    <span>SpiceConnect</span>
+                </div>
+                <div class="nav-menu">
+                    <div class="nav-item" onclick="showSection('home')">
+                        <i class="fas fa-home"></i>
+                        <span>Главная</span>
+                    </div>
+                    <div class="nav-item" onclick="showSection('search')">
+                        <i class="fas fa-search"></i>
+                        <span>Поиск</span>
+                    </div>
+                    <div class="nav-item" onclick="showSection('messages')">
+                        <i class="fas fa-comments"></i>
+                        <span>Сообщения</span>
+                    </div>
+                    <div class="nav-item" onclick="showSection('profile')">
+                        <i class="fas fa-user"></i>
+                        <span>Профиль</span>
+                    </div>
+                    <div class="nav-item" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Выход</span>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Секция авторизации -->
+        <div id="auth-section" class="section active">
+            <div class="auth-container">
+                <div class="auth-card">
+                    <div class="auth-header">
+                        <h1><i class="fas fa-heart"></i> SpiceConnect</h1>
+                        <p>Найди свою любовь!</p>
+                    </div>
+                    
+                    <div class="auth-tabs">
+                        <button class="tab-btn active" onclick="showAuthTab('login')">Вход</button>
+                        <button class="tab-btn" onclick="showAuthTab('register')">Регистрация</button>
+                    </div>
+
+                    <!-- Форма входа -->
+                    <div id="login-form" class="auth-form active">
+                        <div class="form-group">
+                            <label for="login-email">Email</label>
+                            <input type="email" id="login-email" placeholder="Введите ваш email">
+                        </div>
+                        <div class="form-group">
+                            <label for="login-password">Пароль</label>
+                            <input type="password" id="login-password" placeholder="Введите пароль">
+                        </div>
+                        <button class="btn-primary" onclick="login()">
+                            <i class="fas fa-sign-in-alt"></i> Войти
+                        </button>
+                    </div>
+
+                    <!-- Форма регистрации -->
+                    <div id="register-form" class="auth-form">
+                        <div class="form-group">
+                            <label for="reg-email">Email</label>
+                            <input type="email" id="reg-email" placeholder="Введите ваш email">
+                        </div>
+                        <div class="form-group">
+                            <label for="reg-password">Пароль</label>
+                            <input type="password" id="reg-password" placeholder="Создайте пароль">
+                        </div>
+                        <div class="form-group">
+                            <label for="reg-age">Возраст</label>
+                            <input type="number" id="reg-age" placeholder="Ваш возраст" min="18" max="100">
+                        </div>
+                        <div class="form-group">
+                            <label for="reg-city">Город</label>
+                            <input type="text" id="reg-city" placeholder="Ваш город">
+                        </div>
+                        <div class="form-group">
+                            <label for="reg-gender">Пол</label>
+                            <select id="reg-gender">
+                                <option value="">Выберите пол</option>
+                                <option value="1">Мужской</option>
+                                <option value="2">Женский</option>
+                            </select>
+                        </div>
+                        <button class="btn-primary" onclick="register()">
+                            <i class="fas fa-user-plus"></i> Зарегистрироваться
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Главная секция -->
+        <div id="home-section" class="section">
+            <div class="container">
+                <div class="welcome-banner">
+                    <h2>Добро пожаловать в SpiceConnect!</h2>
+                    <p>Найдите интересных людей рядом с вами</p>
+                </div>
+                
+                <div class="stats-cards">
+                    <div class="stat-card">
+                        <i class="fas fa-users"></i>
+                        <h3>1000+</h3>
+                        <p>Активных пользователей</p>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-heart"></i>
+                        <h3>500+</h3>
+                        <p>Успешных знакомств</p>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-comments"></i>
+                        <h3>10k+</h3>
+                        <p>Сообщений отправлено</p>
+                    </div>
+                </div>
+                
+                <div class="quick-actions">
+                    <button class="action-btn" onclick="showSection('search')">
+                        <i class="fas fa-search"></i>
+                        Найти людей
+                    </button>
+                    <button class="action-btn" onclick="showSection('messages')">
+                        <i class="fas fa-comments"></i>
+                        Мои сообщения
+                    </button>
+                    <button class="action-btn" onclick="showSection('profile')">
+                        <i class="fas fa-user-edit"></i>
+                        Редактировать профиль
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Секция поиска -->
+        <div id="search-section" class="section">
+            <div class="container">
+                <h2>Поиск людей</h2>
+                <div class="search-filters">
+                    <div class="filter-group">
+                        <label>Возраст от:</label>
+                        <input type="number" id="search-age-min" value="18" min="18" max="100">
+                    </div>
+                    <div class="filter-group">
+                        <label>до:</label>
+                        <input type="number" id="search-age-max" value="35" min="18" max="100">
+                    </div>
+                    <div class="filter-group">
+                        <label>Пол:</label>
+                        <select id="search-gender">
+                            <option value="">Любой</option>
+                            <option value="1">Мужской</option>
+                            <option value="2">Женский</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Город:</label>
+                        <input type="text" id="search-city" placeholder="Введите город">
+                    </div>
+                    <button class="btn-primary" onclick="searchUsers()">
+                        <i class="fas fa-search"></i> Найти
+                    </button>
+                </div>
+                <div id="search-results" class="user-grid"></div>
+            </div>
+        </div>
+
+        <!-- Секция сообщений -->
+        <div id="messages-section" class="section">
+            <div class="container">
+                <h2>Мои сообщения</h2>
+                <div class="messages-container">
+                    <div class="contacts-list">
+                        <h3>Контакты</h3>
+                        <div id="contacts-list"></div>
+                    </div>
+                    <div class="chat-area">
+                        <div class="chat-header">
+                            <h3 id="chat-user-name">Выберите контакт</h3>
+                        </div>
+                        <div id="chat-messages" class="chat-messages"></div>
+                        <div class="chat-input">
+                            <input type="text" id="message-input" placeholder="Введите сообщение...">
+                            <button onclick="sendMessage()">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Секция профиля -->
+        <div id="profile-section" class="section">
+            <div class="container">
+                <h2>Мой профиль</h2>
+                <div class="profile-container">
+                    <div class="profile-photo">
+                        <div class="photo-placeholder">
+                            <i class="fas fa-camera"></i>
+                            <p>Загрузить фото</p>
+                        </div>
+                        <input type="file" id="photo-upload" accept="image/*" style="display: none;" onchange="uploadPhoto()">
+                        <button onclick="document.getElementById('photo-upload').click()">
+                            <i class="fas fa-upload"></i> Загрузить фото
+                        </button>
+                    </div>
+                    <div class="profile-info">
+                        <div class="form-group">
+                            <label>Имя</label>
+                            <input type="text" id="profile-name" placeholder="Ваше имя">
+                        </div>
+                        <div class="form-group">
+                            <label>Возраст</label>
+                            <input type="number" id="profile-age" placeholder="Ваш возраст">
+                        </div>
+                        <div class="form-group">
+                            <label>Город</label>
+                            <input type="text" id="profile-city" placeholder="Ваш город">
+                        </div>
+                        <div class="form-group">
+                            <label>О себе</label>
+                            <textarea id="profile-description" placeholder="Расскажите о себе..."></textarea>
+                        </div>
+                        <button class="btn-primary" onclick="updateProfile()">
+                            <i class="fas fa-save"></i> Сохранить
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Загрузка -->
+        <div id="loading" class="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>Загрузка...</p>
+        </div>
+
+        <!-- Уведомления -->
+        <div id="notifications" class="notifications"></div>
+    </div>
+
+    <script src="app.js"></script>
+    <!-- Раскомментируйте для включения демо-скрипта -->
+    <!-- <script src="demo.js"></script> -->
+</body>
+</html> 
