@@ -6,7 +6,6 @@
   "scripts": {
     "start": "python -m http.server 8000",
     "dev": "npx http-server -p 3000 -o",
-    "build": "echo 'No build step required for static site'",
     "test": "echo 'No tests specified'"
   },
   "keywords": [
