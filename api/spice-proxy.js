@@ -21,46 +21,67 @@ export default async function handler(req, res) {
     }
 
     try {
-        const { endpoint, method = 'POST', body } = req.body;
-        
+        const { endpoint, method = 'POST', params = {} } = req.body;
+
         if (!endpoint) {
-            return res.status(400).json({ error: 'Endpoint не указан' });
+            return res.status(400).json({ error: 'endpoint is required' });
         }
 
-        // Строим URL для API
-        const url = `${BASE_URL}${endpoint}`;
+        // Полный URL к Spice API
+        const apiUrl = `${BASE_URL}${endpoint}`;
         
-        // Подготавливаем headers
-        const headers = {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${API_KEY}`,
-            'Accept': 'application/json'
+        // Подготавливаем параметры с API ключом
+        const requestParams = {
+            ...params,
+            api_key: API_KEY
         };
 
-        // Делаем запрос к Spice API
-        const response = await fetch(url, {
+        // Подготавливаем данные запроса
+        let requestOptions = {
             method: method,
-            headers: headers,
-            body: body ? JSON.stringify(body) : undefined
-        });
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'User-Agent': 'SpiceConnect/1.0'
+            }
+        };
+
+        // Для POST запросов отправляем данные как form data
+        if (method === 'POST') {
+            const formData = new URLSearchParams();
+            Object.keys(requestParams).forEach(key => {
+                if (requestParams[key] !== undefined && requestParams[key] !== null) {
+                    formData.append(key, requestParams[key]);
+                }
+            });
+            requestOptions.body = formData.toString();
+        } else {
+            // Для GET запросов добавляем параметры в URL
+            const urlParams = new URLSearchParams(requestParams);
+            const separator = apiUrl.includes('?') ? '&' : '?';
+            requestOptions.url = `${apiUrl}${separator}${urlParams.toString()}`;
+        }
+
+        console.log(`🔗 Spice API Request: ${method} ${apiUrl}`, requestParams);
+
+        // Отправляем запрос к Spice API
+        const response = await fetch(method === 'GET' ? requestOptions.url : apiUrl, requestOptions);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
 
         const data = await response.json();
         
-        if (!response.ok) {
-            return res.status(response.status).json({
-                error: data.message || 'Ошибка API',
-                details: data
-            });
-        }
-
-        // Возвращаем успешный ответ
+        console.log('✅ Spice API Response:', data);
+        
+        // Возвращаем данные клиенту
         res.status(200).json(data);
 
     } catch (error) {
-        console.error('Proxy error:', error);
+        console.error('❌ Spice API Error:', error);
         res.status(500).json({ 
-            error: 'Ошибка сервера при обращении к API',
-            message: error.message 
+            error: 'Ошибка при обращении к Spice API',
+            details: error.message 
         });
     }
 } 

@@ -1,28 +1,30 @@
-// SpiceConnect - Основное приложение (Live версия)
+// SpiceConnect - Основное приложение (Live версия с реальным Spice API)
 
-// API Configuration
+// API Configuration - Правильные endpoints для Spice API V2
 const API_CONFIG = {
     PROXY_URL: '/api/spice-proxy', // Наша serverless функция
     ENDPOINTS: {
-        REGISTER: '/api/v2/register',
-        LOGIN: '/api/v2/login', 
-        SEARCH_USERS: '/api/v2/users/search',
-        GET_PROFILE: '/api/v2/users/profile',
-        UPDATE_PROFILE: '/api/v2/users/profile/update',
-        SEND_MESSAGE: '/api/v2/messages/send',
-        GET_MESSAGES: '/api/v2/messages/get',
-        UPLOAD_PHOTO: '/api/v2/users/photo/upload'
+        LOGIN: '/index_api/login',
+        REGISTER: '/index_api/subscribe', 
+        SEARCH: '/index_api/search',
+        USER_PROFILE: '/index_api/user',
+        SEND_MESSAGE: '/ajax_api/send_message',
+        LOAD_MESSAGES: '/ajax_api/load_messages',
+        LOAD_CONTACTS: '/ajax_api/load_contacts',
+        UPLOAD_PHOTO: '/ajax_api/upload_photo'
     }
 };
 
 // Global state
 let currentUser = null;
-let authToken = null;
+let sessionId = null;
 
 // Utility functions
 function showLoading(show = true) {
     const loading = document.getElementById('loading');
-    loading.style.display = show ? 'flex' : 'none';
+    if (loading) {
+        loading.style.display = show ? 'flex' : 'none';
+    }
 }
 
 function showNotification(message, type = 'info') {
@@ -37,24 +39,26 @@ function showNotification(message, type = 'info') {
         top: 20px;
         right: 20px;
         padding: 15px 20px;
-        background: ${type === 'success' ? '#27ae60' : type === 'error' ? '#e74c3c' : '#3498db'};
+        border-radius: 5px;
         color: white;
-        border-radius: 8px;
+        font-weight: bold;
         z-index: 10000;
-        animation: slideIn 0.3s ease;
+        max-width: 300px;
+        background: ${type === 'error' ? '#e74c3c' : type === 'success' ? '#27ae60' : '#3498db'};
     `;
     
     document.body.appendChild(notification);
     
-    // Удаляем через 3 секунды
+    // Убираем через 3 секунды
     setTimeout(() => {
-        notification.style.animation = 'slideOut 0.3s ease';
-        setTimeout(() => notification.remove(), 300);
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
     }, 3000);
 }
 
-// API call function - теперь использует serverless функцию
-async function apiCall(endpoint, method = 'POST', data = null) {
+// Функция для вызова Spice API через наш proxy
+async function callSpiceAPI(endpoint, params = {}, method = 'POST') {
     try {
         showLoading(true);
         
@@ -66,289 +70,310 @@ async function apiCall(endpoint, method = 'POST', data = null) {
             body: JSON.stringify({
                 endpoint: endpoint,
                 method: method,
-                body: data
+                params: params
             })
         });
 
-        const result = await response.json();
+        const data = await response.json();
         
         if (!response.ok) {
-            throw new Error(result.error || 'Ошибка API');
+            throw new Error(data.error || 'Ошибка API');
         }
-        
-        return result;
-        
+
+        return data;
     } catch (error) {
         console.error('API Error:', error);
-        showNotification(`Ошибка: ${error.message}`, 'error');
+        showNotification(error.message || 'Ошибка соединения с сервером', 'error');
         throw error;
     } finally {
         showLoading(false);
     }
 }
 
-// Authentication functions
-async function login() {
-    const email = document.getElementById('login-email').value;
-    const password = document.getElementById('login-password').value;
+// Функции для работы с API
 
-    if (!email || !password) {
-        showNotification('Заполните все поля', 'error');
-        return;
-    }
-
+// Регистрация пользователя
+async function register(formData) {
     try {
-        const response = await apiCall(API_CONFIG.ENDPOINTS.LOGIN, 'POST', {
-            email: email,
-            password: password
-        });
+        const params = {
+            login: formData.nickname,
+            pass: formData.password,
+            mail: formData.email,
+            sex: formData.gender, // 1=мужчина, 2=женщина, 3=пара
+            cherche1: formData.lookingFor || 2, // Кого ищем
+            year: new Date().getFullYear() - (formData.age || 25),
+            month: 1,
+            day: 1,
+            ip_adress: '127.0.0.1', // Заменить на реальный IP
+            city: 1, // ID города (нужно получить через getRegionsAutocomp)
+            region: 1, // ID региона  
+            countryObj: 1, // ID страны
+            'fast-part': '1' // Быстрая регистрация
+        };
 
-        if (response.success) {
-            authToken = response.token;
-            currentUser = response.user;
-            
-            // Сохраняем токен в локальном хранилище
-            localStorage.setItem('spice_token', authToken);
-            localStorage.setItem('spice_user', JSON.stringify(currentUser));
-            
-            showApp();
-            showNotification('Добро пожаловать!', 'success');
+        const result = await callSpiceAPI(API_CONFIG.ENDPOINTS.REGISTER, params);
+        
+        if (result.accepted === 1 && result.session_id) {
+            sessionId = result.session_id;
+            showNotification('Регистрация успешна!', 'success');
+            return { success: true, session_id: result.session_id };
+        } else {
+            throw new Error(result.error || 'Ошибка регистрации');
         }
     } catch (error) {
-        showNotification('Ошибка входа. Проверьте данные.', 'error');
+        showNotification(error.message, 'error');
+        return { success: false, error: error.message };
     }
 }
 
-async function register() {
-    const name = document.getElementById('register-name').value;
-    const email = document.getElementById('register-email').value;
-    const password = document.getElementById('register-password').value;
-    const age = document.getElementById('register-age').value;
-    const city = document.getElementById('register-city').value;
-
-    if (!name || !email || !password || !age || !city) {
-        showNotification('Заполните все поля', 'error');
-        return;
-    }
-
+// Вход пользователя
+async function login(nickname, password) {
     try {
-        const response = await apiCall(API_CONFIG.ENDPOINTS.REGISTER, 'POST', {
-            name: name,
-            email: email,
-            password: password,
-            age: parseInt(age),
-            city: city
-        });
+        const params = {
+            login: nickname,
+            pass: password
+        };
 
-        if (response.success) {
-            showNotification('Регистрация успешна! Войдите в аккаунт.', 'success');
-            showLogin();
+        const result = await callSpiceAPI(API_CONFIG.ENDPOINTS.LOGIN, params);
+        
+        if (result.connected === 1 && result.session_id) {
+            sessionId = result.session_id;
+            currentUser = {
+                id: result.user_id,
+                nickname: nickname
+            };
+            
+            showNotification('Вход выполнен успешно!', 'success');
+            return { success: true, user: currentUser };
+        } else {
+            throw new Error('Неверный логин или пароль');
         }
     } catch (error) {
-        showNotification('Ошибка регистрации. Попробуйте другой email.', 'error');
+        showNotification(error.message, 'error');
+        return { success: false, error: error.message };
     }
 }
 
-function logout() {
-    authToken = null;
-    currentUser = null;
-    localStorage.removeItem('spice_token');
-    localStorage.removeItem('spice_user');
-    
-    document.getElementById('app').style.display = 'none';
-    document.getElementById('login-section').style.display = 'block';
-    
-    showNotification('Вы вышли из аккаунта', 'info');
-}
+// Поиск пользователей
+async function searchUsers(filters = {}) {
+    try {
+        if (!sessionId) {
+            throw new Error('Необходимо войти в систему');
+        }
 
-// UI functions
-function showLogin() {
-    document.getElementById('login-section').style.display = 'block';
-    document.getElementById('register-section').style.display = 'none';
-}
+        const params = {
+            session_id: sessionId,
+            sex: filters.gender || null, // 1=мужчина, 2=женщина, 3=пара
+            age_from: filters.ageFrom || null,
+            age_to: filters.ageTo || null,
+            is_online: filters.onlineOnly ? 1 : 0,
+            is_photo: filters.withPhoto ? 1 : 0,
+            page: filters.page || 0,
+            pas: filters.limit || 12
+        };
 
-function showRegister() {
-    document.getElementById('login-section').style.display = 'none';
-    document.getElementById('register-section').style.display = 'block';
-}
+        // Убираем null значения
+        Object.keys(params).forEach(key => {
+            if (params[key] === null || params[key] === undefined) {
+                delete params[key];
+            }
+        });
 
-function showApp() {
-    document.getElementById('login-section').style.display = 'none';
-    document.getElementById('register-section').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    
-    // Обновляем информацию пользователя
-    if (currentUser) {
-        document.getElementById('user-name').textContent = currentUser.name || 'Пользователь';
-        document.getElementById('profile-name').textContent = currentUser.name || 'Пользователь';
-        document.getElementById('profile-details').textContent = 
-            `${currentUser.age} лет, ${currentUser.city}`;
+        const result = await callSpiceAPI(API_CONFIG.ENDPOINTS.SEARCH, params);
+        
+        if (result.connected !== undefined) {
+            return {
+                success: true,
+                users: result.result || [],
+                total: result.total || 0,
+                pages: result.nb_pages || 0
+            };
+        } else {
+            throw new Error('Ошибка поиска пользователей');
+        }
+    } catch (error) {
+        showNotification(error.message, 'error');
+        return { success: false, error: error.message };
     }
-    
-    // Показываем кнопку выхода
-    document.getElementById('nav-logout').style.display = 'block';
 }
 
+// Получение профиля пользователя
+async function getUserProfile(userId) {
+    try {
+        if (!sessionId) {
+            throw new Error('Необходимо войти в систему');
+        }
+
+        const params = {
+            session_id: sessionId,
+            id: userId
+        };
+
+        const result = await callSpiceAPI(API_CONFIG.ENDPOINTS.USER_PROFILE, params);
+        
+        return { success: true, user: result };
+    } catch (error) {
+        showNotification(error.message, 'error');
+        return { success: false, error: error.message };
+    }
+}
+
+// Отправка сообщения  
+async function sendMessage(recipientId, message) {
+    try {
+        if (!sessionId) {
+            throw new Error('Необходимо войти в систему');
+        }
+
+        const params = {
+            api_key: 'FROM_ENV', // Будет добавлен в proxy
+            session_id: sessionId,
+            id: recipientId,
+            message: message
+        };
+
+        const result = await callSpiceAPI(API_CONFIG.ENDPOINTS.SEND_MESSAGE, params, 'GET');
+        
+        return { success: true, result: result };
+    } catch (error) {
+        showNotification(error.message, 'error');
+        return { success: false, error: error.message };
+    }
+}
+
+// UI Event Handlers - Обработчики событий интерфейса
+
+// Показать секцию
 function showSection(sectionName) {
     // Скрываем все секции
     const sections = document.querySelectorAll('.section');
     sections.forEach(section => section.classList.remove('active'));
     
-    // Убираем активный класс у всех навигационных ссылок
-    const navLinks = document.querySelectorAll('.nav-link');
-    navLinks.forEach(link => link.classList.remove('active'));
-    
-    // Показываем выбранную секцию
+    // Показываем нужную секцию
     const targetSection = document.getElementById(sectionName);
     if (targetSection) {
         targetSection.classList.add('active');
     }
     
-    // Делаем активной соответствующую навигационную ссылку
+    // Обновляем навигацию
+    const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(link => link.classList.remove('active'));
+    
     const activeNavLink = document.getElementById(`nav-${sectionName}`);
     if (activeNavLink) {
         activeNavLink.classList.add('active');
     }
+    
+    // Загружаем данные для секции если нужно
+    if (sectionName === 'search' && sessionId) {
+        loadSearchResults();
+    }
 }
 
-// Search functions
-async function searchUsers() {
-    const ageMin = document.getElementById('search-age-min').value;
-    const ageMax = document.getElementById('search-age-max').value;
-    const city = document.getElementById('search-city').value;
-
-    try {
-        const response = await apiCall(API_CONFIG.ENDPOINTS.SEARCH_USERS, 'POST', {
-            age_min: parseInt(ageMin) || 18,
-            age_max: parseInt(ageMax) || 100,
-            city: city || '',
-            limit: 20
-        });
-
-        if (response.success && response.users) {
-            displaySearchResults(response.users);
-        } else {
-            showNotification('Пользователи не найдены', 'info');
-            displaySearchResults([]);
+// Загрузка результатов поиска
+async function loadSearchResults(filters = {}) {
+    const searchResults = document.getElementById('searchResults');
+    if (!searchResults) return;
+    
+    searchResults.innerHTML = '<div class="loading">Загрузка пользователей...</div>';
+    
+    const result = await searchUsers(filters);
+    
+    if (result.success && result.users) {
+        if (result.users.length === 0) {
+            searchResults.innerHTML = '<div class="no-results">Пользователи не найдены</div>';
+            return;
         }
-    } catch (error) {
-        showNotification('Ошибка поиска пользователей', 'error');
-        displaySearchResults([]);
-    }
-}
-
-function displaySearchResults(users) {
-    const resultsContainer = document.getElementById('search-results');
-    
-    if (!users || users.length === 0) {
-        resultsContainer.innerHTML = '<p class="no-data">Пользователи не найдены. Попробуйте изменить параметры поиска.</p>';
-        return;
-    }
-    
-    const usersHTML = users.map(user => `
-        <div class="user-card">
-            <div class="user-avatar">
-                ${user.photo_url ? 
-                    `<img src="${user.photo_url}" alt="${user.name}">` : 
-                    `<div class="avatar-placeholder">${user.name.charAt(0)}</div>`
-                }
-            </div>
-            <div class="user-info">
-                <h3>${user.name}</h3>
-                <p class="user-details">${user.age} лет, ${user.city}</p>
-                <p class="user-description">${user.description || 'Нет описания'}</p>
-                <div class="user-actions">
-                    <button class="btn btn-primary" onclick="sendMessage('${user.id}', '${user.name}')">
-                        💌 Написать
-                    </button>
-                    <button class="btn btn-secondary" onclick="likeUser('${user.id}')">
-                        ❤️ Лайк
-                    </button>
+        
+        searchResults.innerHTML = result.users.map(user => `
+            <div class="user-card" onclick="showUserProfile('${user.id}')">
+                <div class="user-photo">
+                    ${user.photo_x ? `<img src="${user.photo_x}" alt="${user.pseudo}">` : '<div class="no-photo">Нет фото</div>'}
+                </div>
+                <div class="user-info">
+                    <h3>${user.pseudo || user.prenom || 'Пользователь'}</h3>
+                    <p>Возраст: ${user.age || 'не указан'}</p>
+                    <p>Город: ${user.zone_name || 'не указан'}</p>
+                    ${user.description ? `<p class="description">${user.description}</p>` : ''}
+                    ${user.online === 1 ? '<span class="online-badge">онлайн</span>' : ''}
                 </div>
             </div>
-        </div>
-    `).join('');
-    
-    resultsContainer.innerHTML = usersHTML;
-}
-
-// Message functions
-async function sendMessage(userId, userName) {
-    const message = prompt(`Отправить сообщение пользователю ${userName}:`);
-    
-    if (!message) return;
-    
-    try {
-        const response = await apiCall(API_CONFIG.ENDPOINTS.SEND_MESSAGE, 'POST', {
-            recipient_id: userId,
-            message: message
-        });
-
-        if (response.success) {
-            showNotification(`Сообщение отправлено пользователю ${userName}`, 'success');
-        }
-    } catch (error) {
-        showNotification('Ошибка отправки сообщения', 'error');
+        `).join('');
+    } else {
+        searchResults.innerHTML = '<div class="error">Ошибка загрузки пользователей</div>';
     }
 }
 
-async function likeUser(userId) {
-    try {
-        const response = await apiCall('/api/v2/users/like', 'POST', {
-            user_id: userId
-        });
-
-        if (response.success) {
-            showNotification('Лайк отправлен!', 'success');
-        }
-    } catch (error) {
-        showNotification('Ошибка отправки лайка', 'error');
-    }
+// Показать профиль пользователя  
+async function showUserProfile(userId) {
+    // Здесь можно добавить модальное окно с профилем
+    showNotification(`Открытие профиля пользователя ${userId}`, 'info');
 }
 
-// Profile functions
-function editProfile() {
-    showNotification('Редактирование профиля будет доступно в следующих версиях', 'info');
-}
-
-async function updateProfile() {
-    // Эта функция будет реализована позже
-    showNotification('Функция обновления профиля в разработке', 'info');
-}
-
-// Event listeners
+// Обработчики форм
 document.addEventListener('DOMContentLoaded', function() {
-    // Проверяем сохраненную авторизацию
-    const savedToken = localStorage.getItem('spice_token');
-    const savedUser = localStorage.getItem('spice_user');
-    
-    if (savedToken && savedUser) {
-        authToken = savedToken;
-        currentUser = JSON.parse(savedUser);
-        showApp();
-    }
-    
-    // Обработчики форм
-    document.getElementById('login-form').addEventListener('submit', function(e) {
-        e.preventDefault();
-        login();
-    });
-    
-    document.getElementById('register-form').addEventListener('submit', function(e) {
-        e.preventDefault();
-        register();
-    });
-    
-    // Мобильное меню
-    const hamburger = document.getElementById('hamburger');
-    const navMenu = document.getElementById('navMenu');
-    
-    if (hamburger && navMenu) {
-        hamburger.addEventListener('click', function() {
-            navMenu.classList.toggle('active');
+    // Обработка формы входа
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            
+            const result = await login(formData.get('nickname'), formData.get('password'));
+            
+            if (result.success) {
+                showSection('home');
+            }
         });
     }
     
-    console.log('✅ SpiceConnect Live версия загружена');
-    console.log('🚀 Подключение к реальному API Spice');
-}); 
+    // Обработка формы регистрации
+    const registerForm = document.getElementById('registerForm');
+    if (registerForm) {
+        registerForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            
+            const registrationData = {
+                nickname: formData.get('nickname'),
+                password: formData.get('password'),
+                email: formData.get('email'),
+                age: parseInt(formData.get('age')) || 25,
+                gender: parseInt(formData.get('gender')) || 2,
+                city: formData.get('city') || 'Москва'
+            };
+            
+            const result = await register(registrationData);
+            
+            if (result.success) {
+                showSection('home');
+            }
+        });
+    }
+    
+    // Обработка формы поиска
+    const searchForm = document.getElementById('searchForm');
+    if (searchForm) {
+        searchForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            
+            const filters = {
+                gender: formData.get('gender') ? parseInt(formData.get('gender')) : null,
+                ageFrom: formData.get('ageFrom') ? parseInt(formData.get('ageFrom')) : null,
+                ageTo: formData.get('ageTo') ? parseInt(formData.get('ageTo')) : null,
+                onlineOnly: formData.get('onlineOnly') === 'on',
+                withPhoto: formData.get('withPhoto') === 'on'
+            };
+            
+            await loadSearchResults(filters);
+        });
+    }
+    
+    // Показываем главную секцию по умолчанию
+    showSection('home');
+});
+
+// Добавляем функции в глобальную область видимости для использования в HTML
+window.showSection = showSection;
+window.showUserProfile = showUserProfile; 
