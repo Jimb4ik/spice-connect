@@ -4,325 +4,172 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SpiceConnect - Знакомства</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="app">
-        <!-- Навигация -->
-        <nav class="navbar">
-            <div class="nav-container">
-                <div class="nav-logo">
-                    <i class="fas fa-heart"></i>
-                    <span>SpiceConnect</span>
-                </div>
-                <div class="nav-menu">
-                    <div class="nav-item" onclick="showSection('home')">
-                        <i class="fas fa-home"></i>
-                        <span>Главная</span>
-                    </div>
-                    <div class="nav-item" onclick="showSection('search')">
-                        <i class="fas fa-search"></i>
-                        <span>Поиск</span>
-                    </div>
-                    <div class="nav-item" onclick="showSection('messages')">
-                        <i class="fas fa-comments"></i>
-                        <span>Сообщения</span>
-                    </div>
-                    <div class="nav-item" onclick="showSection('profile')">
-                        <i class="fas fa-user"></i>
-                        <span>Профиль</span>
-                    </div>
-                    <div class="nav-item" onclick="logout()">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span>Выход</span>
-                    </div>
-                </div>
-            </div>
-        </nav>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <h1>🌶️ SpiceConnect</h1>
+        </div>
+        <div class="nav-menu" id="navMenu">
+            <a href="javascript:void(0)" onclick="showSection('home')" class="nav-link active" id="nav-home">Главная</a>
+            <a href="javascript:void(0)" onclick="showSection('search')" class="nav-link" id="nav-search">Поиск</a>
+            <a href="javascript:void(0)" onclick="showSection('messages')" class="nav-link" id="nav-messages">Сообщения</a>
+            <a href="javascript:void(0)" onclick="showSection('profile')" class="nav-link" id="nav-profile">Профиль</a>
+            <a href="javascript:void(0)" onclick="logout()" class="nav-link" id="nav-logout" style="display: none;">Выход</a>
+        </div>
+        <div class="hamburger" id="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </nav>
 
-        <!-- Секция авторизации -->
-        <div id="auth-section" class="section active">
-            <div class="auth-container">
-                <div class="auth-card">
-                    <div class="auth-header">
-                        <h1><i class="fas fa-heart"></i> SpiceConnect</h1>
-                        <p>Найди свою любовь!</p>
+    <!-- Login Section -->
+    <section id="login-section" class="auth-section">
+        <div class="auth-container">
+            <div class="auth-card">
+                <h2>Добро пожаловать в SpiceConnect</h2>
+                <p class="auth-subtitle">Найдите свою вторую половинку</p>
+                
+                <form id="login-form" class="auth-form">
+                    <div class="form-group">
+                        <input type="email" id="login-email" placeholder="Email" required>
                     </div>
-                    
-                    <div class="auth-tabs">
-                        <button class="tab-btn active" onclick="showAuthTab('login')">Вход</button>
-                        <button class="tab-btn" onclick="showAuthTab('register')">Регистрация</button>
+                    <div class="form-group">
+                        <input type="password" id="login-password" placeholder="Пароль" required>
                     </div>
-
-                    <!-- Форма входа -->
-                    <div id="login-form" class="auth-form active">
-                        <div class="form-group">
-                            <label for="login-email">Email</label>
-                            <input type="email" id="login-email" placeholder="Введите ваш email">
-                        </div>
-                        <div class="form-group">
-                            <label for="login-password">Пароль</label>
-                            <input type="password" id="login-password" placeholder="Введите пароль">
-                        </div>
-                        <button class="btn-primary" onclick="login()">
-                            <i class="fas fa-sign-in-alt"></i> Войти
-                        </button>
-                    </div>
-
-                    <!-- Форма регистрации -->
-                    <div id="register-form" class="auth-form">
-                        <div class="form-group">
-                            <label for="reg-email">Email</label>
-                            <input type="email" id="reg-email" placeholder="Введите ваш email">
-                        </div>
-                        <div class="form-group">
-                            <label for="reg-password">Пароль</label>
-                            <input type="password" id="reg-password" placeholder="Создайте пароль">
-                        </div>
-                        <div class="form-group">
-                            <label for="reg-age">Возраст</label>
-                            <input type="number" id="reg-age" placeholder="Ваш возраст" min="18" max="100">
-                        </div>
-                        <div class="form-group">
-                            <label for="reg-city">Город</label>
-                            <input type="text" id="reg-city" placeholder="Ваш город">
-                        </div>
-                        <div class="form-group">
-                            <label for="reg-gender">Пол</label>
-                            <select id="reg-gender">
-                                <option value="">Выберите пол</option>
-                                <option value="1">Мужской</option>
-                                <option value="2">Женский</option>
-                            </select>
-                        </div>
-                        <button class="btn-primary" onclick="register()">
-                            <i class="fas fa-user-plus"></i> Зарегистрироваться
-                        </button>
-                    </div>
-                </div>
+                    <button type="submit" class="btn btn-primary">Войти</button>
+                </form>
+                
+                <p class="auth-switch">
+                    Нет аккаунта? <a href="javascript:void(0)" onclick="showRegister()">Зарегистрироваться</a>
+                </p>
             </div>
         </div>
+    </section>
 
-        <!-- Главная секция -->
-        <div id="home-section" class="section">
+    <!-- Register Section -->
+    <section id="register-section" class="auth-section" style="display: none;">
+        <div class="auth-container">
+            <div class="auth-card">
+                <h2>Регистрация</h2>
+                <p class="auth-subtitle">Создайте аккаунт для знакомств</p>
+                
+                <form id="register-form" class="auth-form">
+                    <div class="form-group">
+                        <input type="text" id="register-name" placeholder="Имя" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" id="register-email" placeholder="Email" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="register-password" placeholder="Пароль" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="number" id="register-age" placeholder="Возраст" min="18" max="100" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="register-city" placeholder="Город" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+                </form>
+                
+                <p class="auth-switch">
+                    Уже есть аккаунт? <a href="javascript:void(0)" onclick="showLogin()">Войти</a>
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main App -->
+    <div id="app" style="display: none;">
+        <!-- Home Section -->
+        <section id="home" class="section active">
             <div class="container">
-                <div class="welcome-banner">
-                    <h2>Добро пожаловать в SpiceConnect!</h2>
-                    <p>Найдите интересных людей рядом с вами</p>
+                <div class="welcome-hero">
+                    <h2>Добро пожаловать, <span id="user-name">Пользователь</span>!</h2>
+                    <p>Начните знакомства прямо сейчас</p>
+                    <button class="btn btn-primary" onclick="showSection('search')">Найти людей</button>
                 </div>
                 
-                <div class="stats-cards">
+                <div class="stats-grid">
                     <div class="stat-card">
-                        <i class="fas fa-users"></i>
-                        <h3>1000+</h3>
-                        <p>Активных пользователей</p>
+                        <h3>💕</h3>
+                        <p>Новые знакомства</p>
                     </div>
                     <div class="stat-card">
-                        <i class="fas fa-heart"></i>
-                        <h3>500+</h3>
-                        <p>Успешных знакомств</p>
+                        <h3>💌</h3>
+                        <p>Сообщения</p>
                     </div>
                     <div class="stat-card">
-                        <i class="fas fa-comments"></i>
-                        <h3>10k+</h3>
-                        <p>Сообщений отправлено</p>
+                        <h3>🎯</h3>
+                        <p>Совпадения</p>
                     </div>
-                </div>
-                
-                <div class="quick-actions">
-                    <button class="action-btn" onclick="showSection('search')">
-                        <i class="fas fa-search"></i>
-                        Найти людей
-                    </button>
-                    <button class="action-btn" onclick="showSection('messages')">
-                        <i class="fas fa-comments"></i>
-                        Мои сообщения
-                    </button>
-                    <button class="action-btn" onclick="showSection('profile')">
-                        <i class="fas fa-user-edit"></i>
-                        Редактировать профиль
-                    </button>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- Секция поиска -->
-        <div id="search-section" class="section">
+        <!-- Search Section -->
+        <section id="search" class="section">
             <div class="container">
                 <h2>Поиск людей</h2>
+                
                 <div class="search-filters">
                     <div class="filter-group">
-                        <label>Возраст от:</label>
-                        <input type="number" id="search-age-min" value="18" min="18" max="100">
+                        <label for="search-age-min">Возраст от:</label>
+                        <input type="number" id="search-age-min" min="18" max="100" value="18">
                     </div>
                     <div class="filter-group">
-                        <label>до:</label>
-                        <input type="number" id="search-age-max" value="35" min="18" max="100">
+                        <label for="search-age-max">до:</label>
+                        <input type="number" id="search-age-max" min="18" max="100" value="50">
                     </div>
                     <div class="filter-group">
-                        <label>Пол:</label>
-                        <select id="search-gender">
-                            <option value="">Любой</option>
-                            <option value="1">Мужской</option>
-                            <option value="2">Женский</option>
-                        </select>
+                        <label for="search-city">Город:</label>
+                        <input type="text" id="search-city" placeholder="Любой город">
                     </div>
-                    <div class="filter-group">
-                        <label>Город:</label>
-                        <input type="text" id="search-city" placeholder="Введите город">
-                    </div>
-                    <button class="btn-primary" onclick="searchUsers()">
-                        <i class="fas fa-search"></i> Найти
-                    </button>
+                    <button class="btn btn-primary" onclick="searchUsers()">Поиск</button>
                 </div>
-                <div id="search-results" class="user-grid"></div>
+                
+                <div id="search-results" class="users-grid">
+                    <!-- Results will be populated here -->
+                </div>
             </div>
-        </div>
+        </section>
 
-        <!-- Секция сообщений -->
-        <div id="messages-section" class="section">
+        <!-- Messages Section -->
+        <section id="messages" class="section">
             <div class="container">
-                <h2>Мои сообщения</h2>
-                <div class="messages-container">
-                    <div class="contacts-list">
-                        <h3>Контакты</h3>
-                        <div id="contacts-list"></div>
-                    </div>
-                    <div class="chat-area">
-                        <div class="chat-header">
-                            <h3 id="chat-user-name">Выберите контакт</h3>
-                        </div>
-                        <div id="chat-messages" class="chat-messages"></div>
-                        <div class="chat-input">
-                            <input type="text" id="message-input" placeholder="Введите сообщение...">
-                            <button onclick="sendMessage()">
-                                <i class="fas fa-paper-plane"></i>
-                            </button>
-                        </div>
-                    </div>
+                <h2>Сообщения</h2>
+                <div id="messages-list" class="messages-container">
+                    <p class="no-data">Сообщений пока нет. Начните общение!</p>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- Секция профиля -->
-        <div id="profile-section" class="section">
+        <!-- Profile Section -->
+        <section id="profile" class="section">
             <div class="container">
                 <h2>Мой профиль</h2>
-                <div class="profile-container">
-                    <div class="profile-photo">
-                        <div class="photo-placeholder">
-                            <i class="fas fa-camera"></i>
-                            <p>Загрузить фото</p>
-                        </div>
-                        <input type="file" id="photo-upload" accept="image/*" style="display: none;" onchange="uploadPhoto()">
-                        <button onclick="document.getElementById('photo-upload').click()">
-                            <i class="fas fa-upload"></i> Загрузить фото
-                        </button>
-                    </div>
+                <div class="profile-card">
                     <div class="profile-info">
-                        <div class="form-group">
-                            <label>Имя</label>
-                            <input type="text" id="profile-name" placeholder="Ваше имя">
-                        </div>
-                        <div class="form-group">
-                            <label>Возраст</label>
-                            <input type="number" id="profile-age" placeholder="Ваш возраст">
-                        </div>
-                        <div class="form-group">
-                            <label>Город</label>
-                            <input type="text" id="profile-city" placeholder="Ваш город">
-                        </div>
-                        <div class="form-group">
-                            <label>О себе</label>
-                            <textarea id="profile-description" placeholder="Расскажите о себе..."></textarea>
-                        </div>
-                        <button class="btn-primary" onclick="updateProfile()">
-                            <i class="fas fa-save"></i> Сохранить
-                        </button>
+                        <h3 id="profile-name">Имя пользователя</h3>
+                        <p id="profile-details">Информация о пользователе</p>
+                        <button class="btn btn-secondary" onclick="editProfile()">Редактировать профиль</button>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Загрузка -->
-        <div id="loading" class="loading" style="display: none;">
-            <div class="spinner"></div>
-            <p>Загрузка...</p>
-        </div>
-
-        <!-- Уведомления -->
-        <div id="notifications" class="notifications"></div>
+        </section>
     </div>
 
-    <!-- Динамическая загрузка JS в зависимости от режима -->
-    <script>
-        // Проверяем выбранный режим и загружаем соответствующий файл
-        const mode = localStorage.getItem('spice_mode') || 'demo';
-        const apiKey = localStorage.getItem('spice_api_key');
-        
-        if (mode === 'production' && apiKey) {
-            // Production режим с API ключом
-            document.write('<script src="app-production.js"><\/script>');
-            
-            // Заменяем API ключ в загруженном скрипте
-            document.addEventListener('DOMContentLoaded', function() {
-                if (typeof API_CONFIG !== 'undefined') {
-                    API_CONFIG.API_KEY = apiKey;
-                    API_CONFIG.BASE_URL = localStorage.getItem('spice_api_url') || 'https://api.jetsetrdv.com';
-                }
-            });
-        } else {
-            // Демо режим
-            document.write('<script src="app.js"><\/script>');
-        }
-    </script>
-    
-    <!-- Добавляем ссылку на настройки API -->
-    <div id="api-settings-link" style="position: fixed; bottom: 10px; right: 10px; z-index: 2000;">
-        <a href="setup-api.html" style="
-            background: rgba(118, 75, 162, 0.9);
-            color: white;
-            padding: 10px 15px;
-            border-radius: 25px;
-            text-decoration: none;
-            font-size: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            backdrop-filter: blur(10px);
-        ">⚙️ Настройки API</a>
+    <!-- Loading -->
+    <div id="loading" class="loading" style="display: none;">
+        <div class="spinner"></div>
+        <p>Загрузка...</p>
     </div>
-    
-    <!-- Индикатор режима -->
-    <div id="mode-indicator" style="position: fixed; bottom: 10px; left: 10px; z-index: 2000;">
-        <span id="mode-badge" style="
-            background: rgba(231, 76, 60, 0.9);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 11px;
-            font-weight: bold;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-            backdrop-filter: blur(10px);
-        ">🎮 ДЕМО</span>
-    </div>
-    
-    <script>
-        // Обновляем индикатор режима
-        document.addEventListener('DOMContentLoaded', function() {
-            const mode = localStorage.getItem('spice_mode') || 'demo';
-            const badge = document.getElementById('mode-badge');
-            
-            if (mode === 'production') {
-                badge.innerHTML = '🚀 LIVE';
-                badge.style.background = 'rgba(39, 174, 96, 0.9)';
-            } else {
-                badge.innerHTML = '🎮 ДЕМО';
-                badge.style.background = 'rgba(231, 76, 60, 0.9)';
-            }
-        });
-    </script>
-    
-    <!-- Раскомментируйте для включения демо-скрипта -->
-    <!-- <script src="demo.js"></script> -->
+
+    <!-- Подключаем основной скрипт -->
+    <script src="app.js"></script>
 </body>
 </html> 
