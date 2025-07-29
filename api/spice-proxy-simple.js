@@ -42,27 +42,18 @@ export default async function handler(req, res) {
         const finalUrl = `${apiUrl}?${queryParams.toString()}`;
         console.log('📡 URL запроса:', finalUrl);
         
-        // Согласно документации: Authorization: Basic API_KEY:PASSWORD для index_api
-        // Пробуем разные варианты Basic авторизации (нет пароля в доках)
-        const basicAuth1 = `Basic ${API_KEY}`;
-        const basicAuth2 = `Basic ${API_KEY}:`;
-        const basicAuth3 = `Basic ${Buffer.from(API_KEY + ':').toString('base64')}`;
-        
+        // Используем РАБОЧИЙ метод авторизации: Query только api_key
+        // (Диагностика показала, что Basic auth НЕ работает, а Query api_key работает!)
         const headers = {
             'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            // Согласно документации для index_api
-            'Authorization': basicAuth3  // Пробуем base64 encoded
+            'Content-Type': 'application/json'
         };
         
-        console.log('🔑 Authorization types tested:', {
-            'basic1': `Basic ${API_KEY.substring(0, 4)}...`,
-            'basic2': `Basic ${API_KEY.substring(0, 4)}...:`,
-            'basic3': `Basic base64(${API_KEY.substring(0, 4)}...:)`,
-            'using': 'basic3'
-        });
+        console.log('🔑 Используем РАБОЧИЙ метод: Query только api_key');
+        console.log('🔧 Headers:', headers);
+        console.log('📋 API ключ передается только через query параметры');
         
-        // Делаем запрос к реальному API с API ключом в headers
+        // Делаем запрос к реальному API (API ключ в query параметрах)
         const apiResponse = await fetch(finalUrl, {
             method: 'POST',
             headers: headers

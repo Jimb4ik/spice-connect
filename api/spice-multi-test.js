@@ -44,36 +44,17 @@ export default async function handler(req, res) {
         const finalUrl = `${apiUrl}?${queryParams.toString()}`;
         console.log('📡 URL запроса:', finalUrl.replace(API_KEY, 'HIDDEN_KEY'));
         
-        // Определяем тип авторизации согласно документации
-        const needsBasicAuth = endpoint.startsWith('/index_api/');
+        // Используем РАБОЧИЙ метод авторизации: Query только api_key
+        // (Диагностика показала, что Basic auth НЕ работает)
         const headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json'
         };
         
-        if (needsBasicAuth) {
-            // Для index_api: пробуем разные варианты авторизации
-            const authVariant1 = `Basic ${Buffer.from(API_KEY + ':').toString('base64')}`;
-            const authVariant2 = `Basic ${Buffer.from(API_KEY).toString('base64')}`;
-            const authVariant3 = `Basic ${API_KEY}`;
-            
-            // Используем первый вариант как основной
-            headers['Authorization'] = authVariant1;
-            
-            console.log('🔑 Пробуем Basic Authorization для index_api');
-            console.log('🔑 API Key:', API_KEY.substring(0, 8) + '...' + API_KEY.slice(-4));
-            console.log('🔑 Auth variant 1 (API_KEY:):', authVariant1.substring(0, 20) + '...');
-            console.log('🔑 Auth variant 2 (API_KEY):', authVariant2.substring(0, 20) + '...');
-            console.log('🔑 Auth variant 3 (plain):', authVariant3.substring(0, 20) + '...');
-        } else {
-            // Для ajax_api авторизация только через query параметры
-            console.log('🔑 Используем query параметры для ajax_api');
-        }
-        
-        console.log('🔧 Headers:', { 
-            ...headers, 
-            'Authorization': needsBasicAuth ? 'Basic [HIDDEN]' : 'не используется' 
-        });
+        console.log('🔑 Используем рабочий метод: Query только api_key');
+        console.log('🔑 API Key:', API_KEY.substring(0, 8) + '...' + API_KEY.slice(-4));
+        console.log('🔧 Headers:', headers);
+        console.log('📋 Авторизация через query параметры (работает для всех endpoints)');
         
         // Выполняем запрос
         const apiResponse = await fetch(finalUrl, {
@@ -105,7 +86,7 @@ export default async function handler(req, res) {
                     api_key_present: !!API_KEY,
                     api_key_length: API_KEY ? API_KEY.length : 0,
                     endpoint_type: endpoint.startsWith('/index_api/') ? 'index_api' : 'ajax_api',
-                    auth_method: endpoint.startsWith('/index_api/') ? 'Basic + Query' : 'Query only'
+                    auth_method: 'Query only api_key (диагностика показала - это работает!)'
                 }
             });
         }
