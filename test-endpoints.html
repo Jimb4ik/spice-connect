@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧪 Spice API - Тестирование всех endpoints</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .endpoint-group {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+        .endpoint-group h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 3px;
+            font-size: 12px;
+        }
+        button:hover { background: #0056b3; }
+        button.get { background: #28a745; }
+        button.post { background: #dc3545; }
+        .result {
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+            background: #f8f9fa;
+        }
+        .success { border-left-color: #28a745; }
+        .error { border-left-color: #dc3545; }
+        pre {
+            background: #f1f1f1;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 11px;
+        }
+        .loading {
+            display: none;
+            color: #007bff;
+            font-weight: bold;
+        }
+        .summary {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Spice API V2 - Тестирование всех endpoints</h1>
+        <p><strong>Источник документации:</strong> <a href="https://dev2018.de5a7.com/api/swagger_en_last_V2.json" target="_blank">Swagger JSON</a></p>
+        
+        <div id="loading" class="loading">⏳ Выполняется запрос...</div>
+        
+        <!-- Site Information -->
+        <div class="endpoint-group">
+            <h3>📊 Информация о сайте</h3>
+            <button class="get" onclick="testEndpoint('/index_api/index', 'GET')">
+                GET /index_api/index (Site Info)
+            </button>
+            <button class="post" onclick="testEndpoint('/index_api/params', 'POST', {ip: '127.0.0.1', track: '', transaction_id: ''})">
+                POST /index_api/params (App Parameters)
+            </button>
+        </div>
+
+        <!-- Configuration Arrays -->
+        <div class="endpoint-group">
+            <h3>🔧 Массивы конфигурации</h3>
+            <button class="get" onclick="testEndpoint('/index_api/array/get/SEXE', 'GET')">
+                GET /array/get/SEXE (Gender)
+            </button>
+            <button class="get" onclick="testEndpoint('/index_api/array/get/CHEVEUX', 'GET')">
+                GET /array/get/CHEVEUX (Hair Colors)
+            </button>
+            <button class="get" onclick="testEndpoint('/index_api/array/get/YEUX', 'GET')">
+                GET /array/get/YEUX (Eye Colors)
+            </button>
+            <button class="get" onclick="testEndpoint('/index_api/array/get/SITUATION', 'GET')">
+                GET /array/get/SITUATION (Marital Status)
+            </button>
+            <button class="get" onclick="testEndpoint('/index_api/array/get/POUR', 'GET')">
+                GET /array/get/POUR (Looking For)
+            </button>
+        </div>
+
+        <!-- Legal Pages -->
+        <div class="endpoint-group">
+            <h3>📋 Юридические страницы</h3>
+            <button class="get" onclick="testEndpoint('/index_api/cgu', 'GET')">
+                GET /index_api/cgu (Terms of Use)
+            </button>
+            <button class="get" onclick="testEndpoint('/index_api/informations', 'GET')">
+                GET /index_api/informations (Legal Mentions)
+            </button>
+            <button class="get" onclick="testEndpoint('/index_api/charte_ethique', 'GET')">
+                GET /index_api/charte_ethique (Ethics Charter)
+            </button>
+        </div>
+
+        <!-- Landing & Profiles -->
+        <div class="endpoint-group">
+            <h3>👥 Профили и лендинг</h3>
+            <button class="post" onclick="testEndpoint('/index_api/landing_module/profils_global', 'POST')">
+                POST /landing_module/profils_global (No Country)
+            </button>
+            <button class="post" onclick="testEndpoint('/index_api/landing_module/profils_global', 'POST', {force_pays: 64})">
+                POST /landing_module/profils_global (France)
+            </button>
+            <button class="post" onclick="testEndpoint('/index_api/landing_module/profils_global', 'POST', {force_pays: 28})">
+                POST /landing_module/profils_global (Spain)
+            </button>
+            <button class="post" onclick="testEndpoint('/index_api/landing_module/profils_global', 'POST', {force_pays: 55})">
+                POST /landing_module/profils_global (USA)
+            </button>
+        </div>
+
+        <!-- Experimental -->
+        <div class="endpoint-group">
+            <h3>🔬 Экспериментальные endpoints</h3>
+            <button class="get" onclick="testEndpoint('/ajax_api/online', 'GET')">
+                GET /ajax_api/online (Online Users)
+            </button>
+            <button class="post" onclick="testEndpoint('/ajax_api/get_pubs', 'POST')">
+                POST /ajax_api/get_pubs (Advertisements)
+            </button>
+        </div>
+
+        <div id="results"></div>
+        
+        <div id="summary" class="summary" style="display: none;">
+            <h3>📈 Сводка результатов:</h3>
+            <div id="summary-content"></div>
+        </div>
+    </div>
+
+    <script>
+        let testResults = [];
+        
+        async function testEndpoint(endpoint, method = 'GET', params = {}) {
+            const loading = document.getElementById('loading');
+            const results = document.getElementById('results');
+            
+            loading.style.display = 'block';
+            
+            try {
+                console.log(`🧪 Тестируем: ${method} ${endpoint}`, params);
+                
+                const response = await fetch('/api/spice-multi-test', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ endpoint, method, params })
+                });
+                
+                const data = await response.json();
+                displayResult(endpoint, method, params, data, response.status);
+                
+                // Сохраняем результат для сводки
+                testResults.push({
+                    endpoint,
+                    method,
+                    params,
+                    success: response.ok && data.success,
+                    status: response.status,
+                    hasData: data.data && Object.keys(data.data).length > 0
+                });
+                
+                updateSummary();
+                
+            } catch (error) {
+                displayError(endpoint, method, params, error);
+                testResults.push({
+                    endpoint,
+                    method,
+                    params,
+                    success: false,
+                    error: error.message
+                });
+                updateSummary();
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+        
+        function displayResult(endpoint, method, params, data, status) {
+            const results = document.getElementById('results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `result ${data.success ? 'success' : 'error'}`;
+            
+            // Анализ ответа
+            let dataAnalysis = '';
+            if (data.data) {
+                const keys = Object.keys(data.data);
+                const arrays = keys.filter(key => Array.isArray(data.data[key]));
+                const objects = keys.filter(key => typeof data.data[key] === 'object' && !Array.isArray(data.data[key]));
+                
+                dataAnalysis = `
+                    <div style="margin: 10px 0; padding: 10px; background: #e9ecef; border-radius: 5px;">
+                        <strong>📊 Анализ данных:</strong><br/>
+                        • Всего ключей: ${keys.length}<br/>
+                        • Массивы: ${arrays.length > 0 ? arrays.map(k => `${k}[${data.data[k].length}]`).join(', ') : 'нет'}<br/>
+                        • Объекты: ${objects.length}<br/>
+                        • Размер: ${JSON.stringify(data.data).length} символов
+                    </div>
+                `;
+            }
+            
+            resultDiv.innerHTML = `
+                <h4>${data.success ? '✅' : '❌'} ${method} ${endpoint} (HTTP ${status})</h4>
+                ${Object.keys(params).length > 0 ? `<p><strong>Параметры:</strong> ${JSON.stringify(params)}</p>` : ''}
+                ${dataAnalysis}
+                <details>
+                    <summary>📋 Полный ответ ${data.data ? `(${JSON.stringify(data).length} символов)` : ''}</summary>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                </details>
+            `;
+            
+            results.appendChild(resultDiv);
+        }
+        
+        function displayError(endpoint, method, params, error) {
+            const results = document.getElementById('results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = 'result error';
+            resultDiv.innerHTML = `
+                <h4>❌ ${method} ${endpoint} - ОШИБКА</h4>
+                ${Object.keys(params).length > 0 ? `<p><strong>Параметры:</strong> ${JSON.stringify(params)}</p>` : ''}
+                <p><strong>Ошибка:</strong> ${error.message}</p>
+            `;
+            results.appendChild(resultDiv);
+        }
+        
+        function updateSummary() {
+            const summary = document.getElementById('summary');
+            const summaryContent = document.getElementById('summary-content');
+            
+            const total = testResults.length;
+            const successful = testResults.filter(r => r.success).length;
+            const withData = testResults.filter(r => r.hasData).length;
+            const errors = testResults.filter(r => !r.success).length;
+            
+            summaryContent.innerHTML = `
+                <ul>
+                    <li><strong>Всего протестировано:</strong> ${total}</li>
+                    <li><strong>Успешных:</strong> ${successful} (${Math.round(successful/total*100)}%)</li>
+                    <li><strong>С данными:</strong> ${withData}</li>
+                    <li><strong>Ошибок:</strong> ${errors}</li>
+                </ul>
+                ${withData > 0 ? '<p><strong>🎉 Найдены endpoints с данными!</strong></p>' : ''}
+            `;
+            
+            summary.style.display = 'block';
+        }
+        
+        // Автоматическое тестирование базовых endpoints при загрузке
+        window.onload = () => {
+            setTimeout(() => {
+                testEndpoint('/index_api/index', 'GET');
+            }, 1000);
+        };
+    </script>
+</body>
+</html> 
