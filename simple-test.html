@@ -277,13 +277,51 @@
             const results = document.getElementById('results');
             const profiles = data.profiles || [];
             
+            // Анализируем все возможные поля с массивами
+            const possibleArrayFields = ['profiles', 'users', 'members', 'data', 'results', 'items', 'content'];
+            let foundArrays = [];
+            
+            possibleArrayFields.forEach(field => {
+                if (data[field] && Array.isArray(data[field])) {
+                    foundArrays.push(`${field}: ${data[field].length} элементов`);
+                }
+            });
+            
+            // Анализируем объект data, если он есть
+            let dataAnalysis = '';
+            if (data.data && typeof data.data === 'object') {
+                const dataKeys = Object.keys(data.data);
+                dataAnalysis = `<li>🔍 data содержит поля: ${dataKeys.join(', ')}</li>`;
+                
+                // Проверяем, есть ли массивы внутри data
+                dataKeys.forEach(key => {
+                    if (Array.isArray(data.data[key])) {
+                        foundArrays.push(`data.${key}: ${data.data[key].length} элементов`);
+                    }
+                });
+            }
+            
             results.innerHTML = `
                 <div class="results success">
-                    <h3>✅ Успех! Получено профилей: ${data.total || profiles.length}</h3>
-                    <div id="profiles-container"></div>
+                    <h3>✅ Успех! Получено профилей: ${profiles.length}</h3>
+                    <div class="analysis">
+                        <h4>🔍 Детальный анализ ответа:</h4>
+                        <ul>
+                            <li>📊 result.profiles: ${profiles.length}</li>
+                            <li>📊 result.total: ${data.total !== undefined ? data.total : 'не указано'}</li>
+                            <li>📊 result.success: ${data.success}</li>
+                            ${dataAnalysis}
+                            <li>🔍 Найденные массивы: ${foundArrays.length > 0 ? foundArrays.join(', ') : 'нет'}</li>
+                            <li>📦 Размер ответа: ${JSON.stringify(data).length} символов</li>
+                            <li>🔑 Все ключи верхнего уровня: ${Object.keys(data).join(', ')}</li>
+                        </ul>
+                    </div>
+                    <div id="profiles-container">
+                        ${profiles.length === 0 ? '<p>❓ Возможные причины отсутствия профилей:<br/>• Тестовая база данных<br/>• Нужны дополнительные параметры<br/>• Другой endpoint содержит данные<br/>• Географические ограничения</p>' : ''}
+                    </div>
                     <details>
-                        <summary>📋 Полный ответ API</summary>
-                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                        <summary>📋 Полный ответ API (кликните для просмотра)</summary>
+                        <pre style="max-height: 300px; overflow-y: auto; background: #f5f5f5; padding: 10px; border-radius: 5px;">${JSON.stringify(data, null, 2)}</pre>
                     </details>
                 </div>
             `;
