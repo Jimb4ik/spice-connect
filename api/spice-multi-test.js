@@ -44,7 +44,7 @@ export default async function handler(req, res) {
         const finalUrl = `${apiUrl}?${queryParams.toString()}`;
         console.log('📡 URL запроса:', finalUrl.replace(API_KEY, 'HIDDEN_KEY'));
         
-        // Определяем нужна ли авторизация в headers (для index_api)
+        // Определяем тип авторизации согласно документации
         const needsBasicAuth = endpoint.startsWith('/index_api/');
         const headers = {
             'Accept': 'application/json',
@@ -52,13 +52,27 @@ export default async function handler(req, res) {
         };
         
         if (needsBasicAuth) {
-            headers['Authorization'] = `Basic ${Buffer.from(API_KEY + ':').toString('base64')}`;
-            console.log('🔑 Используем Basic Authorization для index_api');
+            // Для index_api: пробуем разные варианты авторизации
+            const authVariant1 = `Basic ${Buffer.from(API_KEY + ':').toString('base64')}`;
+            const authVariant2 = `Basic ${Buffer.from(API_KEY).toString('base64')}`;
+            const authVariant3 = `Basic ${API_KEY}`;
+            
+            // Используем первый вариант как основной
+            headers['Authorization'] = authVariant1;
+            
+            console.log('🔑 Пробуем Basic Authorization для index_api');
+            console.log('🔑 API Key:', API_KEY.substring(0, 8) + '...' + API_KEY.slice(-4));
+            console.log('🔑 Auth variant 1 (API_KEY:):', authVariant1.substring(0, 20) + '...');
+            console.log('🔑 Auth variant 2 (API_KEY):', authVariant2.substring(0, 20) + '...');
+            console.log('🔑 Auth variant 3 (plain):', authVariant3.substring(0, 20) + '...');
+        } else {
+            // Для ajax_api авторизация только через query параметры
+            console.log('🔑 Используем query параметры для ajax_api');
         }
         
         console.log('🔧 Headers:', { 
             ...headers, 
-            'Authorization': needsBasicAuth ? 'Basic HIDDEN' : 'не используется' 
+            'Authorization': needsBasicAuth ? 'Basic [HIDDEN]' : 'не используется' 
         });
         
         // Выполняем запрос
@@ -72,13 +86,27 @@ export default async function handler(req, res) {
         const data = await apiResponse.json();
         
         if (!apiResponse.ok) {
-            console.error('❌ API Error:', data);
+            console.error('❌ API Error Details:');
+            console.error('  Status:', apiResponse.status);
+            console.error('  StatusText:', apiResponse.statusText);
+            console.error('  Headers:', Object.fromEntries(apiResponse.headers.entries()));
+            console.error('  Response:', data);
+            console.error('  Request URL:', finalUrl.replace(API_KEY, 'HIDDEN_KEY'));
+            console.error('  Request Headers:', { ...headers, 'Authorization': headers.Authorization ? '[HIDDEN]' : 'none' });
+            
             return res.status(apiResponse.status).json({
                 error: 'Ошибка Spice API',
                 status: apiResponse.status,
+                statusText: apiResponse.statusText,
                 details: data,
                 endpoint: endpoint,
-                method: method
+                method: method,
+                debug: {
+                    api_key_present: !!API_KEY,
+                    api_key_length: API_KEY ? API_KEY.length : 0,
+                    endpoint_type: endpoint.startsWith('/index_api/') ? 'index_api' : 'ajax_api',
+                    auth_method: endpoint.startsWith('/index_api/') ? 'Basic + Query' : 'Query only'
+                }
             });
         }
 

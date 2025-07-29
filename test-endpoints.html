@@ -87,6 +87,9 @@
             <button onclick="testAllBasic()" style="background: #17a2b8; padding: 10px 20px; font-size: 14px;">
                 🚀 Тест основных endpoints
             </button>
+            <button onclick="testAuthMethods()" style="background: #dc3545; padding: 10px 20px; font-size: 14px;">
+                🔑 ДИАГНОСТИКА АВТОРИЗАЦИИ
+            </button>
         </div>
         
         <!-- Site Information -->
@@ -351,6 +354,87 @@
                 await testEndpoint(test.endpoint, test.method, test.params || {});
                 await new Promise(resolve => setTimeout(resolve, test.delay));
             }
+        }
+        
+        // Функция диагностики методов авторизации
+        async function testAuthMethods() {
+            clearResults();
+            const loading = document.getElementById('loading');
+            loading.style.display = 'block';
+            
+            try {
+                console.log('🔑 Тестируем разные методы авторизации...');
+                
+                const response = await fetch('/api/auth-test', {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const data = await response.json();
+                displayAuthTestResults(data);
+                
+            } catch (error) {
+                displayError('Диагностика авторизации', 'GET', {}, error);
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+        
+        // Отображение результатов диагностики авторизации
+        function displayAuthTestResults(data) {
+            const results = document.getElementById('results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = 'result success';
+            
+            const bestMethods = data.summary.best_methods;
+            const hasWorkingMethods = bestMethods.length > 0;
+            
+            let methodsTable = '<table style="width: 100%; border-collapse: collapse; margin: 15px 0;">';
+            methodsTable += '<tr style="background: #f8f9fa;"><th style="border: 1px solid #dee2e6; padding: 8px;">Метод</th><th style="border: 1px solid #dee2e6; padding: 8px;">Статус</th><th style="border: 1px solid #dee2e6; padding: 8px;">Ошибка API</th><th style="border: 1px solid #dee2e6; padding: 8px;">Результат</th></tr>';
+            
+            data.results.forEach(result => {
+                const statusColor = result.success ? '#28a745' : '#dc3545';
+                const hasApiError = result.hasError;
+                const apiErrorColor = hasApiError ? '#ffc107' : '#28a745';
+                
+                methodsTable += `<tr>
+                    <td style="border: 1px solid #dee2e6; padding: 8px; font-weight: bold;">${result.method}</td>
+                    <td style="border: 1px solid #dee2e6; padding: 8px; color: ${statusColor};">${result.status} ${result.statusText || ''}</td>
+                    <td style="border: 1px solid #dee2e6; padding: 8px; color: ${apiErrorColor};">${result.errorMessage || 'OK'}</td>
+                    <td style="border: 1px solid #dee2e6; padding: 8px;">${hasApiError ? '❌' : result.success ? '✅' : '❌'}</td>
+                </tr>`;
+            });
+            methodsTable += '</table>';
+            
+            resultDiv.innerHTML = `
+                <div style="border-bottom: 2px solid #dee2e6; padding-bottom: 10px; margin-bottom: 15px;">
+                    <h4 style="margin: 0;">🔑 ДИАГНОСТИКА АВТОРИЗАЦИИ</h4>
+                    <p style="margin: 5px 0 0 0;">
+                        <strong>API Ключ:</strong> ${data.api_key_info.preview} (${data.api_key_info.length} символов)
+                    </p>
+                </div>
+                
+                <div style="margin: 15px 0; padding: 15px; background: ${hasWorkingMethods ? '#d4edda' : '#f8d7da'}; border-radius: 5px;">
+                    <h5 style="margin: 0 0 10px 0; color: ${hasWorkingMethods ? '#155724' : '#721c24'};">
+                        ${hasWorkingMethods ? '✅ НАЙДЕНЫ РАБОЧИЕ МЕТОДЫ!' : '❌ НЕТ РАБОЧИХ МЕТОДОВ'}
+                    </h5>
+                    ${hasWorkingMethods ? 
+                        `<p style="margin: 0; color: #155724;"><strong>Рабочие методы:</strong> ${bestMethods.join(', ')}</p>` :
+                        `<p style="margin: 0; color: #721c24;">Все методы авторизации возвращают ошибки. Проверьте API ключ.</p>`
+                    }
+                </div>
+                
+                <h5>📊 Детальные результаты тестирования:</h5>
+                ${methodsTable}
+                
+                <details style="margin-top: 15px;">
+                    <summary style="cursor: pointer; font-weight: bold; color: #007bff;">🔍 Полная техническая информация</summary>
+                    <pre style="font-size: 11px; max-height: 300px; overflow-y: auto; margin-top: 10px; padding: 10px; background: #f1f1f1; border-radius: 5px;">${JSON.stringify(data, null, 2)}</pre>
+                </details>
+            `;
+            
+            results.appendChild(resultDiv);
+            resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
         
         // Автоматическое тестирование базовых endpoints при загрузке
