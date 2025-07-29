@@ -31,24 +31,30 @@ export default async function handler(req, res) {
         let apiUrl = `${BASE_URL}/index_api/landing_module/profils_global`;
         const queryParams = new URLSearchParams();
         
-        // Добавляем API ключ как параметр (попробуем разные варианты)
-        queryParams.append('api_key', API_KEY);
-        
         // Добавляем force_pays как query parameter (согласно документации)
         if (force_pays) {
             queryParams.append('force_pays', force_pays);
         }
         
-        const finalUrl = `${apiUrl}?${queryParams.toString()}`;
-        console.log('📡 URL запроса:', finalUrl.replace(API_KEY, 'HIDDEN_API_KEY'));
+        const finalUrl = queryParams.toString() ? `${apiUrl}?${queryParams.toString()}` : apiUrl;
+        console.log('📡 URL запроса:', finalUrl);
         
-        // Делаем запрос к реальному API (теперь согласно документации)
+        // Пробуем разные варианты авторизации
+        const headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            // Пробуем API ключ в разных header форматах
+            'Authorization': `Bearer ${API_KEY}`,
+            'X-API-Key': API_KEY,
+            'api_key': API_KEY
+        };
+        
+        console.log('🔑 Headers (API key hidden):', { ...headers, 'Authorization': 'Bearer HIDDEN', 'X-API-Key': 'HIDDEN', 'api_key': 'HIDDEN' });
+        
+        // Делаем запрос к реальному API с API ключом в headers
         const apiResponse = await fetch(finalUrl, {
             method: 'POST',
-            headers: {
-                'Accept': 'application/json'
-            }
-            // Убираем body - отправляем все через query parameters
+            headers: headers
         });
 
         console.log(`📡 API ответил со статусом: ${apiResponse.status}`);
