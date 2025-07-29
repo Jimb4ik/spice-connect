@@ -374,6 +374,25 @@ document.addEventListener('DOMContentLoaded', function() {
     showSection('home');
 });
 
+// Функции для переключения между авторизацией и регистрацией
+function showRegister() {
+    const loginSection = document.getElementById('login-section');
+    const registerSection = document.getElementById('register-section');
+    
+    if (loginSection) loginSection.style.display = 'none';
+    if (registerSection) registerSection.style.display = 'block';
+}
+
+function showLogin() {
+    const loginSection = document.getElementById('login-section');
+    const registerSection = document.getElementById('register-section');
+    
+    if (registerSection) registerSection.style.display = 'none';
+    if (loginSection) loginSection.style.display = 'block';
+}
+
 // Добавляем функции в глобальную область видимости для использования в HTML
 window.showSection = showSection;
-window.showUserProfile = showUserProfile; 
+window.showUserProfile = showUserProfile;
+window.showRegister = showRegister;
+window.showLogin = showLogin; 
