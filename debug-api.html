@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 API Debug - Детальный анализ</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .success { border-left: 4px solid #28a745; }
+        .error { border-left: 4px solid #dc3545; }
+        pre { 
+            background: #f1f1f1; 
+            padding: 10px; 
+            border-radius: 5px; 
+            overflow-x: auto;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        .analysis { margin: 10px 0; }
+        .analysis li { margin: 5px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Spice API - Детальная диагностика</h1>
+        
+        <div class="test-section">
+            <h3>🧪 Тестирование разных параметров:</h3>
+            <button onclick="testAPI(null)">Без параметров</button>
+            <button onclick="testAPI(64)">France (64)</button>
+            <button onclick="testAPI(28)">Spain (28)</button>
+            <button onclick="testAPI(55)">USA (55)</button>
+            <button onclick="testAPI(13)">UK (13)</button>
+        </div>
+        
+        <div id="results"></div>
+    </div>
+
+    <script>
+        async function testAPI(forcePays) {
+            const testName = forcePays ? `force_pays=${forcePays}` : 'Без параметров';
+            
+            try {
+                console.log(`🧪 Тестируем: ${testName}`);
+                
+                const response = await fetch('/api/spice-proxy-simple', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ force_pays: forcePays })
+                });
+                
+                const data = await response.json();
+                displayDetailedResults(testName, data, response.status);
+                
+            } catch (error) {
+                displayError(testName, error);
+            }
+        }
+        
+        function displayDetailedResults(testName, data, status) {
+            const results = document.getElementById('results');
+            
+            // Анализ всех ключей
+            const allKeys = Object.keys(data);
+            
+            // Поиск массивов
+            const arrays = [];
+            allKeys.forEach(key => {
+                if (Array.isArray(data[key])) {
+                    arrays.push(`${key}[${data[key].length}]`);
+                }
+            });
+            
+            // Анализ data объекта
+            let dataInfo = '';
+            if (data.data && typeof data.data === 'object') {
+                const dataKeys = Object.keys(data.data);
+                dataInfo = `<li><strong>data объект:</strong> ${dataKeys.join(', ')}</li>`;
+                
+                dataKeys.forEach(key => {
+                    if (Array.isArray(data.data[key])) {
+                        dataInfo += `<li><strong>data.${key}:</strong> массив из ${data.data[key].length} элементов</li>`;
+                    }
+                });
+            }
+            
+            // Поиск любых вложенных массивов
+            let nestedArrays = [];
+            function findArrays(obj, path = '') {
+                for (let key in obj) {
+                    if (Array.isArray(obj[key])) {
+                        nestedArrays.push(`${path}${key}[${obj[key].length}]`);
+                    } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+                        findArrays(obj[key], `${path}${key}.`);
+                    }
+                }
+            }
+            findArrays(data);
+            
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${data.success ? 'success' : 'error'}`;
+            resultDiv.innerHTML = `
+                <h4>🧪 ${testName} (HTTP ${status})</h4>
+                <div class="analysis">
+                    <ul>
+                        <li><strong>success:</strong> ${data.success}</li>
+                        <li><strong>total:</strong> ${data.total !== undefined ? data.total : 'не указано'}</li>
+                        <li><strong>profiles.length:</strong> ${data.profiles ? data.profiles.length : 'undefined'}</li>
+                        <li><strong>Все ключи:</strong> ${allKeys.join(', ')}</li>
+                        <li><strong>Массивы верхнего уровня:</strong> ${arrays.join(', ') || 'нет'}</li>
+                        <li><strong>Все найденные массивы:</strong> ${nestedArrays.join(', ') || 'нет'}</li>
+                        ${dataInfo}
+                        <li><strong>Размер ответа:</strong> ${JSON.stringify(data).length} символов</li>
+                    </ul>
+                </div>
+                
+                <details>
+                    <summary>📋 Полный JSON ответ</summary>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                </details>
+                
+                ${data.profiles && data.profiles.length === 0 ? `
+                <div style="margin-top: 15px; padding: 10px; background: #fff3cd; border-radius: 5px;">
+                    <strong>❓ Возможные причины 0 профилей:</strong><br/>
+                    • Тестовая/пустая база данных<br/>
+                    • Нужны дополнительные параметры авторизации<br/>
+                    • Этот endpoint для публичного лендинга (может быть пустым)<br/>
+                    • Географические ограничения для указанной страны<br/>
+                    • API возвращает данные в другом формате/поле
+                </div>
+                ` : ''}
+            `;
+            
+            results.appendChild(resultDiv);
+        }
+        
+        function displayError(testName, error) {
+            const results = document.getElementById('results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = 'test-result error';
+            resultDiv.innerHTML = `
+                <h4>❌ ${testName} - ОШИБКА</h4>
+                <p><strong>Ошибка:</strong> ${error.message}</p>
+            `;
+            results.appendChild(resultDiv);
+        }
+        
+        // Автоматически тестируем при загрузке
+        window.onload = () => {
+            testAPI(null);
+        };
+    </script>
+</body>
+</html> 
