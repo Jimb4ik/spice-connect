@@ -27,17 +27,28 @@ export default async function handler(req, res) {
         
         console.log('🚀 Отправляем запрос к Spice API...');
         
-        // Делаем запрос к реальному API
-        const apiResponse = await fetch(`${BASE_URL}/index_api/landing_module/profils_global`, {
+        // Строим URL с query parameters согласно документации
+        let apiUrl = `${BASE_URL}/index_api/landing_module/profils_global`;
+        const queryParams = new URLSearchParams();
+        
+        // Добавляем API ключ как параметр (попробуем разные варианты)
+        queryParams.append('api_key', API_KEY);
+        
+        // Добавляем force_pays как query parameter (согласно документации)
+        if (force_pays) {
+            queryParams.append('force_pays', force_pays);
+        }
+        
+        const finalUrl = `${apiUrl}?${queryParams.toString()}`;
+        console.log('📡 URL запроса:', finalUrl.replace(API_KEY, 'HIDDEN_API_KEY'));
+        
+        // Делаем запрос к реальному API (теперь согласно документации)
+        const apiResponse = await fetch(finalUrl, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
                 'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                api_key: API_KEY,
-                ...(force_pays && { force_pays: parseInt(force_pays) })
-            })
+            }
+            // Убираем body - отправляем все через query parameters
         });
 
         console.log(`📡 API ответил со статусом: ${apiResponse.status}`);
