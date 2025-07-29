@@ -31,25 +31,36 @@ export default async function handler(req, res) {
         let apiUrl = `${BASE_URL}/index_api/landing_module/profils_global`;
         const queryParams = new URLSearchParams();
         
+        // Добавляем обязательный api_key параметр (Required parameter согласно документации)
+        queryParams.append('api_key', API_KEY);
+        
         // Добавляем force_pays как query parameter (согласно документации)
         if (force_pays) {
             queryParams.append('force_pays', force_pays);
         }
         
-        const finalUrl = queryParams.toString() ? `${apiUrl}?${queryParams.toString()}` : apiUrl;
+        const finalUrl = `${apiUrl}?${queryParams.toString()}`;
         console.log('📡 URL запроса:', finalUrl);
         
-        // Пробуем разные варианты авторизации
+        // Согласно документации: Authorization: Basic API_KEY:PASSWORD для index_api
+        // Пробуем разные варианты Basic авторизации (нет пароля в доках)
+        const basicAuth1 = `Basic ${API_KEY}`;
+        const basicAuth2 = `Basic ${API_KEY}:`;
+        const basicAuth3 = `Basic ${Buffer.from(API_KEY + ':').toString('base64')}`;
+        
         const headers = {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
-            // Пробуем API ключ в разных header форматах
-            'Authorization': `Bearer ${API_KEY}`,
-            'X-API-Key': API_KEY,
-            'api_key': API_KEY
+            // Согласно документации для index_api
+            'Authorization': basicAuth3  // Пробуем base64 encoded
         };
         
-        console.log('🔑 Headers (API key hidden):', { ...headers, 'Authorization': 'Bearer HIDDEN', 'X-API-Key': 'HIDDEN', 'api_key': 'HIDDEN' });
+        console.log('🔑 Authorization types tested:', {
+            'basic1': `Basic ${API_KEY.substring(0, 4)}...`,
+            'basic2': `Basic ${API_KEY.substring(0, 4)}...:`,
+            'basic3': `Basic base64(${API_KEY.substring(0, 4)}...:)`,
+            'using': 'basic3'
+        });
         
         // Делаем запрос к реальному API с API ключом в headers
         const apiResponse = await fetch(finalUrl, {
