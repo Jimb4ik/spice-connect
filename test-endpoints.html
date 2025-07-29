@@ -80,6 +80,15 @@
         
         <div id="loading" class="loading">⏳ Выполняется запрос...</div>
         
+        <div style="margin: 20px 0; text-align: center;">
+            <button onclick="clearResults()" style="background: #6c757d; padding: 10px 20px; font-size: 14px;">
+                🗑️ Очистить результаты
+            </button>
+            <button onclick="testAllBasic()" style="background: #17a2b8; padding: 10px 20px; font-size: 14px;">
+                🚀 Тест основных endpoints
+            </button>
+        </div>
+        
         <!-- Site Information -->
         <div class="endpoint-group">
             <h3>📊 Информация о сайте</h3>
@@ -216,6 +225,8 @@
             
             // Анализ ответа
             let dataAnalysis = '';
+            let responseBody = '';
+            
             if (data.data) {
                 const keys = Object.keys(data.data);
                 const arrays = keys.filter(key => Array.isArray(data.data[key]));
@@ -230,19 +241,57 @@
                         • Размер: ${JSON.stringify(data.data).length} символов
                     </div>
                 `;
+                
+                // Создаем красивое отображение тела ответа
+                responseBody = `
+                    <div style="margin: 15px 0;">
+                        <h5 style="margin-bottom: 10px; color: #495057;">📋 Тело ответа API:</h5>
+                        <div style="background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; padding: 15px;">
+                            <pre style="margin: 0; background: none; padding: 0; max-height: 400px; overflow-y: auto; font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.4;">${JSON.stringify(data.data, null, 2)}</pre>
+                        </div>
+                    </div>
+                `;
+            } else {
+                responseBody = `
+                    <div style="margin: 15px 0;">
+                        <h5 style="margin-bottom: 10px; color: #495057;">📋 Ответ API:</h5>
+                        <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px; padding: 15px;">
+                            <p style="margin: 0; color: #856404;">Нет данных в ответе или ответ пустой</p>
+                        </div>
+                    </div>
+                `;
             }
             
+            // Показываем краткий статус
+            const statusInfo = data.success 
+                ? `<span style="color: #28a745; font-weight: bold;">SUCCESS</span>`
+                : `<span style="color: #dc3545; font-weight: bold;">ERROR</span>`;
+                
             resultDiv.innerHTML = `
-                <h4>${data.success ? '✅' : '❌'} ${method} ${endpoint} (HTTP ${status})</h4>
-                ${Object.keys(params).length > 0 ? `<p><strong>Параметры:</strong> ${JSON.stringify(params)}</p>` : ''}
+                <div style="border-bottom: 2px solid #dee2e6; padding-bottom: 10px; margin-bottom: 15px;">
+                    <h4 style="margin: 0;">${data.success ? '✅' : '❌'} ${method} ${endpoint}</h4>
+                    <p style="margin: 5px 0 0 0;">
+                        <strong>Статус:</strong> ${statusInfo} (HTTP ${status})
+                        ${Object.keys(params).length > 0 ? ` | <strong>Параметры:</strong> ${JSON.stringify(params)}` : ''}
+                    </p>
+                </div>
+                
                 ${dataAnalysis}
-                <details>
-                    <summary>📋 Полный ответ ${data.data ? `(${JSON.stringify(data).length} символов)` : ''}</summary>
-                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                ${responseBody}
+                
+                <details style="margin-top: 15px;">
+                    <summary style="cursor: pointer; font-weight: bold; color: #007bff;">🔍 Полная техническая информация</summary>
+                    <div style="margin-top: 10px; padding: 10px; background: #f1f1f1; border-radius: 5px;">
+                        <h6>Полный ответ от нашего proxy:</h6>
+                        <pre style="font-size: 11px; max-height: 300px; overflow-y: auto;">${JSON.stringify(data, null, 2)}</pre>
+                    </div>
                 </details>
             `;
             
             results.appendChild(resultDiv);
+            
+            // Автоматически прокручиваем к новому результату
+            resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
         
         function displayError(endpoint, method, params, error) {
@@ -277,6 +326,31 @@
             `;
             
             summary.style.display = 'block';
+        }
+        
+        // Функция очистки результатов
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('summary').style.display = 'none';
+            testResults = [];
+        }
+        
+        // Функция автоматического тестирования основных endpoints
+        async function testAllBasic() {
+            clearResults();
+            
+            const basicTests = [
+                { endpoint: '/index_api/index', method: 'GET', delay: 500 },
+                { endpoint: '/index_api/array/get/SEXE', method: 'GET', delay: 500 },
+                { endpoint: '/index_api/array/get/CHEVEUX', method: 'GET', delay: 500 },
+                { endpoint: '/index_api/landing_module/profils_global', method: 'POST', params: {}, delay: 500 },
+                { endpoint: '/index_api/landing_module/profils_global', method: 'POST', params: {force_pays: 64}, delay: 500 }
+            ];
+            
+            for (const test of basicTests) {
+                await testEndpoint(test.endpoint, test.method, test.params || {});
+                await new Promise(resolve => setTimeout(resolve, test.delay));
+            }
         }
         
         // Автоматическое тестирование базовых endpoints при загрузке
