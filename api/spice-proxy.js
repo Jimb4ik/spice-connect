@@ -41,7 +41,7 @@ export default async function handler(req, res) {
             method: method,
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
-                'User-Agent': 'SpiceConnect/1.0'
+                'User-Agent': 'Lavrilo/1.0'
             }
         };
 

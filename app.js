@@ -1,4 +1,4 @@
-// SpiceConnect - Основное приложение (Live версия с реальным Spice API)
+// Lavrilo - Основное приложение (Live версия с реальным Spice API)
 
 // API Configuration - Правильные endpoints для Spice API V2
 const API_CONFIG = {

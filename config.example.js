@@ -1,4 +1,4 @@
-// Пример конфигурации для SpiceConnect
+// Пример конфигурации для Lavrilo
 // Скопируйте этот файл как config.js и заполните ваши данные
 
 const API_CONFIG = {
@@ -14,7 +14,7 @@ const API_CONFIG = {
     // Настройки приложения
     APP_SETTINGS: {
         // Название приложения
-        APP_NAME: 'SpiceConnect',
+        APP_NAME: 'Lavrilo',
         
         // Версия
         VERSION: '1.0.0',
