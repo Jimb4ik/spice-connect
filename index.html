@@ -1,175 +1,273 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SpiceConnect - Знакомства</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>SpiceConnect - Find Your Perfect Match</title>
+    <link rel="stylesheet" href="landing-styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <!-- Navigation -->
     <nav class="navbar">
-        <div class="nav-brand">
-            <h1>🌶️ SpiceConnect</h1>
-        </div>
-        <div class="nav-menu" id="navMenu">
-            <a href="javascript:void(0)" onclick="showSection('home')" class="nav-link active" id="nav-home">Главная</a>
-            <a href="javascript:void(0)" onclick="showSection('search')" class="nav-link" id="nav-search">Поиск</a>
-            <a href="javascript:void(0)" onclick="showSection('messages')" class="nav-link" id="nav-messages">Сообщения</a>
-            <a href="javascript:void(0)" onclick="showSection('profile')" class="nav-link" id="nav-profile">Профиль</a>
-            <a href="javascript:void(0)" onclick="logout()" class="nav-link" id="nav-logout" style="display: none;">Выход</a>
-        </div>
-        <div class="hamburger" id="hamburger">
-            <span></span>
-            <span></span>
-            <span></span>
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h2>SpiceConnect</h2>
+            </div>
+            <div class="nav-menu">
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#profiles" class="nav-link">Browse</a>
+                <a href="#testimonials" class="nav-link">Stories</a>
+                <button id="loginBtn" class="btn-secondary">Log In</button>
+                <button id="signupBtn" class="btn-primary">Sign Up</button>
+            </div>
         </div>
     </nav>
 
-    <!-- Login Section -->
-    <section id="login-section" class="auth-section">
-        <div class="auth-container">
-            <div class="auth-card">
-                <h2>Добро пожаловать в SpiceConnect</h2>
-                <p class="auth-subtitle">Найдите свою вторую половинку</p>
-                
-                <form id="login-form" class="auth-form">
-                    <div class="form-group">
-                        <input type="email" id="login-email" placeholder="Email" required>
-                    </div>
-                    <div class="form-group">
-                        <input type="password" id="login-password" placeholder="Пароль" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Войти</button>
-                </form>
-                
-                <p class="auth-switch">
-                    Нет аккаунта? <a href="javascript:void(0)" onclick="showRegister()">Зарегистрироваться</a>
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <div class="hero-background">
+            <img src="images/hero-background.png" alt="Dating background" class="hero-bg-image">
+        </div>
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    Find Your <span class="gradient-text">Perfect Match</span>
+                </h1>
+                <p class="hero-subtitle">
+                    Connect with genuine people looking for meaningful relationships. 
+                    Join thousands of singles finding love every day.
                 </p>
+                
+                <!-- Live Stats -->
+                <div class="hero-stats" id="heroStats">
+                    <div class="stat-item">
+                        <span class="stat-number" id="onlineCount">1,495</span>
+                        <span class="stat-label">Online Now</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="totalProfiles">50K+</span>
+                        <span class="stat-label">Active Profiles</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number">12K+</span>
+                        <span class="stat-label">Success Stories</span>
+                    </div>
+                </div>
+
+                <div class="hero-actions">
+                    <button class="btn-hero-primary" id="startMatchingBtn">
+                        Start Matching Now
+                    </button>
+                    <button class="btn-hero-secondary" id="browseProfilesBtn">
+                        Browse Profiles
+                    </button>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- Register Section -->
-    <section id="register-section" class="auth-section" style="display: none;">
-        <div class="auth-container">
-            <div class="auth-card">
-                <h2>Регистрация</h2>
-                <p class="auth-subtitle">Создайте аккаунт для знакомств</p>
-                
-                <form id="register-form" class="auth-form">
-                    <div class="form-group">
-                        <input type="text" id="register-name" placeholder="Имя" required>
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-header">
+                <h2>Why Choose SpiceConnect?</h2>
+                <p>Experience dating like never before with our advanced matching system</p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <img src="images/features-icons.png" alt="Smart Matching" class="feature-img">
                     </div>
-                    <div class="form-group">
-                        <input type="email" id="register-email" placeholder="Email" required>
+                    <h3>Smart Matching</h3>
+                    <p>Our AI-powered algorithm finds your perfect match based on compatibility, interests, and preferences.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <div class="icon-secure"></div>
                     </div>
-                    <div class="form-group">
-                        <input type="password" id="register-password" placeholder="Пароль" required>
+                    <h3>100% Safe & Secure</h3>
+                    <p>Your privacy matters. All profiles are verified and your data is protected with bank-level security.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <div class="icon-chat"></div>
                     </div>
-                    <div class="form-group">
-                        <input type="number" id="register-age" placeholder="Возраст" min="18" max="100" required>
+                    <h3>Instant Messaging</h3>
+                    <p>Connect instantly with matches through our real-time chat system. Break the ice with ease.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <div class="icon-location"></div>
                     </div>
-                    <div class="form-group">
-                        <input type="text" id="register-city" placeholder="Город" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
-                </form>
-                
-                <p class="auth-switch">
-                    Уже есть аккаунт? <a href="javascript:void(0)" onclick="showLogin()">Войти</a>
-                </p>
+                    <h3>Location-Based</h3>
+                    <p>Find singles near you or expand your search globally. Distance shouldn't limit love.</p>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- Main App -->
-    <div id="app" style="display: none;">
-        <!-- Home Section -->
-        <section id="home" class="section active">
-            <div class="container">
-                <div class="welcome-hero">
-                    <h2>Добро пожаловать, <span id="user-name">Пользователь</span>!</h2>
-                    <p>Начните знакомства прямо сейчас</p>
-                    <button class="btn btn-primary" onclick="showSection('search')">Найти людей</button>
-                </div>
+    <!-- Live Profiles Section -->
+    <section class="live-profiles" id="profiles">
+        <div class="container">
+            <div class="section-header">
+                <h2>Meet Amazing Singles</h2>
+                <p>Browse real profiles of people looking for meaningful connections</p>
                 
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <h3>💕</h3>
-                        <p>Новые знакомства</p>
+                <!-- Gender Filter -->
+                <div class="profile-filters" id="profileFilters">
+                    <button class="filter-btn active" data-gender="all">All</button>
+                    <button class="filter-btn" data-gender="1">Men</button>
+                    <button class="filter-btn" data-gender="2">Women</button>
+                    <button class="filter-btn" data-gender="couple">Couples</button>
+                </div>
+            </div>
+
+            <div class="profiles-grid" id="profilesGrid">
+                <!-- Profiles will be loaded here via API -->
+                <div class="profile-skeleton" id="profilesLoading">
+                    <div class="skeleton-image"></div>
+                    <div class="skeleton-text"></div>
+                    <div class="skeleton-text short"></div>
+                </div>
+            </div>
+
+            <div class="profiles-actions">
+                <button class="btn-secondary" id="loadMoreProfiles">View More Profiles</button>
+                <button class="btn-primary" id="joinNowBtn">Join Now - It's Free!</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Success Stories Section -->
+    <section class="testimonials" id="testimonials">
+        <div class="container">
+            <div class="section-header">
+                <h2>Love Stories That Inspire</h2>
+                <p>Real couples who found love through SpiceConnect</p>
+            </div>
+
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <div class="testimonial-image">
+                        <img src="images/success-stories.png" alt="Success Story" class="success-img">
                     </div>
-                    <div class="stat-card">
-                        <h3>💌</h3>
-                        <p>Сообщения</p>
+                    <div class="testimonial-content">
+                        <div class="stars">★★★★★</div>
+                        <p>"We met on SpiceConnect 8 months ago and just got engaged! The platform made it so easy to connect with someone who truly understands me."</p>
+                        <div class="testimonial-author">
+                            <strong>Sarah & Michael</strong>
+                            <span>Engaged after 8 months</span>
+                        </div>
                     </div>
-                    <div class="stat-card">
-                        <h3>🎯</h3>
-                        <p>Совпадения</p>
+                </div>
+
+                <div class="testimonial-card">
+                    <div class="testimonial-content">
+                        <div class="stars">★★★★★</div>
+                        <p>"I was skeptical about online dating, but SpiceConnect's matching system is incredible. I found my soulmate within 3 weeks!"</p>
+                        <div class="testimonial-author">
+                            <strong>Emma & David</strong>
+                            <span>Married for 2 years</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="testimonial-card">
+                    <div class="testimonial-content">
+                        <div class="stars">★★★★★</div>
+                        <p>"The safety features gave me confidence to be myself. I met amazing people and found my perfect match. Highly recommend!"</p>
+                        <div class="testimonial-author">
+                            <strong>Lisa & James</strong>
+                            <span>Together for 1 year</span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <!-- Search Section -->
-        <section id="search" class="section">
-            <div class="container">
-                <h2>Поиск людей</h2>
+    <!-- Registration CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Ready to Find Your Perfect Match?</h2>
+                <p>Join <span id="liveMemberCount">50,000+</span> singles who trust SpiceConnect to find meaningful relationships</p>
                 
-                <div class="search-filters">
-                    <div class="filter-group">
-                        <label for="search-age-min">Возраст от:</label>
-                        <input type="number" id="search-age-min" min="18" max="100" value="18">
-                    </div>
-                    <div class="filter-group">
-                        <label for="search-age-max">до:</label>
-                        <input type="number" id="search-age-max" min="18" max="100" value="50">
-                    </div>
-                    <div class="filter-group">
-                        <label for="search-city">Город:</label>
-                        <input type="text" id="search-city" placeholder="Любой город">
-                    </div>
-                    <button class="btn btn-primary" onclick="searchUsers()">Поиск</button>
-                </div>
-                
-                <div id="search-results" class="users-grid">
-                    <!-- Results will be populated here -->
-                </div>
-            </div>
-        </section>
-
-        <!-- Messages Section -->
-        <section id="messages" class="section">
-            <div class="container">
-                <h2>Сообщения</h2>
-                <div id="messages-list" class="messages-container">
-                    <p class="no-data">Сообщений пока нет. Начните общение!</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Profile Section -->
-        <section id="profile" class="section">
-            <div class="container">
-                <h2>Мой профиль</h2>
-                <div class="profile-card">
-                    <div class="profile-info">
-                        <h3 id="profile-name">Имя пользователя</h3>
-                        <p id="profile-details">Информация о пользователе</p>
-                        <button class="btn btn-secondary" onclick="editProfile()">Редактировать профиль</button>
+                <div class="registration-form" id="registrationForm">
+                    <div class="form-steps">
+                        <div class="form-step active">
+                            <h3>Join Free in 30 Seconds</h3>
+                            <div class="form-row">
+                                <input type="text" placeholder="First Name" required>
+                                <input type="email" placeholder="Email Address" required>
+                            </div>
+                            <div class="form-row">
+                                <select required>
+                                    <option value="">I am a...</option>
+                                    <option value="1">Man</option>
+                                    <option value="2">Woman</option>
+                                </select>
+                                <select required>
+                                    <option value="">Looking for...</option>
+                                    <option value="1">Men</option>
+                                    <option value="2">Women</option>
+                                    <option value="all">Everyone</option>
+                                </select>
+                            </div>
+                            <button class="btn-registration" type="submit">
+                                Create My Profile - Free!
+                            </button>
+                            <p class="form-disclaimer">
+                                By clicking "Create My Profile", you agree to our Terms of Service and Privacy Policy. 
+                                It's free and always will be.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
-        </section>
-    </div>
+        </div>
+    </section>
 
-    <!-- Loading -->
-    <div id="loading" class="loading" style="display: none;">
-        <div class="spinner"></div>
-        <p>Загрузка...</p>
-    </div>
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <h3>SpiceConnect</h3>
+                    <p>Connecting hearts worldwide</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>Company</h4>
+                        <a href="#about">About Us</a>
+                        <a href="#careers">Careers</a>
+                        <a href="#press">Press</a>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Support</h4>
+                        <a href="#help">Help Center</a>
+                        <a href="#safety">Safety Tips</a>
+                        <a href="#contact">Contact Us</a>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Legal</h4>
+                        <a href="#privacy">Privacy Policy</a>
+                        <a href="#terms">Terms of Service</a>
+                        <a href="#cookies">Cookie Policy</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 SpiceConnect. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
 
-    <!-- Подключаем основной скрипт -->
-    <script src="app.js"></script>
+    <script src="landing-script.js?v=2.4"></script>
 </body>
-</html> 
+</html>
