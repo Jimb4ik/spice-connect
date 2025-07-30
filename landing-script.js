@@ -1,7 +1,7 @@
 // SpiceConnect Landing Page JavaScript
 class SpiceLanding {
     constructor() {
-        this.baseURL = 'https://spiceconnect.vercel.app/api';
+        this.baseURL = '/api';
         this.currentProfiles = [];
         this.currentFilter = 'all';
         this.init();
