@@ -372,7 +372,7 @@ class SpiceLanding {
 
 // Initialize the landing page when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 Lavrilo Landing Page initializing v2.7...');
+    console.log('🚀 Lavrilo Landing Page initializing v2.8...');
     window.spiceLanding = new SpiceLanding();
     
     // Handle navbar background on scroll
