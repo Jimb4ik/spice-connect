@@ -10,7 +10,7 @@ export default async function handler(req, res) {
     }
 
     const API_KEY = process.env.SPICE_API_KEY;
-    const BASE_URL = 'https://api.jetsetrdv.com';
+    const BASE_URL = process.env.SPICE_BASE_URL || 'https://dev2018.de5a7.com';
 
     if (!API_KEY) {
         return res.status(500).json({ 
@@ -19,13 +19,23 @@ export default async function handler(req, res) {
     }
 
     try {
-        const { endpoint, method = 'GET', params = {} } = req.body;
+        // Получаем параметры из body или query string
+        let { endpoint, method = 'GET', params = {} } = req.method === 'GET' ? req.query : req.body;
+        
+        // Для GET запросов также извлекаем все дополнительные параметры из query
+        if (req.method === 'GET') {
+            const queryParams = { ...req.query };
+            delete queryParams.endpoint;
+            delete queryParams.method;
+            params = { ...params, ...queryParams };
+        }
         
         if (!endpoint) {
             return res.status(400).json({ error: 'Endpoint не указан' });
         }
 
         console.log(`🧪 Тестируем endpoint: ${method} ${endpoint}`);
+        console.log(`📋 Параметры:`, params);
         
         // Строим URL с query parameters
         let apiUrl = `${BASE_URL}${endpoint}`;
@@ -103,11 +113,12 @@ export default async function handler(req, res) {
 
     } catch (error) {
         console.error('❌ Ошибка proxy:', error);
+        const requestData = req.method === 'GET' ? req.query : req.body;
         res.status(500).json({ 
             error: 'Ошибка сервера при обращении к API',
             message: error.message,
-            endpoint: req.body?.endpoint,
-            method: req.body?.method
+            endpoint: requestData?.endpoint,
+            method: requestData?.method
         });
     }
 } 
