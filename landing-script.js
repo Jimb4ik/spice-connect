@@ -1,4 +1,4 @@
-// SpiceConnect Landing Page JavaScript
+// SpiceConnect Landing Page JavaScript - Updated v2.0
 class SpiceLanding {
     constructor() {
         this.baseURL = '/api';
