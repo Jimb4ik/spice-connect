@@ -551,10 +551,11 @@ body {
 
 /* Footer */
 .footer {
-  background: var(--gradient-hero);
-  color: white;
+  background: linear-gradient(135deg, #fef7f7 0%, #f8f6ff 100%);
+  color: var(--text-primary);
   padding: 60px 0 20px;
   position: relative;
+  border-top: 1px solid var(--border-light);
 }
 
 .footer::before {
@@ -564,7 +565,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, rgba(255, 68, 88, 0.03) 0%, rgba(108, 92, 231, 0.03) 100%);
   pointer-events: none;
 }
 
@@ -590,26 +591,26 @@ body {
 
 .footer-column h4 {
   margin-bottom: 20px;
-  color: var(--accent-color);
+  color: var(--primary-color);
 }
 
 .footer-column a {
   display: block;
-  color: var(--text-light);
+  color: var(--text-secondary);
   text-decoration: none;
   margin-bottom: 10px;
   transition: color 0.3s ease;
 }
 
 .footer-column a:hover {
-  color: white;
+  color: var(--primary-color);
 }
 
 .footer-bottom {
   text-align: center;
   padding-top: 20px;
-  border-top: 1px solid #555;
-  color: var(--text-light);
+  border-top: 1px solid var(--border-light);
+  color: var(--text-secondary);
 }
 
 /* Responsive Design */
