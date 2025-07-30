@@ -183,8 +183,8 @@ class SpiceLanding {
             );
         }
         
-        // Take first 6 profiles for display
-        const displayProfiles = filteredProfiles.slice(0, 6);
+        // Take first 12 profiles for display
+        const displayProfiles = filteredProfiles.slice(0, 12);
         
         grid.innerHTML = displayProfiles.map(profile => this.createProfileCard(profile)).join('');
         
@@ -372,7 +372,7 @@ class SpiceLanding {
 
 // Initialize the landing page when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 SpiceConnect Landing Page initializing v2.2...');
+    console.log('🚀 SpiceConnect Landing Page initializing v2.3...');
     window.spiceLanding = new SpiceLanding();
     
     // Handle navbar background on scroll
