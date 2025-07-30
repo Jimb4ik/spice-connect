@@ -22,6 +22,11 @@ class SpiceLanding {
             
             // Get site info and online count
             const siteInfoResponse = await fetch(`${this.baseURL}/spice-multi-test?endpoint=/index_api/index&method=GET`);
+            
+            if (!siteInfoResponse.ok) {
+                throw new Error(`HTTP ${siteInfoResponse.status}: ${siteInfoResponse.statusText}`);
+            }
+            
             const siteInfo = await siteInfoResponse.json();
             
             if (siteInfo.success && siteInfo.data) {
@@ -33,8 +38,10 @@ class SpiceLanding {
             }
         } catch (error) {
             console.error('❌ Failed to load live stats:', error);
-            // Use animated demo stats as fallback
-            this.animateStats();
+            // Show error instead of fallback
+            document.getElementById('onlineCount').textContent = 'ERROR';
+            document.getElementById('liveMemberCount').textContent = 'API ERROR';
+            alert('API Error in loadLiveStats: ' + error.message);
         }
     }
 
@@ -82,6 +89,11 @@ class SpiceLanding {
             
             const params = country ? `force_pays=${country}` : '';
             const response = await fetch(`${this.baseURL}/spice-multi-test?endpoint=/index_api/landing_module/profils_global&method=POST&${params}`);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
             const data = await response.json();
             
             if (data.success && data.data && data.data.result && data.data.result.get_profils_global) {
@@ -94,8 +106,9 @@ class SpiceLanding {
             }
         } catch (error) {
             console.error('❌ Failed to load profiles:', error);
-            // Use demo profiles as fallback
-            this.loadDemoProfiles();
+            // Show error instead of fallback
+            alert('API Error in loadProfiles: ' + error.message);
+            this.showNoProfiles();
         }
     }
 
