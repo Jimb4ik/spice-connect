@@ -194,6 +194,13 @@ class SpiceLanding {
                 this.showProfileModal(displayProfiles[index]);
             });
         });
+        
+        // Add intersection observer to new profile cards for animation
+        if (window.profileObserver) {
+            grid.querySelectorAll('.profile-card').forEach(card => {
+                window.profileObserver.observe(card);
+            });
+        }
     }
 
     // Create individual profile card HTML
@@ -365,7 +372,7 @@ class SpiceLanding {
 
 // Initialize the landing page when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 SpiceConnect Landing Page initializing v2.1...');
+    console.log('🚀 SpiceConnect Landing Page initializing v2.2...');
     window.spiceLanding = new SpiceLanding();
     
     // Handle navbar background on scroll
@@ -380,7 +387,8 @@ const observerOptions = {
     rootMargin: '0px 0px -100px 0px'
 };
 
-const observer = new IntersectionObserver((entries) => {
+// Make observer global so it can be used in profile rendering
+window.profileObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
             entry.target.style.animationPlayState = 'running';
@@ -391,7 +399,7 @@ const observer = new IntersectionObserver((entries) => {
 // Observe elements for animation
 document.addEventListener('DOMContentLoaded', () => {
     const animatedElements = document.querySelectorAll('.feature-card, .profile-card, .testimonial-card');
-    animatedElements.forEach(el => observer.observe(el));
+    animatedElements.forEach(el => window.profileObserver.observe(el));
 });
 
 // Add some CSS animations via JavaScript
