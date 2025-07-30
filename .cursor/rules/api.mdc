@@ -1,0 +1,9 @@
+---
+description: API doc
+globs:
+alwaysApply: true
+---
+- always use API document:
+ webpage: https://dev2018.de5a7.com/swagger-ui-master/dist/index_V2.html
+ 
+ in Json: https://dev2018.de5a7.com/api/swagger_en_last_V2.json

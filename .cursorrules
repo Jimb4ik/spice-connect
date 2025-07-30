@@ -1,0 +1,80 @@
+# SPICE API V2 - Правила авторизации
+
+## ✅ ПРАВИЛЬНЫЙ метод авторизации для Spice API:
+
+### Всегда используй ТОЛЬКО этот метод:
+- ✅ `api_key` передавать ТОЛЬКО в query параметрах URL
+- ✅ Пример: `?api_key=${API_KEY}&force_pays=64`
+- ✅ НЕ используй Authorization заголовки
+- ✅ НЕ используй Basic auth
+- ✅ НЕ используй Bearer токены
+
+### ❌ НЕ используй эти методы (они НЕ работают):
+- ❌ `Authorization: Basic base64(API_KEY:PASSWORD)`
+- ❌ `Authorization: Bearer API_KEY`
+- ❌ `X-API-Key: API_KEY`
+- ❌ api_key в теле запроса (JSON/FormData)
+
+### 📋 Подтвержденные рабочие endpoints:
+- GET /index_api/index
+- GET /index_api/array/get/{ARRAY_NAME}
+- POST /index_api/landing_module/profils_global
+- GET /ajax_api/online
+- POST /ajax_api/get_pubs
+
+### 🔧 Пример правильного запроса:
+```javascript
+const response = await fetch(`${BASE_URL}/index_api/landing_module/profils_global?api_key=${API_KEY}&force_pays=64`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
+```
+
+### 🚫 ЗАПРЕЩЕННЫЕ примеры:
+```javascript
+// ❌ НЕ ДЕЛАЙ ТАК:
+headers: {
+  'Authorization': `Basic ${btoa(API_KEY + ':')}`
+}
+
+// ❌ НЕ ДЕЛАЙ ТАК:
+headers: {
+  'Authorization': `Bearer ${API_KEY}`
+}
+```
+
+## 📚 API документация:
+- Swagger UI: https://dev2018.de5a7.com/swagger-ui-master/dist/index_V2.html
+- JSON документация: https://dev2018.de5a7.com/api/swagger_en_last_V2.json
+
+## 🎯 Base URL: https://dev2018.de5a7.com
+
+### Переменные окружения:
+- SPICE_API_KEY - API ключ (обязательно)
+- SPICE_BASE_URL - базовый URL (опционально)
+
+## 🚀 ПРАВИЛА ДЕПЛОЯ:
+
+### Когда пользователь просит сделать деплой:
+- ✅ ВСЕГДА используй команду: `vercel --prod`
+- ✅ Имя проекта: `spiceconnect`
+- ✅ Продакшн домен: `spiceconnect.vercel.app`
+- ✅ Автоматически коммить изменения перед деплоем
+- ✅ Показать финальную ссылку пользователю
+
+### Команды для деплоя:
+```bash
+# 1. Коммит изменений
+git add .
+git commit -m "Deploy: обновление проекта"
+
+# 2. Деплой в продакшн
+vercel --prod
+```
+
+### Проверка после деплоя:
+- Открыть https://spiceconnect.vercel.app
+- Убедиться что API работает
+- Проверить environment variables в Vercel
