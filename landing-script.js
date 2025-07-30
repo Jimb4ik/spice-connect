@@ -1,4 +1,4 @@
-// SpiceConnect Landing Page JavaScript - Updated v2.0
+// Lavrilo Landing Page JavaScript - Updated v2.0
 class SpiceLanding {
     constructor() {
         this.baseURL = '/api';
@@ -372,7 +372,7 @@ class SpiceLanding {
 
 // Initialize the landing page when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 SpiceConnect Landing Page initializing v2.5...');
+    console.log('🚀 Lavrilo Landing Page initializing v3.0...');
     window.spiceLanding = new SpiceLanding();
     
     // Handle navbar background on scroll

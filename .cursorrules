@@ -59,8 +59,8 @@ headers: {
 
 ### Когда пользователь просит сделать деплой:
 - ✅ ВСЕГДА используй команду: `vercel --prod`
-- ✅ Имя проекта: `spiceconnect`
-- ✅ Продакшн домен: `spiceconnect.vercel.app`
+- ✅ Имя проекта: `lavrilo`
+- ✅ Продакшн домен: `lavrilo.vercel.app`
 - ✅ Автоматически коммить изменения перед деплоем
 - ✅ Показать финальную ссылку пользователю
 
@@ -75,6 +75,6 @@ vercel --prod
 ```
 
 ### Проверка после деплоя:
-- Открыть https://spiceconnect.vercel.app
+- Открыть https://lavrilo.vercel.app
 - Убедиться что API работает
 - Проверить environment variables в Vercel

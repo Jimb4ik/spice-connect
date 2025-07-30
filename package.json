@@ -1,5 +1,5 @@
 {
-  "name": "spiceconnect",
+  "name": "lavrilo",
   "version": "1.0.0",
   "description": "MVP приложение знакомств с использованием Spice API V2",
   "main": "index.html",
@@ -18,15 +18,15 @@
     "javascript",
     "знакомства"
   ],
-  "author": "SpiceConnect Team",
+  "author": "Lavrilo Team",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/spiceconnect.git"
+    "url": "https://github.com/yourusername/lavrilo.git"
   },
-  "homepage": "https://spiceconnect.vercel.app",
+  "homepage": "https://lavrilo.vercel.app",
   "bugs": {
-    "url": "https://github.com/yourusername/spiceconnect/issues"
+    "url": "https://github.com/yourusername/lavrilo/issues"
   },
   "engines": {
     "node": ">=14.0.0"
