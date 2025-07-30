@@ -365,7 +365,7 @@ class SpiceLanding {
 
 // Initialize the landing page when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 SpiceConnect Landing Page initializing...');
+    console.log('🚀 SpiceConnect Landing Page initializing v2.1...');
     window.spiceLanding = new SpiceLanding();
     
     // Handle navbar background on scroll
