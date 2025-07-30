@@ -21,7 +21,7 @@ class SpiceLanding {
             console.log('🔄 Loading live stats...');
             
             // Get site info and online count
-            const siteInfoResponse = await fetch(`${this.baseURL}/spice-multi-test?endpoint=index_api/index&method=GET`);
+            const siteInfoResponse = await fetch(`${this.baseURL}/spice-multi-test?endpoint=/index_api/index&method=GET`);
             const siteInfo = await siteInfoResponse.json();
             
             if (siteInfo.success && siteInfo.data) {
@@ -60,7 +60,7 @@ class SpiceLanding {
         try {
             console.log('🔄 Loading gender filters...');
             
-            const response = await fetch(`${this.baseURL}/spice-multi-test?endpoint=index_api/array/get/SEXE&method=GET`);
+            const response = await fetch(`${this.baseURL}/spice-multi-test?endpoint=/index_api/array/get/SEXE&method=GET`);
             const data = await response.json();
             
             if (data.success && data.data && data.data.result && data.data.result.sexe) {
@@ -81,7 +81,7 @@ class SpiceLanding {
             this.showProfilesLoading();
             
             const params = country ? `force_pays=${country}` : '';
-            const response = await fetch(`${this.baseURL}/spice-multi-test?endpoint=index_api/landing_module/profils_global&method=POST&${params}`);
+            const response = await fetch(`${this.baseURL}/spice-multi-test?endpoint=/index_api/landing_module/profils_global&method=POST&${params}`);
             const data = await response.json();
             
             if (data.success && data.data && data.data.result && data.data.result.get_profils_global) {
