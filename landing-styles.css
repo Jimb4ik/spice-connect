@@ -442,9 +442,33 @@ body {
 }
 
 .testimonials-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 40px;
+  display: flex;
+  gap: 30px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 20px 0 40px 0;
+  scroll-behavior: smooth;
+  margin: 0 -20px;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+.testimonials-grid::-webkit-scrollbar {
+  height: 8px;
+}
+
+.testimonials-grid::-webkit-scrollbar-track {
+  background: var(--background-light);
+  border-radius: 10px;
+}
+
+.testimonials-grid::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 10px;
+}
+
+.testimonials-grid::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-dark);
 }
 
 .testimonial-card {
@@ -453,6 +477,13 @@ body {
   padding: 40px;
   box-shadow: var(--shadow-light);
   text-align: center;
+  min-width: 350px;
+  flex-shrink: 0;
+  transition: transform 0.3s ease;
+}
+
+.testimonial-card:hover {
+  transform: translateY(-5px);
 }
 
 .testimonial-image {
@@ -512,12 +543,12 @@ body {
 }
 
 .registration-form {
-  max-width: 500px;
+  max-width: 600px;
   margin: 0 auto;
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
   border-radius: 20px;
-  padding: 40px;
+  padding: 40px 30px;
   box-shadow: var(--shadow-medium);
 }
 
@@ -532,14 +563,52 @@ body {
   margin-bottom: 20px;
 }
 
-.form-row input,
-.form-row select {
+.form-row input {
   flex: 1;
   padding: 15px;
   border: none;
   border-radius: 10px;
   font-size: 1rem;
   background: rgba(255, 255, 255, 0.9);
+  color: var(--text-primary);
+}
+
+.form-row input::placeholder {
+  color: var(--text-light);
+}
+
+/* Custom Select Dropdown */
+.custom-select {
+  position: relative;
+  flex: 1;
+}
+
+.custom-select select {
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--text-primary);
+  appearance: none;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 15px center;
+  background-size: 20px;
+  padding-right: 45px;
+}
+
+.custom-select select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+}
+
+.custom-select select option {
+  background: white;
+  color: var(--text-primary);
+  padding: 10px;
 }
 
 .form-disclaimer {
@@ -641,11 +710,27 @@ body {
   }
   
   .testimonials-grid {
-    grid-template-columns: 1fr;
+    margin: 0;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  
+  .testimonial-card {
+    min-width: 280px;
+    padding: 30px 20px;
   }
   
   .form-row {
     flex-direction: column;
+  }
+  
+  .registration-form {
+    padding: 30px 20px;
+    max-width: 90%;
+  }
+  
+  .cta-content h2 {
+    font-size: 2rem;
   }
   
   .footer-content {
