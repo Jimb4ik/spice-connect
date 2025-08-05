@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search - Lavrilo</title>
+    <link rel="stylesheet" href="css/app-styles.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Хедер -->
+    <header class="app-header">
+        <div class="header-container">
+            <a href="index.html" class="logo">Lavrilo</a>
+            
+            <nav>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="profile.html" class="nav-link">
+                            <span>👤</span> My Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="messages.html" class="nav-link">
+                            <span>💬</span> Messages
+                            <span class="nav-badge" id="messagesBadge">3</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="discover.html" class="nav-link">
+                            <span>🔥</span> Discover
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="matches.html" class="nav-link">
+                            <span>💕</span> Matches
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="visitors.html" class="nav-link">
+                            <span>👁️</span> Visitors
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="search.html" class="nav-link active">
+                            <span>🔍</span> Search
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="settings.html" class="nav-link">
+                            <span>⚙️</span> Settings
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="user-menu">
+                <div class="user-avatar" id="userAvatar">H</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Основной контент -->
+    <main class="app-main">
+        <div class="page-header fade-in-up">
+            <h1 class="page-title">🔍 Search People</h1>
+            <p class="page-subtitle">Find specific people using advanced filters</p>
+        </div>
+
+        <div class="search-container fade-in-up">
+            <!-- Search Filters -->
+            <div class="search-filters card">
+                <h3 class="mb-2">Search Filters</h3>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Name or Username</label>
+                        <input type="text" placeholder="Search by name..." class="form-input" id="searchName">
+                    </div>
+                    <div class="form-group">
+                        <label>Location</label>
+                        <input type="text" placeholder="City or region..." class="form-input" id="searchLocation">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Age Range</label>
+                        <div class="age-range">
+                            <input type="number" min="18" max="80" value="18" class="form-input" id="ageMin" placeholder="Min">
+                            <span>to</span>
+                            <input type="number" min="18" max="80" value="80" class="form-input" id="ageMax" placeholder="Max">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Gender</label>
+                        <select class="form-input" id="searchGender">
+                            <option value="">Any</option>
+                            <option value="male">Men</option>
+                            <option value="female">Women</option>
+                            <option value="couple">Couples</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Education</label>
+                        <select class="form-input" id="searchEducation">
+                            <option value="">Any</option>
+                            <option value="high_school">High School</option>
+                            <option value="bachelor">Bachelor's Degree</option>
+                            <option value="master">Master's Degree</option>
+                            <option value="phd">PhD/Doctorate</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Profession</label>
+                        <select class="form-input" id="searchProfession">
+                            <option value="">Any</option>
+                            <option value="technology">Technology</option>
+                            <option value="healthcare">Healthcare</option>
+                            <option value="education">Education</option>
+                            <option value="business">Business</option>
+                            <option value="creative">Creative Arts</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="search-actions">
+                    <button class="btn btn-outline" id="clearFilters">Clear All</button>
+                    <button class="btn btn-primary" id="searchBtn">🔍 Search</button>
+                </div>
+            </div>
+
+            <!-- Search Results -->
+            <div class="search-results" id="searchResults">
+                <div class="search-results-header">
+                    <h3>Search Results</h3>
+                    <span class="results-count" id="resultsCount">0 results</span>
+                </div>
+                
+                <div class="search-grid" id="searchGrid">
+                    <!-- Search results will be loaded here -->
+                </div>
+                
+                <div class="no-results" id="noResults" style="display: none;">
+                    <div class="no-results-icon">🔍</div>
+                    <h3>No results found</h3>
+                    <p>Try adjusting your search criteria or browse all profiles.</p>
+                    <a href="discover.html" class="btn btn-primary">🔥 Browse All Profiles</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Скрипты -->
+    <script src="js/auth-manager.js?v=1.2"></script>
+    <script src="js/auth-modal.js?v=1.0"></script>
+    <script src="js/dashboard.js?v=6.1"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!window.authManager || !window.authManager.isLoggedIn) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            const userAvatar = document.getElementById('userAvatar');
+            if (window.authManager.currentUser && window.authManager.currentUser.pseudo) {
+                userAvatar.textContent = window.authManager.currentUser.pseudo.charAt(0).toUpperCase();
+            }
+            
+            // Search functionality
+            document.getElementById('searchBtn').addEventListener('click', performSearch);
+            document.getElementById('clearFilters').addEventListener('click', clearFilters);
+            
+            // Enter key search
+            document.querySelectorAll('.form-input').forEach(input => {
+                input.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        performSearch();
+                    }
+                });
+            });
+        });
+        
+        function performSearch() {
+            const filters = {
+                name: document.getElementById('searchName').value,
+                location: document.getElementById('searchLocation').value,
+                ageMin: document.getElementById('ageMin').value,
+                ageMax: document.getElementById('ageMax').value,
+                gender: document.getElementById('searchGender').value,
+                education: document.getElementById('searchEducation').value,
+                profession: document.getElementById('searchProfession').value
+            };
+            
+            console.log('Searching with filters:', filters);
+            
+            if (window.dashboard && typeof window.dashboard.performSearch === 'function') {
+                window.dashboard.performSearch(filters);
+            }
+        }
+        
+        function clearFilters() {
+            document.getElementById('searchName').value = '';
+            document.getElementById('searchLocation').value = '';
+            document.getElementById('ageMin').value = '18';
+            document.getElementById('ageMax').value = '80';
+            document.getElementById('searchGender').value = '';
+            document.getElementById('searchEducation').value = '';
+            document.getElementById('searchProfession').value = '';
+            
+            document.getElementById('searchGrid').innerHTML = '';
+            document.getElementById('resultsCount').textContent = '0 results';
+        }
+    </script>
+</body>
+</html>

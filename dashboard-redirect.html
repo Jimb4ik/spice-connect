@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Lavrilo</title>
+    <link rel="stylesheet" href="css/app-styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="redirect-container">
+        <div class="redirect-content">
+            <div class="loading-spinner"></div>
+            <h2>Redirecting to your dashboard...</h2>
+            <p>Please wait while we load your profile.</p>
+        </div>
+    </div>
+    
+    <script>
+        // Автоматическое перенаправление на новую структуру
+        document.addEventListener('DOMContentLoaded', () => {
+            // Проверяем авторизацию
+            const isLoggedIn = localStorage.getItem('lavrilo_session') && localStorage.getItem('lavrilo_user');
+            
+            if (!isLoggedIn) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // Перенаправляем на страницу профиля как основную через небольшую задержку
+            setTimeout(() => {
+                window.location.href = 'profile.html';
+            }, 1000);
+        });
+    </script>
+    
+    <style>
+        .redirect-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: var(--primary-gradient);
+        }
+        
+        .redirect-content {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 3rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+        
+        .redirect-content h2 {
+            margin: 1rem 0;
+            color: var(--text-dark);
+        }
+        
+        .redirect-content p {
+            color: var(--text-light);
+        }
+    </style>
+</body>
+</html>

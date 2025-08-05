@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Matches - Lavrilo</title>
+    <link rel="stylesheet" href="css/app-styles.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Хедер -->
+    <header class="app-header">
+        <div class="header-container">
+            <a href="index.html" class="logo">Lavrilo</a>
+            
+            <nav>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="profile.html" class="nav-link">
+                            <span>👤</span> My Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="messages.html" class="nav-link">
+                            <span>💬</span> Messages
+                            <span class="nav-badge" id="messagesBadge">3</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="discover.html" class="nav-link">
+                            <span>🔥</span> Discover
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="matches.html" class="nav-link active">
+                            <span>💕</span> Matches
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="visitors.html" class="nav-link">
+                            <span>👁️</span> Visitors
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="search.html" class="nav-link">
+                            <span>🔍</span> Search
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="settings.html" class="nav-link">
+                            <span>⚙️</span> Settings
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="user-menu">
+                <div class="user-avatar" id="userAvatar">H</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Основной контент -->
+    <main class="app-main">
+        <div class="page-header fade-in-up">
+            <h1 class="page-title">💕 Your Matches</h1>
+            <p class="page-subtitle">People who liked you back - start a conversation!</p>
+        </div>
+
+        <div class="matches-stats fade-in-up">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalMatchesCount">-</div>
+                    <div class="stat-label">Total Matches</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="newMatchesCount">-</div>
+                    <div class="stat-label">New Matches</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="activeChatsCount">3</div>
+                    <div class="stat-label">Active Chats</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Фильтры матчей -->
+        <div class="matches-filters fade-in-up">
+            <div class="filter-tabs">
+                <button class="filter-tab active" data-filter="all">All Matches</button>
+                <button class="filter-tab" data-filter="new">New Matches</button>
+                <button class="filter-tab" data-filter="chatting">Chatting</button>
+                <button class="filter-tab" data-filter="recent">Recent Activity</button>
+            </div>
+        </div>
+
+        <!-- Сетка матчей -->
+        <div class="matches-grid fade-in-up" id="matchesGrid">
+            <!-- Матчи будут загружены динамически -->
+            <div class="loading-matches">
+                <div class="loading-spinner"></div>
+                <p>Loading your matches...</p>
+            </div>
+        </div>
+
+        <!-- Пустое состояние -->
+        <div class="no-matches fade-in-up" id="noMatches" style="display: none;">
+            <div class="no-matches-icon">💔</div>
+            <h3>No matches yet</h3>
+            <p>Don't worry! Keep swiping to find people who are perfect for you.</p>
+            <div class="no-matches-actions">
+                <a href="discover.html" class="btn btn-primary">🔥 Start Swiping</a>
+                <a href="search.html" class="btn btn-secondary">🔍 Browse Profiles</a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Match Details Modal -->
+    <div id="matchDetailsModal" class="modal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2>Match Details</h2>
+                <button class="modal-close" id="closeMatchDetails">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="match-profile-details">
+                    <div class="match-photos">
+                        <div class="main-photo">
+                            <img id="matchMainPhoto" src="" alt="Match photo">
+                        </div>
+                        <div class="photo-gallery" id="matchPhotoGallery">
+                            <!-- Additional photos -->
+                        </div>
+                    </div>
+                    
+                    <div class="match-info">
+                        <div class="match-header">
+                            <h3 id="matchName">Name</h3>
+                            <span class="match-age" id="matchAge">Age</span>
+                        </div>
+                        
+                        <div class="match-location" id="matchLocation">📍 Location</div>
+                        <div class="match-work" id="matchWork">💼 Profession</div>
+                        
+                        <div class="match-description" id="matchDescription">
+                            Description...
+                        </div>
+                        
+                        <div class="match-details-grid">
+                            <div class="detail-item">
+                                <strong>Education:</strong>
+                                <span id="matchEducation">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <strong>Height:</strong>
+                                <span id="matchHeight">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <strong>Body Type:</strong>
+                                <span id="matchBodyType">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <strong>Looking for:</strong>
+                                <span id="matchLookingFor">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="unmatchBtn">💔 Unmatch</button>
+                <button class="btn btn-secondary" id="viewFullProfileBtn">👤 View Full Profile</button>
+                <button class="btn btn-primary" id="startChatBtn">💬 Start Chat</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Unmatch Confirmation Modal -->
+    <div id="unmatchModal" class="modal">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h3>Unmatch Confirmation</h3>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to unmatch with <strong id="unmatchName">this person</strong>?</p>
+                <p class="text-light">This action cannot be undone and you won't be able to message each other anymore.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" id="cancelUnmatch">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmUnmatch">Yes, Unmatch</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Скрипты -->
+    <script src="js/auth-manager.js?v=1.2"></script>
+    <script src="js/auth-modal.js?v=1.0"></script>
+    <script src="js/matching-system-v2.js?v=1.0"></script>
+    <script src="js/dashboard.js?v=6.1"></script>
+    
+    <script>
+        // Проверка авторизации при загрузке страницы
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!window.authManager || !window.authManager.isLoggedIn) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // Обновляем аватар пользователя
+            const userAvatar = document.getElementById('userAvatar');
+            if (window.authManager.currentUser && window.authManager.currentUser.pseudo) {
+                userAvatar.textContent = window.authManager.currentUser.pseudo.charAt(0).toUpperCase();
+            }
+            
+            // Загружаем матчи
+            if (window.matchingSystem && typeof window.matchingSystem.loadMyMatches === 'function') {
+                window.matchingSystem.loadMyMatches();
+            }
+            
+            // Обработчики фильтров
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    const filter = tab.dataset.filter;
+                    filterMatches(filter);
+                });
+            });
+        });
+        
+        function filterMatches(filter) {
+            const matchCards = document.querySelectorAll('.match-card');
+            
+            matchCards.forEach(card => {
+                let show = true;
+                
+                switch(filter) {
+                    case 'new':
+                        show = card.classList.contains('new-match');
+                        break;
+                    case 'chatting':
+                        show = card.classList.contains('has-messages');
+                        break;
+                    case 'recent':
+                        show = card.classList.contains('recent-activity');
+                        break;
+                    case 'all':
+                    default:
+                        show = true;
+                        break;
+                }
+                
+                card.style.display = show ? 'block' : 'none';
+            });
+        }
+    </script>
+</body>
+</html>

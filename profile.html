@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Lavrilo</title>
+    <link rel="stylesheet" href="css/app-styles.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Хедер -->
+    <header class="app-header">
+        <div class="header-container">
+            <a href="index.html" class="logo">Lavrilo</a>
+            
+            <nav>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="profile.html" class="nav-link active">
+                            <span>👤</span> My Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="messages.html" class="nav-link">
+                            <span>💬</span> Messages
+                            <span class="nav-badge" id="messagesBadge">3</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="discover.html" class="nav-link">
+                            <span>🔥</span> Discover
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="matches.html" class="nav-link">
+                            <span>💕</span> Matches
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="visitors.html" class="nav-link">
+                            <span>👁️</span> Visitors
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="search.html" class="nav-link">
+                            <span>🔍</span> Search
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="settings.html" class="nav-link">
+                            <span>⚙️</span> Settings
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="user-menu">
+                <div class="user-avatar" id="userAvatar">H</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Основной контент -->
+    <main class="app-main">
+        <div class="page-header fade-in-up">
+            <h1 class="page-title">My Profile</h1>
+            <p class="page-subtitle">Manage your profile information and photos</p>
+        </div>
+
+        <div class="card-grid">
+            <!-- Фотографии профиля -->
+            <div class="card fade-in-up">
+                <div class="profile-photos-section">
+                    <div class="section-header">
+                        <h3>📷 Your Photos</h3>
+                        <span class="photo-count" id="photoCount">2/10 photos</span>
+                    </div>
+                    
+                    <div class="photo-gallery" id="photoGallery">
+                        <!-- Фотографии будут загружены динамически -->
+                    </div>
+                    
+                    <button class="btn btn-primary mt-2" id="addPhotoBtn">
+                        <span>+</span> Add Photo
+                    </button>
+                </div>
+            </div>
+
+            <!-- Основная информация -->
+            <div class="card fade-in-up">
+                <div class="profile-info">
+                    <div class="profile-avatar">
+                        <img src="images/default-avatar.png" alt="Profile" id="profileMainPhoto">
+                    </div>
+                    <h2 id="profileName">Loading...</h2>
+                    <p class="profile-location" id="profileLocation">📍 Location</p>
+                    <p class="profile-age" id="profileAge">Age</p>
+                    
+                    <div class="profile-completion mt-3">
+                        <div class="completion-label">Profile Completion:</div>
+                        <div class="completion-bar">
+                            <div class="completion-fill" id="completionFill" style="width: 85%"></div>
+                        </div>
+                        <div class="completion-percent" id="completionPercent">85%</div>
+                    </div>
+                    
+                    <button class="btn btn-primary mt-3" id="editProfileBtn">
+                        ✏️ Edit Profile
+                    </button>
+                </div>
+            </div>
+
+            <!-- Статистика -->
+            <div class="card fade-in-up">
+                <h3 class="mb-2">📊 Profile Statistics</h3>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number" id="profileViews">-</div>
+                        <div class="stat-label">Profile Views</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="totalLikes">-</div>
+                        <div class="stat-label">Likes Received</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="totalMatches">-</div>
+                        <div class="stat-label">Total Matches</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="messagesCount">3</div>
+                        <div class="stat-label">Active Chats</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Быстрые действия -->
+            <div class="card fade-in-up">
+                <h3 class="mb-2">⚡ Quick Actions</h3>
+                <div class="quick-actions">
+                    <a href="discover.html" class="btn btn-primary">
+                        🔥 Start Swiping
+                    </a>
+                    <a href="messages.html" class="btn btn-secondary">
+                        💬 Check Messages
+                    </a>
+                    <a href="matches.html" class="btn btn-outline">
+                        💕 View Matches
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Модальные окна (перенесены из dashboard.html) -->
+    <!-- Модальное окно редактирования профиля -->
+    <div id="editProfileModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Your Profile</h2>
+                <button class="modal-close" id="closeEditProfile">&times;</button>
+            </div>
+            
+            <form id="editProfileForm" class="modal-body">
+                <!-- Основная информация -->
+                <div class="form-section">
+                    <h3>Basic Information</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="fullName">Full Name</label>
+                            <input type="text" id="fullName" name="fullName" class="form-input">
+                        </div>
+                        <div class="form-group">
+                            <label for="firstName">First Name</label>
+                            <input type="text" id="firstName" name="firstName" class="form-input">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="height">Height (cm)</label>
+                            <input type="number" id="height" name="height" class="form-input" min="120" max="250">
+                        </div>
+                        <div class="form-group">
+                            <label for="weight">Weight (kg)</label>
+                            <input type="number" id="weight" name="weight" class="form-input" min="30" max="200">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="eyeColor">Eye Color</label>
+                            <select id="eyeColor" name="eyeColor" class="form-input">
+                                <option value="">Select eye color</option>
+                                <option value="brown">Brown</option>
+                                <option value="blue">Blue</option>
+                                <option value="green">Green</option>
+                                <option value="hazel">Hazel</option>
+                                <option value="gray">Gray</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="hairColor">Hair Color</label>
+                            <select id="hairColor" name="hairColor" class="form-input">
+                                <option value="">Select hair color</option>
+                                <option value="black">Black</option>
+                                <option value="brown">Brown</option>
+                                <option value="blonde">Blonde</option>
+                                <option value="red">Red</option>
+                                <option value="gray">Gray</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lifestyle & Background -->
+                <div class="form-section">
+                    <h3>Lifestyle & Background</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="education">Education Level</label>
+                            <select id="education" name="education" class="form-input">
+                                <option value="">Select education level</option>
+                                <option value="high_school">High School</option>
+                                <option value="some_college">Some College</option>
+                                <option value="bachelor">Bachelor's Degree</option>
+                                <option value="master">Master's Degree</option>
+                                <option value="phd">PhD/Doctorate</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="profession">Profession</label>
+                            <select id="profession" name="profession" class="form-input">
+                                <option value="">Select profession</option>
+                                <option value="technology">Technology</option>
+                                <option value="healthcare">Healthcare</option>
+                                <option value="education">Education</option>
+                                <option value="business">Business</option>
+                                <option value="creative">Creative Arts</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="maritalStatus">Marital Status</label>
+                            <select id="maritalStatus" name="maritalStatus" class="form-input">
+                                <option value="">Select status</option>
+                                <option value="single">Single</option>
+                                <option value="divorced">Divorced</option>
+                                <option value="widowed">Widowed</option>
+                                <option value="complicated">It's complicated</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="children">Number of Children</label>
+                            <select id="children" name="children" class="form-input">
+                                <option value="0">No children</option>
+                                <option value="1">1 child</option>
+                                <option value="2">2 children</option>
+                                <option value="3">3 children</option>
+                                <option value="4+">4+ children</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="bodyType">Body Type</label>
+                            <select id="bodyType" name="bodyType" class="form-input">
+                                <option value="">Select body type</option>
+                                <option value="slim">Slim</option>
+                                <option value="athletic">Athletic</option>
+                                <option value="average">Average</option>
+                                <option value="curvy">Curvy</option>
+                                <option value="full">Full-figured</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="personality">Personality</label>
+                            <select id="personality" name="personality" class="form-input">
+                                <option value="">Select personality</option>
+                                <option value="outgoing">Outgoing</option>
+                                <option value="shy">Shy</option>
+                                <option value="funny">Funny</option>
+                                <option value="serious">Serious</option>
+                                <option value="adventurous">Adventurous</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="orientation">Sexual Orientation</label>
+                            <select id="orientation" name="orientation" class="form-input">
+                                <option value="heterosexual">Heterosexual</option>
+                                <option value="homosexual">Homosexual</option>
+                                <option value="bisexual">Bisexual</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="onlineTime">Preferred Online Time</label>
+                            <select id="onlineTime" name="onlineTime" class="form-input">
+                                <option value="">Select time</option>
+                                <option value="morning">Morning (6-12)</option>
+                                <option value="afternoon">Afternoon (12-18)</option>
+                                <option value="evening">Evening (18-24)</option>
+                                <option value="night">Night (0-6)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- О себе -->
+                <div class="form-section">
+                    <h3>About You</h3>
+                    <div class="form-group">
+                        <label for="description">Profile Description</label>
+                        <textarea id="description" name="description" class="form-input" rows="4" maxlength="500" placeholder="Tell others about yourself..."></textarea>
+                        <div class="char-count">
+                            <span id="descriptionCount">0</span>/500 characters
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" id="cancelEditProfile">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Модальное окно редактирования фото -->
+    <div id="editPhotoModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Photo</h2>
+                <button class="modal-close" id="closeEditPhoto">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="photo-editor">
+                    <div class="photo-preview" id="photoPreview">
+                        <!-- Фото для редактирования -->
+                    </div>
+                    
+                    <p class="editor-hint">Drag the square to crop your photo. Only square crops are allowed.</p>
+                    
+                    <div class="photo-settings">
+                        <div class="form-group">
+                            <input type="text" id="photoTitle" placeholder="Photo title" class="form-input">
+                        </div>
+                        
+                        <div class="photo-options">
+                            <div class="option-group">
+                                <input type="radio" id="setMainPhoto" name="photoType" value="main">
+                                <label for="setMainPhoto">Set as main photo</label>
+                            </div>
+                            <div class="option-group">
+                                <input type="radio" id="publicPhoto" name="visibility" value="public" checked>
+                                <label for="publicPhoto">Public</label>
+                            </div>
+                            <div class="option-group">
+                                <input type="radio" id="privatePhoto" name="visibility" value="private">
+                                <label for="privatePhoto">Private (subscribers only)</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" id="deletePhoto">DELETE</button>
+                <button type="button" class="btn btn-primary" id="savePhoto">SAVE</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно подтверждения -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h3>Confirm Action</h3>
+            </div>
+            <div class="modal-body">
+                <p id="confirmMessage">Are you sure you want to delete this photo?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" id="confirmCancel">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmAction">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Скрипты -->
+    <script src="js/auth-manager.js?v=1.2"></script>
+    <script src="js/auth-modal.js?v=1.0"></script>
+    <script src="js/photo-manager.js?v=8.0"></script>
+    <script src="js/dashboard.js?v=6.1"></script>
+    
+    <script>
+        // Проверка авторизации при загрузке страницы
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!window.authManager || !window.authManager.isLoggedIn) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // Обновляем аватар пользователя
+            const userAvatar = document.getElementById('userAvatar');
+            if (window.authManager.currentUser && window.authManager.currentUser.pseudo) {
+                userAvatar.textContent = window.authManager.currentUser.pseudo.charAt(0).toUpperCase();
+            }
+        });
+    </script>
+</body>
+</html>

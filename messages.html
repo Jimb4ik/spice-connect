@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Messages - Lavrilo</title>
+    <link rel="stylesheet" href="css/app-styles.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Хедер -->
+    <header class="app-header">
+        <div class="header-container">
+            <a href="index.html" class="logo">Lavrilo</a>
+            
+            <nav>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="profile.html" class="nav-link">
+                            <span>👤</span> My Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="messages.html" class="nav-link active">
+                            <span>💬</span> Messages
+                            <span class="nav-badge" id="messagesBadge">3</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="discover.html" class="nav-link">
+                            <span>🔥</span> Discover
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="matches.html" class="nav-link">
+                            <span>💕</span> Matches
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="visitors.html" class="nav-link">
+                            <span>👁️</span> Visitors
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="search.html" class="nav-link">
+                            <span>🔍</span> Search
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="settings.html" class="nav-link">
+                            <span>⚙️</span> Settings
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="user-menu">
+                <div class="user-avatar" id="userAvatar">H</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Основной контент -->
+    <main class="app-main">
+        <div class="page-header fade-in-up">
+            <h1 class="page-title">💬 Messages</h1>
+            <p class="page-subtitle">Chat with your connections and matches</p>
+        </div>
+
+        <div class="messages-container fade-in-up">
+            <!-- Sidebar с контактами -->
+            <div class="messages-sidebar">
+                <div class="sidebar-header">
+                    <h3>Chats</h3>
+                    <button class="btn btn-primary btn-sm" id="newChatBtn">+ New Chat</button>
+                </div>
+                
+                <div class="search-contacts">
+                    <input type="text" placeholder="Search conversations..." class="form-input" id="searchContacts">
+                </div>
+                
+                <div class="contacts-list" id="contactsList">
+                    <!-- Контакты будут загружены динамически -->
+                    <div class="loading-contacts">
+                        <div class="loading-spinner"></div>
+                        <p>Loading conversations...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Основная область чата -->
+            <div class="chat-area">
+                <!-- Пустое состояние -->
+                <div class="chat-empty" id="chatEmpty">
+                    <div class="empty-icon">💬</div>
+                    <h3>Select a conversation</h3>
+                    <p>Choose a contact from the left to start chatting</p>
+                </div>
+
+                <!-- Активный чат -->
+                <div class="chat-active" id="chatActive" style="display: none;">
+                    <!-- Заголовок чата -->
+                    <div class="chat-header">
+                        <div class="chat-user-info">
+                            <img id="chatUserAvatar" src="" alt="User avatar" class="chat-avatar">
+                            <div class="chat-user-details">
+                                <h4 id="chatUserName">User Name</h4>
+                                <span class="chat-user-status" id="chatUserStatus">Online</span>
+                            </div>
+                        </div>
+                        
+                        <div class="chat-actions">
+                            <button class="btn btn-outline btn-sm" id="viewProfileBtn">👤 View Profile</button>
+                            <button class="btn btn-outline btn-sm" id="chatOptionsBtn">⋮</button>
+                        </div>
+                    </div>
+
+                    <!-- Сообщения -->
+                    <div class="chat-messages" id="chatMessages">
+                        <!-- Сообщения будут загружены динамически -->
+                    </div>
+
+                    <!-- Поле ввода -->
+                    <div class="chat-input-area">
+                        <div class="chat-input-container">
+                            <button class="btn btn-outline btn-sm" id="attachBtn">📎</button>
+                            <input type="text" placeholder="Type a message..." class="form-input" id="messageInput">
+                            <button class="btn btn-primary btn-sm" id="sendBtn">Send</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- New Chat Modal -->
+    <div id="newChatModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Start New Chat</h2>
+                <button class="modal-close" id="closeNewChat">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Search people</label>
+                    <input type="text" placeholder="Search by name..." class="form-input" id="searchPeople">
+                </div>
+                
+                <div class="people-list" id="peopleList">
+                    <!-- Список людей для начала чата -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Скрипты -->
+    <script src="js/auth-manager.js?v=1.2"></script>
+    <script src="js/auth-modal.js?v=1.0"></script>
+    <script src="js/messages-extension.js?v=1.0"></script>
+    <script src="js/dashboard.js?v=6.1"></script>
+    
+    <script>
+        // Проверка авторизации при загрузке страницы
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!window.authManager || !window.authManager.isLoggedIn) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // Обновляем аватар пользователя
+            const userAvatar = document.getElementById('userAvatar');
+            if (window.authManager.currentUser && window.authManager.currentUser.pseudo) {
+                userAvatar.textContent = window.authManager.currentUser.pseudo.charAt(0).toUpperCase();
+            }
+            
+            // Инициализируем чат
+            if (window.dashboard) {
+                window.dashboard.switchSection('messages');
+            }
+        });
+    </script>
+</body>
+</html>

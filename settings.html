@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Lavrilo</title>
+    <link rel="stylesheet" href="css/app-styles.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Хедер -->
+    <header class="app-header">
+        <div class="header-container">
+            <a href="index.html" class="logo">Lavrilo</a>
+            
+            <nav>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="profile.html" class="nav-link">
+                            <span>👤</span> My Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="messages.html" class="nav-link">
+                            <span>💬</span> Messages
+                            <span class="nav-badge" id="messagesBadge">3</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="discover.html" class="nav-link">
+                            <span>🔥</span> Discover
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="matches.html" class="nav-link">
+                            <span>💕</span> Matches
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="visitors.html" class="nav-link">
+                            <span>👁️</span> Visitors
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="search.html" class="nav-link">
+                            <span>🔍</span> Search
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="settings.html" class="nav-link active">
+                            <span>⚙️</span> Settings
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="user-menu">
+                <div class="user-avatar" id="userAvatar">H</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Основной контент -->
+    <main class="app-main">
+        <div class="page-header fade-in-up">
+            <h1 class="page-title">⚙️ Settings</h1>
+            <p class="page-subtitle">Manage your account preferences and privacy settings</p>
+        </div>
+
+        <div class="settings-container">
+            <div class="card-grid">
+                <!-- Account Settings -->
+                <div class="card fade-in-up">
+                    <h3 class="mb-2">👤 Account Settings</h3>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <strong>Email Address</strong>
+                            <p class="text-light" id="userEmail">Loading...</p>
+                        </div>
+                        <button class="btn btn-outline btn-sm">Change</button>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <strong>Password</strong>
+                            <p class="text-light">••••••••</p>
+                        </div>
+                        <button class="btn btn-outline btn-sm">Change</button>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <strong>Phone Number</strong>
+                            <p class="text-light" id="userPhone">Not verified</p>
+                        </div>
+                        <button class="btn btn-outline btn-sm">Verify</button>
+                    </div>
+                </div>
+
+                <!-- Privacy Settings -->
+                <div class="card fade-in-up">
+                    <h3 class="mb-2">🔒 Privacy Settings</h3>
+                    
+                    <div class="setting-toggle">
+                        <div class="setting-info">
+                            <strong>Show my profile to others</strong>
+                            <p class="text-light">Allow others to find and view your profile</p>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="profileVisible" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="setting-toggle">
+                        <div class="setting-info">
+                            <strong>Show my online status</strong>
+                            <p class="text-light">Let others see when you're online</p>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="onlineStatus" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="setting-toggle">
+                        <div class="setting-info">
+                            <strong>Show my location</strong>
+                            <p class="text-light">Display your city to other users</p>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="showLocation" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Notification Settings -->
+                <div class="card fade-in-up">
+                    <h3 class="mb-2">🔔 Notifications</h3>
+                    
+                    <div class="setting-toggle">
+                        <div class="setting-info">
+                            <strong>New matches</strong>
+                            <p class="text-light">Get notified when someone likes you back</p>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="matchNotifications" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="setting-toggle">
+                        <div class="setting-info">
+                            <strong>New messages</strong>
+                            <p class="text-light">Get notified when you receive messages</p>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="messageNotifications" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="setting-toggle">
+                        <div class="setting-info">
+                            <strong>Profile visitors</strong>
+                            <p class="text-light">Get notified when someone views your profile</p>
+                        </div>
+                        <label class="toggle">
+                            <input type="checkbox" id="visitorNotifications">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Discovery Settings -->
+                <div class="card fade-in-up">
+                    <h3 class="mb-2">🔍 Discovery Preferences</h3>
+                    
+                    <div class="form-group">
+                        <label>Maximum Distance</label>
+                        <input type="range" min="1" max="100" value="50" id="maxDistance" class="range-input">
+                        <div class="range-display">
+                            <span id="distanceValue">50</span> km
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Age Range</label>
+                        <div class="age-range-inputs">
+                            <input type="number" min="18" max="80" value="18" id="prefAgeMin" class="form-input">
+                            <span>to</span>
+                            <input type="number" min="18" max="80" value="80" id="prefAgeMax" class="form-input">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Show me</label>
+                        <div class="checkbox-group">
+                            <label class="checkbox-item">
+                                <input type="checkbox" value="men" checked> Men
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" value="women" checked> Women
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" value="couples"> Couples
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Danger Zone -->
+                <div class="card fade-in-up danger-zone">
+                    <h3 class="mb-2">⚠️ Danger Zone</h3>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <strong>Delete Account</strong>
+                            <p class="text-light">Permanently delete your account and all data</p>
+                        </div>
+                        <button class="btn btn-danger btn-sm" id="deleteAccountBtn">Delete</button>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <strong>Logout</strong>
+                            <p class="text-light">Sign out of your account</p>
+                        </div>
+                        <button class="btn btn-outline btn-sm" id="logoutBtn">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Delete Account Modal -->
+    <div id="deleteAccountModal" class="modal">
+        <div class="modal-content modal-small">
+            <div class="modal-header">
+                <h3>⚠️ Delete Account</h3>
+            </div>
+            <div class="modal-body">
+                <p><strong>This action cannot be undone!</strong></p>
+                <p>Deleting your account will:</p>
+                <ul>
+                    <li>Remove all your photos and profile information</li>
+                    <li>Delete all your matches and conversations</li>
+                    <li>Cancel any active subscriptions</li>
+                </ul>
+                <div class="form-group mt-2">
+                    <label>Type "DELETE" to confirm:</label>
+                    <input type="text" id="deleteConfirmation" class="form-input" placeholder="DELETE">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" id="cancelDelete">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDelete" disabled>Delete Account</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Скрипты -->
+    <script src="js/auth-manager.js?v=1.2"></script>
+    <script src="js/auth-modal.js?v=1.0"></script>
+    <script src="js/dashboard.js?v=6.1"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!window.authManager || !window.authManager.isLoggedIn) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            const userAvatar = document.getElementById('userAvatar');
+            if (window.authManager.currentUser && window.authManager.currentUser.pseudo) {
+                userAvatar.textContent = window.authManager.currentUser.pseudo.charAt(0).toUpperCase();
+            }
+            
+            // Load user settings
+            loadUserSettings();
+            
+            // Event listeners
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+            document.getElementById('deleteAccountBtn').addEventListener('click', showDeleteModal);
+            document.getElementById('cancelDelete').addEventListener('click', hideDeleteModal);
+            document.getElementById('confirmDelete').addEventListener('click', deleteAccount);
+            
+            // Delete confirmation
+            document.getElementById('deleteConfirmation').addEventListener('input', (e) => {
+                const confirmBtn = document.getElementById('confirmDelete');
+                confirmBtn.disabled = e.target.value !== 'DELETE';
+            });
+            
+            // Distance slider
+            document.getElementById('maxDistance').addEventListener('input', (e) => {
+                document.getElementById('distanceValue').textContent = e.target.value;
+            });
+        });
+        
+        function loadUserSettings() {
+            if (window.authManager.currentUser) {
+                const email = window.authManager.currentUser.email || 'Not provided';
+                document.getElementById('userEmail').textContent = email;
+            }
+        }
+        
+        function logout() {
+            if (window.authManager && typeof window.authManager.logout === 'function') {
+                window.authManager.logout();
+            }
+            window.location.href = 'index.html';
+        }
+        
+        function showDeleteModal() {
+            document.getElementById('deleteAccountModal').style.display = 'flex';
+        }
+        
+        function hideDeleteModal() {
+            document.getElementById('deleteAccountModal').style.display = 'none';
+            document.getElementById('deleteConfirmation').value = '';
+            document.getElementById('confirmDelete').disabled = true;
+        }
+        
+        function deleteAccount() {
+            // This would normally call an API to delete the account
+            alert('Account deletion is not implemented in this demo.');
+            hideDeleteModal();
+        }
+    </script>
+</body>
+</html>

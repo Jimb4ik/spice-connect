@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Visitors - Lavrilo</title>
+    <link rel="stylesheet" href="css/app-styles.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Хедер -->
+    <header class="app-header">
+        <div class="header-container">
+            <a href="index.html" class="logo">Lavrilo</a>
+            
+            <nav>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="profile.html" class="nav-link">
+                            <span>👤</span> My Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="messages.html" class="nav-link">
+                            <span>💬</span> Messages
+                            <span class="nav-badge" id="messagesBadge">3</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="discover.html" class="nav-link">
+                            <span>🔥</span> Discover
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="matches.html" class="nav-link">
+                            <span>💕</span> Matches
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="visitors.html" class="nav-link active">
+                            <span>👁️</span> Visitors
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="search.html" class="nav-link">
+                            <span>🔍</span> Search
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="settings.html" class="nav-link">
+                            <span>⚙️</span> Settings
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="user-menu">
+                <div class="user-avatar" id="userAvatar">H</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Основной контент -->
+    <main class="app-main">
+        <div class="page-header fade-in-up">
+            <h1 class="page-title">👁️ Profile Visitors</h1>
+            <p class="page-subtitle">See who has been checking out your profile</p>
+        </div>
+
+        <div class="visitors-stats fade-in-up">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalVisitors">-</div>
+                    <div class="stat-label">Total Visitors</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="todayVisitors">-</div>
+                    <div class="stat-label">Today</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="weekVisitors">-</div>
+                    <div class="stat-label">This Week</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="visitors-grid fade-in-up" id="visitorsGrid">
+            <!-- Visitors will be loaded dynamically -->
+            <div class="loading-visitors">
+                <div class="loading-spinner"></div>
+                <p>Loading your visitors...</p>
+            </div>
+        </div>
+
+        <div class="no-visitors fade-in-up" id="noVisitors" style="display: none;">
+            <div class="no-visitors-icon">👻</div>
+            <h3>No visitors yet</h3>
+            <p>Make your profile more attractive to get more visitors!</p>
+            <div class="no-visitors-actions">
+                <a href="profile.html" class="btn btn-primary">✏️ Edit Profile</a>
+                <a href="discover.html" class="btn btn-secondary">🔥 Start Swiping</a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Скрипты -->
+    <script src="js/auth-manager.js?v=1.2"></script>
+    <script src="js/auth-modal.js?v=1.0"></script>
+    <script src="js/dashboard.js?v=6.1"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!window.authManager || !window.authManager.isLoggedIn) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            const userAvatar = document.getElementById('userAvatar');
+            if (window.authManager.currentUser && window.authManager.currentUser.pseudo) {
+                userAvatar.textContent = window.authManager.currentUser.pseudo.charAt(0).toUpperCase();
+            }
+            
+            // Load visitors
+            if (window.dashboard) {
+                window.dashboard.switchSection('visitors');
+            }
+        });
+    </script>
+</body>
+</html>
