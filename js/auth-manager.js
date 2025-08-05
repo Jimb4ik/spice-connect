@@ -319,20 +319,20 @@ class AuthManager {
       detail: { user: this.currentUser }
     }));
     
-    console.log('[AUTH] About to call redirectToDashboard()');
-    // Redirect to dashboard after successful authentication
-    this.redirectToDashboard();
+    console.log('[AUTH] About to call redirectToProfile()');
+    // Redirect to profile after successful authentication
+    this.redirectToProfile();
   }
   
   /**
-   * Redirect user to dashboard
+   * Redirect user to profile
    */
-  redirectToDashboard() {
-    console.log('[AUTH] redirectToDashboard() called, scheduling redirect in 800ms');
+  redirectToProfile() {
+    console.log('[AUTH] redirectToProfile() called, scheduling redirect in 800ms');
     // Small delay to ensure UI updates are complete
     setTimeout(() => {
-      console.log('[AUTH] Executing redirect to dashboard.html NOW');
-      window.location.href = 'dashboard.html';
+      console.log('[AUTH] Executing redirect to profile.html NOW');
+      window.location.href = 'profile.html';
     }, 800);
   }
 
@@ -407,7 +407,7 @@ class AuthManager {
       <div class="user-info">
         <span class="user-name">Hello, ${this.currentUser.pseudo}!</span>
         <div class="user-dropdown">
-          <button class="dashboard-btn">Dashboard</button>
+          <button class="dashboard-btn">Profile</button>
           <button class="logout-btn">Logout</button>
         </div>
       </div>
@@ -417,7 +417,7 @@ class AuthManager {
     
     // Add event listeners
     userMenu.querySelector('.dashboard-btn').addEventListener('click', () => {
-      this.goToDashboard();
+      this.goToProfile();
     });
     
     userMenu.querySelector('.logout-btn').addEventListener('click', () => {
@@ -426,10 +426,10 @@ class AuthManager {
   }
 
   /**
-   * Navigate to user dashboard
+   * Navigate to user profile
    */
-  goToDashboard() {
-    window.location.href = '/dashboard.html';
+  goToProfile() {
+    window.location.href = '/profile.html';
   }
 }
 

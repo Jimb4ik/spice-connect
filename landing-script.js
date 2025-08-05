@@ -8,10 +8,10 @@ class SpiceLanding {
     }
 
     async init() {
-        // Check if user is already logged in and redirect to dashboard
+        // Check if user is already logged in and redirect to profile
         if (window.authManager && window.authManager.isLoggedIn) {
-            console.log('[LANDING] User already logged in, redirecting to dashboard');
-            window.location.href = 'dashboard.html';
+            console.log('[LANDING] User already logged in, redirecting to profile');
+            window.location.href = 'profile.html';
             return;
         }
 
