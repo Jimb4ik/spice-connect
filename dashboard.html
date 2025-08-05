@@ -1,1 +1,867 @@
-Redirecting...
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Lavrilo</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="landing-styles.css?v=3.8">
+    <link rel="stylesheet" href="css/auth-modal.css?v=1.0">
+            <link rel="stylesheet" href="css/dashboard.css?v=7.1">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav>
+            <div class="logo">
+                <h1>Lavrilo</h1>
+            </div>
+            
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="#" class="active">Dashboard</a>
+                <div class="user-menu-placeholder">
+                    <!-- User menu will be inserted here by AuthManager -->
+                </div>
+            </div>
+            
+            <!-- Mobile hamburger -->
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Dashboard Content -->
+    <main class="dashboard-main">
+        <div class="dashboard-container">
+            <!-- Welcome Section -->
+            <section class="dashboard-welcome">
+                <div class="welcome-content">
+                    <h2 id="welcomeTitle">Welcome to your Dashboard!</h2>
+                    <p id="welcomeSubtitle">Manage your profile, connections, and more.</p>
+                </div>
+            </section>
+
+            <!-- Dashboard Navigation -->
+            <nav class="dashboard-nav">
+                <div class="nav-cards">
+                    <a href="#profile" class="nav-card active" data-section="profile">
+                        <div class="nav-card-icon">👤</div>
+                        <h3>My Profile</h3>
+                        <p>View and edit your profile information</p>
+                    </a>
+                    
+                    <a href="#messages" class="nav-card" data-section="messages">
+                        <div class="nav-card-icon">💬</div>
+                        <h3>Messages</h3>
+                        <p>Chat with your connections</p>
+                        <span class="notification-badge" id="messagesBadge">3</span>
+                    </a>
+                    
+                    <a href="#matches" class="nav-card" data-section="matches">
+                        <div class="nav-card-icon">💕</div>
+                        <h3>Matches</h3>
+                        <p>See who likes you back</p>
+                    </a>
+                    
+                    <a href="#visitors" class="nav-card" data-section="visitors">
+                        <div class="nav-card-icon">👁️</div>
+                        <h3>Profile Visitors</h3>
+                        <p>Who viewed your profile</p>
+                    </a>
+                    
+                    <a href="#search" class="nav-card" data-section="search">
+                        <div class="nav-card-icon">🔍</div>
+                        <h3>Search</h3>
+                        <p>Find new connections</p>
+                    </a>
+                    
+                    <a href="#settings" class="nav-card" data-section="settings">
+                        <div class="nav-card-icon">⚙️</div>
+                        <h3>Settings</h3>
+                        <p>Manage your account preferences</p>
+                    </a>
+                </div>
+            </nav>
+
+            <!-- Dashboard Content Sections -->
+            <div class="dashboard-content">
+                <!-- Profile Section -->
+                <section id="profile-section" class="content-section active">
+                    <div class="section-header">
+                        <h2>My Profile</h2>
+                        <button class="btn-secondary" id="editProfileBtn">Edit Profile</button>
+                    </div>
+                    
+                    <div class="profile-preview">
+                        <!-- Photo Manager -->
+                        <div class="photo-manager">
+                            <div class="photo-manager-header">
+                                <h4>📷 Your Photos</h4>
+                                <span class="photo-count" id="photoCount">0/10 photos</span>
+                            </div>
+                            
+                            <!-- Photo Gallery -->
+                            <div class="photo-gallery" id="photoGallery">
+                                <!-- Dynamic photos will be inserted here -->
+                            </div>
+                        </div>
+                        
+                        <div class="profile-info">
+                            <h3 id="profileName">Complete your profile</h3>
+                            <p id="profileLocation">Add your location</p>
+                            <p id="profileAge">Add your age</p>
+                            
+                            <div class="profile-completion">
+                                <span>Profile Completion: </span>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: 25%"></div>
+                                </div>
+                                <span>25%</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Messages Section -->
+                <section id="messages-section" class="content-section">
+                    <div class="section-header">
+                        <h2>Messages</h2>
+                        <div class="messages-status" id="messagesStatus">
+                            <span class="status-indicator offline" id="connectionStatus">Connecting...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="messages-container">
+                        <!-- Left Panel: Contacts List -->
+                        <div class="contacts-panel">
+                            <div class="contacts-header">
+                                <h3>Conversations</h3>
+                                <button class="btn-secondary btn-sm" id="refreshContacts">
+                                    🔄 Refresh
+                                </button>
+                            </div>
+                            
+                            <div class="contacts-search">
+                                <input type="text" id="contactsSearch" placeholder="Search conversations..." />
+                            </div>
+                            
+                            <div class="contacts-list" id="contactsList">
+                                <div class="contacts-loading" id="contactsLoading">
+                                    <div class="loading-spinner"></div>
+                                    <p>Loading conversations...</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Right Panel: Chat Window -->
+                        <div class="chat-panel">
+                            <div class="chat-header" id="chatHeader" style="display: none;">
+                                <div class="chat-user-info">
+                                    <div class="chat-avatar">
+                                        <span id="chatUserAvatar">👤</span>
+                                    </div>
+                                    <div class="chat-user-details">
+                                        <h4 id="chatUserName">Select a conversation</h4>
+                                        <span class="chat-user-status" id="chatUserStatus">Offline</span>
+                                    </div>
+                                </div>
+                                <div class="chat-actions">
+                                    <button class="btn-secondary btn-sm" id="chatMenuBtn">⋮</button>
+                                </div>
+                            </div>
+                            
+                            <div class="chat-messages" id="chatMessages">
+                                <div class="chat-welcome" id="chatWelcome">
+                                    <div class="welcome-icon">💬</div>
+                                    <h3>Welcome to Messages!</h3>
+                                    <p>Select a conversation from the left panel to start chatting.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="chat-input-container" id="chatInputContainer" style="display: none;">
+                                <div class="chat-input">
+                                    <textarea 
+                                        id="messageInput" 
+                                        placeholder="Type your message..." 
+                                        rows="1"
+                                        maxlength="1000"
+                                    ></textarea>
+                                    <button class="send-button" id="sendMessageBtn" disabled>
+                                        <span class="send-icon">➤</span>
+                                    </button>
+                                </div>
+                                <div class="message-info">
+                                    <span class="char-count" id="messageCharCount">0/1000</span>
+                                    <span class="typing-indicator" id="typingIndicator" style="display: none;">
+                                        Someone is typing...
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Matches Section -->
+                <section id="matches-section" class="content-section">
+                    <div class="section-header">
+                        <h2>Find Your Match</h2>
+                        <div class="matches-stats" id="matchesStats">
+                            <span class="stat-item">❤️ <span id="totalLikes">0</span> Likes</span>
+                            <span class="stat-item">💕 <span id="totalMatches">0</span> Matches</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Matching Mode Selector -->
+                    <div class="matching-modes">
+                        <button class="mode-tab active" data-mode="tinder">
+                            🔥 <span>Discover</span>
+                        </button>
+                        <button class="mode-tab" data-mode="secret-garden">
+                            🌹 <span>Secret Garden</span>
+                        </button>
+                        <button class="mode-tab" data-mode="my-matches">
+                            💕 <span>My Matches</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Tinder Style Matching -->
+                    <div class="matching-mode active" id="tinder-mode">
+                        <div class="tinder-container">
+                            <div class="tinder-header">
+                                <h3>🔥 Discover New People</h3>
+                                <button class="filters-btn" id="tinderFilters">🎛️ Filters</button>
+                            </div>
+                            
+                            <!-- Loading State -->
+                            <div class="tinder-loading" id="tinderLoading">
+                                <div class="loading-spinner"></div>
+                                <p>Loading profiles...</p>
+                            </div>
+                            
+                            <!-- Swipe Card -->
+                            <div class="swipe-card-container" id="swipeCardContainer" style="display: none;">
+                                <div class="swipe-card" id="swipeCard">
+                                    <!-- Индикаторы действий -->
+                                    <div class="like-indicator">LIKE</div>
+                                    <div class="dislike-indicator">NOPE</div>
+                                    
+                                    <div class="card-photos">
+                                        <div class="photo-main">
+                                            <img id="cardMainPhoto" src="" alt="Profile photo">
+                                            <div class="photo-indicators" id="photoIndicators">
+                                                <!-- Dynamic dots will be added here -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="card-info">
+                                        <div class="card-main-info">
+                                            <h3 id="cardName">Name, Age</h3>
+                                            <p id="cardLocation">📍 Location</p>
+                                        </div>
+                                        <div class="card-details">
+                                            <p id="cardWork">💼 Work</p>
+                                            <p id="cardDescription">Description...</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="swipe-actions">
+                                        <button class="action-btn dislike" id="dislikeBtn">
+                                            <span class="btn-icon">❌</span>
+                                            <span class="btn-text">Pass</span>
+                                        </button>
+                                        <button class="action-btn superlike" id="superlikeBtn">
+                                            <span class="btn-icon">⭐</span>
+                                            <span class="btn-text">Super</span>
+                                        </button>
+                                        <button class="action-btn like" id="likeBtn">
+                                            <span class="btn-icon">❤️</span>
+                                            <span class="btn-text">Like</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- No More Profiles -->
+                            <div class="no-profiles" id="noProfiles" style="display: none;">
+                                <div class="no-profiles-icon">😊</div>
+                                <h3>You've seen everyone!</h3>
+                                <p>Check back later for new profiles, or adjust your preferences.</p>
+                                <button class="btn-primary" id="adjustFilters">Adjust Filters</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Secret Garden Mode -->
+                    <div class="matching-mode" id="secret-garden-mode">
+                        <div class="secret-garden-container">
+                            <!-- Secret Garden Navigation -->
+                            <div class="garden-nav">
+                                <button class="garden-tab active" data-tab="flash">
+                                    🌹 <span>Flash Others</span>
+                                </button>
+                                <button class="garden-tab" data-tab="guess">
+                                    🔍 <span>Guess Game</span>
+                                </button>
+                                <button class="garden-tab" data-tab="results">
+                                    🏆 <span>My Results</span>
+                                </button>
+                            </div>
+                            
+                            <!-- Flash Mode -->
+                            <div class="garden-content active" id="flash-content">
+                                <div class="flash-header">
+                                    <h3>🌹 Flash People You Like</h3>
+                                    <p>Send secret flashes to people you find interesting</p>
+                                </div>
+                                
+                                <div class="flash-loading" id="flashLoading">
+                                    <div class="loading-spinner"></div>
+                                    <p>Loading profiles to flash...</p>
+                                </div>
+                                
+                                <div class="flash-cards" id="flashCards" style="display: none;">
+                                    <!-- Flash cards will be dynamically loaded here -->
+                                </div>
+                            </div>
+                            
+                            <!-- Guess Game -->
+                            <div class="garden-content" id="guess-content">
+                                <div class="guess-header">
+                                    <h3>🔍 Who Flashed You?</h3>
+                                    <p>Try to guess who sent you a secret flash!</p>
+                                </div>
+                                
+                                <div class="guess-loading" id="guessLoading">
+                                    <div class="loading-spinner"></div>
+                                    <p>Loading guessing game...</p>
+                                </div>
+                                
+                                <div class="candidates-grid" id="candidatesGrid" style="display: none;">
+                                    <!-- 3x3 grid of candidates will be loaded here -->
+                                </div>
+                                
+                                <div class="no-flashes" id="noFlashes" style="display: none;">
+                                    <div class="no-flashes-icon">🌹</div>
+                                    <h3>No Secret Flashes Yet</h3>
+                                    <p>Nobody has sent you a secret flash yet. Keep browsing and flash others first!</p>
+                                </div>
+                            </div>
+                            
+                            <!-- Results -->
+                            <div class="garden-content" id="results-content">
+                                <div class="results-header">
+                                    <h3>🏆 Your Secret Garden Results</h3>
+                                </div>
+                                
+                                <div class="results-tabs">
+                                    <button class="result-tab active" data-result="flashed">My Flashes</button>
+                                    <button class="result-tab" data-result="found">Found Matches</button>
+                                </div>
+                                
+                                <div class="results-grid" id="resultsGrid">
+                                    <!-- Results will be loaded here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- My Matches -->
+                    <div class="matching-mode" id="my-matches-mode">
+                        <div class="matches-container">
+                            <div class="matches-header">
+                                <h3>💕 Your Matches</h3>
+                                <p>People who liked you back</p>
+                            </div>
+                            
+                            <div class="matches-loading" id="matchesLoading">
+                                <div class="loading-spinner"></div>
+                                <p>Loading your matches...</p>
+                            </div>
+                            
+                            <div class="matches-grid" id="matchesGrid" style="display: none;">
+                                <!-- Matches will be dynamically loaded here -->
+                            </div>
+                            
+                            <div class="no-matches" id="noMatches" style="display: none;">
+                                <div class="no-matches-icon">💕</div>
+                                <h3>No Matches Yet</h3>
+                                <p>Start swiping to find your perfect match!</p>
+                                <button class="btn-primary" id="startSwiping">Start Swiping</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Visitors Section -->
+                <section id="visitors-section" class="content-section">
+                    <div class="section-header">
+                        <h2>Profile Visitors</h2>
+                    </div>
+                    
+                    <div class="coming-soon">
+                        <h3>👁️ Visitors Coming Soon!</h3>
+                        <p>See who has been checking out your profile.</p>
+                    </div>
+                </section>
+
+                <!-- Search Section -->
+                <section id="search-section" class="content-section">
+                    <div class="section-header">
+                        <h2>Search</h2>
+                    </div>
+                    
+                    <!-- Search Filters -->
+                    <div class="search-filters">
+                        <div class="filter-row">
+                            <div class="filter-group">
+                                <label for="searchGender">Gender</label>
+                                <select id="searchGender" name="gender">
+                                    <option value="">Any Gender</option>
+                                    <option value="1">Male</option>
+                                    <option value="2">Female</option>
+                                    <option value="3">Couple</option>
+                                </select>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label for="searchAgeFrom">Age From</label>
+                                <input type="number" id="searchAgeFrom" name="ageFrom" min="18" max="100" placeholder="18">
+                            </div>
+                            
+                            <div class="filter-group">
+                                <label for="searchAgeTo">Age To</label>
+                                <input type="number" id="searchAgeTo" name="ageTo" min="18" max="100" placeholder="100">
+                            </div>
+                        </div>
+                        
+                        <div class="filter-row">
+                            <div class="filter-group checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="searchOnlineOnly" name="onlineOnly">
+                                    <span class="checkmark"></span>
+                                    Online Only
+                                </label>
+                            </div>
+                            
+                            <div class="filter-group checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="searchWithPhoto" name="withPhoto">
+                                    <span class="checkmark"></span>
+                                    With Photo Only
+                                </label>
+                            </div>
+                            
+                            <div class="filter-group">
+                                <button id="performSearch" class="btn-primary">
+                                    🔍 Search Users
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Search Results -->
+                    <div class="search-results" id="searchResults">
+                        <div class="search-status" id="searchStatus">
+                            <p>👋 Ready to find your perfect match? Use the filters above to start searching!</p>
+                        </div>
+                        
+                        <div class="results-grid" id="resultsGrid">
+                            <!-- Search results will be populated here -->
+                        </div>
+                        
+                        <div class="search-pagination" id="searchPagination" style="display: none;">
+                            <button id="prevPage" class="btn-secondary">← Previous</button>
+                            <span id="pageInfo">Page 1 of 1</span>
+                            <button id="nextPage" class="btn-secondary">Next →</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Settings Section -->
+                <section id="settings-section" class="content-section">
+                    <div class="section-header">
+                        <h2>Account Settings</h2>
+                    </div>
+                    
+                    <div class="settings-grid">
+                        <div class="settings-card">
+                            <h3>Privacy Settings</h3>
+                            <p>Control who can see your profile and information</p>
+                            <button class="btn-secondary">Manage Privacy</button>
+                        </div>
+                        
+                        <div class="settings-card">
+                            <h3>Notifications</h3>
+                            <p>Choose how you want to be notified</p>
+                            <button class="btn-secondary">Notification Settings</button>
+                        </div>
+                        
+                        <div class="settings-card">
+                            <h3>Account Security</h3>
+                            <p>Change your password and security settings</p>
+                            <button class="btn-secondary">Security Settings</button>
+                        </div>
+                        
+                        <div class="settings-card danger">
+                            <h3>Delete Account</h3>
+                            <p>Permanently delete your Lavrilo account</p>
+                            <button class="btn-danger">Delete Account</button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <p>Loading...</p>
+    </div>
+
+    <!-- Custom Confirmation Modal -->
+    <div class="confirmation-modal" id="confirmationModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Confirm Action</h3>
+            </div>
+            <div class="modal-body">
+                <p id="confirmationMessage">Are you sure you want to delete this photo?</p>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-secondary" id="confirmationCancel">Cancel</button>
+                <button class="btn-danger" id="confirmationConfirm">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Photo Crop Modal -->
+    <div class="photo-crop-modal" id="photoCropModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Photo</h2>
+                <button class="modal-close" id="closePhotoCropModal">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <!-- Photo thumbnails -->
+                <div class="photo-thumbnails" id="photoThumbnails">
+                    <!-- Thumbnails will be rendered here -->
+                </div>
+                
+                <!-- Crop container -->
+                <div class="crop-container" id="cropContainer">
+                    <div class="crop-info">
+                        <p><i class="fas fa-info-circle"></i> Drag the square to crop your photo. Only square crops are allowed.</p>
+                    </div>
+                    <div class="crop-wrapper">
+                        <img id="cropImage" src="" alt="">
+                        <div class="crop-box" id="cropBox"></div>
+                    </div>
+                </div>
+                
+                <!-- Photo options -->
+                <div class="photo-options">
+                    <input type="text" id="photoTitle" placeholder="Photo title" class="photo-title-input">
+                    
+                    <div class="photo-privacy-options">
+                        <label class="radio-option">
+                            <input type="radio" name="photoPrivacy" value="main" id="photoMain">
+                            <span>Set as main photo</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="photoPrivacy" value="public" id="photoPublic" checked>
+                            <span>Public</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="photoPrivacy" value="private" id="photoPrivate">
+                            <span>Private (subscribers only)</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Action buttons -->
+                <div class="modal-actions">
+                    <button class="btn-secondary" id="deletePhotoBtn">DELETE</button>
+                    <button class="btn-primary" id="validatePhotoBtn">SAVE</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Edit Modal -->
+    <div class="profile-edit-modal" id="profileEditModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Your Profile</h2>
+                <button class="modal-close" id="closeProfileModal">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <form id="profileEditForm" class="profile-form">
+                    <!-- Basic Information -->
+                    <div class="form-section">
+                        <h3>Basic Information</h3>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="fullName">Full Name</label>
+                                <input type="text" id="fullName" name="nom_complet" placeholder="Enter your full name">
+                            </div>
+                            <div class="form-group">
+                                <label for="firstName">First Name</label>
+                                <input type="text" id="firstName" name="prenom" placeholder="Enter your first name">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="height">Height (cm)</label>
+                                <input type="number" id="height" name="taille" min="120" max="250" placeholder="170">
+                            </div>
+                            <div class="form-group">
+                                <label for="weight">Weight (kg)</label>
+                                <input type="number" id="weight" name="poids" min="40" max="200" placeholder="70">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="eyeColor">Eye Color</label>
+                                <select id="eyeColor" name="yeux">
+                                    <option value="0">Select eye color</option>
+                                    <option value="1">Brown</option>
+                                    <option value="2">Blue</option>
+                                    <option value="3">Green</option>
+                                    <option value="4">Hazel</option>
+                                    <option value="5">Gray</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="hairColor">Hair Color</label>
+                                <select id="hairColor" name="cheveux">
+                                    <option value="0">Select hair color</option>
+                                    <option value="1">Black</option>
+                                    <option value="2">Brown</option>
+                                    <option value="3">Blonde</option>
+                                    <option value="4">Red</option>
+                                    <option value="5">Gray</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Lifestyle & Background -->
+                    <div class="form-section">
+                        <h3>Lifestyle & Background</h3>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="education">Education Level</label>
+                                <select id="education" name="etudes">
+                                    <option value="0">Select education level</option>
+                                    <option value="1">High School</option>
+                                    <option value="2">Some College</option>
+                                    <option value="3">Bachelor's Degree</option>
+                                    <option value="4">Master's Degree</option>
+                                    <option value="5">PhD/Doctorate</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="profession">Profession</label>
+                                <select id="profession" name="travail">
+                                    <option value="0">Select profession</option>
+                                    <option value="1">Technology</option>
+                                    <option value="2">Healthcare</option>
+                                    <option value="3">Education</option>
+                                    <option value="4">Business</option>
+                                    <option value="5">Creative Arts</option>
+                                    <option value="6">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="maritalStatus">Marital Status</label>
+                                <select id="maritalStatus" name="situation">
+                                    <option value="0">Select status</option>
+                                    <option value="1">Single</option>
+                                    <option value="2">Divorced</option>
+                                    <option value="3">Widowed</option>
+                                    <option value="4">It's complicated</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="children">Number of Children</label>
+                                <select id="children" name="child">
+                                    <option value="0">No children</option>
+                                    <option value="1">1 child</option>
+                                    <option value="2">2 children</option>
+                                    <option value="3">3 children</option>
+                                    <option value="4">4+ children</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="bodyType">Body Type</label>
+                                <select id="bodyType" name="silhouette">
+                                    <option value="0">Select body type</option>
+                                    <option value="1">Slim</option>
+                                    <option value="2">Athletic</option>
+                                    <option value="3">Average</option>
+                                    <option value="4">Curvy</option>
+                                    <option value="5">Full-figured</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="personality">Personality</label>
+                                <select id="personality" name="personnalite">
+                                    <option value="0">Select personality</option>
+                                    <option value="1">Outgoing</option>
+                                    <option value="2">Shy</option>
+                                    <option value="3">Funny</option>
+                                    <option value="4">Serious</option>
+                                    <option value="5">Adventurous</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="orientation">Sexual Orientation</label>
+                                <select id="orientation" name="sexe2">
+                                    <option value="1">Heterosexual</option>
+                                    <option value="2">Homosexual</option>
+                                    <option value="3">Bisexual</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="onlineTime">Preferred Online Time</label>
+                                <select id="onlineTime" name="horaires">
+                                    <option value="0">Select time</option>
+                                    <option value="1">Morning (6-12)</option>
+                                    <option value="2">Afternoon (12-18)</option>
+                                    <option value="3">Evening (18-24)</option>
+                                    <option value="4">Night (0-6)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Description -->
+                    <div class="form-section">
+                        <h3>About You</h3>
+                        <div class="form-group">
+                            <label for="profileDescription">Profile Description</label>
+                            <textarea id="profileDescription" name="description" rows="5" placeholder="Tell others about yourself, your interests, and what you're looking for..."></textarea>
+                            <div class="char-counter">
+                                <span id="descriptionCounter">0</span>/500 characters
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" id="cancelProfileEdit">Cancel</button>
+                        <button type="submit" class="btn-primary" id="saveProfileChanges">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Match Result Modal -->
+    <div class="match-modal" id="matchModal" style="display: none;">
+        <div class="match-overlay"></div>
+        <div class="match-content">
+            <div class="match-celebration">
+                <div class="match-icon">🎉</div>
+                <h2>IT'S A MATCH!</h2>
+                <p>You and <span id="matchedUserName">Someone</span> liked each other</p>
+            </div>
+            
+            <div class="matched-users">
+                <div class="matched-user">
+                    <div class="user-photo">
+                        <img id="myMatchPhoto" src="" alt="My photo">
+                    </div>
+                    <span>You</span>
+                </div>
+                <div class="heart-connector">💕</div>
+                <div class="matched-user">
+                    <div class="user-photo">
+                        <img id="matchedUserPhoto" src="" alt="Matched user photo">
+                    </div>
+                    <span id="matchedUserNameSmall">Match</span>
+                </div>
+            </div>
+            
+            <div class="match-actions">
+                <button class="btn-secondary" id="keepSwiping">
+                    <span>🔥</span>
+                    Keep Swiping
+                </button>
+                <button class="btn-primary" id="sendMessage">
+                    <span>💬</span>
+                    Send Message
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Secret Garden Match Result Modal -->
+    <div class="garden-match-modal" id="gardenMatchModal" style="display: none;">
+        <div class="garden-match-overlay"></div>
+        <div class="garden-match-content">
+            <div class="garden-celebration">
+                <div class="garden-icon">🌹</div>
+                <h2>CORRECT GUESS!</h2>
+                <p><span id="secretMatchUserName">Someone</span> flashed you!</p>
+            </div>
+            
+            <div class="secret-reveal">
+                <div class="revealed-user">
+                    <div class="user-photo large">
+                        <img id="secretMatchUserPhoto" src="" alt="Secret admirer photo">
+                    </div>
+                    <h3 id="secretMatchUserInfo">Name, Age</h3>
+                    <p id="secretMatchUserLocation">📍 Location</p>
+                </div>
+            </div>
+            
+            <div class="garden-match-actions">
+                <button class="btn-secondary" id="continueGame">
+                    <span>🎮</span>
+                    Continue Game
+                </button>
+                <button class="btn-primary" id="startChat">
+                    <span>💬</span>
+                    Start Chat
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="js/auth-manager.js?v=1.2"></script>
+    <script src="js/auth-modal.js?v=1.0"></script>
+      <script src="js/dashboard.js?v=6.1"></script>
+  <script src="js/messages-extension.js?v=1.0"></script>
+  <script src="js/photo-manager.js?v=8.0"></script>
+            <script src="js/matching-system.js?v=3.9"></script>
+</body>
+</html>

@@ -19,16 +19,20 @@ export default async function handler(req, res) {
     }
 
     try {
-        // Получаем параметры из body или query string
-        let { endpoint, method = 'GET', params = {} } = req.method === 'GET' ? req.query : req.body;
+        // Получаем основные параметры (endpoint, method) всегда из query string
+        // А остальные параметры - из body для POST или query для GET
+        const { endpoint, method = 'GET' } = req.query;
+        let params = {};
         
-        // Для GET запросов также извлекаем все дополнительные параметры из query
         if (req.method === 'GET') {
-            const queryParams = { ...req.query };
-            delete queryParams.endpoint;
-            delete queryParams.method;
-            params = { ...params, ...queryParams };
+            params = { ...req.query };
+        } else {
+            params = { ...(req.body || {}), ...req.query };
         }
+        
+        // Убираем служебные параметры
+        delete params.endpoint;
+        delete params.method;
         
         if (!endpoint) {
             return res.status(400).json({ error: 'Endpoint не указан' });
@@ -56,21 +60,39 @@ export default async function handler(req, res) {
         
         // Используем РАБОЧИЙ метод авторизации: Query только api_key
         // (Диагностика показала, что Basic auth НЕ работает)
-        const headers = {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        };
+        // По умолчанию отправляем JSON, но если исходный запрос был multipart/form-data, заголовок ставить нельзя
+        let headers = { 'Accept': 'application/json' };
+        const incomingType = req.headers['content-type'] || '';
+        if (!incomingType.startsWith('multipart/form-data')) {
+            headers['Content-Type'] = 'application/json';
+        }
         
         console.log('🔑 Используем рабочий метод: Query только api_key');
         console.log('🔑 API Key:', API_KEY.substring(0, 8) + '...' + API_KEY.slice(-4));
         console.log('🔧 Headers:', headers);
         console.log('📋 Авторизация через query параметры (работает для всех endpoints)');
         
-        // Выполняем запрос
-        const apiResponse = await fetch(finalUrl, {
+        // Передаем тело запроса если оно есть
+        let fetchOptions = {
             method: method,
             headers: headers
-        });
+        };
+        
+        // Для POST/PUT запросов передаем тело
+        if ((method === 'POST' || method === 'PUT') && req.body) {
+            // Если это multipart/form-data, передаем как есть
+            if (incomingType.startsWith('multipart/form-data')) {
+                // Для multipart нужно передать raw body
+                fetchOptions.body = req.rawBody || req.body;
+            } else {
+                // Для JSON
+                fetchOptions.body = JSON.stringify(req.body);
+            }
+            console.log('📤 Передаем тело запроса');
+        }
+        
+        // Выполняем запрос
+        const apiResponse = await fetch(finalUrl, fetchOptions);
 
         console.log(`📊 API ответил со статусом: ${apiResponse.status}`);
         

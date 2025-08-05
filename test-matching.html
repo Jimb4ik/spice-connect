@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Matching System</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        button {
+            background: #ed4458;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background: #d63447;
+        }
+        .info {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .success {
+            color: #2ecc71;
+        }
+        .error {
+            color: #e74c3c;
+        }
+        #testResults {
+            max-height: 400px;
+            overflow-y: auto;
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Matching System - SpiceConnect</h1>
+    
+    <div class="test-section">
+        <h2>Session Info</h2>
+        <div class="info">
+            <p>Session ID: <span id="sessionId">Not set</span></p>
+            <p>API Key: <span id="apiKey">Not set</span></p>
+        </div>
+        <button onclick="checkSession()">Check Session</button>
+        <button onclick="clearLocalStorage()">Clear Local Storage</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test API Endpoints</h2>
+        <button onclick="testSearchProfiles()">Test Search Profiles</button>
+        <button onclick="testSendFlash()">Test Send Flash (Like)</button>
+        <button onclick="testGetMatches()">Test Get Matches</button>
+        <button onclick="testMatchingStats()">Test Matching Stats</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Results</h2>
+        <div id="testResults"></div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const results = document.getElementById('testResults');
+            const time = new Date().toLocaleTimeString();
+            const color = type === 'error' ? 'red' : type === 'success' ? 'green' : 'black';
+            results.innerHTML += `<div style="color: ${color}">[${time}] ${message}</div>`;
+            results.scrollTop = results.scrollHeight;
+        }
+
+        function checkSession() {
+            const sessionId = localStorage.getItem('session_id');
+            const apiKey = localStorage.getItem('api_key');
+            
+            document.getElementById('sessionId').textContent = sessionId || 'Not set';
+            document.getElementById('apiKey').textContent = apiKey ? '***' + apiKey.slice(-4) : 'Not set';
+            
+            if (!sessionId || !apiKey) {
+                log('⚠️ Session or API key not found. Please login first.', 'error');
+            } else {
+                log('✅ Session found', 'success');
+            }
+        }
+
+        function clearLocalStorage() {
+            if (confirm('This will clear all local storage including viewed profiles. Continue?')) {
+                localStorage.removeItem('viewed_profiles');
+                localStorage.removeItem('liked_profiles');
+                localStorage.removeItem('matching_stats');
+                log('🗑️ Cleared matching data from localStorage', 'success');
+            }
+        }
+
+        async function testSearchProfiles() {
+            log('🔍 Testing profile search...');
+            
+            const sessionId = localStorage.getItem('session_id');
+            const apiKey = localStorage.getItem('api_key') || '';
+            
+            const searchParams = {
+                session_id: sessionId,
+                api_key: apiKey,
+                limite: 5,
+                tri: 'last_cnx'
+            };
+            
+            try {
+                const response = await fetch('/api/spice-multi-test?endpoint=/index_api/search&method=POST', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(searchParams)
+                });
+                
+                const data = await response.json();
+                log('Response: ' + JSON.stringify(data, null, 2));
+                
+                if (data.success) {
+                    const profiles = data.data?.membres || data.data?.result || [];
+                    log(`✅ Found ${profiles.length} profiles`, 'success');
+                    if (profiles.length > 0) {
+                        log(`First profile: ${profiles[0].pseudo || profiles[0].nom_complet} (ID: ${profiles[0].id || profiles[0].id_membre})`, 'success');
+                    }
+                } else {
+                    log('❌ Search failed: ' + (data.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                log('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        async function testSendFlash() {
+            log('💗 Testing send flash (like)...');
+            
+            const testUserId = prompt('Enter user ID to flash (like):');
+            if (!testUserId) return;
+            
+            const sessionId = localStorage.getItem('session_id');
+            const apiKey = localStorage.getItem('api_key') || '';
+            
+            try {
+                const response = await fetch(`/api/spice-multi-test?endpoint=/ajax_api/setFlash&method=GET&id_user=${testUserId}&session_id=${sessionId}&api_key=${encodeURIComponent(apiKey)}`);
+                const data = await response.json();
+                
+                log('Response: ' + JSON.stringify(data, null, 2));
+                
+                if (data.success && data.data) {
+                    if (data.data.result === 1 && data.data.info === 'match') {
+                        log('🎉 IT\'S A MATCH!', 'success');
+                    } else {
+                        log('✅ Flash sent successfully', 'success');
+                    }
+                } else {
+                    log('❌ Flash failed: ' + (data.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                log('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        async function testGetMatches() {
+            log('💕 Testing get matches...');
+            
+            const sessionId = localStorage.getItem('session_id');
+            const apiKey = localStorage.getItem('api_key') || '';
+            
+            try {
+                const response = await fetch(`/api/spice-multi-test?endpoint=/index_api/match&method=GET&action=get_matches&session_id=${sessionId}&api_key=${encodeURIComponent(apiKey)}`);
+                const data = await response.json();
+                
+                log('Response: ' + JSON.stringify(data, null, 2));
+                
+                if (data.success && data.data?.result) {
+                    const matches = data.data.result;
+                    log(`✅ Found ${matches.length} matches`, 'success');
+                    matches.forEach(match => {
+                        log(`Match: ${match.pseudo || match.nom_complet} (ID: ${match.id})`, 'success');
+                    });
+                } else {
+                    log('❌ Get matches failed: ' + (data.error || 'No matches found'), 'error');
+                }
+            } catch (error) {
+                log('❌ Error: ' + error.message, 'error');
+            }
+        }
+
+        function testMatchingStats() {
+            log('📊 Testing matching stats...');
+            
+            const stats = localStorage.getItem('matching_stats');
+            const viewedProfiles = localStorage.getItem('viewed_profiles');
+            const likedProfiles = localStorage.getItem('liked_profiles');
+            
+            if (stats) {
+                const statsData = JSON.parse(stats);
+                log('Stats: ' + JSON.stringify(statsData, null, 2), 'success');
+            } else {
+                log('No stats found in localStorage');
+            }
+            
+            if (viewedProfiles) {
+                const viewed = JSON.parse(viewedProfiles);
+                log(`Viewed profiles: ${viewed.length}`, 'success');
+            } else {
+                log('No viewed profiles found');
+            }
+            
+            if (likedProfiles) {
+                const liked = JSON.parse(likedProfiles);
+                log(`Liked profiles: ${liked.length}`, 'success');
+            } else {
+                log('No liked profiles found');
+            }
+        }
+
+        // Check session on load
+        window.onload = () => {
+            checkSession();
+            log('Test page loaded. Use the buttons above to test different features.');
+        };
+    </script>
+</body>
+</html>

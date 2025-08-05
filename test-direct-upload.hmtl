@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Direct API Upload Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            border: 1px solid #ccc;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .log {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 3px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        input[type="file"] {
+            margin: 10px 0;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>Direct Spice API Upload Test</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: Direct Upload to Spice API</h2>
+        <p>Этот тест обращается напрямую к Spice API без прокси</p>
+        
+        <input type="file" id="fileInput" accept="image/*">
+        <br>
+        <input type="text" id="sessionId" placeholder="Session ID" style="width: 300px;">
+        <br>
+        <button onclick="testDirectUpload()">Upload Direct to Spice API</button>
+        
+        <h3>Response Log:</h3>
+        <div id="directLog" class="log"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 2: Upload via Our Proxy</h2>
+        <p>Этот тест использует наш прокси сервер</p>
+        
+        <input type="file" id="fileInput2" accept="image/*">
+        <br>
+        <input type="text" id="sessionId2" placeholder="Session ID" style="width: 300px;">
+        <br>
+        <button onclick="testProxyUpload()">Upload via Proxy</button>
+        
+        <h3>Response Log:</h3>
+        <div id="proxyLog" class="log"></div>
+    </div>
+
+    <script>
+        const API_KEY = 'f512a388aa942760c3200a4ef8fb523a61s'; // Из правил
+        const BASE_URL = 'https://dev2018.de5a7.com';
+        
+        function log(elementId, message, type = 'info') {
+            const logElement = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : '';
+            logElement.innerHTML += `<span class="${className}">[${timestamp}] ${message}</span>\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        async function testDirectUpload() {
+            const fileInput = document.getElementById('fileInput');
+            const sessionId = document.getElementById('sessionId').value;
+            
+            if (!fileInput.files[0]) {
+                log('directLog', 'Please select a file', 'error');
+                return;
+            }
+            
+            if (!sessionId) {
+                log('directLog', 'Please enter session ID', 'error');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            log('directLog', `Starting upload of ${file.name} (${file.size} bytes)`);
+
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('contenttype', 'photo');
+
+                const url = `${BASE_URL}/ajax_api/upload_photo?session_id=${sessionId}&api_key=${API_KEY}&is_private=0`;
+                
+                log('directLog', `Request URL: ${url.replace(API_KEY, 'HIDDEN_KEY')}`);
+                log('directLog', 'FormData contents:');
+                for (let [key, value] of formData.entries()) {
+                    if (value instanceof File) {
+                        log('directLog', `  ${key}: File(${value.name}, ${value.size} bytes)`);
+                    } else {
+                        log('directLog', `  ${key}: ${value}`);
+                    }
+                }
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                log('directLog', `Response status: ${response.status}`);
+                log('directLog', 'Response headers:');
+                for (let [key, value] of response.headers.entries()) {
+                    log('directLog', `  ${key}: ${value}`);
+                }
+
+                const responseText = await response.text();
+                log('directLog', `Raw response: ${responseText}`);
+
+                try {
+                    const data = JSON.parse(responseText);
+                    log('directLog', `Parsed JSON: ${JSON.stringify(data, null, 2)}`, 'success');
+                    
+                    if (data.result && data.result.id_photo) {
+                        log('directLog', `SUCCESS! Photo ID: ${data.result.id_photo}`, 'success');
+                    }
+                } catch (parseError) {
+                    log('directLog', `JSON Parse Error: ${parseError.message}`, 'error');
+                }
+
+            } catch (error) {
+                log('directLog', `Upload Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testProxyUpload() {
+            const fileInput = document.getElementById('fileInput2');
+            const sessionId = document.getElementById('sessionId2').value;
+            
+            if (!fileInput.files[0]) {
+                log('proxyLog', 'Please select a file', 'error');
+                return;
+            }
+            
+            if (!sessionId) {
+                log('proxyLog', 'Please enter session ID', 'error');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            log('proxyLog', `Starting upload of ${file.name} (${file.size} bytes)`);
+
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('contenttype', 'photo');
+
+                const url = `/api/upload-photo?session_id=${sessionId}&is_private=0`;
+                
+                log('proxyLog', `Request URL: ${url}`);
+                log('proxyLog', 'FormData contents:');
+                for (let [key, value] of formData.entries()) {
+                    if (value instanceof File) {
+                        log('proxyLog', `  ${key}: File(${value.name}, ${value.size} bytes)`);
+                    } else {
+                        log('proxyLog', `  ${key}: ${value}`);
+                    }
+                }
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                log('proxyLog', `Response status: ${response.status}`);
+                log('proxyLog', 'Response headers:');
+                for (let [key, value] of response.headers.entries()) {
+                    log('proxyLog', `  ${key}: ${value}`);
+                }
+
+                const responseText = await response.text();
+                log('proxyLog', `Raw response: ${responseText}`);
+
+                try {
+                    const data = JSON.parse(responseText);
+                    log('proxyLog', `Parsed JSON: ${JSON.stringify(data, null, 2)}`, 'success');
+                    
+                    if (data.result && data.result.id_photo) {
+                        log('proxyLog', `SUCCESS! Photo ID: ${data.result.id_photo}`, 'success');
+                    }
+                } catch (parseError) {
+                    log('proxyLog', `JSON Parse Error: ${parseError.message}`, 'error');
+                }
+
+            } catch (error) {
+                log('proxyLog', `Upload Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-fill session ID if available in localStorage
+        window.addEventListener('load', function() {
+            // Try to get session ID from localStorage or cookies
+            const savedSessionId = localStorage.getItem('spice_session_id') || 'u5jvr3v4bqi2svjf8qkh31h6on';
+            document.getElementById('sessionId').value = savedSessionId;
+            document.getElementById('sessionId2').value = savedSessionId;
+        });
+    </script>
+</body>
+</html>
