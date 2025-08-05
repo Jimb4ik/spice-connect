@@ -1480,7 +1480,15 @@ body {
   width: 8px;
   height: 8px;
   border-radius: 50%;
+  background: #6c757d;
+}
+
+.status-dot.online {
   background: #2ed573;
+}
+
+.status-dot.offline {
+  background: #6c757d;
 }
 
 .card-location {

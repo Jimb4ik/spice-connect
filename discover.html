@@ -37,11 +37,7 @@
                             <span>💕</span> Matches
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a href="visitors.html" class="nav-link">
-                            <span>👁️</span> Visitors
-                        </a>
-                    </li>
+
                     <li class="nav-item">
                         <a href="search.html" class="nav-link">
                             <span>🔍</span> Search
@@ -109,13 +105,31 @@
                                 <span>Profession</span>
                             </div>
                             <div class="detail-item" id="cardEducation">
-                                <span class="detail-icon">🎓</span>
-                                <span>Education</span>
+                                <span class="detail-icon">🎂</span>
+                                <span>Age</span>
                             </div>
                         </div>
                         
                         <div class="card-description" id="cardDescription">
                             <p>Profile description will appear here...</p>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="discover-actions">
+                            <button class="action-button dislike-btn" id="dislikeBtn" title="Pass">
+                                <span class="action-icon">❌</span>
+                                <span class="action-label">Pass</span>
+                            </button>
+                            
+                            <button class="action-button super-like-btn" id="superLikeBtn" title="Super Like">
+                                <span class="action-icon">⭐</span>
+                                <span class="action-label">Super</span>
+                            </button>
+                            
+                            <button class="action-button like-btn" id="likeBtn" title="Like">
+                                <span class="action-icon">❤️</span>
+                                <span class="action-label">Like</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -131,37 +145,9 @@
                 </div>
             </div>
 
-            <!-- Action Buttons -->
-            <div class="discover-actions">
-                <button class="action-button dislike-btn" id="dislikeBtn" title="Pass">
-                    <span class="action-icon">❌</span>
-                    <span class="action-label">Pass</span>
-                </button>
-                
-                <button class="action-button super-like-btn" id="superLikeBtn" title="Super Like">
-                    <span class="action-icon">⭐</span>
-                    <span class="action-label">Super</span>
-                </button>
-                
-                <button class="action-button like-btn" id="likeBtn" title="Like">
-                    <span class="action-icon">❤️</span>
-                    <span class="action-label">Like</span>
-                </button>
-            </div>
 
-            <!-- Profile Stats -->
-            <div class="discover-stats">
-                <div class="stat-item">
-                    <span class="stat-label">Current:</span>
-                    <span class="stat-value">
-                        <span id="currentProfileNum">1</span> of <span id="remainingProfiles">--</span>
-                    </span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Today:</span>
-                    <span class="stat-value" id="todayLikes">0 likes</span>
-                </div>
-            </div>
+
+
         </div>
     </main>
 
@@ -245,7 +231,6 @@
 
     <!-- Скрипты -->
     <script src="js/auth-manager.js?v=1.2"></script>
-    <script src="js/auth-modal.js?v=1.0"></script>
     <script src="js/matching-system-v2.js?v=1.0"></script>
     
     <script>
@@ -381,6 +366,18 @@
                 nameElement.textContent = `${profile.pseudo || profile.nom_complet || 'Unknown'}, ${age}`;
             }
             
+            // Обновляем статус онлайн
+            const onlineStatusElement = document.getElementById('cardOnlineStatus');
+            if (onlineStatusElement) {
+                const statusDot = onlineStatusElement.querySelector('.status-dot');
+                const statusText = onlineStatusElement.querySelector('span:last-child');
+                if (statusDot && statusText) {
+                    const isOnline = profile.online === 1 || profile.online === '1' || profile.is_online === 1;
+                    statusDot.className = isOnline ? 'status-dot online' : 'status-dot offline';
+                    statusText.textContent = isOnline ? 'Online now' : 'Offline';
+                }
+            }
+            
             // Обновляем локацию
             const locationElement = document.getElementById('cardLocation');
             if (locationElement) {
@@ -395,16 +392,22 @@
             if (workElement) {
                 const workSpan = workElement.querySelector('span:last-child');
                 if (workSpan) {
-                    workSpan.textContent = profile.travail || 'Work not specified';
+                    // Проверяем различные поля для работы
+                    const work = profile.travail || profile.profession || profile.metier || profile.job;
+                    workSpan.textContent = work || 'Work not specified';
                 }
             }
             
-            // Обновляем образование
+            // Обновляем образование - заменяем на возраст, так как education нет в API
             const educationElement = document.getElementById('cardEducation');
             if (educationElement) {
                 const educationSpan = educationElement.querySelector('span:last-child');
-                if (educationSpan) {
-                    educationSpan.textContent = profile.education || 'Education not specified';
+                const ageIcon = educationElement.querySelector('span:first-child');
+                if (educationSpan && ageIcon) {
+                    // Меняем иконку на возраст
+                    ageIcon.textContent = '🎂';
+                    const age = profile.age || profile.birthday || 'Unknown';
+                    educationSpan.textContent = `${age} years old`;
                 }
             }
             
@@ -413,7 +416,9 @@
             if (descriptionElement) {
                 const descriptionP = descriptionElement.querySelector('p');
                 if (descriptionP) {
-                    descriptionP.textContent = profile.description || 'No description available.';
+                    // Проверяем различные поля для описания
+                    const description = profile.a_propos || profile.description || profile.presentation || profile.bio;
+                    descriptionP.textContent = description || 'No description available.';
                 }
             }
             
