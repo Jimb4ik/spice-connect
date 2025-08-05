@@ -63,11 +63,12 @@ class MatchingSystemV2 {
   async initDatabase() {
     try {
       console.log('[MATCHING-V2] Initializing database...');
-      const response = await fetch('/api/db-init', {
+      const response = await fetch('/api/database', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
-        }
+        },
+        body: JSON.stringify({ action: 'init_db' })
       });
       
       const result = await response.json();
@@ -84,7 +85,7 @@ class MatchingSystemV2 {
   async loadUserProgress() {
     try {
       console.log('[MATCHING-V2] Loading user progress...');
-      const response = await fetch(`/api/user-progress?user_id=${this.userId}&session_id=${this.sessionId}`);
+      const response = await fetch('/api/database?action=get_progress&user_id=' + this.userId + '&session_id=' + this.sessionId);
       const result = await response.json();
       
       if (result.success) {
@@ -107,12 +108,13 @@ class MatchingSystemV2 {
 
   async saveUserProgress() {
     try {
-      const response = await fetch('/api/user-progress', {
+      const response = await fetch('/api/database', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
+          action: 'save_progress',
           user_id: this.userId,
           session_id: this.sessionId,
           current_page: this.currentPage,
@@ -260,7 +262,7 @@ class MatchingSystemV2 {
 
   async getViewedProfiles() {
     try {
-      const response = await fetch(`/api/viewed-profiles?user_id=${this.userId}`);
+      const response = await fetch(`/api/database?action=get_viewed&user_id=${this.userId}`);
       const result = await response.json();
       return result.success ? result.data : [];
     } catch (error) {
@@ -271,15 +273,16 @@ class MatchingSystemV2 {
 
   async markProfileAsViewed(profileId, action = 'viewed') {
     try {
-      await fetch('/api/viewed-profiles', {
+      await fetch('/api/database', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
+          action: 'mark_viewed',
           user_id: this.userId,
           profile_id: profileId,
-          action: action
+          view_action: action
         })
       });
     } catch (error) {
@@ -302,12 +305,13 @@ class MatchingSystemV2 {
         });
       }
 
-      const response = await fetch('/api/matches', {
+      const response = await fetch('/api/database', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
+          action: 'save_match',
           user_id: this.userId,
           matched_user_id: profileId,
           matched_user_name: profileName,
@@ -560,12 +564,13 @@ class MatchingSystemV2 {
   async resetProgress() {
     // Очищаем просмотренные профили и начинаем сначала
     try {
-      await fetch('/api/viewed-profiles', {
-        method: 'DELETE',
+      await fetch('/api/database', {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
+          action: 'clear_viewed',
           user_id: this.userId
         })
       });
@@ -630,7 +635,7 @@ class MatchingSystemV2 {
 
   async loadMyMatches() {
     try {
-      const response = await fetch(`/api/matches?user_id=${this.userId}&limit=50`);
+      const response = await fetch(`/api/database?action=get_matches&user_id=${this.userId}&limit=50`);
       const result = await response.json();
       
       if (result.success) {
@@ -676,12 +681,13 @@ class MatchingSystemV2 {
 
   async openChatWithMatch(userId, userName) {
     // Отмечаем матч как прочитанный
-    await fetch('/api/matches', {
-      method: 'PUT',
+    await fetch('/api/database', {
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
+        action: 'update_match',
         user_id: this.userId,
         matched_user_id: userId,
         is_read: true
