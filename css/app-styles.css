@@ -113,7 +113,7 @@ body {
   gap: 1rem;
 }
 
-.user-avatar {
+.app-user-avatar {
   width: 50px;
   height: 50px;
   border-radius: 50%;
@@ -128,11 +128,11 @@ body {
   overflow: hidden;
 }
 
-.user-avatar:hover {
+.app-user-avatar:hover {
   transform: scale(1.1);
 }
 
-.user-avatar img {
+.app-user-avatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -193,7 +193,7 @@ body {
 }
 
 /* Кнопки */
-.btn {
+.app-btn {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -209,33 +209,33 @@ body {
   justify-content: center;
 }
 
-.btn-primary {
+.app-btn-primary {
   background: var(--gradient-primary);
   color: white;
 }
 
-.btn-primary:hover {
+.app-btn-primary:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 25px rgba(255, 68, 88, 0.4);
 }
 
-.btn-secondary {
+.app-btn-secondary {
   background: var(--gradient-secondary);
   color: white;
 }
 
-.btn-secondary:hover {
+.app-btn-secondary:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 25px rgba(108, 92, 231, 0.4);
 }
 
-.btn-outline {
+.app-btn-outline {
   background: transparent;
   color: var(--text-primary);
   border: 2px solid rgba(45, 52, 54, 0.2);
 }
 
-.btn-outline:hover {
+.app-btn-outline:hover {
   background: var(--text-primary);
   color: white;
   transform: translateY(-2px);
@@ -538,7 +538,7 @@ body {
   font-size: 0.9rem;
 }
 
-.btn-sm {
+.app-btn-sm {
   padding: 0.5rem 1rem;
   font-size: 0.9rem;
 }
@@ -978,8 +978,8 @@ body {
   justify-content: center;
 }
 
-.photo-crop-modal .btn-secondary,
-.photo-crop-modal .btn-primary {
+.photo-crop-modal .app-btn-secondary,
+.photo-crop-modal .app-btn-primary {
   padding: 12px 32px;
   font-size: 16px;
   font-weight: 600;
@@ -991,22 +991,22 @@ body {
   letter-spacing: 0.5px;
 }
 
-.photo-crop-modal .btn-secondary {
+.photo-crop-modal .app-btn-secondary {
   background: var(--text-secondary);
   color: white;
 }
 
-.photo-crop-modal .btn-secondary:hover {
+.photo-crop-modal .app-btn-secondary:hover {
   background: var(--text-primary);
   transform: translateY(-1px);
 }
 
-.photo-crop-modal .btn-primary {
+.photo-crop-modal .app-btn-primary {
   background: var(--primary-color);
   color: white;
 }
 
-.photo-crop-modal .btn-primary:hover {
+.photo-crop-modal .app-btn-primary:hover {
   background: var(--primary-dark);
   transform: translateY(-1px);
 }
@@ -1070,8 +1070,8 @@ body {
   background: #f9fafb;
 }
 
-.confirmation-modal .btn-secondary,
-.confirmation-modal .btn-danger {
+.confirmation-modal .app-btn-secondary,
+.confirmation-modal .app-btn-danger {
   padding: 12px 24px;
   border-radius: 10px;
   font-weight: 600;
@@ -1084,21 +1084,21 @@ body {
   outline: none;
 }
 
-.confirmation-modal .btn-secondary {
+.confirmation-modal .app-btn-secondary {
   background: #e5e7eb;
   color: var(--text-secondary);
 }
 
-.confirmation-modal .btn-secondary:hover {
+.confirmation-modal .app-btn-secondary:hover {
   background: #d1d5db;
 }
 
-.confirmation-modal .btn-danger {
+.confirmation-modal .app-btn-danger {
   background: #ef4444;
   color: white;
 }
 
-.confirmation-modal .btn-danger:hover {
+.confirmation-modal .app-btn-danger:hover {
   background: #dc2626;
 }
 
@@ -2490,12 +2490,12 @@ body {
   background: rgba(255, 71, 87, 0.05);
 }
 
-.btn-danger {
+.app-btn-danger {
   background: #ff4757;
   color: white;
 }
 
-.btn-danger:hover {
+.app-btn-danger:hover {
   background: #ff3838;
   transform: translateY(-2px);
 }
