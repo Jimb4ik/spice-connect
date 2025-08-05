@@ -1098,3 +1098,4 @@ class PhotoManager {
 // Create and export instance
 const photoManager = new PhotoManager();
 window.photoManager = photoManager; // Make it globally accessible
+window.PhotoManager = PhotoManager; // Make class accessible too

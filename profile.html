@@ -647,7 +647,14 @@
         
         function updateMainProfilePhoto(profile) {
             const mainPhotoElement = document.getElementById('profileMainPhoto');
-                            let photoUrl = null;
+            console.log('[PROFILE] updateMainProfilePhoto called, element found:', !!mainPhotoElement);
+            
+            if (!mainPhotoElement) {
+                console.error('[PROFILE] profileMainPhoto element not found!');
+                return;
+            }
+            
+            let photoUrl = null;
             
             console.log('[PROFILE] Photo data:', {
                 photos_v2: profile.photos_v2,
@@ -686,13 +693,26 @@
             }
             
             console.log('[PROFILE] Setting main photo URL:', photoUrl);
-            mainPhotoElement.src = photoUrl;
             
-            // Добавляем обработчик ошибок для фото
-            mainPhotoElement.onerror = function() {
-                console.warn('[PROFILE] Failed to load photo, using default');
-                this.style.display = 'none';
-            };
+            if (photoUrl) {
+                mainPhotoElement.src = photoUrl;
+                mainPhotoElement.style.display = 'block';
+                
+                // Добавляем обработчик успешной загрузки
+                mainPhotoElement.onload = function() {
+                    console.log('[PROFILE] ✅ Main photo loaded successfully:', photoUrl);
+                    this.style.display = 'block';
+                };
+                
+                // Добавляем обработчик ошибок для фото
+                mainPhotoElement.onerror = function() {
+                    console.warn('[PROFILE] ❌ Failed to load photo:', photoUrl);
+                    this.style.display = 'none';
+                };
+            } else {
+                console.warn('[PROFILE] ❌ No photo URL found, hiding main photo');
+                mainPhotoElement.style.display = 'none';
+            }
         }
         
         // Функции для загрузки данных в форму редактирования (из dashboard.js)
