@@ -5,7 +5,7 @@
 
 class Dashboard {
   constructor() {
-    this.currentSection = 'profile';
+    this.currentPage = 'profile';
     this.init();
   }
 
@@ -18,6 +18,7 @@ class Dashboard {
     }
 
     // Initialize dashboard
+    this.setupNavigation();
     this.setupEventListeners();
     this.createUserMenu();
     this.setupProfileEditModal(); // Setup profile editing
@@ -1019,6 +1020,147 @@ class Dashboard {
       statusIndicator.className = `status-indicator ${status}`;
       statusIndicator.textContent = status === 'online' ? 'Connected' : 'Connecting...';
     }
+  }
+  // Navigation Methods
+  setupNavigation() {
+    console.log('[DASHBOARD] Setting up navigation');
+    
+    // Add click listeners to navigation items
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.addEventListener('click', (e) => {
+        e.preventDefault();
+        const page = item.dataset.page;
+        if (page) {
+          this.navigateToPage(page);
+        }
+      });
+    });
+    
+    // Setup mobile menu toggle
+    const mobileToggle = document.getElementById('mobileMenuToggle');
+    const navMenu = document.getElementById('navMenu');
+    
+    if (mobileToggle && navMenu) {
+      mobileToggle.addEventListener('click', () => {
+        navMenu.classList.toggle('active');
+      });
+    }
+    
+    // Update user name in header
+    this.updateHeaderUserInfo();
+  }
+  
+  navigateToPage(page) {
+    console.log('[DASHBOARD] Navigating to page:', page);
+    
+    // Update current page
+    this.currentPage = page;
+    
+    // Update navigation active state
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.classList.toggle('active', item.dataset.page === page);
+    });
+    
+    // Hide all pages
+    document.querySelectorAll('.page-content').forEach(pageEl => {
+      pageEl.style.display = 'none';
+    });
+    
+    // Show selected page
+    const targetPage = document.getElementById(`${page}Page`);
+    if (targetPage) {
+      targetPage.style.display = 'block';
+      
+      // Load page-specific data
+      this.loadPageData(page);
+    }
+    
+    // Close mobile menu if open
+    const navMenu = document.getElementById('navMenu');
+    if (navMenu) {
+      navMenu.classList.remove('active');
+    }
+  }
+  
+  loadPageData(page) {
+    switch (page) {
+      case 'profile':
+        this.loadUserProfile();
+        break;
+      case 'messages':
+        this.loadMessages();
+        break;
+      case 'discover':
+        // Matching system will handle this
+        if (window.matchingSystem && typeof window.matchingSystem.switchMode === 'function') {
+          window.matchingSystem.switchMode('tinder');
+        }
+        break;
+      case 'matches':
+        this.loadMatches();
+        break;
+      case 'visitors':
+        this.loadVisitors();
+        break;
+      case 'search':
+        this.loadSearch();
+        break;
+      case 'settings':
+        this.loadSettings();
+        break;
+    }
+  }
+  
+  updateHeaderUserInfo() {
+    const userName = document.getElementById('userName');
+    const userAvatar = document.getElementById('userAvatar');
+    
+    if (window.authManager && window.authManager.currentUser) {
+      if (userName) {
+        userName.textContent = window.authManager.currentUser.pseudo || 'User';
+      }
+      
+      // Update avatar if available
+      if (userAvatar && window.photoManager && window.photoManager.photos) {
+        const mainPhoto = window.photoManager.photos.find(p => p.is_main);
+        if (mainPhoto && mainPhoto.url) {
+          userAvatar.src = mainPhoto.url;
+        }
+      }
+    }
+  }
+  
+  // Placeholder methods for loading different page data
+  loadMessages() {
+    console.log('[DASHBOARD] Loading messages...');
+    // Messages loading logic will be implemented
+  }
+  
+  loadMatches() {
+    console.log('[DASHBOARD] Loading matches...');
+    // Matches loading logic will be implemented
+  }
+  
+  loadVisitors() {
+    console.log('[DASHBOARD] Loading visitors...');
+    // Visitors loading logic will be implemented
+  }
+  
+  loadSearch() {
+    console.log('[DASHBOARD] Loading search...');
+    // Search loading logic will be implemented
+  }
+  
+  loadSettings() {
+    console.log('[DASHBOARD] Loading settings...');
+    // Settings loading logic will be implemented
+  }
+}
+
+// Global logout function
+function logout() {
+  if (window.authManager && typeof window.authManager.logout === 'function') {
+    window.authManager.logout();
   }
 }
 
