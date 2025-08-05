@@ -506,12 +506,36 @@
             }
             
             // Инициализируем PhotoManager
-            setTimeout(() => {
+            setTimeout(async () => {
                 if (window.PhotoManager) {
                     console.log('[PROFILE] Initializing PhotoManager...');
                     window.photoManager = new PhotoManager();
+                    await window.photoManager.init(); // Важно: явно вызываем init и ждем завершения
+                    
+                    // Принудительно рендерим галерею
+                    setTimeout(() => {
+                        if (window.photoManager.renderPhotoGallery) {
+                            console.log('[PROFILE] Force rendering photo gallery...');
+                            window.photoManager.renderPhotoGallery();
+                        }
+                    }, 1000);
+                } else {
+                    console.error('[PROFILE] PhotoManager not found!');
                 }
-            }, 200);
+            }, 1000); // Увеличиваем задержку еще больше
+            
+            // Добавляем обработчик для кнопки добавления фото
+            const addPhotoBtn = document.getElementById('addPhotoBtn');
+            if (addPhotoBtn) {
+                addPhotoBtn.addEventListener('click', () => {
+                    console.log('[PROFILE] Add photo button clicked');
+                    if (window.photoManager && window.photoManager.addPhoto) {
+                        window.photoManager.addPhoto();
+                    } else {
+                        console.error('[PROFILE] PhotoManager not available');
+                    }
+                });
+            }
             
             // Загружаем профиль пользователя
             loadUserProfile();

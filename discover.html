@@ -150,6 +150,16 @@
         </div>
     </main>
 
+    <!-- Photo Modal -->
+    <div id="photoModal" class="photo-modal" style="display: none;">
+        <div class="photo-modal-overlay">
+            <div class="photo-modal-content">
+                <button class="photo-modal-close" id="photoModalClose">&times;</button>
+                <img id="photoModalImage" src="" alt="Full size photo" class="photo-modal-image">
+            </div>
+        </div>
+    </div>
+
     <!-- Match Modal -->
     <div id="matchModal" class="modal">
         <div class="modal-content match-modal">
@@ -424,6 +434,13 @@
             // Обновляем фото
             updateProfilePhoto(profile);
             
+            // Добавляем обработчик клика для фото
+            const photoElement = document.getElementById('cardMainPhoto');
+            if (photoElement) {
+                photoElement.style.cursor = 'pointer';
+                photoElement.onclick = () => openPhotoModal(photoElement.src);
+            }
+            
             // Показываем карточку и кнопки
             const discoverCard = document.getElementById('discoverCard');
             const noProfilesState = document.getElementById('noProfilesState');
@@ -607,6 +624,47 @@
             // TODO: Показать модальное окно матча
             alert(`It's a match with ${matchedProfile.pseudo || 'this person'}! 💕`);
         }
+        
+        // Функции для модального окна фото
+        function openPhotoModal(photoSrc) {
+            const modal = document.getElementById('photoModal');
+            const modalImage = document.getElementById('photoModalImage');
+            
+            if (modal && modalImage && photoSrc) {
+                modalImage.src = photoSrc;
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+        }
+        
+        function closePhotoModal() {
+            const modal = document.getElementById('photoModal');
+            if (modal) {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        }
+        
+        // Обработчики для модального окна фото
+        document.addEventListener('DOMContentLoaded', () => {
+            const closeBtn = document.getElementById('photoModalClose');
+            const overlay = document.querySelector('.photo-modal-overlay');
+            
+            if (closeBtn) {
+                closeBtn.addEventListener('click', closePhotoModal);
+            }
+            
+            if (overlay) {
+                overlay.addEventListener('click', closePhotoModal);
+            }
+            
+            // Закрытие по ESC
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closePhotoModal();
+                }
+            });
+        });
     </script>
 </body>
 </html>
