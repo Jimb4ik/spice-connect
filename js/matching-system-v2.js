@@ -316,40 +316,17 @@ class MatchingSystemV2 {
 
   async saveMatch(profileData) {
     try {
-      const profileId = profileData.id || profileData.id_membre;
-      const profileName = profileData.pseudo || profileData.nom_complet || 'Unknown';
-      const profileAge = profileData.age || null;
-      const profileCity = profileData.ville || profileData.region || null;
+      console.log('[MATCHING-V2] Saving match via MatchUtils...');
       
-      // Собираем URLs фотографий
-      const photos = [];
-      if (profileData.photos_v2 && Array.isArray(profileData.photos_v2)) {
-        profileData.photos_v2.forEach(photo => {
-          if (photo.normal) photos.push(photo.normal);
-        });
-      }
-
-      const response = await fetch('/api/database', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          action: 'save_match',
-          user_id: this.userId,
-          matched_user_id: profileId,
-          matched_user_name: profileName,
-          matched_user_age: profileAge,
-          matched_user_city: profileCity,
-          matched_user_photos: photos
-        })
-      });
-
-      const result = await response.json();
-      if (result.success) {
-        console.log('[MATCHING-V2] Match saved successfully:', result.data);
+      // Используем общую функцию из match-utils.js
+      const success = await window.MatchUtils.saveMatchToDatabase(profileData, this.userId);
+      
+      if (success) {
+        console.log('[MATCHING-V2] Match saved successfully');
         this.stats.totalMatches++;
         this.updateStats();
+      } else {
+        console.error('[MATCHING-V2] Failed to save match');
       }
     } catch (error) {
       console.error('[MATCHING-V2] Error saving match:', error);

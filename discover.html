@@ -275,6 +275,7 @@
 
     <!-- Скрипты -->
     <script src="js/auth-manager.js?v=1.2"></script>
+    <script src="js/match-utils.js?v=1.0"></script>
     <script src="js/matching-system-v2.js?v=1.0"></script>
     
     <script>
@@ -641,7 +642,7 @@
                     if (data.result === 'match') {
                         console.log('🎉 IT\'S A MATCH!');
                         // Сохраняем матч в базу данных
-                        await saveMatchToDatabase(currentProfile);
+                        await window.MatchUtils.saveMatchToDatabase(currentProfile);
                         showMatchModal(currentProfile);
                     }
                 }
@@ -735,97 +736,7 @@
             }
         }
         
-        async function saveMatchToDatabase(matchedProfile) {
-            try {
-                console.log('[DISCOVER] Saving match to database:', matchedProfile);
-                
-                const sessionId = window.authManager?.sessionId;
-                if (!sessionId) {
-                    console.error('[DISCOVER] No session ID for saving match');
-                    return;
-                }
-                
-                // Получаем ID текущего пользователя
-                const userId = await getCurrentUserId();
-                if (!userId) {
-                    console.error('[DISCOVER] No user ID for saving match');
-                    return;
-                }
-                
-                // Подготавливаем данные матча
-                const matchData = {
-                    action: 'save_match',
-                    user_id: userId,
-                    matched_user_id: matchedProfile.id || matchedProfile.id_membre,
-                    matched_user_name: matchedProfile.pseudo || matchedProfile.nom_complet || 'Unknown',
-                    matched_user_age: matchedProfile.age || null,
-                    matched_user_city: matchedProfile.ville || matchedProfile.region || null,
-                    matched_user_photos: getProfilePhotos(matchedProfile)
-                };
-                
-                console.log('[DISCOVER] Match data to save:', matchData);
-                
-                const response = await fetch('/api/database', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(matchData)
-                });
-                
-                const result = await response.json();
-                console.log('[DISCOVER] Match saved result:', result);
-                
-                if (result.success) {
-                    console.log('✅ Match successfully saved to database!');
-                } else {
-                    console.error('❌ Failed to save match:', result.error);
-                }
-                
-            } catch (error) {
-                console.error('[DISCOVER] Error saving match to database:', error);
-            }
-        }
-        
-        async function getCurrentUserId() {
-            try {
-                const sessionId = window.authManager?.sessionId;
-                if (!sessionId) return null;
-                
-                const apiConfigResponse = await fetch('/api/get-api-key');
-                const apiConfig = await apiConfigResponse.json();
-                
-                const response = await fetch(`${apiConfig.baseUrl}/index_api/user?api_key=${apiConfig.apiKey}&session_id=${sessionId}`);
-                const userData = await response.json();
-                
-                if (userData && userData.result) {
-                    return userData.result.id || userData.result.id_membre || sessionId;
-                }
-                
-                return sessionId; // fallback
-            } catch (error) {
-                console.error('[DISCOVER] Error getting user ID:', error);
-                return null;
-            }
-        }
-        
-        function getProfilePhotos(profile) {
-            const photos = [];
-            
-            // Собираем фотографии из разных полей
-            if (profile.photos_v2 && Array.isArray(profile.photos_v2)) {
-                photos.push(...profile.photos_v2.map(p => p.url || p.src || p));
-            }
-            
-            if (profile.photos && Array.isArray(profile.photos)) {
-                photos.push(...profile.photos.map(p => p.url || p.src || p));
-            }
-            
-            if (profile.picture_430) photos.push(profile.picture_430);
-            if (profile.picture) photos.push(profile.picture);
-            
-            return photos.filter(photo => photo && typeof photo === 'string');
-        }
+        // Функции для работы с матчами перенесены в js/match-utils.js
         
         // Функции для модального окна фото
         function openPhotoModal(photoSrc) {
