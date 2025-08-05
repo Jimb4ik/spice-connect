@@ -480,6 +480,20 @@
                 console.log('[PROFILE] Initializing Dashboard...');
                 window.dashboard = new Dashboard();
                 
+                // Переопределяем openProfileEditor чтобы загружать данные
+                const originalOpenProfileEditor = window.dashboard.openProfileEditor;
+                window.dashboard.openProfileEditor = function() {
+                    const modal = document.getElementById('profileEditModal');
+                    if (modal) {
+                        // Загружаем данные в форму
+                        loadProfileDataIntoForm();
+                        
+                        // Показываем модальное окно
+                        modal.classList.add('active');
+                        document.body.style.overflow = 'hidden';
+                    }
+                };
+                
                 // Симулируем переключение на секцию профиля
                 setTimeout(() => {
                     if (window.dashboard.switchSection) {
@@ -499,6 +513,8 @@
             // Загружаем профиль пользователя
             loadUserProfile();
         });
+        
+        let currentProfileData = null; // Храним данные профиля для использования в edit modal
         
         async function loadUserProfile() {
             try {
@@ -526,6 +542,7 @@
                 
                 if (data.success && data.data?.result) {
                     const profile = data.data.result;
+                    currentProfileData = profile; // Сохраняем данные для edit modal
                     
                     // Обновляем главное фото профиля
                     updateMainProfilePhoto(profile);
@@ -595,6 +612,52 @@
                 console.warn('[PROFILE] Failed to load photo, using default');
                 this.src = '/images/default-avatar.png';
             };
+        }
+        
+        // Функции для загрузки данных в форму редактирования (из dashboard.js)
+        function loadProfileDataIntoForm() {
+            if (!currentProfileData) {
+                console.warn('[PROFILE] No profile data available for form');
+                return;
+            }
+
+            const data = currentProfileData;
+            console.log('[PROFILE] Loading data into form:', data);
+            
+            // Basic Information
+            setFormValue('fullName', data.nom_complet || '');
+            setFormValue('firstName', data.prenom || '');
+            setFormValue('height', data.taille || '');
+            setFormValue('weight', data.poids || '');
+            setFormValue('eyeColor', data.yeux || '0');
+            setFormValue('hairColor', data.cheveux || '0');
+            
+            // Lifestyle & Background
+            setFormValue('education', data.etudes || '0');
+            setFormValue('profession', data.travail || '0');
+            setFormValue('maritalStatus', data.situation || '0');
+            setFormValue('children', data.child || '0');
+            setFormValue('bodyType', data.silhouette || '0');
+            setFormValue('personality', data.personnalite || '0');
+            setFormValue('orientation', data.sexe2 || '1');
+            setFormValue('onlineTime', data.horaires || '0');
+            
+            // Description
+            setFormValue('profileDescription', data.description || '');
+            
+            // Update character counter
+            const descriptionField = document.getElementById('profileDescription');
+            const counter = document.getElementById('descriptionCounter');
+            if (descriptionField && counter) {
+                counter.textContent = descriptionField.value.length;
+            }
+        }
+
+        function setFormValue(fieldId, value) {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                field.value = value;
+            }
         }
     </script>
 </body>

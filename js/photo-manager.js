@@ -160,6 +160,7 @@ class PhotoManager {
           this.photos = photos.filter(p => p.id > 0).map((p, idx) => ({
             id: p.id || `server-${idx}`,
             serverId: p.id,
+            photoNum: p.num || p.id_photo || p.id || 0, // Важно для удаления!
             url: p.sq_430 || p.normal || p.url_big,
             previewUrl: null,
             name: `photo_${idx}.jpg`,
@@ -847,10 +848,17 @@ class PhotoManager {
     console.log('[PHOTO MANAGER] === DELETE CURRENT PHOTO START ===');
     console.log('[PHOTO MANAGER] Current editing photo:', this.currentEditingPhoto);
     
-    if (!this.currentEditingPhoto || !this.currentEditingPhoto.photoNum) {
-      console.log('[PHOTO MANAGER] ERROR: No current editing photo or photoNum');
+    if (!this.currentEditingPhoto) {
+      console.error('[PHOTO MANAGER] ERROR: No current editing photo set!');
       return;
     }
+    
+    if (!this.currentEditingPhoto.photoNum) {
+      console.error('[PHOTO MANAGER] ERROR: Current editing photo has no photoNum!', this.currentEditingPhoto);
+      return;
+    }
+    
+    console.log('[PHOTO MANAGER] Ready to delete photo with photoNum:', this.currentEditingPhoto.photoNum);
     
     // Use custom confirmation modal instead of system confirm
     console.log('[PHOTO MANAGER] Showing confirmation modal...');
