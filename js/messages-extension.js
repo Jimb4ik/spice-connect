@@ -216,18 +216,68 @@ Object.assign(Dashboard.prototype, {
     console.log(`[MESSAGES] Loading messages for user: ${userId}`);
     
     try {
+      // Сначала загружаем локальные сообщения
+      const localMessages = this.getLocalMessages(userId);
+      
+      // Затем загружаем сообщения с сервера
       const result = await this.callMessagesAPI(userId);
       
+      let allMessages = [];
+      
+      // Объединяем локальные и серверные сообщения
       if (result.success && result.messages) {
-        this.displayChatMessages(result.messages);
-        console.log(`[MESSAGES] Loaded ${result.messages.length} messages`);
-      } else {
-        this.showChatError(result.error || 'Failed to load messages');
+        allMessages = [...result.messages];
+        console.log(`[MESSAGES] Loaded ${result.messages.length} messages from server`);
       }
+      
+      // Добавляем локальные сообщения (отправленные нами)
+      if (localMessages.length > 0) {
+        allMessages = [...allMessages, ...localMessages];
+        console.log(`[MESSAGES] Added ${localMessages.length} local messages`);
+      }
+      
+      // Сортируем по времени
+      allMessages.sort((a, b) => {
+        const timeA = new Date(a.timestamp || a.created_at || 0);
+        const timeB = new Date(b.timestamp || b.created_at || 0);
+        return timeA - timeB;
+      });
+      
+      this.displayChatMessages(allMessages);
+      console.log(`[MESSAGES] Total displayed: ${allMessages.length} messages`);
       
     } catch (error) {
       console.error('[MESSAGES] Error loading messages:', error);
-      this.showChatError(error.message);
+      // Показываем хотя бы локальные сообщения при ошибке
+      const localMessages = this.getLocalMessages(userId);
+      if (localMessages.length > 0) {
+        this.displayChatMessages(localMessages);
+      } else {
+        this.showChatError(error.message);
+      }
+    }
+  },
+
+  // Получение локальных сообщений из localStorage
+  getLocalMessages(userId) {
+    try {
+      const localMessages = localStorage.getItem(`messages_${userId}`);
+      return localMessages ? JSON.parse(localMessages) : [];
+    } catch (error) {
+      console.error('[MESSAGES] Error loading local messages:', error);
+      return [];
+    }
+  },
+
+  // Сохранение сообщения в localStorage
+  saveLocalMessage(userId, message) {
+    try {
+      const localMessages = this.getLocalMessages(userId);
+      localMessages.push(message);
+      localStorage.setItem(`messages_${userId}`, JSON.stringify(localMessages));
+      console.log('[MESSAGES] Message saved locally');
+    } catch (error) {
+      console.error('[MESSAGES] Error saving local message:', error);
     }
   },
 

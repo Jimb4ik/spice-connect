@@ -86,7 +86,6 @@
             <div class="messages-sidebar">
                 <div class="sidebar-header">
                     <h3>Chats</h3>
-                    <button class="app-btn app-btn-primary btn-sm" id="newChatBtn">+ New Chat</button>
                 </div>
                 
                 <div class="search-contacts">
@@ -252,14 +251,6 @@
         
         // Настройка обработчиков событий
         function setupEventListeners() {
-            // Кнопка New Chat
-            const newChatBtn = document.getElementById('newChatBtn');
-            if (newChatBtn) {
-                newChatBtn.addEventListener('click', () => {
-                    console.log('[MESSAGES] New Chat button clicked');
-                    // TODO: Открыть модал для нового чата
-                });
-            }
             
             // Поиск контактов
             const searchContacts = document.getElementById('searchContacts');
@@ -320,7 +311,7 @@
                     // Очищаем поле ввода
                     messageInput.value = '';
                     
-                    // Добавляем сообщение в чат локально
+                    // Создаем объект сообщения
                     const message = {
                         text: messageText,
                         isOwn: true,
@@ -328,9 +319,13 @@
                         sender: 'You'
                     };
                     
+                    // Сохраняем сообщение локально
+                    window.messagesSystem.saveLocalMessage(window.messagesSystem.currentChatUserId, message);
+                    
+                    // Добавляем сообщение в чат
                     window.messagesSystem.addMessageToChat(message);
                     
-                    console.log('[MESSAGES] ✅ Message sent successfully');
+                    console.log('[MESSAGES] ✅ Message sent and saved locally');
                 } else {
                     console.error('[MESSAGES] ❌ Failed to send message:', result.error);
                     alert('Failed to send message: ' + result.error);

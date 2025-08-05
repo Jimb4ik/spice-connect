@@ -10,9 +10,10 @@
   display: flex;
   flex: 1;
   height: calc(100vh - 200px); /* Учитываем header и footer */
+  max-width: 1200px; /* Фиксированная ширина как у profile hero card */
   background: white;
   border-radius: 16px;
-  margin: 20px;
+  margin: 20px auto; /* Центрирование */
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
@@ -27,11 +28,8 @@
 }
 
 .sidebar-header {
-  padding: 20px;
+  padding: 24px 20px;
   border-bottom: 1px solid #e2e8f0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   background: white;
 }
 
@@ -43,7 +41,7 @@
 }
 
 .search-contacts {
-  padding: 16px 20px;
+  padding: 20px;
   border-bottom: 1px solid #e2e8f0;
 }
 
@@ -63,7 +61,7 @@
 .contact-item {
   display: flex;
   align-items: center;
-  padding: 12px 20px;
+  padding: 16px 20px;
   cursor: pointer;
   transition: background-color 0.2s;
   border-bottom: 1px solid #f1f5f9;
@@ -177,7 +175,7 @@
 }
 
 .chat-header {
-  padding: 16px 20px;
+  padding: 20px 24px;
   border-bottom: 1px solid #e2e8f0;
   display: flex;
   justify-content: space-between;
@@ -221,7 +219,7 @@
 
 .chat-messages {
   flex: 1;
-  padding: 20px;
+  padding: 24px;
   overflow-y: auto;
   background: #ffffff;
 }
@@ -279,7 +277,7 @@
 }
 
 .chat-input-area {
-  padding: 16px 20px;
+  padding: 20px 24px;
   border-top: 1px solid #e2e8f0;
   background: #f8fafc;
 }
@@ -302,13 +300,15 @@
   font-size: 14px;
 }
 
-.chat-input-container button {
+.chat-input-container .app-btn {
   border: none;
-  background: none;
   cursor: pointer;
-  padding: 8px;
-  border-radius: 50%;
-  transition: background-color 0.2s;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s;
+  min-width: 80px;
 }
 
 .chat-input-container .app-btn-primary {
@@ -318,6 +318,12 @@
 
 .chat-input-container .app-btn-primary:hover {
   background: #2563eb;
+}
+
+.chat-input-container .app-btn-outline {
+  background: transparent;
+  border: 1px solid #d1d5db;
+  color: #6b7280;
 }
 
 .contacts-empty {
