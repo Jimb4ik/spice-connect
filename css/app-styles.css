@@ -597,20 +597,21 @@ body {
 
 .photo-info {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
-  padding: 8px 4px 4px;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  background: transparent;
+  padding: 0;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  gap: 4px;
 }
 
 .main-badge, .private-badge, .public-badge {
-  font-size: 10px;
-  padding: 2px 6px;
-  border-radius: 4px;
+  font-size: 8px;
+  padding: 2px 4px;
+  border-radius: 3px;
   font-weight: 600;
   text-transform: uppercase;
   background: rgba(0, 0, 0, 0.7);
