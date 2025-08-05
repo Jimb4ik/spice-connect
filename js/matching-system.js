@@ -524,11 +524,12 @@ class MatchingSystem {
         
         console.log(`[MATCHING] ${apiAction} response:`, data);
         
-        // Проверяем на матч
-        if (data.connected === 1 && data.result === 'match') {
-          console.log('[MATCHING] IT\'S A MATCH!');
+        // Проверяем на матч (как в code-sniper.md)
+        if (data.result === 'match') {
+          console.log('[MATCHING] IT\'S A MATCH! 🎉');
           this.stats.totalMatches++;
-          this.showMatchModal(profile);
+          this.showNewMatchModal(profile);
+          return; // Не переходим к следующему профилю сразу
         }
       }
     } catch (error) {
@@ -578,6 +579,110 @@ class MatchingSystem {
 
     // Add confetti effect
     this.showConfetti();
+  }
+
+  // Новая функция для показа матча по образцу code-sniper.md
+  showNewMatchModal(profile) {
+    console.log('[MATCHING] Showing new match modal for:', profile);
+    
+    // Создаем HTML для модального окна матча (как в code-sniper.md)
+    const matchHtml = `
+      <div class="alert alert-success p-5 text-center wow fadeInDown position-absolute h-100 alert-match" 
+           role="alert" style="visibility: visible; animation-name: fadeInDown; z-index: 9999; 
+           background: rgba(40, 167, 69, 0.95); color: white; top: 0; left: 0; right: 0; bottom: 0;
+           display: flex; flex-direction: column; justify-content: center; align-items: center;">
+        <button type="button" class="btn-close btn-close-white position-absolute" 
+                style="top: 20px; right: 20px;" data-bs-dismiss="alert" aria-label="Close"></button>
+        
+        <h4 class="fw-bold mb-4">🎉 Vous avez un Match ! 🎉</h4>
+        
+        <div class="match-photos mb-4">
+          <img src="${this.getProfilePhoto(profile)}" alt="${profile.pseudo || 'Match'}" 
+               class="img-fluid rounded-circle" style="width: 120px; height: 120px; object-fit: cover;">
+        </div>
+        
+        <h4 class="fw-bold mb-2">${profile.pseudo || 'Match'}</h4>
+        <small class="text-light mb-4">${profile.zone_name || profile.ville || 'Unknown location'}</small>
+        
+        <div class="match-actions mt-4">
+          <a href="#" class="btn btn-light btn-lg rounded-pill fw-bold px-4 mb-2 w-100 match-send-message" 
+             data-user-id="${profile.id || profile.id_membre}" data-pseudo="${profile.pseudo}">
+            💬 ENVOYER UN MESSAGE
+          </a>
+          <a href="#" class="btn btn-outline-light btn-sm rounded-pill fw-bold px-4 w-100 match-continue-swiping" 
+             data-bs-dismiss="alert" aria-label="Close">
+            ➡️ CONTINUER A SWIPER
+          </a>
+        </div>
+      </div>
+    `;
+    
+    // Добавляем модальное окно в контейнер
+    const matchContainer = document.getElementById('match_new') || document.body;
+    matchContainer.insertAdjacentHTML('afterbegin', matchHtml);
+    
+    // Привязываем события к кнопкам
+    this.bindMatchModalEvents();
+    
+    // Автоматически скрыть через 10 секунд
+    setTimeout(() => {
+      const matchAlert = document.querySelector('.alert-match');
+      if (matchAlert) {
+        matchAlert.remove();
+      }
+    }, 10000);
+  }
+  
+  // Вспомогательная функция для получения фото профиля
+  getProfilePhoto(profile) {
+    if (profile.photos_v2 && profile.photos_v2.length > 0) {
+      return profile.photos_v2[0].sq_middle || profile.photos_v2[0].normal;
+    }
+    if (profile.photos && profile.photos.length > 0) {
+      return profile.photos[0].url_middle || profile.photos[0].url_big;
+    }
+    return '/images/default-avatar.png';
+  }
+  
+  // Привязка событий для модального окна матча
+  bindMatchModalEvents() {
+    // Кнопка отправки сообщения
+    document.querySelectorAll('.match-send-message').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const userId = e.currentTarget.dataset.userId;
+        const pseudo = e.currentTarget.dataset.pseudo;
+        console.log('[MATCHING] Send message to:', pseudo, userId);
+        
+        // Переходим к чату (можно адаптировать под вашу систему)
+        if (window.dashboard) {
+          window.dashboard.openChat(userId, pseudo);
+        }
+        
+        // Закрываем модальное окно
+        const matchAlert = document.querySelector('.alert-match');
+        if (matchAlert) {
+          matchAlert.remove();
+        }
+      });
+    });
+    
+    // Кнопка продолжения свайпинга
+    document.querySelectorAll('.match-continue-swiping').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        console.log('[MATCHING] Continue swiping');
+        
+        // Закрываем модальное окно и загружаем новый профиль
+        const matchAlert = document.querySelector('.alert-match');
+        if (matchAlert) {
+          matchAlert.remove();
+        }
+        
+        // Загружаем следующий профиль
+        this.loadTinderProfiles(true);
+      });
+    });
   }
 
   closeMatchModal() {
@@ -1002,7 +1107,7 @@ class MatchingSystem {
   // =====================================
 
   async loadMyMatches() {
-    console.log('[MATCHING] Loading my matches...');
+    console.log('[MATCHING] Loading my matches (code-sniper style)...');
     this.showMatchesLoading(true);
 
     try {
@@ -1026,42 +1131,183 @@ class MatchingSystem {
       });
       const data = await response.json();
       
-
-
       console.log('[MATCHING] My matches response:', data);
-      console.log('[MATCHING] Response connected:', data.connected);
-      console.log('[MATCHING] Response result:', data.result);
-      console.log('[MATCHING] Response error:', data.error);
 
-      // Handle new API format: {connected: 1, result: {nb_total: X, tab_profils: [...]}}
-      if (data.connected === 1 && data.result) {
-        if (data.result.tab_profils && Array.isArray(data.result.tab_profils) && data.result.tab_profils.length > 0) {
-          this.myMatches = data.result.tab_profils;
-          console.log('[MATCHING] Found matches in tab_profils:', this.myMatches.length);
-          this.displayMatches();
-        } else if (Array.isArray(data.result) && data.result.length > 0) {
-          // Fallback if result is directly an array
-          this.myMatches = data.result;
-          console.log('[MATCHING] Found matches in result array:', this.myMatches.length);
-          this.displayMatches();
-        } else {
-          console.log('[MATCHING] No matches found - nb_total:', data.result.nb_total);
-          console.log('[MATCHING] tab_profils:', data.result.tab_profils);
-          this.showNoMatches();
-        }
-      } else if (data.success && data.data && data.data.result && data.data.result.length > 0) {
-        // Fallback for old format
-        this.myMatches = data.data.result;
-        this.displayMatches();
+      // Обработка как в code-sniper.md
+      if (data.result && data.result.tab_profils) {
+        this.myMatches = data.result.tab_profils;
+        const totalMatches = data.result.nb_total || this.myMatches.length;
+        
+        console.log(`[MATCHING] Found ${totalMatches} matches`);
+        
+        // Обновляем счетчик матчей
+        this.updateMatchCount(totalMatches);
+        
+        // Отображаем матчи в стиле code-sniper.md
+        this.displayMatchesCodeSniper();
       } else {
-        console.log('[MATCHING] No matches found - result:', data.result);
-        this.showNoMatches();
+        console.log('[MATCHING] No matches found');
+        this.myMatches = [];
+        this.updateMatchCount(0);
+        this.displayNoMatches();
       }
     } catch (error) {
       console.error('[MATCHING] Error loading matches:', error);
-      this.showNoMatches();
-    } finally {
       this.showMatchesLoading(false);
+      this.displayNoMatches();
+    }
+  }
+
+  // Новые функции для отображения матчей в стиле code-sniper.md
+  updateMatchCount(count) {
+    const matchCountEl = document.getElementById('totalMatches');
+    if (matchCountEl) {
+      matchCountEl.textContent = count;
+    }
+    
+    // Обновляем текст (singular/plural)
+    const matchWordEl = document.querySelector('.match-word');
+    if (matchWordEl) {
+      matchWordEl.textContent = count === 1 ? 'match' : 'matches';
+    }
+  }
+
+  displayMatchesCodeSniper() {
+    console.log('[MATCHING] Displaying matches in code-sniper style');
+    this.showMatchesLoading(false);
+    
+    const container = document.getElementById('matchesContainer') || document.getElementById('matchesGrid');
+    if (!container) {
+      console.warn('[MATCHING] No matches container found');
+      return;
+    }
+
+    if (this.myMatches.length === 0) {
+      this.displayNoMatches();
+      return;
+    }
+
+    let html = '<div class="matches-grid">';
+    
+    this.myMatches.forEach(match => {
+      const photoUrl = this.getProfilePhoto(match);
+      const isOnline = match.online === '1' || match.online === 1;
+      
+      html += `
+        <div class="match-card">
+          <div class="match-photo ${isOnline ? 'online' : ''}">
+            <img src="${photoUrl}" alt="${match.pseudo}" class="match-img">
+            ${isOnline ? '<div class="online-indicator"></div>' : ''}
+          </div>
+          <div class="match-info">
+            <h4 class="match-name">${match.pseudo}</h4>
+            <p class="match-location">${match.zone_name || match.ville || ''}</p>
+          </div>
+          <div class="match-actions">
+            <button class="btn btn-primary btn-sm match-chat-btn" 
+                    data-user-id="${match.id}" data-pseudo="${match.pseudo}">
+              <i class="fa-solid fa-comment-dots"></i> Chat
+            </button>
+            <button class="btn btn-outline-primary btn-sm match-fav-btn ${this.isFavorite(match.pseudo) ? 'active' : ''}" 
+                    data-user-id="${match.id}" data-pseudo="${match.pseudo}">
+              <i class="fa-solid fa-star"></i>
+            </button>
+          </div>
+        </div>
+      `;
+    });
+    
+    html += '</div>';
+    container.innerHTML = html;
+    
+    // Привязываем события
+    this.bindMatchEvents();
+  }
+  
+  displayNoMatches() {
+    this.showMatchesLoading(false);
+    
+    const container = document.getElementById('matchesContainer') || document.getElementById('matchesGrid');
+    if (!container) return;
+    
+    container.innerHTML = `
+      <div class="no-matches-state">
+        <div class="no-matches-icon">💕</div>
+        <h3>No matches yet</h3>
+        <p>Keep swiping to find your perfect match!</p>
+        <button class="btn btn-primary" onclick="window.matchingSystem.switchMode('tinder')">
+          Start Swiping
+        </button>
+      </div>
+    `;
+  }
+  
+  bindMatchEvents() {
+    // Кнопки чата
+    document.querySelectorAll('.match-chat-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const userId = e.currentTarget.dataset.userId;
+        const pseudo = e.currentTarget.dataset.pseudo;
+        console.log('[MATCHING] Open chat with:', pseudo, userId);
+        
+        // Переходим к чату
+        if (window.dashboard) {
+          window.dashboard.openChat(userId, pseudo);
+        }
+      });
+    });
+    
+    // Кнопки избранного
+    document.querySelectorAll('.match-fav-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const userId = e.currentTarget.dataset.userId;
+        const pseudo = e.currentTarget.dataset.pseudo;
+        this.toggleFavorite(userId, pseudo, e.currentTarget);
+      });
+    });
+  }
+  
+  isFavorite(pseudo) {
+    // Проверяем, есть ли пользователь в избранном
+    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    return favorites.includes(pseudo);
+  }
+  
+  async toggleFavorite(userId, pseudo, button) {
+    try {
+      const apiConfigResponse = await fetch('/api/get-api-key');
+      const apiConfig = await apiConfigResponse.json();
+      const sessionId = window.authManager?.sessionId || localStorage.getItem('session_id');
+      
+      const isCurrentlyFav = button.classList.contains('active');
+      const action = isCurrentlyFav ? 'del' : 'add';
+      
+      const favQuery = new URLSearchParams({
+        session_id: sessionId || '',
+        api_key: apiConfig.apiKey,
+        target_id: userId,
+        action: action
+      });
+      
+      const response = await fetch(`${apiConfig.baseUrl}/ajax_api/setFriend?${favQuery.toString()}`, {
+        method: 'GET'
+      });
+      
+      if (response.ok) {
+        button.classList.toggle('active');
+        
+        // Обновляем localStorage
+        const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+        if (action === 'add') {
+          favorites.push(pseudo);
+        } else {
+          const index = favorites.indexOf(pseudo);
+          if (index > -1) favorites.splice(index, 1);
+        }
+        localStorage.setItem('favorites', JSON.stringify(favorites));
+      }
+    } catch (error) {
+      console.error('[MATCHING] Error toggling favorite:', error);
     }
   }
 
