@@ -141,12 +141,8 @@
                         </div>
                     </div>
                     
-                    <div class="photos-grid" id="photoGallery">
+                    <div class="photo-gallery" id="photoGallery">
                         <!-- Фотографии будут загружены динамически -->
-                        <div class="photo-placeholder">
-                            <div class="placeholder-icon">📷</div>
-                            <p>Upload your first photo</p>
-                        </div>
                     </div>
                     
                     <div class="profile-completion">
@@ -387,48 +383,57 @@
         </div>
     </div>
 
-    <!-- Модальное окно редактирования фото -->
-    <div id="editPhotoModal" class="modal">
+    <!-- Photo Crop Modal -->
+    <div class="photo-crop-modal" id="photoCropModal">
+        <div class="modal-overlay"></div>
         <div class="modal-content">
             <div class="modal-header">
                 <h2>Edit Photo</h2>
-                <button class="modal-close" id="closeEditPhoto">&times;</button>
+                <button class="modal-close" id="closePhotoCropModal">&times;</button>
             </div>
             
             <div class="modal-body">
-                <div class="photo-editor">
-                    <div class="photo-preview" id="photoPreview">
-                        <!-- Фото для редактирования -->
+                <!-- Photo thumbnails -->
+                <div class="photo-thumbnails" id="photoThumbnails">
+                    <!-- Thumbnails will be rendered here -->
+                </div>
+                
+                <!-- Crop container -->
+                <div class="crop-container" id="cropContainer">
+                    <div class="crop-info">
+                        <p><i class="fas fa-info-circle"></i> Drag the square to crop your photo. Only square crops are allowed.</p>
                     </div>
-                    
-                    <p class="editor-hint">Drag the square to crop your photo. Only square crops are allowed.</p>
-                    
-                    <div class="photo-settings">
-                        <div class="form-group">
-                            <input type="text" id="photoTitle" placeholder="Photo title" class="form-input">
-                        </div>
-                        
-                        <div class="photo-options">
-                            <div class="option-group">
-                                <input type="radio" id="setMainPhoto" name="photoType" value="main">
-                                <label for="setMainPhoto">Set as main photo</label>
-                            </div>
-                            <div class="option-group">
-                                <input type="radio" id="publicPhoto" name="visibility" value="public" checked>
-                                <label for="publicPhoto">Public</label>
-                            </div>
-                            <div class="option-group">
-                                <input type="radio" id="privatePhoto" name="visibility" value="private">
-                                <label for="privatePhoto">Private (subscribers only)</label>
-                            </div>
-                        </div>
+                    <div class="crop-wrapper">
+                        <img id="cropImage" src="" alt="">
+                        <div class="crop-box" id="cropBox"></div>
                     </div>
                 </div>
-            </div>
-            
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline" id="deletePhoto">DELETE</button>
-                <button type="button" class="btn btn-primary" id="savePhoto">SAVE</button>
+                
+                <!-- Photo options -->
+                <div class="photo-options">
+                    <input type="text" id="photoTitle" placeholder="Photo title" class="photo-title-input">
+                    
+                    <div class="photo-privacy-options">
+                        <label class="radio-option">
+                            <input type="radio" name="photoPrivacy" value="main" id="photoMain">
+                            <span>Set as main photo</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="photoPrivacy" value="public" id="photoPublic" checked>
+                            <span>Public</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="photoPrivacy" value="private" id="photoPrivate">
+                            <span>Private (subscribers only)</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Action buttons -->
+                <div class="modal-actions">
+                    <button class="btn-secondary" id="deletePhotoBtn">DELETE</button>
+                    <button class="btn-primary" id="validatePhotoBtn">SAVE</button>
+                </div>
             </div>
         </div>
     </div>
@@ -451,6 +456,7 @@
 
     <!-- Скрипты -->
     <script src="js/auth-manager.js?v=1.2"></script>
+    <script src="js/dashboard.js?v=6.1"></script>
     <script src="js/photo-manager.js?v=8.0"></script>
     
     <script>
@@ -467,13 +473,29 @@
                 userAvatar.textContent = window.authManager.currentUser.pseudo.charAt(0).toUpperCase();
             }
             
+            // Инициализируем Dashboard для функциональности профиля
+            if (window.Dashboard) {
+                console.log('[PROFILE] Initializing Dashboard...');
+                window.dashboard = new Dashboard();
+                
+                // Симулируем переключение на секцию профиля
+                setTimeout(() => {
+                    if (window.dashboard.switchSection) {
+                        window.dashboard.switchSection('profile');
+                    }
+                }, 100);
+            }
+            
+            // Инициализируем PhotoManager
+            setTimeout(() => {
+                if (window.PhotoManager) {
+                    console.log('[PROFILE] Initializing PhotoManager...');
+                    window.photoManager = new PhotoManager();
+                }
+            }, 200);
+            
             // Загружаем профиль пользователя
             loadUserProfile();
-            
-            // Инициализируем photo manager для загрузки фотографий
-            if (window.PhotoManager) {
-                window.photoManager = new PhotoManager();
-            }
         });
         
         async function loadUserProfile() {
