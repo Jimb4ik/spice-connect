@@ -528,6 +528,10 @@ class MatchingSystem {
         if (data.connected === 1 && data.result === 'match') {
           console.log('[MATCHING] IT\'S A MATCH!');
           this.stats.totalMatches++;
+          
+          // Создаем контакт для обмена сообщениями
+          await this.createContactForMatch(profileId);
+          
           this.showMatchModal(profile);
         }
       }
@@ -584,15 +588,89 @@ class MatchingSystem {
     document.getElementById('matchModal').style.display = 'none';
   }
 
+  async createContactForMatch(profileId) {
+    console.log('[MATCHING] Creating contact for matched user:', profileId);
+    
+    try {
+      const sessionId = window.authManager?.sessionId || localStorage.getItem('session_id');
+      
+      if (!sessionId) {
+        console.error('[MATCHING] No session ID available');
+        return false;
+      }
+      
+      // Попробуем несколько действий для создания контакта
+      const contactActions = ['add_contact', 'add_friend'];
+      
+      for (const action of contactActions) {
+        try {
+          console.log(`[MATCHING] Trying action: ${action}`);
+          
+          const contactResponse = await fetch('/api/contacts', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              action: action,
+              session_id: sessionId,
+              user_id: profileId
+            })
+          });
+          
+          const result = await contactResponse.json();
+          console.log(`[MATCHING] Contact API response (${action}):`, result);
+          
+          // Проверяем успешность создания контакта
+          if (result.success && result.data) {
+            // Проверяем различные варианты успешного ответа
+            const data = result.data;
+            if (data.connected === 1 || data.success === true || !data.error || data.error === 0) {
+              console.log('[MATCHING] ✅ Contact created successfully!');
+              return true;
+            }
+          }
+          
+        } catch (actionError) {
+          console.log(`[MATCHING] Action ${action} failed:`, actionError.message);
+          continue; // Пробуем следующее действие
+        }
+      }
+      
+      console.warn('[MATCHING] ⚠️ Could not create contact with any action');
+      
+      // Даже если создание контакта не удалось, разрешаем матч
+      // Пользователь всё равно сможет попробовать написать сообщение
+      return true;
+      
+    } catch (error) {
+      console.error('[MATCHING] Error creating contact:', error);
+      // Не блокируем матч из-за ошибки создания контакта
+      return true;
+    }
+  }
+
   sendMessageToMatch() {
     if (this.currentMatch) {
+      console.log('[MATCHING] Opening chat with matched user:', this.currentMatch);
+      
       // Redirect to messages with this user
       if (window.dashboard) {
-        window.dashboard.switchSection('messages');
-        // Could also pre-populate a message or open chat with this user
+        // Use the openChatWithUser method we just added
+        window.dashboard.openChatWithUser(
+          this.currentMatch.id, 
+          this.currentMatch.pseudo || this.currentMatch.nom_complet
+        );
+      } else {
+        console.error('[MATCHING] Dashboard not available');
       }
     }
     this.closeMatchModal();
+  }
+
+  startChatWithMatch() {
+    // Same as sendMessageToMatch for now
+    this.sendMessageToMatch();
   }
 
   showNoProfiles() {

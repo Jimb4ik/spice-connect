@@ -426,6 +426,44 @@ Object.assign(Dashboard.prototype, {
     }
   },
 
+  openChatWithUser(userId, userName) {
+    console.log('[MESSAGES] Opening chat with user:', userId, userName);
+    
+    // Switch to messages section if not already there
+    if (this.currentSection !== 'messages') {
+      this.switchSection('messages');
+    }
+    
+    // Find user in contacts or add them
+    const existingContact = this.contacts?.find(contact => contact.id == userId);
+    
+    if (existingContact) {
+      // Open existing contact chat
+      this.openChat(existingContact);
+    } else {
+      // Create temporary contact for new match
+      const tempContact = {
+        id: userId,
+        pseudo: userName || 'Match',
+        nom_complet: userName || 'Match',
+        is_new_match: true
+      };
+      
+      // Add to contacts temporarily 
+      if (!this.contacts) this.contacts = [];
+      this.contacts.unshift(tempContact);
+      
+      // Refresh contacts display
+      this.displayContacts(this.contacts);
+      
+      // Open chat with new contact
+      this.openChat(tempContact);
+      
+      // Show notification
+      this.showNotification(`New match! You can now message ${userName}`, 'success');
+    }
+  },
+
   startMessagePolling() {
     // Poll for new messages every 10 seconds
     this.messagePollingInterval = setInterval(() => {
