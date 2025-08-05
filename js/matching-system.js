@@ -5,7 +5,7 @@ class MatchingSystem {
   constructor() {
     // Система пагинации для больших объемов профилей (50k+)
     this.currentPage = 0;
-    this.profilesPerPage = 100; // Загружаем по 100 профилей за раз для оптимального UX
+    this.profilesPerPage = 150; // Загружаем по 150 профилей за раз для более плавного UX
     this.maxRetries = 3; // Максимум попыток загрузки
     this.lastLoadedCount = 0; // Сколько профилей загрузилось в последний раз
     this.totalProfilesLoaded = 0; // Общее количество загруженных профилей

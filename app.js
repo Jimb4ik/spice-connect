@@ -169,7 +169,7 @@ async function searchUsers(filters = {}) {
             is_online: filters.onlineOnly ? 1 : 0,
             is_photo: filters.withPhoto ? 1 : 0,
             page: filters.page || 0,
-            pas: filters.limit || 100
+            pas: filters.limit || 12
         };
 
         // Убираем null значения
