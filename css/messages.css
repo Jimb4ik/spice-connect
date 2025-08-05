@@ -6,31 +6,33 @@
   height: 100vh;
 }
 
-.messages-container {
-  display: flex;
-  flex: 1;
-  height: calc(100vh - 200px); /* Учитываем header и footer */
-  max-width: 1200px; /* Фиксированная ширина как у profile hero card */
-  background: white;
-  border-radius: 16px;
-  margin: 20px auto; /* Центрирование */
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+/* Более специфичный селектор и !important для приоритета */
+body .messages-container {
+  display: flex !important;
+  flex: 1 !important;
+  height: calc(100vh - 200px) !important; /* Учитываем header и footer */
+  max-width: 1200px !important; /* Фиксированная ширина как у profile hero card */
+  width: 100% !important;
+  background: white !important;
+  border-radius: 16px !important;
+  margin: 20px auto !important; /* Центрирование */
+  overflow: hidden !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
 }
 
 /* Sidebar с контактами */
-.messages-sidebar {
-  width: 350px;
-  background: #f8fafc;
-  border-right: 1px solid #e2e8f0;
-  display: flex;
-  flex-direction: column;
+body .messages-sidebar {
+  width: 350px !important;
+  background: #f8fafc !important;
+  border-right: 1px solid #e2e8f0 !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
-.sidebar-header {
-  padding: 24px 20px;
-  border-bottom: 1px solid #e2e8f0;
-  background: white;
+body .sidebar-header {
+  padding: 24px 20px !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  background: white !important;
 }
 
 .sidebar-header h3 {
@@ -40,9 +42,9 @@
   color: #1e293b;
 }
 
-.search-contacts {
-  padding: 20px;
-  border-bottom: 1px solid #e2e8f0;
+body .search-contacts {
+  padding: 20px !important;
+  border-bottom: 1px solid #e2e8f0 !important;
 }
 
 .search-contacts input {
@@ -58,13 +60,13 @@
   overflow-y: auto;
 }
 
-.contact-item {
-  display: flex;
-  align-items: center;
-  padding: 16px 20px;
-  cursor: pointer;
-  transition: background-color 0.2s;
-  border-bottom: 1px solid #f1f5f9;
+body .contact-item {
+  display: flex !important;
+  align-items: center !important;
+  padding: 16px 20px !important;
+  cursor: pointer !important;
+  transition: background-color 0.2s !important;
+  border-bottom: 1px solid #f1f5f9 !important;
 }
 
 .contact-item:hover {
@@ -174,13 +176,13 @@
   flex-direction: column;
 }
 
-.chat-header {
-  padding: 20px 24px;
-  border-bottom: 1px solid #e2e8f0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #f8fafc;
+body .chat-header {
+  padding: 20px 24px !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  background: #f8fafc !important;
 }
 
 .chat-user-info {
@@ -217,11 +219,11 @@
   gap: 8px;
 }
 
-.chat-messages {
-  flex: 1;
-  padding: 24px;
-  overflow-y: auto;
-  background: #ffffff;
+body .chat-messages {
+  flex: 1 !important;
+  padding: 24px !important;
+  overflow-y: auto !important;
+  background: #ffffff !important;
 }
 
 .message-item {
@@ -276,10 +278,10 @@
   text-align: left;
 }
 
-.chat-input-area {
-  padding: 20px 24px;
-  border-top: 1px solid #e2e8f0;
-  background: #f8fafc;
+body .chat-input-area {
+  padding: 20px 24px !important;
+  border-top: 1px solid #e2e8f0 !important;
+  background: #f8fafc !important;
 }
 
 .chat-input-container {

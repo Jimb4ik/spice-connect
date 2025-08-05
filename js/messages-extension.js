@@ -315,7 +315,28 @@ Object.assign(Dashboard.prototype, {
 
     const response = await fetch(apiUrl);
     const result = await response.json();
-    console.log('[MESSAGES] Messages API Response:', result);
+    
+    console.log('🔍 [MESSAGES] ========== ДЕТАЛЬНЫЙ АНАЛИЗ API ОТВЕТА ==========');
+    console.log('[MESSAGES] API URL:', apiUrl);
+    console.log('[MESSAGES] Response status:', response.status);
+    console.log('[MESSAGES] Raw API Response:', result);
+    console.log('[MESSAGES] result.success:', result.success);
+    console.log('[MESSAGES] result.data:', result.data);
+    
+    if (result.data) {
+      console.log('[MESSAGES] result.data.result:', result.data.result);
+      console.log('[MESSAGES] result.data.messages:', result.data.messages);
+      console.log('[MESSAGES] Type of result.data.result:', typeof result.data.result);
+      console.log('[MESSAGES] Is Array result.data.result:', Array.isArray(result.data.result));
+      
+      if (Array.isArray(result.data.result)) {
+        console.log('[MESSAGES] Количество сообщений в result.data.result:', result.data.result.length);
+        result.data.result.forEach((msg, index) => {
+          console.log(`[MESSAGES] Message ${index}:`, msg);
+        });
+      }
+    }
+    console.log('🔍 [MESSAGES] ===================================================');
 
     if (result.success && result.data) {
       return {
