@@ -287,24 +287,41 @@ Object.assign(Dashboard.prototype, {
 
     if (!messages || messages.length === 0) {
       chatMessages.innerHTML = `
-        <div class="chat-empty" style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; text-align: center; color: #6b7280; padding: 40px 20px;">
-          <div style="font-size: 32px; margin-bottom: 16px;">💬</div>
-          <h4>No messages yet</h4>
-          <p>Start the conversation by sending a message!</p>
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; text-align: center; color: #64748b; padding: 40px 20px;">
+          <div style="font-size: 48px; margin-bottom: 16px;">💬</div>
+          <h4 style="margin: 0 0 8px 0; color: #1e293b;">No messages yet</h4>
+          <p style="margin: 0; font-size: 14px;">Start the conversation by sending a message!</p>
         </div>
       `;
       return;
     }
 
-    // Group messages by date and create HTML
-    const messagesHTML = this.groupMessagesByDate(messages)
-      .map(group => this.createMessageGroup(group))
-      .join('');
-    
+    // Создаем простой HTML для сообщений
+    const messagesHTML = messages.map(message => this.createSimpleMessageItem(message)).join('');
     chatMessages.innerHTML = messagesHTML;
     
     // Scroll to bottom
     this.scrollToBottom();
+  },
+
+  createSimpleMessageItem(message) {
+    const isOwn = message.isOwn || message.from_me || false;
+    const text = message.text || message.message || message.content || '';
+    const time = this.formatMessageTime(message.timestamp || message.created_at || Date.now());
+    
+    return `
+      <div class="message-item ${isOwn ? 'own' : ''}">
+        <div class="message-avatar">
+          ${isOwn ? '👤' : '👤'}
+        </div>
+        <div class="message-content">
+          <div class="message-bubble">
+            ${text}
+          </div>
+          <div class="message-time">${time}</div>
+        </div>
+      </div>
+    `;
   },
 
   groupMessagesByDate(messages) {
@@ -473,13 +490,13 @@ Object.assign(Dashboard.prototype, {
     if (!chatMessages) return;
 
     // Remove empty state if present
-    const emptyState = chatMessages.querySelector('.chat-empty');
-    if (emptyState) {
+    const emptyState = chatMessages.querySelector('div[style*="flex-direction: column"]');
+    if (emptyState && emptyState.textContent.includes('No messages yet')) {
       emptyState.remove();
     }
 
-    // Add message
-    const messageHTML = this.createMessageItem(message);
+    // Add message using the simple format
+    const messageHTML = this.createSimpleMessageItem(message);
     chatMessages.insertAdjacentHTML('beforeend', messageHTML);
     
     // Scroll to bottom
