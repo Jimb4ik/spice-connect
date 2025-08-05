@@ -38,24 +38,40 @@ Object.assign(Dashboard.prototype, {
   },
 
   async callContactsAPI() {
-    const apiUrl = `/api/spice-multi-test?endpoint=/ajax_api/load_contacts&method=GET&session_id=${window.authManager.sessionId}`;
+    const sessionId = window.authManager?.sessionId;
+    if (!sessionId) {
+      return { success: false, error: 'No session ID available' };
+    }
+
+    // Получаем API ключ
+    const apiConfigResponse = await fetch('/api/get-api-key');
+    const apiConfig = await apiConfigResponse.json();
     
-    console.log('[MESSAGES] API call for contacts');
+    if (!apiConfig.apiKey) {
+      return { success: false, error: 'No API key available' };
+    }
 
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      }
+    // Параметры согласно документации: session_id и filter (1 = contacts, 2 = blacklist, 3 = friends)
+    const contactParams = new URLSearchParams({
+      api_key: apiConfig.apiKey,
+      session_id: sessionId,
+      filter: '1'  // 1 = список контактов
     });
+    
+    const apiUrl = `/api/spice-multi-test?endpoint=/ajax_api/load_contacts&method=GET&${contactParams.toString()}`;
+    
+    console.log('[MESSAGES] API call for contacts:', apiUrl);
 
+    const response = await fetch(apiUrl);
     const result = await response.json();
     console.log('[MESSAGES] Contacts API Response:', result);
 
     if (result.success && result.data) {
+      // API возвращает массив контактов в result.data.result
+      const contacts = result.data.result || [];
       return {
         success: true,
-        contacts: result.data.result || result.data.contacts || []
+        contacts: Array.isArray(contacts) ? contacts : []
       };
     } else {
       return {

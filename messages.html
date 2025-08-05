@@ -206,9 +206,68 @@
     <!-- Скрипты -->
     <script src="js/auth-manager.js?v=1.2"></script>
     <script src="js/header-avatar.js?v=1.0"></script>
-
     
     <script>
+        // Базовый класс Dashboard для совместимости с messages-extension.js
+        class Dashboard {
+            constructor() {
+                this.contacts = [];
+            }
+            
+            showNotification(message, type = 'info') {
+                console.log(`[${type.toUpperCase()}] ${message}`);
+                // Показываем уведомление в консоли, можно позже добавить UI
+            }
+        }
+        
+        // Создаем глобальный экземпляр
+        window.dashboard = new Dashboard();
+    </script>
+    
+    <script src="js/messages-extension.js?v=1.0"></script>
+    
+    <script>
+        // Функция инициализации страницы сообщений
+        async function initializeMessagesPage() {
+            console.log('[MESSAGES] Initializing messages page...');
+            
+            // Создаем объект с методами из messages-extension.js
+            const messagesSystem = Object.assign({}, Dashboard.prototype);
+            
+            try {
+                // Загружаем контакты
+                await messagesSystem.loadContacts.call(messagesSystem);
+                
+                // Настраиваем обработчики событий
+                setupEventListeners();
+                
+                console.log('[MESSAGES] ✅ Messages page initialized successfully');
+            } catch (error) {
+                console.error('[MESSAGES] ❌ Failed to initialize:', error);
+            }
+        }
+        
+        // Настройка обработчиков событий
+        function setupEventListeners() {
+            // Кнопка New Chat
+            const newChatBtn = document.getElementById('newChatBtn');
+            if (newChatBtn) {
+                newChatBtn.addEventListener('click', () => {
+                    console.log('[MESSAGES] New Chat button clicked');
+                    // TODO: Открыть модал для нового чата
+                });
+            }
+            
+            // Поиск контактов
+            const searchContacts = document.getElementById('searchContacts');
+            if (searchContacts) {
+                searchContacts.addEventListener('input', (e) => {
+                    // TODO: Фильтрация контактов
+                    console.log('[MESSAGES] Search:', e.target.value);
+                });
+            }
+        }
+        
         // Проверка авторизации при загрузке страницы
         document.addEventListener('DOMContentLoaded', () => {
             if (!window.authManager || !window.authManager.isLoggedIn) {
@@ -222,10 +281,8 @@
                 userAvatar.textContent = window.authManager.currentUser.pseudo.charAt(0).toUpperCase();
             }
             
-            // Инициализируем чат
-            if (window.dashboard) {
-                window.dashboard.switchSection('messages');
-            }
+            // Инициализируем систему сообщений
+            initializeMessagesPage();
         });
     </script>
     <script>

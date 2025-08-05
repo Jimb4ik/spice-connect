@@ -573,9 +573,7 @@
             
             photoElement.onerror = function() {
                 console.warn('[DISCOVER] Failed to load photo, using default');
-                // Используем заглушку для профиля без фото
-                this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjZjNmNGY2Ii8+CjxjaXJjbGUgY3g9IjEwMCIgY3k9IjgwIiByPSIzMCIgZmlsbD0iIzlmYTJhNyIvPgo8cGF0aCBkPSJNNTAgMTYwYzAtMzAgMjItNTAgNTAtNTBzNTAgMjAgNTAgNTB2NDBINTB2LTQweiIgZmlsbD0iIzlmYTJhNyIvPgo8L3N2Zz4=';
-                this.onerror = null; // Предотвращаем бесконечный цикл
+                this.style.display = 'none';
             };
         }
         
@@ -911,11 +909,13 @@
                 
                 console.log('[CONTACT] API Response:', result);
                 
-                if (result.success) {
+                // Проверяем успех согласно документации API: result.data.result должно быть 1
+                if (result.success && result.data && result.data.result === 1) {
+                    console.log('[CONTACT] ✅ Contact created successfully - result:', result.data.result);
                     return { success: true, data: result.data };
                 } else {
-                    console.error('[CONTACT] API Error:', result.error);
-                    return { success: false, error: result.error };
+                    console.error('[CONTACT] ❌ API returned error or result !== 1:', result);
+                    return { success: false, error: result.error || 'Failed to create contact' };
                 }
                 
             } catch (error) {
