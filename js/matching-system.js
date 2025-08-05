@@ -4,7 +4,7 @@
 class MatchingSystem {
   constructor() {
     // Система загрузки профилей без пагинации - используем exclude_ids
-    this.profilesPerBatch = 50; // Запрашиваем по 50 профилей за раз для оптимальной производительности
+    this.profilesPerBatch = 500; // Запрашиваем по 50 профилей за раз для оптимальной производительности
     this.maxRetries = 3; // Максимум попыток загрузки
     this.lastLoadedCount = 0; // Сколько профилей загрузилось в последний раз
     this.totalProfilesLoaded = 0; // Общее количество загруженных профилей
