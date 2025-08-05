@@ -133,23 +133,27 @@ body {
 .app-main {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
-  min-height: calc(100vh - 80px);
+  padding: 1rem;
+  height: calc(100vh - 70px); /* Высота хидера около 70px */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .page-header {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 1.5rem;
+  flex-shrink: 0;
 }
 
 .page-title {
-  font-size: 3rem;
+  font-size: 2rem;
   font-weight: 800;
   background: linear-gradient(135deg, #2c3e50, #34495e);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .page-subtitle {
@@ -1345,17 +1349,21 @@ body {
 
 /* Discover Page Styles */
 .discover-container {
-  max-width: 800px;
-  margin: 0 auto;
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+  min-height: 0; /* Важно для flex shrinking */
 }
 
 .discover-card-container {
+  flex: 1;
   position: relative;
-  height: 600px;
-  margin-bottom: 1rem;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .discover-loading {
@@ -1373,11 +1381,58 @@ body {
   border-radius: var(--border-radius);
   overflow: hidden;
   box-shadow: var(--shadow);
-  height: 100%;
+  flex: 1;
   display: grid;
   grid-template-columns: 1fr 1fr;
   border: 1px solid rgba(255, 255, 255, 0.2);
   transition: var(--transition);
+  min-height: 0;
+}
+
+/* Мобильная адаптивность */
+@media (max-width: 768px) {
+  .app-main {
+    padding: 0.5rem;
+    height: calc(100vh - 60px);
+  }
+  
+  .page-title {
+    font-size: 1.5rem;
+  }
+  
+  .page-subtitle {
+    font-size: 1rem;
+  }
+  
+  .discover-card {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto;
+  }
+  
+  .card-content {
+    padding: 1rem;
+  }
+  
+  .card-header h2 {
+    font-size: 1.3rem;
+  }
+  
+  .discover-actions-fixed {
+    padding: 0.5rem 0;
+  }
+  
+  .action-button {
+    min-width: 50px;
+    padding: 0.5rem 0.6rem;
+  }
+  
+  .action-icon {
+    font-size: 1rem;
+  }
+  
+  .action-label {
+    font-size: 0.7rem;
+  }
 }
 
 .discover-card:hover {
@@ -1569,6 +1624,14 @@ body {
   justify-content: center;
   gap: 1rem;
   margin: 1rem 0;
+}
+
+.discover-actions-fixed {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1rem 0;
+  flex-shrink: 0; /* Не сжимается */
 }
 
 .action-button {

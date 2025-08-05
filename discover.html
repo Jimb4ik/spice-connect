@@ -113,24 +113,6 @@
                         <div class="card-description" id="cardDescription">
                             <p>Profile description will appear here...</p>
                         </div>
-                        
-                        <!-- Action Buttons -->
-                        <div class="discover-actions">
-                            <button class="action-button dislike-btn" id="dislikeBtn" title="Pass">
-                                <span class="action-icon">❌</span>
-                                <span class="action-label">Pass</span>
-                            </button>
-                            
-                            <button class="action-button super-like-btn" id="superLikeBtn" title="Super Like">
-                                <span class="action-icon">⭐</span>
-                                <span class="action-label">Super</span>
-                            </button>
-                            
-                            <button class="action-button like-btn" id="likeBtn" title="Like">
-                                <span class="action-icon">❤️</span>
-                                <span class="action-label">Like</span>
-                            </button>
-                        </div>
                     </div>
                 </div>
 
@@ -145,6 +127,23 @@
                 </div>
             </div>
 
+            <!-- Action Buttons - всегда видимые -->
+            <div class="discover-actions-fixed" id="discoverActionsFixed" style="display: none;">
+                <button class="action-button dislike-btn" id="dislikeBtn" title="Pass">
+                    <span class="action-icon">❌</span>
+                    <span class="action-label">Pass</span>
+                </button>
+                
+                <button class="action-button super-like-btn" id="superLikeBtn" title="Super Like">
+                    <span class="action-icon">⭐</span>
+                    <span class="action-label">Super</span>
+                </button>
+                
+                <button class="action-button like-btn" id="likeBtn" title="Like">
+                    <span class="action-icon">❤️</span>
+                    <span class="action-label">Like</span>
+                </button>
+            </div>
 
 
 
@@ -425,12 +424,14 @@
             // Обновляем фото
             updateProfilePhoto(profile);
             
-            // Показываем карточку
+            // Показываем карточку и кнопки
             const discoverCard = document.getElementById('discoverCard');
             const noProfilesState = document.getElementById('noProfilesState');
+            const actionsFixed = document.getElementById('discoverActionsFixed');
             
             if (discoverCard) discoverCard.style.display = 'grid';
             if (noProfilesState) noProfilesState.style.display = 'none';
+            if (actionsFixed) actionsFixed.style.display = 'flex';
         }
         
         function updateProfilePhoto(profile) {
@@ -490,12 +491,16 @@
         function showNoProfilesState() {
             const noProfilesElement = document.getElementById('noProfilesState');
             const cardElement = document.getElementById('discoverCard');
+            const actionsFixed = document.getElementById('discoverActionsFixed');
             
             if (noProfilesElement) {
                 noProfilesElement.style.display = 'block';
             }
             if (cardElement) {
                 cardElement.style.display = 'none';
+            }
+            if (actionsFixed) {
+                actionsFixed.style.display = 'none';
             }
         }
         
