@@ -1029,26 +1029,7 @@ class PhotoManager {
       gallery.appendChild(photoCard);
     });
 
-    // Add upload button
-    const addPhotoCard = document.createElement('div');
-    addPhotoCard.className = 'photo-card add-photo-card';
-    addPhotoCard.innerHTML = `
-      <button class="add-photo-btn" id="addPhotoBtn">
-        <div class="add-icon">+</div>
-        <span>Add Photo</span>
-      </button>
-    `;
-
-    gallery.appendChild(addPhotoCard);
-
-    // Re-attach event listener
-    const addPhotoBtn = addPhotoCard.querySelector('#addPhotoBtn');
-    if (addPhotoBtn) {
-      addPhotoBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        this.handleAddPhoto();
-      });
-    }
+    // Кнопка "Add Photo" убрана по запросу пользователя
   }
 
   showNotification(message, type = 'info') {
