@@ -60,8 +60,8 @@
     <!-- Основной контент -->
     <main class="app-main">
         <div class="page-header fade-in-up">
-            <h1 class="page-title">🔥 Discover New People</h1>
-            <p class="page-subtitle">Find your perfect match by swiping through profiles</p>
+            <h1 class="page-title">Discover</h1>
+            <p class="page-subtitle">"Discover" is your space for dating and having fun! Select profiles that appeal to you. They won't know you liked them unless they like you back! Have fun!</p>
         </div>
 
         <!-- Discover Interface -->
@@ -74,45 +74,19 @@
                     <p>Loading profiles...</p>
                 </div>
 
-                <!-- Profile Card -->
-                <div class="discover-card" id="discoverCard" style="display: none;">
-                    <div class="card-images">
-                        <img id="cardMainPhoto" src="/images/default-avatar.png" alt="Profile photo" class="card-photo">
-                        <div class="photo-navigation" id="photoNavigation" style="display: none;">
-                            <button class="photo-nav-btn prev" id="prevPhotoBtn">‹</button>
-                            <button class="photo-nav-btn next" id="nextPhotoBtn">›</button>
-                        </div>
-                        <div class="photo-indicators" id="photoIndicators"></div>
+                <!-- Profile Card в новом стиле -->
+                <div class="profile-card-new" id="discoverCard" style="display: none;">
+                    <!-- Большое фото профиля -->
+                    <div class="profile-photo-wrapper">
+                        <img id="cardMainPhoto" src="/images/default-avatar.png" alt="Profile photo" class="profile-main-photo">
+                        <!-- Имя пользователя на фото -->
+                        <div class="profile-name-badge" id="cardNameBadge">username</div>
                     </div>
                     
-                    <div class="card-content">
-                        <div class="card-header">
-                            <h2 id="cardName">Name, Age</h2>
-                            <div class="card-online-status" id="cardOnlineStatus">
-                                <span class="status-dot"></span>
-                                <span>Online now</span>
-                            </div>
-                        </div>
-                        
-                        <div class="card-location" id="cardLocation">
-                            <span class="location-icon">📍</span>
-                            <span>Location</span>
-                        </div>
-                        
-                        <div class="card-details">
-                            <div class="detail-item" id="cardWork">
-                                <span class="detail-icon">💼</span>
-                                <span>Profession</span>
-                            </div>
-                            <div class="detail-item" id="cardEducation">
-                                <span class="detail-icon">🎂</span>
-                                <span>Age</span>
-                            </div>
-                        </div>
-                        
-                        <div class="card-description" id="cardDescription">
-                            <p>Profile description will appear here...</p>
-                        </div>
+                    <!-- Информация под фото -->
+                    <div class="profile-info-section">
+                        <h2 class="profile-main-name" id="cardName">Name</h2>
+                        <p class="profile-location-text" id="cardLocation">Location</p>
                     </div>
                 </div>
 
@@ -127,21 +101,21 @@
                 </div>
             </div>
 
-            <!-- Action Buttons - всегда видимые -->
-            <div class="discover-actions-fixed" id="discoverActionsFixed" style="display: none;">
-                <button class="action-button dislike-btn" id="dislikeBtn" title="Pass">
-                    <span class="action-icon">❌</span>
-                    <span class="action-label">Pass</span>
+            <!-- Action Buttons в новом стиле -->
+            <div class="action-buttons-new" id="discoverActionsFixed" style="display: none;">
+                <button class="action-btn-new pass-btn" id="dislikeBtn" title="Pass">
+                    <span class="btn-icon-new">✕</span>
                 </button>
                 
-                <button class="action-button super-like-btn" id="superLikeBtn" title="Super Like">
-                    <span class="action-icon">⭐</span>
-                    <span class="action-label">Super</span>
+                <button class="action-btn-new like-btn" id="likeBtn" title="Like">
+                    <span class="btn-icon-new">💖</span>
                 </button>
-                
-                <button class="action-button like-btn" id="likeBtn" title="Like">
-                    <span class="action-icon">❤️</span>
-                    <span class="action-label">Like</span>
+            </div>
+
+            <!-- Кнопка просмотра всех матчей -->
+            <div class="view-all-matches" id="viewAllMatches" style="display: none;">
+                <button class="btn-view-all-matches" onclick="window.location.href='matches.html'">
+                    VIEW ALL MATCHES
                 </button>
             </div>
 
@@ -301,7 +275,6 @@
             // Добавляем обработчики кнопок
             const dislikeBtn = document.getElementById('dislikeBtn');
             const likeBtn = document.getElementById('likeBtn');
-            const superLikeBtn = document.getElementById('superLikeBtn');
             const resetBtn = document.getElementById('resetProfilesBtn');
             
             if (dislikeBtn) {
@@ -310,10 +283,6 @@
             
             if (likeBtn) {
                 likeBtn.addEventListener('click', () => handleLike());
-            }
-            
-            if (superLikeBtn) {
-                superLikeBtn.addEventListener('click', () => handleSuperLike());
             }
             
             if (resetBtn) {
@@ -403,56 +372,23 @@
                 return;
             }
             
-            // Обновляем имя и возраст
-            const nameElement = document.getElementById('cardName');
-            if (nameElement) {
-                const age = profile.age || 'Unknown age';
-                nameElement.textContent = `${profile.pseudo || profile.nom_complet || 'Unknown'}, ${age}`;
+            // Обновляем имя пользователя в бейдже на фото
+            const nameBadgeElement = document.getElementById('cardNameBadge');
+            if (nameBadgeElement) {
+                nameBadgeElement.textContent = profile.pseudo || profile.login || 'user';
             }
             
-            // Обновляем статус онлайн
-            const onlineStatusElement = document.getElementById('cardOnlineStatus');
-            if (onlineStatusElement) {
-                const statusDot = onlineStatusElement.querySelector('.status-dot');
-                const statusText = onlineStatusElement.querySelector('span:last-child');
-                if (statusDot && statusText) {
-                    const isOnline = profile.online === 1 || profile.online === '1' || profile.is_online === 1;
-                    statusDot.className = isOnline ? 'status-dot online' : 'status-dot offline';
-                    statusText.textContent = isOnline ? 'Online now' : 'Offline';
-                }
+            // Обновляем полное имя под фото
+            const nameElement = document.getElementById('cardName');
+            if (nameElement) {
+                const fullName = profile.nom_complet || profile.pseudo || 'Unknown';
+                nameElement.textContent = fullName;
             }
             
             // Обновляем локацию
             const locationElement = document.getElementById('cardLocation');
             if (locationElement) {
-                const locationSpan = locationElement.querySelector('span:last-child');
-                if (locationSpan) {
-                    locationSpan.textContent = profile.ville || profile.region || 'Location not specified';
-                }
-            }
-            
-            // Обновляем работу
-            const workElement = document.getElementById('cardWork');
-            if (workElement) {
-                const workSpan = workElement.querySelector('span:last-child');
-                if (workSpan) {
-                    // Проверяем различные поля для работы
-                    const work = profile.travail || profile.profession || profile.metier || profile.job;
-                    workSpan.textContent = work || 'Work not specified';
-                }
-            }
-            
-            // Обновляем образование - заменяем на возраст, так как education нет в API
-            const educationElement = document.getElementById('cardEducation');
-            if (educationElement) {
-                const educationSpan = educationElement.querySelector('span:last-child');
-                const ageIcon = educationElement.querySelector('span:first-child');
-                if (educationSpan && ageIcon) {
-                    // Меняем иконку на возраст
-                    ageIcon.textContent = '🎂';
-                    const age = profile.age || profile.birthday || 'Unknown';
-                    educationSpan.textContent = `${age} years old`;
-                }
+                locationElement.textContent = profile.ville || profile.region || 'Location not specified';
             }
             
             // Обновляем описание
@@ -531,12 +467,20 @@
         function showLoadingState(show) {
             const loadingElement = document.getElementById('discoverLoading');
             const cardElement = document.getElementById('discoverCard');
+            const actionsElement = document.getElementById('discoverActionsFixed');
+            const viewAllElement = document.getElementById('viewAllMatches');
             
             if (loadingElement) {
                 loadingElement.style.display = show ? 'block' : 'none';
             }
             if (cardElement) {
-                cardElement.style.display = show ? 'none' : 'grid';
+                cardElement.style.display = show ? 'none' : 'block';
+            }
+            if (actionsElement) {
+                actionsElement.style.display = show ? 'none' : 'flex';
+            }
+            if (viewAllElement) {
+                viewAllElement.style.display = show ? 'none' : 'block';
             }
         }
         
@@ -544,6 +488,7 @@
             const noProfilesElement = document.getElementById('noProfilesState');
             const cardElement = document.getElementById('discoverCard');
             const actionsFixed = document.getElementById('discoverActionsFixed');
+            const viewAllElement = document.getElementById('viewAllMatches');
             
             if (noProfilesElement) {
                 noProfilesElement.style.display = 'block';
@@ -553,6 +498,9 @@
             }
             if (actionsFixed) {
                 actionsFixed.style.display = 'none';
+            }
+            if (viewAllElement) {
+                viewAllElement.style.display = 'none';
             }
         }
         
