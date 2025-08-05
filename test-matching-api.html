@@ -215,7 +215,7 @@
         
         <div class="controls">
             <button onclick="testMatchAPI()" id="testBtn">🔍 Тест get_profile (/match)</button>
-            <button onclick="testSearchAPI()" id="searchBtn">🔎 Тест search (/search)</button>
+            <button onclick="testSearchAPI()" id="searchBtn">🔎 Тест search (/search) через proxy</button>
             <button onclick="testLikeAPI()" id="likeBtn">❤️ Тест set_like</button>
             <button onclick="testDislikeAPI()" id="dislikeBtn">👎 Тест set_dislike</button>
             <button onclick="clearResults()">🗑️ Очистить</button>
@@ -359,13 +359,17 @@
                 return;
             }
             
-            setStatus('Тестируем Search API...', 'loading');
+            setStatus('Тестируем Search API через proxy...', 'loading');
             document.getElementById('searchBtn').disabled = true;
             
             try {
+                // Используем наш proxy для обхода CORS
+                const proxyUrl = '/api/spice-multi-test';
+                
                 // Собираем параметры поиска
                 const searchParams = new URLSearchParams({
-                    api_key: apiKey,
+                    endpoint: '/index_api/search',
+                    method: 'POST',
                     session_id: sessionId,
                     page: document.getElementById('searchPage').value || '0',
                     pas: document.getElementById('searchPas').value || '50'
@@ -380,10 +384,10 @@
                 if (ageMax) searchParams.append('age_max', ageMax);
                 if (sexe) searchParams.append('sexe', sexe);
                 
-                const url = `${baseUrl}/index_api/search?${searchParams.toString()}`;
+                const url = `${proxyUrl}?${searchParams.toString()}`;
                 
-                console.log('🔗 Search API Request URL:', url);
-                document.getElementById('requestUrl').textContent = url.replace(apiKey, 'HIDDEN_API_KEY');
+                console.log('🔗 Search API Proxy Request URL:', url);
+                document.getElementById('requestUrl').textContent = `Proxy: ${url}`;
                 
                 const response = await fetch(url, {
                     method: 'POST',
@@ -396,7 +400,7 @@
                 const data = await response.json();
                 
                 displayResults(data, response.status);
-                setStatus(`✅ Search запрос выполнен (${response.status})`, 'success');
+                setStatus(`✅ Search запрос выполнен через proxy (${response.status})`, 'success');
                 
             } catch (error) {
                 console.error('❌ Error:', error);
