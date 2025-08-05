@@ -3,17 +3,13 @@
 
 class MatchingSystem {
   constructor() {
-    // Система пагинации для больших объемов профилей (50k+)
-    this.currentPage = 0;
-    this.profilesPerPage = 150; // Загружаем по 150 профилей за раз для более плавного UX
+    // Система загрузки профилей без пагинации - используем exclude_ids
+    this.profilesPerBatch = 50; // Запрашиваем по 50 профилей за раз для оптимальной производительности
     this.maxRetries = 3; // Максимум попыток загрузки
     this.lastLoadedCount = 0; // Сколько профилей загрузилось в последний раз
     this.totalProfilesLoaded = 0; // Общее количество загруженных профилей
-    
-    // Текущая страница для fallback поиска
-    this.searchPage = 0;
-    // Максимальное количество страниц (обновляется из ответа API)
-    this.totalSearchPages = 999;
+    this.consecutiveEmptyLoads = 0; // Счетчик пустых загрузок подряд
+    this.isLoadingProfiles = false; // Флаг что сейчас идет загрузка профилей
     this.currentMode = 'tinder'; // tinder, secret-garden, my-matches
     this.tinderProfiles = [];
     this.currentProfileIndex = 0;
@@ -167,9 +163,18 @@ class MatchingSystem {
   // =====================================
 
   async loadTinderProfiles(forceReload = false) {
+    // Предотвращаем дублирующиеся запросы
+    if (this.isLoadingProfiles && !forceReload) {
+      console.log('[MATCHING] Already loading profiles, skipping...');
+      return;
+    }
+    
+    this.isLoadingProfiles = true;
+    
     if (forceReload) {
       this.tinderProfiles = [];
       this.currentProfileIndex = 0;
+      this.consecutiveEmptyLoads = 0;
     }
     console.log('[MATCHING] Loading Tinder profiles...', forceReload ? '(forced reload)' : '');
     this.showTinderLoading(true);
@@ -179,14 +184,14 @@ class MatchingSystem {
       const sessionId = window.authManager?.sessionId || localStorage.getItem('session_id');
       console.log('[MATCHING] Using session ID:', sessionId);
       
-      // Собираем список уже просмотренных ID, но ограничиваем длину (max 250 последних),
-      // чтобы не превысить лимит длины URL у сервера
-      const MAX_EXCLUDE = 250;
+      // Собираем список уже просмотренных ID, но ограничиваем длину (max 500 последних),
+      // чтобы не превысить лимит длины URL у сервера но максимизировать фильтрацию
+      const MAX_EXCLUDE = 500;
       const viewedArr = Array.from(this.viewedProfiles);
-      const limitedExcludeArr = viewedArr.slice(-MAX_EXCLUDE); // берем только последние 250 id
+      const limitedExcludeArr = viewedArr.slice(-MAX_EXCLUDE); // берем только последние 500 id
       const excludeIds = limitedExcludeArr.join(',');
       console.log(`[MATCHING] exclude_ids limited to last ${limitedExcludeArr.length} IDs (out of ${viewedArr.length})`);
-      console.log('[MATCHING] Excluding IDs:', excludeIds.length > 0 ? excludeIds : 'none');
+      console.log('[MATCHING] Excluding IDs:', excludeIds.length > 0 ? excludeIds.substring(0, 100) + '...' : 'none');
 
       // --- 1. Пробуем специализированный эндпоинт /index_api/match ---
       // First, get API config
@@ -196,7 +201,8 @@ class MatchingSystem {
       const matchQuery = new URLSearchParams({
         session_id: sessionId || '',
         api_key: apiConfig.apiKey,
-        action: 'get_profile'
+        action: 'get_profile',
+        limit: this.profilesPerBatch.toString() // Запрашиваем нужное количество профилей
       });
       if (excludeIds) {
         matchQuery.append('exclude_ids', excludeIds);
@@ -229,49 +235,16 @@ class MatchingSystem {
         }
       }
 
-      // --- 2. Если профилей нет, пробуем общий поиск /index_api/search ---
-      if (false && profiles.length === 0) {  // fallback disabled for testing
-        const searchBody = {
-          session_id: sessionId,
-          page: this.searchPage,
-          pas: 20,
-          get_picture_430: 1,
-          searchAction: 'Last'
-        };
-        try {
-          const searchResp = await fetch(`/api/spice-multi-test?endpoint=/index_api/search&method=POST`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(searchBody)
-          });
-          const searchData = await searchResp.json();
-          console.log('[MATCHING] Fallback search response:', searchData);
-          if (searchData.success && searchData.data) {
-            // Обновляем totalSearchPages, если есть
-            if (searchData.data.nb_pages) {
-              this.totalSearchPages = searchData.data.nb_pages;
-            }
-            if (searchData.data.result && Array.isArray(searchData.data.result)) {
-              profiles = searchData.data.result;
-            } else if (Array.isArray(searchData.data.membres)) {
-              profiles = searchData.data.membres;
-            } else if (Array.isArray(searchData.data)) {
-              profiles = searchData.data;
-            }
-          }
-        } catch (fallbackErr) {
-          console.error('[MATCHING] Fallback search error:', fallbackErr);
-        }
-      }
+      // Если профилей нет через /index_api/match, это означает что больше подходящих профилей нет
+      // API должен возвращать новые профили, исключая те что в exclude_ids
 
       console.log('[MATCHING] Raw profiles from API:', profiles.length);
-      console.log('[MATCHING] Current page:', this.currentPage);
       console.log('[MATCHING] Sample profile structure:', profiles[0]);
       console.log('[MATCHING] Viewed profiles count:', this.viewedProfiles.size);
       
       // Сохраняем количество загруженных профилей до фильтрации
       this.lastLoadedCount = profiles.length;
-      console.log(`[MATCHING] API returned ${this.lastLoadedCount} profiles (requested ${this.profilesPerPage})`);
+      console.log(`[MATCHING] API returned ${this.lastLoadedCount} profiles (requested ${this.profilesPerBatch})`);
       
       // Фильтруем уже просмотренные профили на всякий случай
       const originalCount = profiles.length;
@@ -283,11 +256,11 @@ class MatchingSystem {
       console.log('[MATCHING] Profiles after filtering:', profiles.length, `(${originalCount - profiles.length} already viewed)`);
 
       if (profiles.length > 0) {
-        // Увеличиваем страницу для следующей загрузки
-        this.currentPage++;
+        // Сбрасываем счетчик пустых загрузок
+        this.consecutiveEmptyLoads = 0;
         this.totalProfilesLoaded += profiles.length;
         
-        console.log(`[MATCHING] Successfully loaded ${profiles.length} profiles from page ${this.currentPage - 1}`);
+        console.log(`[MATCHING] Successfully loaded ${profiles.length} new profiles`);
         console.log(`[MATCHING] Total profiles loaded so far: ${this.totalProfilesLoaded}`);
         
         // Если это первая загрузка или нет существующих профилей
@@ -315,29 +288,20 @@ class MatchingSystem {
           }
         }
       } else {
-        console.log('[MATCHING] No new profiles found on page', this.currentPage);
+        // Увеличиваем счетчик пустых загрузок
+        this.consecutiveEmptyLoads++;
+        console.log(`[MATCHING] No new profiles found (${this.consecutiveEmptyLoads} consecutive empty loads)`);
         
-        // Если API вернул пустой результат, пробуем следующую страницу
-        if (this.lastLoadedCount === 0 && this.currentPage < 100) {
-          console.log('[MATCHING] Empty result, trying next page...');
-          this.currentPage++;
-          this.loadTinderProfiles(false);
-          return;
-        }
-        
-        // Если API вернул меньше профилей чем ожидалось, попробуем следующую страницу
-        if (this.lastLoadedCount > 0 && this.lastLoadedCount < this.profilesPerPage && this.currentPage < 100) {
-          console.log(`[MATCHING] Got ${this.lastLoadedCount} profiles (expected ${this.profilesPerPage}), trying next page...`);
-          this.currentPage++;
-          this.loadTinderProfiles(false);
-          return;
+        // Если API вернул пустой результат несколько раз подряд, проверим есть ли еще профили в буфере
+        if (this.consecutiveEmptyLoads >= 3) {
+          console.log('[MATCHING] Multiple empty loads - API may not have more matching profiles');
         }
         
         if (!this.tinderProfiles || this.tinderProfiles.length === 0) {
-          // Если это форсированная перезагрузка и все еще нет профилей, сбросим пагинацию
+          // Если это форсированная перезагрузка и все еще нет профилей, очистим исключения
           if (forceReload && this.viewedProfiles.size > 0) {
-            console.log('[MATCHING] Force reload: resetting pagination and clearing viewed list...');
-            this.currentPage = 0;
+            console.log('[MATCHING] Force reload: clearing viewed list to get more profiles...');
+            this.consecutiveEmptyLoads = 0;
             this.viewedProfiles.clear();
             this.saveViewedProfiles();
             this.loadTinderProfiles(false);
@@ -351,6 +315,7 @@ class MatchingSystem {
       this.showNoProfiles();
     } finally {
       this.showTinderLoading(false);
+      this.isLoadingProfiles = false; // Сбрасываем флаг загрузки
     }
   }
 
@@ -370,6 +335,14 @@ class MatchingSystem {
       console.log('[MATCHING] Index beyond array length, trying to load more profiles...');
       this.loadTinderProfiles(false);
       return;
+    }
+    
+    // Предзагрузка: если осталось мало профилей в буфере, загружаем еще
+    const remainingProfiles = this.tinderProfiles.length - this.currentProfileIndex;
+    if (remainingProfiles <= 5 && this.consecutiveEmptyLoads < 3) {
+      console.log(`[MATCHING] Only ${remainingProfiles} profiles left in buffer, preloading more...`);
+      // Загружаем асинхронно, не блокируя отображение текущего профиля
+      setTimeout(() => this.loadTinderProfiles(false), 100);
     }
 
     const profile = this.tinderProfiles[this.currentProfileIndex];
