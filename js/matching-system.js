@@ -171,7 +171,7 @@ class MatchingSystem {
       this.tinderProfiles = [];
       this.currentProfileIndex = 0;
     }
-    console.log('[MATCHING] Loading Tinder profiles...', forceReload ? '(forced reload)' : '');
+    console.log('[MATCHING] Loading Tinder profiles (code-sniper style - one at a time)...', forceReload ? '(forced reload)' : '');
     this.showTinderLoading(true);
 
     try {
@@ -283,37 +283,19 @@ class MatchingSystem {
       console.log('[MATCHING] Profiles after filtering:', profiles.length, `(${originalCount - profiles.length} already viewed)`);
 
       if (profiles.length > 0) {
-        // Увеличиваем страницу для следующей загрузки
-        this.currentPage++;
-        this.totalProfilesLoaded += profiles.length;
+        // CODE-SNIPER STYLE: берем только первый профиль (как в оригинале - n>1 return)
+        const singleProfile = profiles[0];
+        console.log(`[MATCHING] Code-sniper style: taking only 1 profile from ${profiles.length} available`);
         
-        console.log(`[MATCHING] Successfully loaded ${profiles.length} profiles from page ${this.currentPage - 1}`);
-        console.log(`[MATCHING] Total profiles loaded so far: ${this.totalProfilesLoaded}`);
+        // Заменяем весь массив одним профилем (как в code-sniper.md)
+        this.tinderProfiles = [singleProfile];
+        this.currentProfileIndex = 0;
         
-        // Если это первая загрузка или нет существующих профилей
-        if (!this.tinderProfiles || this.tinderProfiles.length === 0) {
-          this.tinderProfiles = profiles;
-          this.currentProfileIndex = 0;
-          console.log(`[MATCHING] Initial load: ${profiles.length} profiles`);
-          this.displayCurrentProfile();
-        } else {
-          // Добавляем новые профили к существующим
-          this.tinderProfiles.push(...profiles);
-          console.log(`[MATCHING] Added ${profiles.length} more profiles. Total buffer: ${this.tinderProfiles.length}`);
-          
-          // Очищаем старые профили если буфер стал слишком большим (больше 500 профилей)
-          if (this.tinderProfiles.length > 500 && this.currentProfileIndex > 200) {
-            const toRemove = this.currentProfileIndex - 100; // Оставляем 100 профилей назад
-            this.tinderProfiles.splice(0, toRemove);
-            this.currentProfileIndex -= toRemove;
-            console.log(`[MATCHING] Cleaned up ${toRemove} old profiles. New index: ${this.currentProfileIndex}, buffer: ${this.tinderProfiles.length}`);
-          }
-          
-          // Если мы на последнем профиле, покажем следующий
-          if (this.currentProfileIndex >= this.tinderProfiles.length - profiles.length) {
-            this.displayCurrentProfile();
-          }
-        }
+        this.totalProfilesLoaded++;
+        console.log(`[MATCHING] Loaded single profile: ${singleProfile.pseudo || singleProfile.nom_complet}`);
+        console.log(`[MATCHING] Total profiles shown so far: ${this.totalProfilesLoaded}`);
+        
+        this.displayCurrentProfile();
       } else {
         console.log('[MATCHING] No new profiles found on page', this.currentPage);
         
@@ -367,8 +349,8 @@ class MatchingSystem {
     }
     
     if (this.currentProfileIndex >= this.tinderProfiles.length) {
-      console.log('[MATCHING] Index beyond array length, trying to load more profiles...');
-      this.loadTinderProfiles(false);
+      console.log('[MATCHING] Code-sniper style: no more profiles, loading fresh one...');
+      this.loadTinderProfiles(true); // Всегда форсируем перезагрузку как в code-sniper.md
       return;
     }
 
@@ -536,10 +518,10 @@ class MatchingSystem {
       console.error('[MATCHING] Error sending Tinder action:', error);
     }
 
-    // Move to next profile after animation
+    // Move to next profile after animation (code-sniper style)
     setTimeout(() => {
       card.classList.remove('swiping-right', 'swiping-left');
-      // Запрашиваем свежий профиль сразу после действия
+      // Как в code-sniper.md: "on relance tout" - перезагружаем профили
       this.loadTinderProfiles(true);
       this.updateStats();
     }, 300);
