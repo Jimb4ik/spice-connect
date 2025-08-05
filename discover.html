@@ -633,20 +633,41 @@
                     return;
                 }
                 
-                // Fallback: прямой вызов API
-                const endpoint = '/index_api/match';
-                const actionParam = action === 'like' ? 'setLike' : 'setDislike';
+                // Fallback: прямой вызов API (используем тот же формат что и в matching-system.js)
+                const apiConfigResponse = await fetch('/api/get-api-key');
+                const apiConfig = await apiConfigResponse.json();
                 
-                const apiUrl = `/api/spice-multi-test?endpoint=${endpoint}&method=POST&session_id=${sessionId}&${actionParam}=${profileId}`;
+                // Преобразуем action в правильный API параметр
+                let apiAction;
+                if (action === 'like' || action === 'super_like') {
+                    apiAction = 'set_like';
+                } else if (action === 'dislike') {
+                    apiAction = 'set_dislike';
+                }
                 
-                const response = await fetch(apiUrl);
-                const data = await response.json();
-                
-                console.log(`[DISCOVER] ${action} result:`, data);
-                
-                // Проверяем на матч
-                if (data.success && data.data?.result === 'match') {
-                    showMatchModal(currentProfile);
+                if (apiAction) {
+                    const actionQuery = new URLSearchParams({
+                        session_id: sessionId,
+                        api_key: apiConfig.apiKey,
+                        action: apiAction,
+                        id_user: profileId
+                    });
+                    
+                    const apiUrl = `${apiConfig.baseUrl}/index_api/match?${actionQuery.toString()}`;
+                    console.log('[DISCOVER] Action API URL:', apiUrl);
+                    
+                    const response = await fetch(apiUrl, {
+                        method: 'GET'
+                    });
+                    const data = await response.json();
+                    
+                    console.log(`[DISCOVER] ${action} result:`, data);
+                    
+                    // Проверяем на матч (точно такой же формат как в matching-system.js)
+                    if (data.result === 'match') {
+                        console.log('🎉 IT\'S A MATCH!');
+                        showMatchModal(currentProfile);
+                    }
                 }
                 
             } catch (error) {
@@ -669,14 +690,24 @@
                 modalImage.src = photoSrc;
                 modal.style.display = 'flex';
                 document.body.style.overflow = 'hidden';
+                
+                // Добавляем класс для анимации через небольшую задержку
+                setTimeout(() => {
+                    modal.classList.add('active');
+                }, 10);
             }
         }
         
         function closePhotoModal() {
             const modal = document.getElementById('photoModal');
             if (modal) {
-                modal.style.display = 'none';
+                modal.classList.remove('active');
                 document.body.style.overflow = 'auto';
+                
+                // Скрываем модальное окно после анимации
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 300);
             }
         }
         

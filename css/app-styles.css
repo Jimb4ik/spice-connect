@@ -136,9 +136,8 @@ body {
   max-width: 1200px;
   margin: 0 auto;
   padding: 1rem;
-  min-height: calc(100vh - 140px); /* Учитываем header + footer */
-  display: flex;
-  flex-direction: column;
+  padding-bottom: 2rem; /* Дополнительный отступ снизу */
+  flex: 1; /* Занимает оставшееся пространство */
 }
 
 .page-header {
@@ -1349,21 +1348,19 @@ body {
 
 /* Discover Page Styles */
 .discover-container {
-  flex: 1;
+  width: 100%;
   display: flex;
   flex-direction: column;
   max-width: 800px;
   margin: 0 auto;
-  width: 100%;
-  min-height: 0; /* Важно для flex shrinking */
+  padding-bottom: 2rem; /* Добавляем отступ снизу */
 }
 
 .discover-card-container {
-  flex: 1;
   position: relative;
-  min-height: 0;
   display: flex;
   flex-direction: column;
+  margin-bottom: 2rem; /* Отступ от кнопок */
 }
 
 .discover-loading {
@@ -1381,12 +1378,13 @@ body {
   border-radius: var(--border-radius);
   overflow: hidden;
   box-shadow: var(--shadow);
-  flex: 1;
   display: grid;
   grid-template-columns: 1fr 1fr;
   border: 1px solid rgba(255, 255, 255, 0.2);
   transition: var(--transition);
-  min-height: 0;
+  height: 450px; /* Фиксированная высота вместо flex: 1 */
+  max-width: 700px; /* Максимальная ширина */
+  width: 100%;
 }
 
 /* Photo Modal */
@@ -1400,6 +1398,14 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.photo-modal.active {
+  opacity: 1;
+  visibility: visible;
 }
 
 .photo-modal-overlay {
@@ -1408,33 +1414,48 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.9);
-  backdrop-filter: blur(10px);
+  background: linear-gradient(135deg, rgba(255, 68, 88, 0.95) 0%, rgba(108, 92, 231, 0.95) 100%);
+  backdrop-filter: blur(20px);
 }
 
 .photo-modal-content {
   position: relative;
-  max-width: 90vw;
-  max-height: 90vh;
+  max-width: 85vw;
+  max-height: 85vh;
   z-index: 10000;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border-radius: var(--border-radius);
+  padding: 1rem;
+  box-shadow: var(--shadow-hover);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transform: scale(0.8);
+  transition: transform 0.3s ease;
+}
+
+.photo-modal.active .photo-modal-content {
+  transform: scale(1);
 }
 
 .photo-modal-image {
-  max-width: 100%;
-  max-height: 90vh;
+  width: 100%;
+  height: auto;
+  max-height: 75vh;
   object-fit: contain;
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow-hover);
+  border-radius: calc(var(--border-radius) - 5px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  display: block;
+  margin: 0 auto;
 }
 
 .photo-modal-close {
   position: absolute;
-  top: -40px;
-  right: 0;
-  background: rgba(255, 255, 255, 0.2);
+  top: -15px;
+  right: -15px;
+  background: var(--gradient-primary);
   border: none;
   color: white;
-  font-size: 2rem;
+  font-size: 1.5rem;
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -1443,11 +1464,15 @@ body {
   align-items: center;
   justify-content: center;
   transition: var(--transition);
+  box-shadow: var(--shadow);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  font-weight: bold;
 }
 
 .photo-modal-close:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: var(--primary-dark);
   transform: scale(1.1);
+  box-shadow: var(--shadow-hover);
 }
 
 /* Footer */
@@ -1532,7 +1557,7 @@ body {
 @media (max-width: 768px) {
   .app-main {
     padding: 0.5rem;
-    height: calc(100vh - 60px);
+    padding-bottom: 2rem;
   }
   
   .page-title {
@@ -1546,6 +1571,8 @@ body {
   .discover-card {
     grid-template-columns: 1fr;
     grid-template-rows: 1fr auto;
+    height: 500px; /* Немного больше для мобильных */
+    max-width: 100%;
   }
   
   .card-content {
