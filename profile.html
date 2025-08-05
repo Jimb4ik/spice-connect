@@ -131,9 +131,6 @@
                         <h3>📷 Your Photos</h3>
                         <div class="section-header-actions">
                             <span class="photo-count" id="photoCount">2/10 photos</span>
-                            <button class="btn btn-primary btn-sm" id="addPhotoBtn">
-                                <span>+</span> Add Photo
-                            </button>
                         </div>
                     </div>
                     
@@ -559,18 +556,7 @@
                 }
             }, 1000); // Увеличиваем задержку еще больше
             
-            // Добавляем обработчик для кнопки добавления фото
-            const addPhotoBtn = document.getElementById('addPhotoBtn');
-            if (addPhotoBtn) {
-                addPhotoBtn.addEventListener('click', () => {
-                    console.log('[PROFILE] Add photo button clicked');
-                    if (window.photoManager && window.photoManager.addPhoto) {
-                        window.photoManager.addPhoto();
-                    } else {
-                        console.error('[PROFILE] PhotoManager not available');
-                    }
-                });
-            }
+            // Кнопка Add Photo удалена по запросу пользователя
             
             // Загружаем профиль пользователя
             loadUserProfile();

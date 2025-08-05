@@ -169,29 +169,55 @@
         </div>
     </div>
 
-    <!-- Match Modal -->
-    <div id="matchModal" class="modal">
-        <div class="modal-content match-modal">
-            <div class="match-celebration">
-                <div class="match-hearts">💕💕💕</div>
-                <h2>It's a Match!</h2>
-                <div class="match-profiles">
-                    <div class="match-profile">
-                        <img id="matchYourPhoto" src="" alt="Your photo">
-                        <p>You</p>
+    <!-- Beautiful Match Modal -->
+    <div id="matchModal" class="beautiful-match-modal" style="display: none;">
+        <div class="match-overlay">
+            <div class="match-content">
+                <div class="match-celebration-header">
+                    <div class="celebration-particles">
+                        <span class="particle">💖</span>
+                        <span class="particle">✨</span>
+                        <span class="particle">💕</span>
+                        <span class="particle">⭐</span>
+                        <span class="particle">💫</span>
                     </div>
-                    <div class="match-heart">❤️</div>
-                    <div class="match-profile">
-                        <img id="matchTheirPhoto" src="" alt="Their photo">
-                        <p id="matchTheirName">Name</p>
-                    </div>
+                    <h1 class="match-title">It's a Match!</h1>
+                    <p class="match-subtitle">You both liked each other!</p>
                 </div>
-                <p class="match-message">You both liked each other!</p>
                 
-                <div class="match-actions">
-                    <button class="btn btn-primary" id="sendMessageBtn">💬 Send Message</button>
-                    <button class="btn btn-outline" id="keepSwipingBtn">🔥 Keep Swiping</button>
+                <div class="match-profiles-display">
+                    <div class="profile-circle">
+                        <img id="matchYourPhoto" src="/images/default-avatar.png" alt="Your photo" class="profile-image">
+                        <div class="profile-label">You</div>
+                    </div>
+                    
+                    <div class="match-connection">
+                        <div class="heart-beat">💖</div>
+                        <div class="connection-line"></div>
+                    </div>
+                    
+                    <div class="profile-circle">
+                        <img id="matchTheirPhoto" src="/images/default-avatar.png" alt="Their photo" class="profile-image">
+                        <div class="profile-label" id="matchTheirName">Username</div>
+                    </div>
                 </div>
+                
+                <div class="match-message-beautiful">
+                    <p>Start a conversation and see where it goes!</p>
+                </div>
+                
+                <div class="match-action-buttons">
+                    <button class="match-btn primary" id="sendMessageBtn">
+                        <span class="btn-icon">💬</span>
+                        <span class="btn-text">Send Message</span>
+                    </button>
+                    <button class="match-btn secondary" id="keepSwipingBtn">
+                        <span class="btn-icon">🔥</span>
+                        <span class="btn-text">Keep Discovering</span>
+                    </button>
+                </div>
+                
+                <button class="match-close" id="closeMatchModal">&times;</button>
             </div>
         </div>
     </div>
@@ -614,6 +640,8 @@
                     // Проверяем на матч (точно такой же формат как в matching-system.js)
                     if (data.result === 'match') {
                         console.log('🎉 IT\'S A MATCH!');
+                        // Сохраняем матч в базу данных
+                        await saveMatchToDatabase(currentProfile);
                         showMatchModal(currentProfile);
                     }
                 }
@@ -625,8 +653,178 @@
         
         function showMatchModal(matchedProfile) {
             console.log('[DISCOVER] Match found!', matchedProfile);
-            // TODO: Показать модальное окно матча
-            alert(`It's a match with ${matchedProfile.pseudo || 'this person'}! 💕`);
+            
+            const modal = document.getElementById('matchModal');
+            const theirPhoto = document.getElementById('matchTheirPhoto');
+            const theirName = document.getElementById('matchTheirName');
+            const yourPhoto = document.getElementById('matchYourPhoto');
+            const sendMessageBtn = document.getElementById('sendMessageBtn');
+            const keepSwipingBtn = document.getElementById('keepSwipingBtn');
+            const closeMatchModal = document.getElementById('closeMatchModal');
+            
+            if (!modal) return;
+            
+            // Заполняем данные матча
+            if (theirPhoto && matchedProfile) {
+                updateProfilePhoto(theirPhoto, matchedProfile);
+            }
+            
+            if (theirName) {
+                theirName.textContent = matchedProfile.pseudo || matchedProfile.nom_complet || 'User';
+            }
+            
+            // Загружаем фото текущего пользователя
+            if (yourPhoto && window.authManager) {
+                loadCurrentUserPhoto(yourPhoto);
+            }
+            
+            // Показываем модальное окно
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            
+            // Обработчики кнопок
+            if (sendMessageBtn) {
+                sendMessageBtn.onclick = () => {
+                    closeMatchModalFunc();
+                    // Переходим на страницу сообщений
+                    window.location.href = 'messages.html';
+                };
+            }
+            
+            if (keepSwipingBtn) {
+                keepSwipingBtn.onclick = () => {
+                    closeMatchModalFunc();
+                };
+            }
+            
+            if (closeMatchModal) {
+                closeMatchModal.onclick = () => {
+                    closeMatchModalFunc();
+                };
+            }
+            
+            // Закрытие по клику на overlay
+            modal.onclick = (e) => {
+                if (e.target === modal) {
+                    closeMatchModalFunc();
+                }
+            };
+            
+            function closeMatchModalFunc() {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        }
+        
+        async function loadCurrentUserPhoto(imgElement) {
+            try {
+                const sessionId = window.authManager?.sessionId;
+                if (!sessionId) return;
+                
+                const apiConfigResponse = await fetch('/api/get-api-key');
+                const apiConfig = await apiConfigResponse.json();
+                
+                const response = await fetch(`${apiConfig.baseUrl}/index_api/user?api_key=${apiConfig.apiKey}&session_id=${sessionId}`);
+                const userData = await response.json();
+                
+                if (userData && userData.result) {
+                    updateProfilePhoto(imgElement, userData.result);
+                }
+            } catch (error) {
+                console.error('[DISCOVER] Error loading user photo:', error);
+            }
+        }
+        
+        async function saveMatchToDatabase(matchedProfile) {
+            try {
+                console.log('[DISCOVER] Saving match to database:', matchedProfile);
+                
+                const sessionId = window.authManager?.sessionId;
+                if (!sessionId) {
+                    console.error('[DISCOVER] No session ID for saving match');
+                    return;
+                }
+                
+                // Получаем ID текущего пользователя
+                const userId = await getCurrentUserId();
+                if (!userId) {
+                    console.error('[DISCOVER] No user ID for saving match');
+                    return;
+                }
+                
+                // Подготавливаем данные матча
+                const matchData = {
+                    action: 'save_match',
+                    user_id: userId,
+                    matched_user_id: matchedProfile.id || matchedProfile.id_membre,
+                    matched_user_name: matchedProfile.pseudo || matchedProfile.nom_complet || 'Unknown',
+                    matched_user_age: matchedProfile.age || null,
+                    matched_user_city: matchedProfile.ville || matchedProfile.region || null,
+                    matched_user_photos: getProfilePhotos(matchedProfile)
+                };
+                
+                console.log('[DISCOVER] Match data to save:', matchData);
+                
+                const response = await fetch('/api/database', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(matchData)
+                });
+                
+                const result = await response.json();
+                console.log('[DISCOVER] Match saved result:', result);
+                
+                if (result.success) {
+                    console.log('✅ Match successfully saved to database!');
+                } else {
+                    console.error('❌ Failed to save match:', result.error);
+                }
+                
+            } catch (error) {
+                console.error('[DISCOVER] Error saving match to database:', error);
+            }
+        }
+        
+        async function getCurrentUserId() {
+            try {
+                const sessionId = window.authManager?.sessionId;
+                if (!sessionId) return null;
+                
+                const apiConfigResponse = await fetch('/api/get-api-key');
+                const apiConfig = await apiConfigResponse.json();
+                
+                const response = await fetch(`${apiConfig.baseUrl}/index_api/user?api_key=${apiConfig.apiKey}&session_id=${sessionId}`);
+                const userData = await response.json();
+                
+                if (userData && userData.result) {
+                    return userData.result.id || userData.result.id_membre || sessionId;
+                }
+                
+                return sessionId; // fallback
+            } catch (error) {
+                console.error('[DISCOVER] Error getting user ID:', error);
+                return null;
+            }
+        }
+        
+        function getProfilePhotos(profile) {
+            const photos = [];
+            
+            // Собираем фотографии из разных полей
+            if (profile.photos_v2 && Array.isArray(profile.photos_v2)) {
+                photos.push(...profile.photos_v2.map(p => p.url || p.src || p));
+            }
+            
+            if (profile.photos && Array.isArray(profile.photos)) {
+                photos.push(...profile.photos.map(p => p.url || p.src || p));
+            }
+            
+            if (profile.picture_430) photos.push(profile.picture_430);
+            if (profile.picture) photos.push(profile.picture);
+            
+            return photos.filter(photo => photo && typeof photo === 'string');
         }
         
         // Функции для модального окна фото
