@@ -891,11 +891,12 @@
                     return { success: false, error: 'No API key' };
                 }
                 
-                // Параметры для создания контакта - используем GET как указано в документации для AJAX
+                // Параметры для создания контакта согласно официальной документации
                 const contactParams = new URLSearchParams({
                     api_key: apiConfig.apiKey,
                     session_id: sessionId,
-                    id: profileId
+                    action: 'add',
+                    target_id: profileId
                 });
                 
                 console.log('[CONTACT] Contact params:', contactParams.toString());
