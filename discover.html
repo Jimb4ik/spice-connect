@@ -792,10 +792,36 @@
             
             // Обработчики кнопок
             if (sendMessageBtn) {
-                sendMessageBtn.onclick = () => {
-                    closeMatchModalFunc();
-                    // Переходим на страницу сообщений
-                    window.location.href = 'messages.html';
+                sendMessageBtn.onclick = async () => {
+                    console.log('[MATCH] Creating contact and sending message...');
+                    
+                    const sessionId = window.authManager?.sessionId;
+                    if (!sessionId || !currentProfile) {
+                        console.error('[MATCH] No session ID or profile for contact creation');
+                        closeMatchModalFunc();
+                        return;
+                    }
+                    
+                    try {
+                        // Создаем контакт через API
+                        const contactResult = await createContact(sessionId, currentProfile);
+                        
+                        if (contactResult.success) {
+                            console.log('[MATCH] ✅ Contact created successfully:', contactResult);
+                            
+                            // Закрываем модальное окно
+                            closeMatchModalFunc();
+                            
+                            // Переходим на страницу сообщений
+                            window.location.href = 'messages.html';
+                        } else {
+                            console.error('[MATCH] ❌ Failed to create contact:', contactResult);
+                            alert('Ошибка создания контакта. Попробуйте еще раз.');
+                        }
+                    } catch (error) {
+                        console.error('[MATCH] Error creating contact:', error);
+                        alert('Ошибка создания контакта. Попробуйте еще раз.');
+                    }
                 };
             }
             
@@ -844,6 +870,56 @@
         }
         
         // Функции для работы с матчами перенесены в js/match-utils.js
+        
+        // Создание контакта через API
+        async function createContact(sessionId, profile) {
+            try {
+                console.log('[CONTACT] Creating contact for profile:', profile);
+                
+                const profileId = profile.id || profile.id_membre;
+                if (!profileId) {
+                    console.error('[CONTACT] No profile ID found');
+                    return { success: false, error: 'No profile ID' };
+                }
+                
+                // Получаем API ключ
+                const apiConfigResponse = await fetch('/api/get-api-key');
+                const apiConfig = await apiConfigResponse.json();
+                
+                if (!apiConfig.apiKey) {
+                    console.error('[CONTACT] No API key available');
+                    return { success: false, error: 'No API key' };
+                }
+                
+                // Параметры для создания контакта - используем GET как указано в документации для AJAX
+                const contactParams = new URLSearchParams({
+                    api_key: apiConfig.apiKey,
+                    session_id: sessionId,
+                    id: profileId
+                });
+                
+                console.log('[CONTACT] Contact params:', contactParams.toString());
+                
+                // Пробуем через spice-multi-test proxy с GET методом
+                const apiUrl = `/api/spice-multi-test?endpoint=/ajax_api/setContact&method=GET&${contactParams.toString()}`;
+                
+                const response = await fetch(apiUrl);
+                const result = await response.json();
+                
+                console.log('[CONTACT] API Response:', result);
+                
+                if (result.success) {
+                    return { success: true, data: result.data };
+                } else {
+                    console.error('[CONTACT] API Error:', result.error);
+                    return { success: false, error: result.error };
+                }
+                
+            } catch (error) {
+                console.error('[CONTACT] Error creating contact:', error);
+                return { success: false, error: error.message };
+            }
+        }
         
         // Функции для модального окна фото
         function openPhotoModal(photoSrc) {
