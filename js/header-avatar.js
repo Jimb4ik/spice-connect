@@ -1,6 +1,18 @@
 // Утилита для загрузки аватара пользователя в header
 // Используется на всех страницах для отображения фото пользователя
 
+// Функция для отображения инициалов
+function showInitials(name = 'H') {
+    const avatarImg = document.getElementById('userAvatarImg');
+    const avatarText = document.getElementById('userAvatarText');
+    
+    if (avatarImg && avatarText) {
+        avatarImg.style.display = 'none';
+        avatarText.style.display = 'flex';
+        avatarText.textContent = name.charAt(0).toUpperCase();
+    }
+}
+
 /**
  * Загружает и отображает аватар пользователя в header
  */
@@ -41,6 +53,12 @@ async function loadUserAvatar() {
         const apiUrl = `/api/spice-multi-test?endpoint=/index_api/user&method=POST&session_id=${sessionId}&id=${userId}&get_picture_430=1`;
         
         const response = await fetch(apiUrl);
+        if (!response.ok) {
+            console.warn('[HEADER-AVATAR] API request failed:', response.status, response.statusText);
+            showInitials();
+            return;
+        }
+        
         const apiData = await response.json();
         
         console.log('[HEADER-AVATAR] API response:', apiData);

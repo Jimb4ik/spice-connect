@@ -117,7 +117,7 @@ async function initDatabase(pool) {
             matched_user_name VARCHAR(255),
             matched_user_age INTEGER,
             matched_user_city VARCHAR(255),
-            matched_user_photos TEXT[],
+            matched_user_photos TEXT,
             match_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             is_read BOOLEAN DEFAULT FALSE,
             UNIQUE(user_id, matched_user_id)
@@ -362,7 +362,7 @@ async function saveMatch(pool, req) {
             matched_user_photos = EXCLUDED.matched_user_photos,
             match_date = CURRENT_TIMESTAMP
          RETURNING *`,
-        [user_id, matched_user_id, matched_user_name, matched_user_age, matched_user_city, JSON.stringify(matched_user_photos)]
+        [user_id, matched_user_id, matched_user_name, matched_user_age, matched_user_city, Array.isArray(matched_user_photos) ? JSON.stringify(matched_user_photos) : matched_user_photos]
     );
 
     return {
