@@ -646,6 +646,21 @@ class MatchingSystemV2 {
       tab.classList.toggle('active', tab.dataset.mode === mode);
     });
 
+    // Скрываем все основные секции дашборда
+    const dashboardSections = ['#profile', '#messages', '#matches', '#visitors', '#search', '#settings'];
+    dashboardSections.forEach(selector => {
+      const section = document.querySelector(selector);
+      if (section) {
+        section.style.display = 'none';
+      }
+    });
+
+    // Скрываем навигацию дашборда если в режиме матчинга
+    const dashboardNav = document.querySelector('.dashboard-nav');
+    if (dashboardNav) {
+      dashboardNav.style.display = 'none';
+    }
+
     // Показываем соответствующий контент матчинга
     document.querySelectorAll('.matching-mode').forEach(content => {
       if (content.id === `${mode}-mode`) {
