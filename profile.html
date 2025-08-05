@@ -68,85 +68,140 @@
             <p class="page-subtitle">Manage your profile information and photos</p>
         </div>
 
-        <div class="card-grid">
-            <!-- Фотографии профиля -->
-            <div class="card fade-in-up">
-                <div class="profile-photos-section">
-                    <div class="section-header">
-                        <h3>📷 Your Photos</h3>
-                        <span class="photo-count" id="photoCount">2/10 photos</span>
+        <!-- Главная информация профиля -->
+        <div class="profile-hero-section fade-in-up">
+            <div class="profile-hero-card">
+                <div class="profile-main-info">
+                    <div class="profile-avatar-section">
+                        <div class="profile-main-avatar">
+                            <img src="images/default-avatar.png" alt="Profile" id="profileMainPhoto">
+                            <button class="avatar-edit-btn" id="editAvatarBtn">📷</button>
+                        </div>
+                        <div class="profile-basic-info">
+                            <h1 id="profileName">Loading...</h1>
+                            <p class="profile-subtitle">
+                                <span id="profileAge">--</span> years • <span id="profileLocation">Loading location...</span>
+                            </p>
+                            <div class="profile-online-status">
+                                <span class="status-indicator online"></span>
+                                <span>Online now</span>
+                            </div>
+                        </div>
                     </div>
                     
-                    <div class="photo-gallery" id="photoGallery">
-                        <!-- Фотографии будут загружены динамически -->
+                    <div class="profile-actions">
+                        <button class="btn btn-primary" id="editProfileBtn">
+                            ✏️ Edit Profile
+                        </button>
+                        <button class="btn btn-secondary" id="viewPublicProfileBtn">
+                            👁️ View Public Profile
+                        </button>
                     </div>
-                    
-                    <button class="btn btn-primary mt-2" id="addPhotoBtn">
-                        <span>+</span> Add Photo
-                    </button>
                 </div>
             </div>
+        </div>
 
-            <!-- Основная информация -->
-            <div class="card fade-in-up">
-                <div class="profile-info">
-                    <div class="profile-avatar">
-                        <img src="images/default-avatar.png" alt="Profile" id="profileMainPhoto">
+        <!-- Статистика -->
+        <div class="profile-stats-section fade-in-up">
+            <div class="stats-container">
+                <div class="stat-card">
+                    <div class="stat-number" id="profileViews">-</div>
+                    <div class="stat-label">Profile Views</div>
+                    <div class="stat-trend">+12% this week</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalLikes">-</div>
+                    <div class="stat-label">Likes Received</div>
+                    <div class="stat-trend">+8% this week</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalMatches">-</div>
+                    <div class="stat-label">Total Matches</div>
+                    <div class="stat-trend">+25% this week</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="messagesCount">3</div>
+                    <div class="stat-label">Active Chats</div>
+                    <div class="stat-trend">2 new today</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-content-grid">
+            <!-- Фотографии профиля -->
+            <div class="profile-section fade-in-up">
+                <div class="section-card">
+                    <div class="section-header">
+                        <h3>📷 Your Photos</h3>
+                        <div class="section-header-actions">
+                            <span class="photo-count" id="photoCount">2/10 photos</span>
+                            <button class="btn btn-primary btn-sm" id="addPhotoBtn">
+                                <span>+</span> Add Photo
+                            </button>
+                        </div>
                     </div>
-                    <h2 id="profileName">Loading...</h2>
-                    <p class="profile-location" id="profileLocation">📍 Location</p>
-                    <p class="profile-age" id="profileAge">Age</p>
                     
-                    <div class="profile-completion mt-3">
-                        <div class="completion-label">Profile Completion:</div>
+                    <div class="photos-grid" id="photoGallery">
+                        <!-- Фотографии будут загружены динамически -->
+                        <div class="photo-placeholder">
+                            <div class="placeholder-icon">📷</div>
+                            <p>Upload your first photo</p>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-completion">
+                        <div class="completion-header">
+                            <span class="completion-label">Profile Completion</span>
+                            <span class="completion-percent" id="completionPercent">85%</span>
+                        </div>
                         <div class="completion-bar">
                             <div class="completion-fill" id="completionFill" style="width: 85%"></div>
                         </div>
-                        <div class="completion-percent" id="completionPercent">85%</div>
-                    </div>
-                    
-                    <button class="btn btn-primary mt-3" id="editProfileBtn">
-                        ✏️ Edit Profile
-                    </button>
-                </div>
-            </div>
-
-            <!-- Статистика -->
-            <div class="card fade-in-up">
-                <h3 class="mb-2">📊 Profile Statistics</h3>
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <div class="stat-number" id="profileViews">-</div>
-                        <div class="stat-label">Profile Views</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number" id="totalLikes">-</div>
-                        <div class="stat-label">Likes Received</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number" id="totalMatches">-</div>
-                        <div class="stat-label">Total Matches</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number" id="messagesCount">3</div>
-                        <div class="stat-label">Active Chats</div>
+                        <p class="completion-hint">Add more photos and complete your profile to get more matches!</p>
                     </div>
                 </div>
             </div>
 
             <!-- Быстрые действия -->
-            <div class="card fade-in-up">
-                <h3 class="mb-2">⚡ Quick Actions</h3>
-                <div class="quick-actions">
-                    <a href="discover.html" class="btn btn-primary">
-                        🔥 Start Swiping
-                    </a>
-                    <a href="messages.html" class="btn btn-secondary">
-                        💬 Check Messages
-                    </a>
-                    <a href="matches.html" class="btn btn-outline">
-                        💕 View Matches
-                    </a>
+            <div class="profile-section fade-in-up">
+                <div class="section-card">
+                    <div class="section-header">
+                        <h3>⚡ Quick Actions</h3>
+                    </div>
+                    
+                    <div class="quick-actions-grid">
+                        <a href="discover.html" class="action-card primary">
+                            <div class="action-icon">🔥</div>
+                            <div class="action-content">
+                                <h4>Start Discovering</h4>
+                                <p>Find new people nearby</p>
+                            </div>
+                        </a>
+                        
+                        <a href="messages.html" class="action-card secondary">
+                            <div class="action-icon">💬</div>
+                            <div class="action-content">
+                                <h4>Check Messages</h4>
+                                <p>3 new conversations</p>
+                            </div>
+                        </a>
+                        
+                        <a href="matches.html" class="action-card accent">
+                            <div class="action-icon">💕</div>
+                            <div class="action-content">
+                                <h4>View Matches</h4>
+                                <p>See who likes you</p>
+                            </div>
+                        </a>
+                        
+                        <a href="settings.html" class="action-card outline">
+                            <div class="action-icon">⚙️</div>
+                            <div class="action-content">
+                                <h4>Settings</h4>
+                                <p>Manage your account</p>
+                            </div>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -396,9 +451,7 @@
 
     <!-- Скрипты -->
     <script src="js/auth-manager.js?v=1.2"></script>
-    <script src="js/auth-modal.js?v=1.0"></script>
     <script src="js/photo-manager.js?v=8.0"></script>
-    <script src="js/dashboard.js?v=6.1"></script>
     
     <script>
         // Проверка авторизации при загрузке страницы
@@ -408,12 +461,117 @@
                 return;
             }
             
-            // Обновляем аватар пользователя
+            // Обновляем аватар пользователя в хедере
             const userAvatar = document.getElementById('userAvatar');
             if (window.authManager.currentUser && window.authManager.currentUser.pseudo) {
                 userAvatar.textContent = window.authManager.currentUser.pseudo.charAt(0).toUpperCase();
             }
+            
+            // Загружаем профиль пользователя
+            loadUserProfile();
+            
+            // Инициализируем photo manager для загрузки фотографий
+            if (window.PhotoManager) {
+                window.photoManager = new PhotoManager();
+            }
         });
+        
+        async function loadUserProfile() {
+            try {
+                const sessionId = window.authManager?.sessionId;
+                if (!sessionId) return;
+                
+                const userDataString = localStorage.getItem('lavrilo_user');
+                if (!userDataString) return;
+                
+                const userData = JSON.parse(userDataString);
+                const userId = userData.id;
+                
+                // Обновляем базовую информацию
+                document.getElementById('profileName').textContent = userData.pseudo || userData.nom_complet || 'Your Name';
+                document.getElementById('profileAge').textContent = userData.age || '--';
+                document.getElementById('profileLocation').textContent = userData.ville || userData.region || 'Location';
+                
+                // Загружаем полный профиль через API с фотографиями
+                const apiUrl = `/api/spice-multi-test?endpoint=/index_api/user&method=POST&session_id=${sessionId}&id=${userId}&get_picture_430=1&get_title=1`;
+                
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                
+                console.log('[PROFILE] API Response:', data);
+                
+                if (data.success && data.data?.result) {
+                    const profile = data.data.result;
+                    
+                    // Обновляем главное фото профиля
+                    updateMainProfilePhoto(profile);
+                    
+                    // Обновляем дополнительную информацию
+                    if (profile.pseudo) {
+                        document.getElementById('profileName').textContent = profile.pseudo;
+                    }
+                    if (profile.age) {
+                        document.getElementById('profileAge').textContent = profile.age;
+                    }
+                    if (profile.ville || profile.region) {
+                        document.getElementById('profileLocation').textContent = profile.ville || profile.region;
+                    }
+                }
+                
+            } catch (error) {
+                console.error('[PROFILE] Error loading profile:', error);
+            }
+        }
+        
+        function updateMainProfilePhoto(profile) {
+            const mainPhotoElement = document.getElementById('profileMainPhoto');
+            let photoUrl = '/images/default-avatar.png';
+            
+            console.log('[PROFILE] Photo data:', {
+                photos_v2: profile.photos_v2,
+                photos: profile.photos,
+                picture_430: profile.picture_430,
+                picture: profile.picture
+            });
+            
+            // Ищем главное фото в разных форматах
+            if (profile.photos_v2) {
+                if (profile.photos_v2.public) {
+                    // Структура photos_v2.public.1.normal
+                    const publicPhotos = profile.photos_v2.public;
+                    const firstPhotoKey = Object.keys(publicPhotos)[0];
+                    if (firstPhotoKey && publicPhotos[firstPhotoKey]) {
+                        photoUrl = publicPhotos[firstPhotoKey].sq_430 || 
+                                  publicPhotos[firstPhotoKey].normal || 
+                                  publicPhotos[firstPhotoKey].sq_middle;
+                    }
+                } else if (Array.isArray(profile.photos_v2) && profile.photos_v2.length > 0) {
+                    // Массив фотографий
+                    const mainPhoto = profile.photos_v2.find(p => p.main_photo === '1') || profile.photos_v2[0];
+                    photoUrl = mainPhoto.sq_430 || mainPhoto.normal || mainPhoto.sq_middle;
+                }
+            } else if (profile.photos && profile.photos.length > 0) {
+                photoUrl = profile.photos[0].url_big || profile.photos[0].url_middle;
+            } else if (profile.picture_430) {
+                photoUrl = profile.picture_430;
+            } else if (profile.picture) {
+                photoUrl = profile.picture;
+            }
+            
+            // Убеждаемся что URL корректный
+            if (photoUrl && !photoUrl.startsWith('http') && !photoUrl.startsWith('/')) {
+                photoUrl = 'https://dev2018.de5a7.com/' + photoUrl;
+            }
+            
+            console.log('[PROFILE] Setting main photo URL:', photoUrl);
+            mainPhotoElement.src = photoUrl;
+            
+            // Добавляем обработчик ошибок для фото
+            mainPhotoElement.onerror = function() {
+                console.warn('[PROFILE] Failed to load photo, using default');
+                this.src = '/images/default-avatar.png';
+            };
+        }
     </script>
 </body>
 </html>

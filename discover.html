@@ -68,112 +68,98 @@
             <p class="page-subtitle">Find your perfect match by swiping through profiles</p>
         </div>
 
-        <!-- Переключатель режимов -->
-        <div class="mode-switcher fade-in-up">
-            <div class="mode-tabs">
-                <button class="mode-tab active" data-mode="tinder">🔥 Discover</button>
-                <button class="mode-tab" data-mode="secret-garden">🌹 Secret Garden</button>
-                <button class="mode-tab" data-mode="my-matches">💕 My Matches</button>
-            </div>
-        </div>
-
-        <!-- Режим Tinder -->
-        <div id="tinder-mode" class="matching-mode active fade-in-up">
-            <div class="tinder-container">
-                <div class="tinder-header">
-                    <h3>🔥 Discover New People</h3>
-                    <button class="filters-btn" id="tinderFilters">🎛️ Filters</button>
-                </div>
-                
+        <!-- Discover Interface -->
+        <div class="discover-container fade-in-up">
+            <!-- Profile Card -->
+            <div class="discover-card-container">
                 <!-- Loading State -->
-                <div class="tinder-loading" id="tinderLoading" style="display: none;">
+                <div class="discover-loading" id="discoverLoading">
                     <div class="loading-spinner"></div>
                     <p>Loading profiles...</p>
                 </div>
 
-                <!-- Profile Cards Container -->
-                <div class="tinder-cards" id="tinderCards">
-                    <div class="swipe-card-container" id="swipeCardContainer" style="display: none;">
-                        <div class="swipe-card" id="swipeCard">
-                            <div class="card-photo-container">
-                                <img id="cardMainPhoto" src="" alt="Profile photo" class="card-main-photo">
-                                <div class="photo-indicators" id="photoIndicators"></div>
-                            </div>
-                            
-                            <div class="card-info">
-                                <div class="card-header">
-                                    <h3 id="cardName">Name, Age</h3>
-                                    <div class="card-location" id="cardLocation">📍 Location</div>
-                                </div>
-                                
-                                <div class="card-details">
-                                    <div class="card-work" id="cardWork">💼 Profession</div>
-                                    <div class="card-description" id="cardDescription">Description...</div>
-                                </div>
+                <!-- Profile Card -->
+                <div class="discover-card" id="discoverCard" style="display: none;">
+                    <div class="card-images">
+                        <img id="cardMainPhoto" src="/images/default-avatar.png" alt="Profile photo" class="card-photo">
+                        <div class="photo-navigation" id="photoNavigation" style="display: none;">
+                            <button class="photo-nav-btn prev" id="prevPhotoBtn">‹</button>
+                            <button class="photo-nav-btn next" id="nextPhotoBtn">›</button>
+                        </div>
+                        <div class="photo-indicators" id="photoIndicators"></div>
+                    </div>
+                    
+                    <div class="card-content">
+                        <div class="card-header">
+                            <h2 id="cardName">Name, Age</h2>
+                            <div class="card-online-status" id="cardOnlineStatus">
+                                <span class="status-dot"></span>
+                                <span>Online now</span>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- No Profiles State -->
-                    <div class="no-profiles" id="noProfiles" style="display: none;">
-                        <div class="no-profiles-icon">😔</div>
-                        <h3>No more profiles</h3>
-                        <p>You've seen all available profiles. Check back later for new people!</p>
-                        <button class="btn btn-primary" id="resetProfilesBtn">Reset Viewed Profiles</button>
+                        
+                        <div class="card-location" id="cardLocation">
+                            <span class="location-icon">📍</span>
+                            <span>Location</span>
+                        </div>
+                        
+                        <div class="card-details">
+                            <div class="detail-item" id="cardWork">
+                                <span class="detail-icon">💼</span>
+                                <span>Profession</span>
+                            </div>
+                            <div class="detail-item" id="cardEducation">
+                                <span class="detail-icon">🎓</span>
+                                <span>Education</span>
+                            </div>
+                        </div>
+                        
+                        <div class="card-description" id="cardDescription">
+                            <p>Profile description will appear here...</p>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Action Buttons -->
-                <div class="tinder-actions" id="tinderActions">
-                    <button class="action-btn dislike-btn" id="dislikeBtn">
-                        <span>❌</span>
+                <!-- No Profiles State -->
+                <div class="no-profiles-state" id="noProfilesState" style="display: none;">
+                    <div class="no-profiles-icon">🎯</div>
+                    <h3>You've seen everyone!</h3>
+                    <p>Check back later for new people in your area.</p>
+                    <button class="btn btn-primary" id="resetProfilesBtn">
+                        🔄 Reset and Start Over
                     </button>
-                    <button class="action-btn super-like-btn" id="superLikeBtn">
-                        <span>⭐</span>
-                    </button>
-                    <button class="action-btn like-btn" id="likeBtn">
-                        <span>❤️</span>
-                    </button>
-                </div>
-
-                <!-- Profile Counter -->
-                <div class="profile-counter" id="profileCounter">
-                    <span id="currentProfileNum">1</span> of <span id="remainingProfiles">--</span>
                 </div>
             </div>
-        </div>
 
-        <!-- Режим Secret Garden -->
-        <div id="secret-garden-mode" class="matching-mode" style="display: none;">
-            <div class="secret-garden-container">
-                <div class="garden-header">
-                    <h3>🌹 Secret Garden</h3>
-                    <p>Discover profiles in a more intimate setting</p>
-                </div>
+            <!-- Action Buttons -->
+            <div class="discover-actions">
+                <button class="action-button dislike-btn" id="dislikeBtn" title="Pass">
+                    <span class="action-icon">❌</span>
+                    <span class="action-label">Pass</span>
+                </button>
                 
-                <div class="garden-content">
-                    <p class="text-center">Secret Garden mode coming soon...</p>
-                </div>
+                <button class="action-button super-like-btn" id="superLikeBtn" title="Super Like">
+                    <span class="action-icon">⭐</span>
+                    <span class="action-label">Super</span>
+                </button>
+                
+                <button class="action-button like-btn" id="likeBtn" title="Like">
+                    <span class="action-icon">❤️</span>
+                    <span class="action-label">Like</span>
+                </button>
             </div>
-        </div>
 
-        <!-- Режим My Matches -->
-        <div id="my-matches-mode" class="matching-mode" style="display: none;">
-            <div class="matches-container">
-                <div class="matches-header">
-                    <h3>💕 My Matches</h3>
-                    <p>People who liked you back</p>
+            <!-- Profile Stats -->
+            <div class="discover-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Current:</span>
+                    <span class="stat-value">
+                        <span id="currentProfileNum">1</span> of <span id="remainingProfiles">--</span>
+                    </span>
                 </div>
-                
-                <div class="matches-grid" id="matchesGrid">
-                    <!-- Matches will be loaded dynamically -->
-                </div>
-                
-                <div class="no-matches" id="noMatches" style="display: none;">
-                    <div class="no-matches-icon">💔</div>
-                    <h3>No matches yet</h3>
-                    <p>Keep swiping to find your perfect match!</p>
-                    <button class="btn btn-primary" onclick="switchMode('tinder')">Start Swiping</button>
+                <div class="stat-item">
+                    <span class="stat-label">Today:</span>
+                    <span class="stat-value" id="todayLikes">0 likes</span>
                 </div>
             </div>
         </div>
@@ -276,16 +262,317 @@
                 userAvatar.textContent = window.authManager.currentUser.pseudo.charAt(0).toUpperCase();
             }
             
-            // Добавляем обработчики для переключения режимов
-            document.querySelectorAll('.mode-tab').forEach(tab => {
-                tab.addEventListener('click', () => {
-                    const mode = tab.dataset.mode;
-                    if (window.matchingSystem && typeof window.matchingSystem.switchMode === 'function') {
-                        window.matchingSystem.switchMode(mode);
-                    }
-                });
-            });
+            // Инициализируем Discover функционал
+            initializeDiscover();
         });
+        
+        function initializeDiscover() {
+            console.log('[DISCOVER] Initializing discover functionality...');
+            
+            // Добавляем обработчики кнопок
+            const dislikeBtn = document.getElementById('dislikeBtn');
+            const likeBtn = document.getElementById('likeBtn');
+            const superLikeBtn = document.getElementById('superLikeBtn');
+            const resetBtn = document.getElementById('resetProfilesBtn');
+            
+            if (dislikeBtn) {
+                dislikeBtn.addEventListener('click', () => handleDislike());
+            }
+            
+            if (likeBtn) {
+                likeBtn.addEventListener('click', () => handleLike());
+            }
+            
+            if (superLikeBtn) {
+                superLikeBtn.addEventListener('click', () => handleSuperLike());
+            }
+            
+            if (resetBtn) {
+                resetBtn.addEventListener('click', () => handleReset());
+            }
+            
+            // Загружаем первый профиль
+            loadNextProfile();
+        }
+        
+        let currentProfile = null;
+        let currentProfileIndex = 0;
+        let profilesBuffer = [];
+        
+        async function loadNextProfile() {
+            try {
+                console.log('[DISCOVER] Loading next profile...');
+                showLoadingState(true);
+                
+                // Если есть matching system v2, используем его
+                if (window.matchingSystem && typeof window.matchingSystem.loadTinderProfiles === 'function') {
+                    await window.matchingSystem.loadTinderProfiles();
+                    
+                    if (window.matchingSystem.profilesBuffer && window.matchingSystem.profilesBuffer.length > 0) {
+                        currentProfile = window.matchingSystem.profilesBuffer[window.matchingSystem.currentProfileIndex];
+                        displayCurrentProfile(currentProfile);
+                        updateProfileCounter();
+                        showLoadingState(false);
+                        return;
+                    }
+                }
+                
+                // Fallback: загружаем профили напрямую
+                const sessionId = window.authManager?.sessionId;
+                if (!sessionId) {
+                    console.error('[DISCOVER] No session ID available');
+                    showNoProfilesState();
+                    return;
+                }
+                
+                const apiUrl = `/api/spice-multi-test?endpoint=/index_api/search&method=POST&session_id=${sessionId}&page=1&pas=30&searchAgeMin=18&searchAgeMax=80&searchSexe=all`;
+                
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                
+                console.log('[DISCOVER] API Response:', data);
+                
+                if (data.success && data.data?.result?.length > 0) {
+                    profilesBuffer = data.data.result;
+                    currentProfileIndex = 0;
+                    currentProfile = profilesBuffer[0];
+                    displayCurrentProfile(currentProfile);
+                    updateProfileCounter();
+                } else {
+                    showNoProfilesState();
+                }
+                
+                showLoadingState(false);
+                
+            } catch (error) {
+                console.error('[DISCOVER] Error loading profile:', error);
+                showLoadingState(false);
+                showNoProfilesState();
+            }
+        }
+        
+        function displayCurrentProfile(profile) {
+            console.log('[DISCOVER] Displaying profile:', profile);
+            
+            if (!profile) {
+                showNoProfilesState();
+                return;
+            }
+            
+            // Обновляем имя и возраст
+            const nameElement = document.getElementById('cardName');
+            if (nameElement) {
+                const age = profile.age || 'Unknown age';
+                nameElement.textContent = `${profile.pseudo || profile.nom_complet || 'Unknown'}, ${age}`;
+            }
+            
+            // Обновляем локацию
+            const locationElement = document.getElementById('cardLocation');
+            if (locationElement) {
+                const locationSpan = locationElement.querySelector('span:last-child');
+                if (locationSpan) {
+                    locationSpan.textContent = profile.ville || profile.region || 'Location not specified';
+                }
+            }
+            
+            // Обновляем работу
+            const workElement = document.getElementById('cardWork');
+            if (workElement) {
+                const workSpan = workElement.querySelector('span:last-child');
+                if (workSpan) {
+                    workSpan.textContent = profile.travail || 'Work not specified';
+                }
+            }
+            
+            // Обновляем образование
+            const educationElement = document.getElementById('cardEducation');
+            if (educationElement) {
+                const educationSpan = educationElement.querySelector('span:last-child');
+                if (educationSpan) {
+                    educationSpan.textContent = profile.education || 'Education not specified';
+                }
+            }
+            
+            // Обновляем описание
+            const descriptionElement = document.getElementById('cardDescription');
+            if (descriptionElement) {
+                const descriptionP = descriptionElement.querySelector('p');
+                if (descriptionP) {
+                    descriptionP.textContent = profile.description || 'No description available.';
+                }
+            }
+            
+            // Обновляем фото
+            updateProfilePhoto(profile);
+            
+            // Показываем карточку
+            const discoverCard = document.getElementById('discoverCard');
+            const noProfilesState = document.getElementById('noProfilesState');
+            
+            if (discoverCard) discoverCard.style.display = 'grid';
+            if (noProfilesState) noProfilesState.style.display = 'none';
+        }
+        
+        function updateProfilePhoto(profile) {
+            const photoElement = document.getElementById('cardMainPhoto');
+            if (!photoElement) return;
+            
+            let photoUrl = '/images/default-avatar.png';
+            
+            // Пробуем разные источники фотографий
+            if (profile.photos_v2) {
+                if (profile.photos_v2.public) {
+                    const publicPhotos = profile.photos_v2.public;
+                    const firstPhotoKey = Object.keys(publicPhotos)[0];
+                    if (firstPhotoKey && publicPhotos[firstPhotoKey]) {
+                        photoUrl = publicPhotos[firstPhotoKey].sq_430 || 
+                                  publicPhotos[firstPhotoKey].normal || 
+                                  publicPhotos[firstPhotoKey].sq_middle;
+                    }
+                } else if (Array.isArray(profile.photos_v2) && profile.photos_v2.length > 0) {
+                    const mainPhoto = profile.photos_v2.find(p => p.main_photo === '1') || profile.photos_v2[0];
+                    photoUrl = mainPhoto.sq_430 || mainPhoto.normal || mainPhoto.sq_middle;
+                }
+            } else if (profile.photos && profile.photos.length > 0) {
+                photoUrl = profile.photos[0].url_big || profile.photos[0].url_middle;
+            } else if (profile.picture_430) {
+                photoUrl = profile.picture_430;
+            } else if (profile.picture) {
+                photoUrl = profile.picture;
+            }
+            
+            // Исправляем URL если нужно
+            if (photoUrl && !photoUrl.startsWith('http') && !photoUrl.startsWith('/')) {
+                photoUrl = 'https://dev2018.de5a7.com/' + photoUrl;
+            }
+            
+            console.log('[DISCOVER] Setting photo URL:', photoUrl);
+            photoElement.src = photoUrl;
+            
+            photoElement.onerror = function() {
+                console.warn('[DISCOVER] Failed to load photo, using default');
+                this.src = '/images/default-avatar.png';
+            };
+        }
+        
+        function showLoadingState(show) {
+            const loadingElement = document.getElementById('discoverLoading');
+            const cardElement = document.getElementById('discoverCard');
+            
+            if (loadingElement) {
+                loadingElement.style.display = show ? 'block' : 'none';
+            }
+            if (cardElement) {
+                cardElement.style.display = show ? 'none' : 'grid';
+            }
+        }
+        
+        function showNoProfilesState() {
+            const noProfilesElement = document.getElementById('noProfilesState');
+            const cardElement = document.getElementById('discoverCard');
+            
+            if (noProfilesElement) {
+                noProfilesElement.style.display = 'block';
+            }
+            if (cardElement) {
+                cardElement.style.display = 'none';
+            }
+        }
+        
+        function updateProfileCounter() {
+            const currentNumElement = document.getElementById('currentProfileNum');
+            const remainingElement = document.getElementById('remainingProfiles');
+            
+            if (currentNumElement) {
+                currentNumElement.textContent = currentProfileIndex + 1;
+            }
+            if (remainingElement) {
+                remainingElement.textContent = profilesBuffer.length || '--';
+            }
+        }
+        
+        // Обработчики действий
+        async function handleLike() {
+            console.log('[DISCOVER] Like action');
+            if (currentProfile) {
+                await performMatchAction('like', currentProfile.id);
+                moveToNextProfile();
+            }
+        }
+        
+        async function handleDislike() {
+            console.log('[DISCOVER] Dislike action');
+            if (currentProfile) {
+                await performMatchAction('dislike', currentProfile.id);
+                moveToNextProfile();
+            }
+        }
+        
+        async function handleSuperLike() {
+            console.log('[DISCOVER] Super like action');
+            if (currentProfile) {
+                await performMatchAction('super_like', currentProfile.id);
+                moveToNextProfile();
+            }
+        }
+        
+        async function handleReset() {
+            console.log('[DISCOVER] Reset profiles');
+            currentProfileIndex = 0;
+            profilesBuffer = [];
+            await loadNextProfile();
+        }
+        
+        function moveToNextProfile() {
+            currentProfileIndex++;
+            
+            if (currentProfileIndex < profilesBuffer.length) {
+                currentProfile = profilesBuffer[currentProfileIndex];
+                displayCurrentProfile(currentProfile);
+                updateProfileCounter();
+            } else {
+                // Загружаем новую порцию профилей
+                loadNextProfile();
+            }
+        }
+        
+        async function performMatchAction(action, profileId) {
+            try {
+                const sessionId = window.authManager?.sessionId;
+                if (!sessionId || !profileId) return;
+                
+                // Используем matching system v2 если доступен
+                if (window.matchingSystem && window.matchingSystem.performLikeDislike) {
+                    await window.matchingSystem.performLikeDislike(action, profileId);
+                    return;
+                }
+                
+                // Fallback: прямой вызов API
+                const endpoint = '/index_api/match';
+                const actionParam = action === 'like' ? 'setLike' : 'setDislike';
+                
+                const apiUrl = `/api/spice-multi-test?endpoint=${endpoint}&method=POST&session_id=${sessionId}&${actionParam}=${profileId}`;
+                
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                
+                console.log(`[DISCOVER] ${action} result:`, data);
+                
+                // Проверяем на матч
+                if (data.success && data.data?.result === 'match') {
+                    showMatchModal(currentProfile);
+                }
+                
+            } catch (error) {
+                console.error(`[DISCOVER] Error performing ${action}:`, error);
+            }
+        }
+        
+        function showMatchModal(matchedProfile) {
+            console.log('[DISCOVER] Match found!', matchedProfile);
+            // TODO: Показать модальное окно матча
+            alert(`It's a match with ${matchedProfile.pseudo || 'this person'}! 💕`);
+        }
     </script>
 </body>
 </html>
