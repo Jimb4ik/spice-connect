@@ -108,15 +108,29 @@ function initHeaderAvatar() {
     }
 }
 
+// Функция для проверки и повторного вызова
+function tryInitHeaderAvatar(attempt = 1, maxAttempts = 5) {
+    console.log(`[HEADER-AVATAR] Attempt ${attempt}/${maxAttempts} to init header avatar`);
+    
+    if (window.authManager && window.authManager.sessionId) {
+        console.log('[HEADER-AVATAR] AuthManager ready, initializing...');
+        initHeaderAvatar();
+    } else if (attempt < maxAttempts) {
+        console.log('[HEADER-AVATAR] AuthManager not ready, retrying in 1s...');
+        setTimeout(() => tryInitHeaderAvatar(attempt + 1, maxAttempts), 1000);
+    } else {
+        console.error('[HEADER-AVATAR] Failed to initialize after', maxAttempts, 'attempts');
+    }
+}
+
 // Автоматически инициализируем когда DOM готов
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-        // Увеличенная задержка для загрузки authManager
-        setTimeout(initHeaderAvatar, 2000);
+        setTimeout(() => tryInitHeaderAvatar(), 1000);
     });
 } else {
     // DOM уже готов
-    setTimeout(initHeaderAvatar, 2000);
+    setTimeout(() => tryInitHeaderAvatar(), 1000);
 }
 
 // Экспортируем функции для использования в других файлах

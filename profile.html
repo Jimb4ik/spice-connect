@@ -555,39 +555,41 @@
                 }, 300);
             }
             
-            // Инициализируем PhotoManager
-            setTimeout(async () => {
-                if (window.PhotoManager) {
-                    console.log('[PROFILE] Initializing PhotoManager...');
+            // Функция для инициализации PhotoManager с проверками
+            function initPhotoManager(attempt = 1, maxAttempts = 3) {
+                console.log(`[PROFILE] Initializing PhotoManager, attempt ${attempt}/${maxAttempts}`);
+                
+                if (window.PhotoManager && window.authManager?.sessionId) {
+                    console.log('[PROFILE] PhotoManager and AuthManager ready, initializing...');
                     window.photoManager = new PhotoManager();
-                    await window.photoManager.init(); // Важно: явно вызываем init и ждем завершения
                     
-                    // Принудительно рендерим галерею
-                    setTimeout(() => {
-                        if (window.photoManager.renderPhotoGallery) {
-                            console.log('[PROFILE] Force rendering photo gallery...');
-                            window.photoManager.renderPhotoGallery();
-                        }
-                    }, 1000);
+                    window.photoManager.init().then(() => {
+                        console.log('[PROFILE] PhotoManager initialized successfully');
+                        
+                        // Рендерим галерею после успешной инициализации
+                        setTimeout(() => {
+                            if (window.photoManager?.renderPhotoGallery) {
+                                console.log('[PROFILE] Rendering photo gallery...');
+                                window.photoManager.renderPhotoGallery();
+                            }
+                        }, 500);
+                    }).catch(error => {
+                        console.error('[PROFILE] PhotoManager init failed:', error);
+                    });
+                    
+                } else if (attempt < maxAttempts) {
+                    console.log('[PROFILE] PhotoManager or AuthManager not ready, retrying...');
+                    setTimeout(() => initPhotoManager(attempt + 1, maxAttempts), 1500);
                 } else {
-                    console.error('[PROFILE] PhotoManager not found! Retrying...');
-                    // Повторная попытка через 2 секунды
-                    setTimeout(async () => {
-                        if (window.PhotoManager) {
-                            console.log('[PROFILE] PhotoManager found on retry, initializing...');
-                            window.photoManager = new PhotoManager();
-                            await window.photoManager.init();
-                            setTimeout(() => {
-                                if (window.photoManager.renderPhotoGallery) {
-                                    window.photoManager.renderPhotoGallery();
-                                }
-                            }, 500);
-                        } else {
-                            console.error('[PROFILE] PhotoManager still not found after retry');
-                        }
-                    }, 2000);
+                    console.error('[PROFILE] Failed to initialize PhotoManager after', maxAttempts, 'attempts');
+                    console.log('[PROFILE] PhotoManager available:', !!window.PhotoManager);
+                    console.log('[PROFILE] AuthManager available:', !!window.authManager);
+                    console.log('[PROFILE] AuthManager sessionId:', window.authManager?.sessionId);
                 }
-            }, 1500); // Увеличиваем задержку еще больше
+            }
+            
+            // Инициализируем PhotoManager
+            setTimeout(() => initPhotoManager(), 1000);
             
             // Кнопка Add Photo удалена по запросу пользователя
             
@@ -668,19 +670,38 @@
                 if (profile.photos_v2.public) {
                     // Структура photos_v2.public.1.normal
                     const publicPhotos = profile.photos_v2.public;
-                    const firstPhotoKey = Object.keys(publicPhotos)[0];
-                    if (firstPhotoKey && publicPhotos[firstPhotoKey]) {
-                        photoUrl = publicPhotos[firstPhotoKey].sq_430 || 
-                                  publicPhotos[firstPhotoKey].normal || 
-                                  publicPhotos[firstPhotoKey].sq_middle;
+                    
+                    // Ищем главное фото (с ключом = 0 или отмеченное как main)
+                    let mainPhotoKey = null;
+                    for (const key in publicPhotos) {
+                        if (key === '0' || publicPhotos[key].isMain) {
+                            mainPhotoKey = key;
+                            break;
+                        }
+                    }
+                    
+                    // Если главное не найдено, берем первое
+                    if (!mainPhotoKey) {
+                        mainPhotoKey = Object.keys(publicPhotos)[0];
+                    }
+                    
+                    if (mainPhotoKey && publicPhotos[mainPhotoKey]) {
+                        console.log('[PROFILE] Found main photo with key:', mainPhotoKey, publicPhotos[mainPhotoKey]);
+                        photoUrl = publicPhotos[mainPhotoKey].sq_430 || 
+                                  publicPhotos[mainPhotoKey].normal || 
+                                  publicPhotos[mainPhotoKey].sq_middle;
                     }
                 } else if (Array.isArray(profile.photos_v2) && profile.photos_v2.length > 0) {
-                    // Массив фотографий
-                    const mainPhoto = profile.photos_v2.find(p => p.main_photo === '1') || profile.photos_v2[0];
+                    // Массив фотографий - ищем главное
+                    const mainPhoto = profile.photos_v2.find(p => p.main_photo === '1' || p.isMain === true || p.num === 0) || profile.photos_v2[0];
+                    console.log('[PROFILE] Found main photo in array:', mainPhoto);
                     photoUrl = mainPhoto.sq_430 || mainPhoto.normal || mainPhoto.sq_middle;
                 }
             } else if (profile.photos && profile.photos.length > 0) {
-                photoUrl = profile.photos[0].url_big || profile.photos[0].url_middle;
+                // Ищем главное фото в старом формате
+                const mainPhoto = profile.photos.find(p => p.main_photo === '1' || p.isMain === true) || profile.photos[0];
+                console.log('[PROFILE] Found main photo in photos:', mainPhoto);
+                photoUrl = mainPhoto.url_big || mainPhoto.url_middle;
             } else if (profile.picture_430) {
                 photoUrl = profile.picture_430;
             } else if (profile.picture) {
