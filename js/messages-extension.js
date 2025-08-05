@@ -438,8 +438,8 @@ Object.assign(Dashboard.prototype, {
     const existingContact = this.contacts?.find(contact => contact.id == userId);
     
     if (existingContact) {
-      // Open existing contact chat
-      this.openChat(existingContact);
+      // Open existing contact chat using selectChat
+      this.selectChat(userId);
     } else {
       // Create temporary contact for new match
       const tempContact = {
@@ -456,8 +456,8 @@ Object.assign(Dashboard.prototype, {
       // Refresh contacts display
       this.displayContacts(this.contacts);
       
-      // Open chat with new contact
-      this.openChat(tempContact);
+      // Open chat with new contact using selectChat
+      this.selectChat(userId);
       
       // Show notification
       this.showNotification(`New match! You can now message ${userName}`, 'success');
