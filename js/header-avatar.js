@@ -41,12 +41,12 @@ async function loadUserAvatar() {
         const apiUrl = `/api/spice-multi-test?endpoint=/index_api/user&method=POST&session_id=${sessionId}&id=${userId}&get_picture_430=1`;
         
         const response = await fetch(apiUrl);
-        const userData = await response.json();
+        const apiData = await response.json();
         
-        console.log('[HEADER-AVATAR] API response:', userData);
+        console.log('[HEADER-AVATAR] API response:', apiData);
         
-        if (userData && userData.success && userData.data?.result) {
-            const user = userData.data.result;
+        if (apiData && apiData.success && apiData.data?.result) {
+            const user = apiData.data.result;
             const avatarImg = document.getElementById('userAvatarImg');
             const avatarText = document.getElementById('userAvatarText');
             
