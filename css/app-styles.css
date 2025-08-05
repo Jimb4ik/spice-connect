@@ -1401,6 +1401,8 @@ body {
   opacity: 0;
   visibility: hidden;
   transition: all 0.3s ease;
+  padding: 2rem; /* Добавляем padding для лучшего центрирования */
+  box-sizing: border-box;
 }
 
 .photo-modal.active {
@@ -1420,8 +1422,10 @@ body {
 
 .photo-modal-content {
   position: relative;
-  max-width: 85vw;
-  max-height: 85vh;
+  max-width: 80vw;
+  max-height: 80vh;
+  width: auto;
+  height: auto;
   z-index: 10000;
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(20px);
@@ -1431,6 +1435,9 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.2);
   transform: scale(0.8);
   transition: transform 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .photo-modal.active .photo-modal-content {
@@ -1438,14 +1445,14 @@ body {
 }
 
 .photo-modal-image {
-  width: 100%;
+  max-width: 100%;
+  max-height: 70vh;
+  width: auto;
   height: auto;
-  max-height: 75vh;
   object-fit: contain;
   border-radius: calc(var(--border-radius) - 5px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   display: block;
-  margin: 0 auto;
 }
 
 .photo-modal-close {
@@ -1614,6 +1621,29 @@ body {
   .footer-links {
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
     gap: 20px;
+  }
+  
+  /* Photo Modal мобильный */
+  .photo-modal {
+    padding: 1rem;
+  }
+  
+  .photo-modal-content {
+    max-width: 95vw;
+    max-height: 90vh;
+    padding: 0.5rem;
+  }
+  
+  .photo-modal-image {
+    max-height: 80vh;
+  }
+  
+  .photo-modal-close {
+    top: -10px;
+    right: -10px;
+    width: 35px;
+    height: 35px;
+    font-size: 1.2rem;
   }
 }
 
