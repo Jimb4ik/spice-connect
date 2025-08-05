@@ -65,10 +65,12 @@ Object.assign(Dashboard.prototype, {
     const response = await fetch(apiUrl);
     const result = await response.json();
     console.log('[MESSAGES] Contacts API Response:', result);
+    console.log('[MESSAGES] Raw API data structure:', result.data);
 
     if (result.success && result.data) {
-      // API возвращает массив контактов в result.data.result
-      const contacts = result.data.result || [];
+      // Согласно документации API возвращает контакты в поле "contacts"
+      const contacts = result.data.contacts || result.data.result || [];
+      console.log('[MESSAGES] Parsed contacts count:', contacts.length);
       return {
         success: true,
         contacts: Array.isArray(contacts) ? contacts : []
@@ -113,10 +115,12 @@ Object.assign(Dashboard.prototype, {
   },
 
   createContactItem(contact) {
-    const userId = contact.id || contact.user_id || 'unknown';
+    // Согласно документации API load_contacts контакт содержит: m_id, pseudo, photo, etc.
+    const userId = contact.m_id || contact.id || contact.user_id || 'unknown';
     const username = contact.pseudo || contact.username || contact.name || 'Unknown User';
     const lastMessage = contact.last_message || contact.lastMessage || 'No messages yet';
     const lastTime = contact.last_time || contact.lastTime || '';
+    const photoUrl = contact.photo || contact.picture || null;
     const hasPhoto = contact.photo_url || contact.avatar || contact.picture;
     const isOnline = contact.is_online === 1 || contact.is_online === '1';
     const hasUnread = contact.unread_count > 0;
@@ -127,7 +131,7 @@ Object.assign(Dashboard.prototype, {
     return `
       <div class="contact-item ${hasUnread ? 'contact-unread' : ''}" data-user-id="${userId}">
         <div class="contact-avatar">
-          ${hasPhoto ? `<img src="${hasPhoto}" alt="${username}" onerror="this.style.display='none'">` : '👤'}
+          ${photoUrl ? `<img src="${photoUrl}" alt="${username}" onerror="this.style.display='none'">` : '👤'}
         </div>
         <div class="contact-info">
           <div class="contact-header">
@@ -152,8 +156,8 @@ Object.assign(Dashboard.prototype, {
       }
     });
 
-    // Find contact info
-    const contact = this.contacts.find(c => (c.id || c.user_id) == userId);
+    // Find contact info (используем правильное поле m_id)
+    const contact = this.contacts.find(c => (c.m_id || c.id || c.user_id) == userId);
     if (contact) {
       this.updateChatHeader(contact);
     }
