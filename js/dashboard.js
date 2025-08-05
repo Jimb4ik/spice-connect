@@ -429,7 +429,7 @@ class Dashboard {
 
     // Add pagination
     params.append('page', (page - 1).toString()); // API uses 0-based pagination
-    params.append('pas', '12'); // Results per page
+    params.append('pas', '100'); // Results per page - увеличено до 100
 
     console.log('[SEARCH] API call with params:', params.toString());
 

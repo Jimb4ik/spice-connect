@@ -111,7 +111,7 @@ class SpiceLanding {
             // Show loading state
             this.showProfilesLoading();
             
-            const params = country ? `force_pays=${country}` : '';
+            const params = country ? `force_pays=${country}&pas=100` : 'pas=100';
             const response = await fetch(`${this.baseURL}/spice-multi-test?endpoint=/index_api/landing_module/profils_global&method=POST&${params}`);
             
             if (!response.ok) {
