@@ -73,7 +73,7 @@
                 <div class="profile-main-info">
                     <div class="profile-avatar-section">
                         <div class="profile-main-avatar">
-                            <img src="images/default-avatar.png" alt="Profile" id="profileMainPhoto">
+                            <img alt="Profile" id="profileMainPhoto" style="display: none;">
                             <button class="avatar-edit-btn" id="editAvatarBtn">📷</button>
                         </div>
                         <div class="profile-basic-info">
@@ -618,7 +618,7 @@
         
         function updateMainProfilePhoto(profile) {
             const mainPhotoElement = document.getElementById('profileMainPhoto');
-            let photoUrl = '/images/default-avatar.png';
+                            let photoUrl = null;
             
             console.log('[PROFILE] Photo data:', {
                 photos_v2: profile.photos_v2,
@@ -662,7 +662,7 @@
             // Добавляем обработчик ошибок для фото
             mainPhotoElement.onerror = function() {
                 console.warn('[PROFILE] Failed to load photo, using default');
-                this.src = '/images/default-avatar.png';
+                this.style.display = 'none';
             };
         }
         

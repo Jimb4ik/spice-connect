@@ -457,7 +457,7 @@
             const photoElement = document.getElementById('cardMainPhoto');
             if (!photoElement) return;
             
-            let photoUrl = '/images/default-avatar.png';
+            let photoUrl = null;
             
             // Пробуем разные источники фотографий
             if (profile.photos_v2) {
@@ -491,7 +491,7 @@
             
             photoElement.onerror = function() {
                 console.warn('[DISCOVER] Failed to load photo, using default');
-                this.src = '/images/default-avatar.png';
+                this.style.display = 'none';
             };
         }
         

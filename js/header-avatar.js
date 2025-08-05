@@ -114,12 +114,12 @@ function initHeaderAvatar() {
 // Автоматически инициализируем когда DOM готов
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-        // Небольшая задержка для загрузки authManager
-        setTimeout(initHeaderAvatar, 500);
+        // Увеличенная задержка для загрузки authManager
+        setTimeout(initHeaderAvatar, 2000);
     });
 } else {
     // DOM уже готов
-    setTimeout(initHeaderAvatar, 500);
+    setTimeout(initHeaderAvatar, 2000);
 }
 
 // Экспортируем функции для использования в других файлах
