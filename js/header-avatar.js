@@ -6,16 +6,47 @@
  */
 async function loadUserAvatar() {
     try {
-        if (!window.authManager || !window.authManager.sessionId) {
+        console.log('[HEADER-AVATAR] Starting loadUserAvatar');
+        
+        if (!window.authManager) {
+            console.log('[HEADER-AVATAR] authManager not found, retrying in 1s');
+            setTimeout(loadUserAvatar, 1000);
+            return;
+        }
+        
+        if (!window.authManager.sessionId) {
+            console.log('[HEADER-AVATAR] No sessionId found');
             return;
         }
         
         const sessionId = window.authManager.sessionId;
+        const userId = window.authManager.userId;
+        console.log('[HEADER-AVATAR] Using sessionId:', sessionId, 'userId:', userId);
+        
+        if (!userId) {
+            console.log('[HEADER-AVATAR] No userId found');
+            return;
+        }
+        
         const apiConfigResponse = await fetch('/api/get-api-key');
         const apiConfig = await apiConfigResponse.json();
         
-        const response = await fetch(`${apiConfig.baseUrl}/index_api/user?api_key=${apiConfig.apiKey}&session_id=${sessionId}`);
+        // Используем POST запрос согласно API документации
+        const formData = new URLSearchParams();
+        formData.append('session_id', sessionId);
+        formData.append('id', userId);
+        formData.append('get_picture_430', '1');  // Получаем фотографии
+        
+        const response = await fetch(`${apiConfig.baseUrl}/index_api/user?api_key=${apiConfig.apiKey}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: formData
+        });
         const userData = await response.json();
+        
+        console.log('[HEADER-AVATAR] API response:', userData);
         
         if (userData && userData.result) {
             const user = userData.result;
@@ -25,20 +56,16 @@ async function loadUserAvatar() {
             if (avatarImg && avatarText) {
                 let photoUrl = null;
                 
-                // Ищем главное фото пользователя в порядке приоритета
-                if (user.picture_430) {
-                    photoUrl = user.picture_430;
-                } else if (user.picture) {
-                    photoUrl = user.picture;
-                } else if (user.photos_v2 && user.photos_v2.length > 0) {
-                    const mainPhoto = user.photos_v2.find(p => p.main === '1') || user.photos_v2[0];
-                    photoUrl = mainPhoto.normal || mainPhoto.url || mainPhoto.src;
-                } else if (user.photos && user.photos.length > 0) {
-                    const photo = user.photos[0];
-                    photoUrl = photo.url || photo.src || photo;
+                // Ищем главное фото пользователя согласно API документации
+                if (user.photos_v2 && user.photos_v2.length > 0) {
+                    // Первая фотография (num: 0) - это главная фотография
+                    const mainPhoto = user.photos_v2.find(p => p.num === 0) || user.photos_v2[0];
+                    // Приоритет: sq_430 (430x430), sq_middle (215x215), normal (оригинал), sq_small (80x80)
+                    photoUrl = mainPhoto.sq_430 || mainPhoto.sq_middle || mainPhoto.normal || mainPhoto.sq_small;
                 }
                 
                 if (photoUrl) {
+                    console.log('[HEADER-AVATAR] Found photo URL:', photoUrl);
                     // Показываем фото
                     avatarImg.src = photoUrl;
                     avatarImg.style.display = 'block';
