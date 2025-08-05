@@ -1751,6 +1751,8 @@ body {
 /* Новый дизайн Discover в стиле скриншота */
 .profile-card-new {
   max-width: 400px;
+  min-width: 300px;
+  width: 100%;
   margin: 0 auto;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);

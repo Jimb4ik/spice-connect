@@ -341,28 +341,77 @@
         let currentProfile = null;
         let currentProfileIndex = 0;
         let profilesBuffer = [];
-        let currentPage = 1; // Начинаем с первой страницы
+        let currentPage = 0; // Начинаем с 0 страницы как в API
         let isLoadingMoreProfiles = false;
+        let userProgress = null; // Прогресс пользователя из БД
+        
+        // Загружаем прогресс пользователя из БД
+        async function loadUserProgress() {
+            try {
+                const sessionId = window.authManager?.sessionId;
+                if (!sessionId) return null;
+                
+                const userDataString = localStorage.getItem('lavrilo_user');
+                if (!userDataString) return null;
+                
+                const userData = JSON.parse(userDataString);
+                const userId = userData.id;
+                
+                const response = await fetch('/api/database', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'get_progress',
+                        user_id: userId,
+                        session_id: sessionId
+                    })
+                });
+                
+                const result = await response.json();
+                console.log('[DISCOVER] User progress loaded:', result);
+                
+                if (result.success && result.data) {
+                    return result.data;
+                } else {
+                    // Создаем новый прогресс если не найден
+                    await saveUserProgress(userId, sessionId, 0, 0);
+                    return { current_page: 0, last_profile_index: 0 };
+                }
+            } catch (error) {
+                console.error('[DISCOVER] Error loading user progress:', error);
+                return null;
+            }
+        }
+        
+        // Сохраняем прогресс пользователя в БД
+        async function saveUserProgress(userId, sessionId, page, profileIndex) {
+            try {
+                const response = await fetch('/api/database', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'update_progress',
+                        user_id: userId,
+                        session_id: sessionId,
+                        current_page: page,
+                        last_profile_index: profileIndex
+                    })
+                });
+                
+                const result = await response.json();
+                console.log('[DISCOVER] User progress saved:', result);
+                return result.success;
+            } catch (error) {
+                console.error('[DISCOVER] Error saving user progress:', error);
+                return false;
+            }
+        }
         
         async function loadNextProfile() {
             try {
                 console.log('[DISCOVER] Loading next profile...');
                 showLoadingState(true);
                 
-                // Если есть matching system v2, используем его
-                if (window.matchingSystem && typeof window.matchingSystem.loadTinderProfiles === 'function') {
-                    await window.matchingSystem.loadTinderProfiles();
-                    
-                    if (window.matchingSystem.profilesBuffer && window.matchingSystem.profilesBuffer.length > 0) {
-                        currentProfile = window.matchingSystem.profilesBuffer[window.matchingSystem.currentProfileIndex];
-                        displayCurrentProfile(currentProfile);
-                        updateProfileCounter();
-                        showLoadingState(false);
-                        return;
-                    }
-                }
-                
-                // Fallback: загружаем профили напрямую
                 const sessionId = window.authManager?.sessionId;
                 if (!sessionId) {
                     console.error('[DISCOVER] No session ID available');
@@ -370,41 +419,60 @@
                     return;
                 }
                 
-                const apiUrl = `/api/spice-multi-test?endpoint=/index_api/search&method=POST&session_id=${sessionId}&page=${currentPage}&pas=30&searchAgeMin=18&searchAgeMax=80&searchSexe=all`;
-                
-                const response = await fetch(apiUrl);
-                const data = await response.json();
-                
-                console.log('[DISCOVER] API Response:', data);
-                
-                if (data.success && data.data?.result?.length > 0) {
-                    const newProfiles = data.data.result;
-                    console.log(`[DISCOVER] Loaded ${newProfiles.length} new profiles from page ${currentPage}`);
-                    
-                    // Добавляем новые профили к существующему буферу
-                    profilesBuffer = [...profilesBuffer, ...newProfiles];
-                    
-                    // Если это первая загрузка, устанавливаем текущий профиль
-                    if (currentProfileIndex === 0 && profilesBuffer.length > 0) {
-                        currentProfile = profilesBuffer[0];
-                        displayCurrentProfile(currentProfile);
-                    }
-                    
-                    updateProfileCounter();
-                    currentPage++; // Готовимся к следующей странице
-                    
-                } else {
-                    console.log('[DISCOVER] No more profiles available');
-                    if (profilesBuffer.length === 0) {
-                        showNoProfilesState();
+                // Загружаем прогресс пользователя если еще не загружен
+                if (!userProgress) {
+                    userProgress = await loadUserProgress();
+                    if (userProgress) {
+                        currentPage = userProgress.current_page || 0;
+                        currentProfileIndex = userProgress.last_profile_index || 0;
+                        console.log(`[DISCOVER] Restored progress: page=${currentPage}, index=${currentProfileIndex}`);
                     }
                 }
                 
-                showLoadingState(false);
+                // Проверяем есть ли профили в буфере
+                if (profilesBuffer.length === 0 || currentProfileIndex >= profilesBuffer.length) {
+                    console.log(`[DISCOVER] Loading profiles from page ${currentPage}`);
+                    
+                    const apiUrl = `/api/spice-multi-test?endpoint=/index_api/search&method=POST&session_id=${sessionId}&page=${currentPage}&pas=30&searchAgeMin=18&searchAgeMax=80&searchSexe=all`;
+                    
+                    const response = await fetch(apiUrl);
+                    const data = await response.json();
+                    
+                    console.log('[DISCOVER] API Response:', data);
+                    
+                    if (data.success && data.data?.result?.length > 0) {
+                        const newProfiles = data.data.result;
+                        console.log(`[DISCOVER] Loaded ${newProfiles.length} new profiles from page ${currentPage}`);
+                        
+                        // Заменяем буфер новыми профилями при загрузке новой страницы
+                        profilesBuffer = newProfiles;
+                        
+                        // Если это восстановление прогресса, начинаем с сохраненного индекса
+                        // Иначе начинаем с первого профиля
+                        if (currentProfileIndex >= profilesBuffer.length) {
+                            currentProfileIndex = 0;
+                        }
+                        
+                    } else {
+                        console.log('[DISCOVER] No more profiles available');
+                        showNoProfilesState();
+                        return;
+                    }
+                }
+                
+                // Показываем текущий профиль
+                if (profilesBuffer.length > currentProfileIndex) {
+                    currentProfile = profilesBuffer[currentProfileIndex];
+                    displayCurrentProfile(currentProfile);
+                    updateProfileCounter();
+                    showLoadingState(false);
+                } else {
+                    console.log('[DISCOVER] No profiles in buffer');
+                    showNoProfilesState();
+                }
                 
             } catch (error) {
-                console.error('[DISCOVER] Error loading profile:', error);
-                showLoadingState(false);
+                console.error('[DISCOVER] Error loading profiles:', error);
                 showNoProfilesState();
             }
         }
@@ -595,16 +663,37 @@
             await loadNextProfile();
         }
         
-        function moveToNextProfile() {
+        async function moveToNextProfile() {
             currentProfileIndex++;
             
-            // Проверяем, нужно ли загрузить следующую страницу (когда остается 5 профилей)
-            const remainingProfiles = profilesBuffer.length - currentProfileIndex;
-            if (remainingProfiles <= 5 && !isLoadingMoreProfiles) {
-                console.log(`[DISCOVER] Preloading next page (${remainingProfiles} profiles remaining)`);
-                loadNextProfile();
+            // Сохраняем прогресс в БД
+            const userDataString = localStorage.getItem('lavrilo_user');
+            if (userDataString) {
+                const userData = JSON.parse(userDataString);
+                const userId = userData.id;
+                const sessionId = window.authManager?.sessionId;
+                
+                if (userId && sessionId) {
+                    // Если переходим к новой странице, увеличиваем номер страницы
+                    let pageToSave = currentPage;
+                    if (currentProfileIndex >= profilesBuffer.length) {
+                        pageToSave = currentPage + 1;
+                    }
+                    
+                    await saveUserProgress(userId, sessionId, pageToSave, currentProfileIndex);
+                }
             }
             
+            // Проверяем, нужно ли загрузить следующую страницу
+            if (currentProfileIndex >= profilesBuffer.length) {
+                console.log(`[DISCOVER] Moving to next page (${currentPage + 1})`);
+                currentPage++;
+                currentProfileIndex = 0;
+                await loadNextProfile();
+                return;
+            }
+            
+            // Показываем следующий профиль в текущем буфере
             if (currentProfileIndex < profilesBuffer.length) {
                 currentProfile = profilesBuffer[currentProfileIndex];
                 displayCurrentProfile(currentProfile);
