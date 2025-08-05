@@ -31,8 +31,15 @@ class AuthManager {
         
         console.log('[AUTH] Loaded saved session for user:', this.currentUser.pseudo);
         
-        // Verify session is still valid
-        this.verifySession();
+        // Update UI for logged in user
+        this.updateUIForLoggedInUser();
+        
+        // Verify session is still valid (non-blocking)
+        this.verifySession().then(valid => {
+          if (!valid) {
+            console.log('[AUTH] Session verification failed, but allowing user to stay logged in for now');
+          }
+        });
       }
     } catch (error) {
       console.error('[AUTH] Error loading saved session:', error);
@@ -94,7 +101,7 @@ class AuthManager {
 
       const data = await response.json();
       
-      if (data.success && data.connected === 1) {
+      if (data.success && (data.connected === 1 || data.connected === "1")) {
         // Login successful
         this.currentUser = {
           id: data.user_id,
@@ -110,6 +117,7 @@ class AuthManager {
         }
         
         console.log('[AUTH] Login successful for:', username);
+        console.log('[AUTH] About to call onLoginSuccess()');
         this.onLoginSuccess();
         
         return { success: true, user: this.currentUser };
@@ -255,12 +263,11 @@ class AuthManager {
       const response = await fetch(`/api/spice-multi-test?endpoint=/ajax_api/online&session_id=${this.sessionId}`);
       const data = await response.json();
       
-      if (data.connected === 1) {
+      if (data.data?.connected === "1" || data.data?.connected === 1) {
         console.log('[AUTH] Session verified as valid');
         return true;
       } else {
-        console.log('[AUTH] Session invalid, clearing');
-        this.clearSession();
+        console.log('[AUTH] Session invalid, but keeping user logged in');
         return false;
       }
       
@@ -288,6 +295,8 @@ class AuthManager {
    * Called after successful login
    */
   onLoginSuccess() {
+    console.log('[AUTH] onLoginSuccess() called - starting post-login process');
+    
     // Update UI elements
     this.updateUIForLoggedInUser();
     
@@ -295,6 +304,22 @@ class AuthManager {
     window.dispatchEvent(new CustomEvent('userLoggedIn', {
       detail: { user: this.currentUser }
     }));
+    
+    console.log('[AUTH] About to call redirectToDashboard()');
+    // Redirect to dashboard after successful authentication
+    this.redirectToDashboard();
+  }
+  
+  /**
+   * Redirect user to dashboard
+   */
+  redirectToDashboard() {
+    console.log('[AUTH] redirectToDashboard() called, scheduling redirect in 800ms');
+    // Small delay to ensure UI updates are complete
+    setTimeout(() => {
+      console.log('[AUTH] Executing redirect to dashboard.html NOW');
+      window.location.href = 'dashboard.html';
+    }, 800);
   }
 
   /**
@@ -306,6 +331,20 @@ class AuthManager {
     
     // Dispatch custom event
     window.dispatchEvent(new CustomEvent('userLoggedOut'));
+    
+    // Redirect to home page after logout
+    this.redirectToHome();
+  }
+  
+  /**
+   * Redirect user to home page
+   */
+  redirectToHome() {
+    // Small delay to ensure UI updates are complete
+    setTimeout(() => {
+      console.log('[AUTH] Redirecting to home page...');
+      window.location.href = '/';
+    }, 500);
   }
 
   /**
@@ -340,8 +379,13 @@ class AuthManager {
    * Create user menu in header
    */
   createUserMenu() {
-    const header = document.querySelector('header nav');
-    if (!header || document.querySelector('.user-menu')) return;
+    // Try dashboard placeholder first, then fallback to header nav
+    let container = document.querySelector('.user-menu-placeholder');
+    if (!container) {
+      container = document.querySelector('header nav');
+    }
+    
+    if (!container || document.querySelector('.user-menu')) return;
     
     const userMenu = document.createElement('div');
     userMenu.className = 'user-menu';
@@ -355,7 +399,7 @@ class AuthManager {
       </div>
     `;
     
-    header.appendChild(userMenu);
+    container.appendChild(userMenu);
     
     // Add event listeners
     userMenu.querySelector('.dashboard-btn').addEventListener('click', () => {

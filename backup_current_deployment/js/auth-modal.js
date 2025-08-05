@@ -273,10 +273,10 @@ class AuthModal {
       
       if (result.success) {
         this.showSuccess('Login successful! Welcome back.');
+        // AuthManager will handle the redirect, just hide the modal after short delay
         setTimeout(() => {
           this.hide();
-          // Redirect or update UI as needed
-        }, 1500);
+        }, 1000);
       } else {
         this.showError(result.error || 'Login failed. Please check your credentials.');
       }
@@ -304,10 +304,10 @@ class AuthModal {
       
       if (result.success) {
         this.showSuccess('Account created successfully! Welcome to Lavrilo.');
+        // AuthManager will handle the redirect, just hide the modal after short delay
         setTimeout(() => {
           this.hide();
-          // Redirect to dashboard or show welcome
-        }, 1500);
+        }, 1000);
       } else {
         this.showError(result.error || 'Registration failed. Please try again.');
       }

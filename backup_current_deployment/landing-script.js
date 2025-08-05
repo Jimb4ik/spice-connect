@@ -8,6 +8,13 @@ class SpiceLanding {
     }
 
     async init() {
+        // Check if user is already logged in and redirect to dashboard
+        if (window.authManager && window.authManager.isLoggedIn) {
+            console.log('[LANDING] User already logged in, redirecting to dashboard');
+            window.location.href = 'dashboard.html';
+            return;
+        }
+
         await this.loadLiveStats();
         await this.loadGenderFilters();
         await this.loadProfiles();
@@ -315,14 +322,8 @@ class SpiceLanding {
             this.handleRegistration();
         });
 
-        // Navigation buttons
-        document.getElementById('loginBtn')?.addEventListener('click', () => {
-            window.location.href = 'index.html#login';
-        });
-
-        document.getElementById('signupBtn')?.addEventListener('click', () => {
-            this.scrollToRegistration();
-        });
+        // Login and Signup buttons are now handled by auth-modal.js
+        // Removed these handlers to prevent conflicts with authentication modal
 
         document.getElementById('startMatchingBtn')?.addEventListener('click', () => {
             this.scrollToRegistration();
