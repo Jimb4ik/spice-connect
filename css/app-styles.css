@@ -114,19 +114,18 @@ body {
 }
 
 .user-avatar {
-  width: 32px;
-  height: 32px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
-  background: var(--gradient-secondary);
+  margin: 0 auto 5px;
+  background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  font-weight: 600;
-  cursor: pointer;
-  transition: var(--transition);
+  font-size: 32px;
+  color: #9ca3af;
+  position: relative;
   overflow: hidden;
-  border: 2px solid rgba(255, 255, 255, 0.2);
 }
 
 .user-avatar:hover {
