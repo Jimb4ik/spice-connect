@@ -646,14 +646,37 @@ class MatchingSystemV2 {
       tab.classList.toggle('active', tab.dataset.mode === mode);
     });
 
-    // Показываем соответствующий контент
-    document.querySelectorAll('.mode-content').forEach(content => {
-      content.style.display = content.id === `${mode}Content` ? 'block' : 'none';
+    // Скрываем все основные секции дашборда
+    const dashboardSections = ['#profile', '#messages', '#matches', '#visitors', '#search', '#settings'];
+    dashboardSections.forEach(selector => {
+      const section = document.querySelector(selector);
+      if (section) {
+        section.style.display = 'none';
+      }
+    });
+
+    // Скрываем навигацию дашборда если в режиме матчинга
+    const dashboardNav = document.querySelector('.dashboard-nav');
+    if (dashboardNav) {
+      dashboardNav.style.display = 'none';
+    }
+
+    // Показываем соответствующий контент матчинга
+    document.querySelectorAll('.matching-mode').forEach(content => {
+      if (content.id === `${mode}-mode`) {
+        content.style.display = 'block';
+        content.classList.add('active');
+      } else {
+        content.style.display = 'none';
+        content.classList.remove('active');
+      }
     });
 
     // Загружаем данные для режима
     if (mode === 'my-matches') {
       this.loadMyMatches();
+    } else if (mode === 'tinder') {
+      this.displayCurrentProfile();
     }
   }
 
