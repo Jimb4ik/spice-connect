@@ -573,7 +573,9 @@
             
             photoElement.onerror = function() {
                 console.warn('[DISCOVER] Failed to load photo, using default');
-                this.style.display = 'none';
+                // Используем заглушку для профиля без фото
+                this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjZjNmNGY2Ii8+CjxjaXJjbGUgY3g9IjEwMCIgY3k9IjgwIiByPSIzMCIgZmlsbD0iIzlmYTJhNyIvPgo8cGF0aCBkPSJNNTAgMTYwYzAtMzAgMjItNTAgNTAtNTBzNTAgMjAgNTAgNTB2NDBINTB2LTQweiIgZmlsbD0iIzlmYTJhNyIvPgo8L3N2Zz4=';
+                this.onerror = null; // Предотвращаем бесконечный цикл
             };
         }
         
