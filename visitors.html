@@ -56,7 +56,24 @@
             </nav>
             
             <div class="user-menu">
-                <div class="app-user-avatar" id="userAvatar"><img id="userAvatarImg" src="" alt="User Avatar" style="display: none;"><span id="userAvatarText">H</span></div>
+                <div class="app-user-avatar" id="userAvatar">
+                    <img id="userAvatarImg" src="" alt="User Avatar" style="display: none;">
+                    <span id="userAvatarText">H</span>
+                </div>
+                <div class="user-dropdown">
+                    <a href="profile.html" class="dropdown-item">
+                        <span class="dropdown-icon">👤</span>
+                        My Profile
+                    </a>
+                    <a href="settings.html" class="dropdown-item">
+                        <span class="dropdown-icon">⚙️</span>
+                        Settings
+                    </a>
+                    <button class="dropdown-item logout" id="logoutBtn">
+                        <span class="dropdown-icon">🚪</span>
+                        Logout
+                    </button>
+                </div>
             </div>
         </div>
     </header>
@@ -157,6 +174,19 @@
             // Load visitors
             if (window.dashboard) {
                 window.dashboard.switchSection('visitors');
+            }
+        });
+    </script>
+    <script>
+        // Обработчик кнопки logout
+        document.addEventListener('DOMContentLoaded', () => {
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', () => {
+                    if (window.authManager) {
+                        window.authManager.logout();
+                    }
+                });
             }
         });
     </script>
