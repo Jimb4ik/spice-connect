@@ -220,46 +220,46 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="fullName">Full Name</label>
-                            <input type="text" id="fullName" name="fullName" class="form-input">
+                            <input type="text" id="fullName" name="nom_complet" class="form-input">
                         </div>
                         <div class="form-group">
                             <label for="firstName">First Name</label>
-                            <input type="text" id="firstName" name="firstName" class="form-input">
+                            <input type="text" id="firstName" name="prenom" class="form-input">
                         </div>
                     </div>
                     
                     <div class="form-row">
                         <div class="form-group">
                             <label for="height">Height (cm)</label>
-                            <input type="number" id="height" name="height" class="form-input" min="120" max="250">
+                            <input type="number" id="height" name="taille" class="form-input" min="120" max="250">
                         </div>
                         <div class="form-group">
                             <label for="weight">Weight (kg)</label>
-                            <input type="number" id="weight" name="weight" class="form-input" min="30" max="200">
+                            <input type="number" id="weight" name="poids" class="form-input" min="30" max="200">
                         </div>
                     </div>
                     
                     <div class="form-row">
                         <div class="form-group">
                             <label for="eyeColor">Eye Color</label>
-                            <select id="eyeColor" name="eyeColor" class="form-input">
-                                <option value="">Select eye color</option>
-                                <option value="brown">Brown</option>
-                                <option value="blue">Blue</option>
-                                <option value="green">Green</option>
-                                <option value="hazel">Hazel</option>
-                                <option value="gray">Gray</option>
+                            <select id="eyeColor" name="yeux" class="form-input">
+                                <option value="0">Select eye color</option>
+                                <option value="1">Brown</option>
+                                <option value="2">Blue</option>
+                                <option value="3">Green</option>
+                                <option value="4">Hazel</option>
+                                <option value="5">Gray</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label for="hairColor">Hair Color</label>
-                            <select id="hairColor" name="hairColor" class="form-input">
-                                <option value="">Select hair color</option>
-                                <option value="black">Black</option>
-                                <option value="brown">Brown</option>
-                                <option value="blonde">Blonde</option>
-                                <option value="red">Red</option>
-                                <option value="gray">Gray</option>
+                            <select id="hairColor" name="cheveux" class="form-input">
+                                <option value="0">Select hair color</option>
+                                <option value="1">Black</option>
+                                <option value="2">Brown</option>
+                                <option value="3">Blonde</option>
+                                <option value="4">Red</option>
+                                <option value="5">Gray</option>
                             </select>
                         </div>
                     </div>
@@ -271,25 +271,25 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="education">Education Level</label>
-                            <select id="education" name="education" class="form-input">
-                                <option value="">Select education level</option>
-                                <option value="high_school">High School</option>
-                                <option value="some_college">Some College</option>
-                                <option value="bachelor">Bachelor's Degree</option>
-                                <option value="master">Master's Degree</option>
-                                <option value="phd">PhD/Doctorate</option>
+                            <select id="education" name="etudes" class="form-input">
+                                <option value="0">Select education level</option>
+                                <option value="1">High School</option>
+                                <option value="2">Some College</option>
+                                <option value="3">Bachelor's Degree</option>
+                                <option value="4">Master's Degree</option>
+                                <option value="5">PhD/Doctorate</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label for="profession">Profession</label>
-                            <select id="profession" name="profession" class="form-input">
-                                <option value="">Select profession</option>
-                                <option value="technology">Technology</option>
-                                <option value="healthcare">Healthcare</option>
-                                <option value="education">Education</option>
-                                <option value="business">Business</option>
-                                <option value="creative">Creative Arts</option>
-                                <option value="other">Other</option>
+                            <select id="profession" name="travail" class="form-input">
+                                <option value="0">Select profession</option>
+                                <option value="1">Technology</option>
+                                <option value="2">Healthcare</option>
+                                <option value="3">Education</option>
+                                <option value="4">Business</option>
+                                <option value="5">Creative Arts</option>
+                                <option value="6">Other</option>
                             </select>
                         </div>
                     </div>
@@ -297,22 +297,22 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="maritalStatus">Marital Status</label>
-                            <select id="maritalStatus" name="maritalStatus" class="form-input">
-                                <option value="">Select status</option>
-                                <option value="single">Single</option>
-                                <option value="divorced">Divorced</option>
-                                <option value="widowed">Widowed</option>
-                                <option value="complicated">It's complicated</option>
+                            <select id="maritalStatus" name="situation" class="form-input">
+                                <option value="0">Select status</option>
+                                <option value="1">Single</option>
+                                <option value="2">Divorced</option>
+                                <option value="3">Widowed</option>
+                                <option value="4">It's complicated</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label for="children">Number of Children</label>
-                            <select id="children" name="children" class="form-input">
+                            <select id="children" name="child" class="form-input">
                                 <option value="0">No children</option>
                                 <option value="1">1 child</option>
                                 <option value="2">2 children</option>
                                 <option value="3">3 children</option>
-                                <option value="4+">4+ children</option>
+                                <option value="4">4+ children</option>
                             </select>
                         </div>
                     </div>
@@ -320,24 +320,24 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="bodyType">Body Type</label>
-                            <select id="bodyType" name="bodyType" class="form-input">
-                                <option value="">Select body type</option>
-                                <option value="slim">Slim</option>
-                                <option value="athletic">Athletic</option>
-                                <option value="average">Average</option>
-                                <option value="curvy">Curvy</option>
-                                <option value="full">Full-figured</option>
+                            <select id="bodyType" name="silhouette" class="form-input">
+                                <option value="0">Select body type</option>
+                                <option value="1">Slim</option>
+                                <option value="2">Athletic</option>
+                                <option value="3">Average</option>
+                                <option value="4">Curvy</option>
+                                <option value="5">Full-figured</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label for="personality">Personality</label>
-                            <select id="personality" name="personality" class="form-input">
-                                <option value="">Select personality</option>
-                                <option value="outgoing">Outgoing</option>
-                                <option value="shy">Shy</option>
-                                <option value="funny">Funny</option>
-                                <option value="serious">Serious</option>
-                                <option value="adventurous">Adventurous</option>
+                            <select id="personality" name="personnalite" class="form-input">
+                                <option value="0">Select personality</option>
+                                <option value="1">Outgoing</option>
+                                <option value="2">Shy</option>
+                                <option value="3">Funny</option>
+                                <option value="4">Serious</option>
+                                <option value="5">Adventurous</option>
                             </select>
                         </div>
                     </div>
@@ -345,20 +345,20 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label for="orientation">Sexual Orientation</label>
-                            <select id="orientation" name="orientation" class="form-input">
-                                <option value="heterosexual">Heterosexual</option>
-                                <option value="homosexual">Homosexual</option>
-                                <option value="bisexual">Bisexual</option>
+                            <select id="orientation" name="sexe2" class="form-input">
+                                <option value="1">Heterosexual</option>
+                                <option value="2">Homosexual</option>
+                                <option value="3">Bisexual</option>
                             </select>
                         </div>
                         <div class="form-group">
                             <label for="onlineTime">Preferred Online Time</label>
-                            <select id="onlineTime" name="onlineTime" class="form-input">
-                                <option value="">Select time</option>
-                                <option value="morning">Morning (6-12)</option>
-                                <option value="afternoon">Afternoon (12-18)</option>
-                                <option value="evening">Evening (18-24)</option>
-                                <option value="night">Night (0-6)</option>
+                            <select id="onlineTime" name="horaires" class="form-input">
+                                <option value="0">Select time</option>
+                                <option value="1">Morning (6-12)</option>
+                                <option value="2">Afternoon (12-18)</option>
+                                <option value="3">Evening (18-24)</option>
+                                <option value="4">Night (0-6)</option>
                             </select>
                         </div>
                     </div>
@@ -369,9 +369,9 @@
                     <h3>About You</h3>
                     <div class="form-group">
                         <label for="description">Profile Description</label>
-                        <textarea id="description" name="description" class="form-input" rows="4" maxlength="500" placeholder="Tell others about yourself..."></textarea>
+                        <textarea id="profileDescription" name="description" class="form-input" rows="4" maxlength="500" placeholder="Tell others about yourself..."></textarea>
                         <div class="char-count">
-                            <span id="descriptionCount">0</span>/500 characters
+                            <span id="descriptionCounter">0</span>/500 characters
                         </div>
                     </div>
                 </div>
@@ -480,26 +480,34 @@
                 console.log('[PROFILE] Initializing Dashboard...');
                 window.dashboard = new Dashboard();
                 
-                // Переопределяем openProfileEditor чтобы загружать данные
-                const originalOpenProfileEditor = window.dashboard.openProfileEditor;
-                window.dashboard.openProfileEditor = function() {
-                    const modal = document.getElementById('profileEditModal');
-                    if (modal) {
-                        // Загружаем данные в форму
-                        loadProfileDataIntoForm();
-                        
-                        // Показываем модальное окно
-                        modal.classList.add('active');
-                        document.body.style.overflow = 'hidden';
-                    }
-                };
-                
-                // Симулируем переключение на секцию профиля
+                // Переопределяем openProfileEditor после полной инициализации Dashboard
                 setTimeout(() => {
+                    console.log('[PROFILE] Setting up profile editor override...');
+                    const originalOpenProfileEditor = window.dashboard.openProfileEditor;
+                    window.dashboard.openProfileEditor = function() {
+                        console.log('[PROFILE] Opening profile editor...');
+                        console.log('[PROFILE] Current profile data:', currentProfileData);
+                        
+                        const modal = document.getElementById('profileEditModal');
+                        if (modal) {
+                            // Загружаем данные в форму
+                            loadProfileDataIntoForm();
+                            
+                            // Показываем модальное окно
+                            modal.classList.add('active');
+                            document.body.style.overflow = 'hidden';
+                            
+                            console.log('[PROFILE] Modal opened and data loaded');
+                        } else {
+                            console.error('[PROFILE] Modal not found!');
+                        }
+                    };
+                    
+                    // Симулируем переключение на секцию профиля
                     if (window.dashboard.switchSection) {
                         window.dashboard.switchSection('profile');
                     }
-                }, 100);
+                }, 300);
             }
             
             // Инициализируем PhotoManager
@@ -616,8 +624,21 @@
         
         // Функции для загрузки данных в форму редактирования (из dashboard.js)
         function loadProfileDataIntoForm() {
+            console.log('[PROFILE] loadProfileDataIntoForm called');
+            console.log('[PROFILE] currentProfileData:', currentProfileData);
+            
             if (!currentProfileData) {
                 console.warn('[PROFILE] No profile data available for form');
+                // Попробуем загрузить данные если их нет
+                if (window.authManager?.sessionId) {
+                    console.log('[PROFILE] Trying to reload profile data...');
+                    loadUserProfile().then(() => {
+                        if (currentProfileData) {
+                            console.log('[PROFILE] Profile data reloaded, trying again...');
+                            loadProfileDataIntoForm();
+                        }
+                    });
+                }
                 return;
             }
 
@@ -654,9 +675,13 @@
         }
 
         function setFormValue(fieldId, value) {
+            console.log(`[PROFILE] Setting ${fieldId} = ${value}`);
             const field = document.getElementById(fieldId);
             if (field) {
                 field.value = value;
+                console.log(`[PROFILE] ✅ ${fieldId} set successfully`);
+            } else {
+                console.warn(`[PROFILE] ❌ Field ${fieldId} not found`);
             }
         }
     </script>
