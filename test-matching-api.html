@@ -182,7 +182,8 @@
         
         <div class="form-group">
             <label for="limit">Лимит профилей:</label>
-            <input type="text" id="limit" value="50" placeholder="50">
+            <input type="text" id="limit" value="100" placeholder="50">
+            <small style="color: #666; font-size: 12px;">Попробуйте разные значения: 50, 100, 200, 500 для тестирования лимитов API</small>
         </div>
         
         <div class="controls">
@@ -191,6 +192,18 @@
             <button onclick="testDislikeAPI()" id="dislikeBtn">👎 Тест set_dislike</button>
             <button onclick="clearResults()">🗑️ Очистить</button>
             <div class="status" id="status" style="display: none;"></div>
+        </div>
+        
+        <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;">
+            <strong>🚀 Быстрый тест лимитов:</strong>
+            <div style="margin-top: 10px; gap: 10px; display: flex; flex-wrap: wrap;">
+                <button onclick="testWithLimit(10)" style="font-size: 12px; padding: 5px 10px;">Лимит 10</button>
+                <button onclick="testWithLimit(50)" style="font-size: 12px; padding: 5px 10px;">Лимит 50</button>
+                <button onclick="testWithLimit(100)" style="font-size: 12px; padding: 5px 10px;">Лимит 100</button>
+                <button onclick="testWithLimit(200)" style="font-size: 12px; padding: 5px 10px;">Лимит 200</button>
+                <button onclick="testWithLimit(500)" style="font-size: 12px; padding: 5px 10px;">Лимит 500</button>
+                <button onclick="testWithLimit(1000)" style="font-size: 12px; padding: 5px 10px;">Лимит 1000</button>
+            </div>
         </div>
     </div>
     
@@ -422,6 +435,13 @@
             }
             
             console.log(`➕ Added ${profileId} to exclude list`);
+        }
+        
+        async function testWithLimit(limitValue) {
+            // Устанавливаем лимит и запускаем тест
+            document.getElementById('limit').value = limitValue;
+            setStatus(`🔍 Тестируем с лимитом ${limitValue}...`, 'loading');
+            await testMatchAPI();
         }
         
         function clearResults() {
