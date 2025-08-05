@@ -171,12 +171,9 @@ Object.assign(Dashboard.prototype, {
   },
 
   updateChatHeader(contact) {
-    const chatHeader = document.getElementById('chatHeader');
     const chatUserName = document.getElementById('chatUserName');
     const chatUserStatus = document.getElementById('chatUserStatus');
     const chatUserAvatar = document.getElementById('chatUserAvatar');
-
-    if (chatHeader) chatHeader.style.display = 'flex';
     
     if (chatUserName) {
       chatUserName.textContent = contact.pseudo || contact.username || contact.name || 'Unknown User';
@@ -189,21 +186,28 @@ Object.assign(Dashboard.prototype, {
     }
     
     if (chatUserAvatar) {
-      const hasPhoto = contact.photo_url || contact.avatar || contact.picture;
-      if (hasPhoto) {
-        chatUserAvatar.innerHTML = `<img src="${hasPhoto}" alt="${contact.pseudo}" onerror="this.textContent='👤'">`;
+      const photoUrl = contact.photo || contact.picture || null;
+      if (photoUrl) {
+        chatUserAvatar.src = photoUrl;
+        chatUserAvatar.style.display = 'block';
+        chatUserAvatar.onerror = () => {
+          chatUserAvatar.style.display = 'none';
+          chatUserAvatar.alt = '👤';
+        };
       } else {
-        chatUserAvatar.textContent = '👤';
+        chatUserAvatar.src = '';
+        chatUserAvatar.style.display = 'none';
+        chatUserAvatar.alt = '👤';
       }
     }
   },
 
   showChatInterface() {
-    const chatWelcome = document.getElementById('chatWelcome');
-    const chatInputContainer = document.getElementById('chatInputContainer');
+    const chatEmpty = document.getElementById('chatEmpty');
+    const chatActive = document.getElementById('chatActive');
     
-    if (chatWelcome) chatWelcome.style.display = 'none';
-    if (chatInputContainer) chatInputContainer.style.display = 'block';
+    if (chatEmpty) chatEmpty.style.display = 'none';
+    if (chatActive) chatActive.style.display = 'flex';
   },
 
   async loadChatMessages(userId) {
@@ -228,17 +232,38 @@ Object.assign(Dashboard.prototype, {
   },
 
   async callMessagesAPI(userId) {
-    const apiUrl = `/api/spice-multi-test?endpoint=/ajax_api/load_messages&method=GET&session_id=${window.authManager.sessionId}&id=${userId}`;
+    const sessionId = window.authManager?.sessionId;
+    if (!sessionId) {
+      return { success: false, error: 'No session ID available' };
+    }
+
+    // Найдем контакт по userId для получения nickname
+    const contact = this.contacts.find(c => (c.m_id || c.id || c.user_id) == userId);
+    if (!contact) {
+      return { success: false, error: 'Contact not found' };
+    }
+
+    // Получаем API ключ
+    const apiConfigResponse = await fetch('/api/get-api-key');
+    const apiConfig = await apiConfigResponse.json();
     
-    console.log('[MESSAGES] API call for messages with user:', userId);
+    if (!apiConfig.apiKey) {
+      return { success: false, error: 'No API key available' };
+    }
 
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      }
+    // Параметры согласно документации: api-key, session_id, contact (nickname), contact_id
+    const messageParams = new URLSearchParams({
+      'api-key': apiConfig.apiKey,
+      session_id: sessionId,
+      contact: contact.pseudo || contact.username || contact.name || '',
+      contact_id: userId
     });
+    
+    const apiUrl = `/api/spice-multi-test?endpoint=/ajax_api/load_messages&method=GET&${messageParams.toString()}`;
+    
+    console.log('[MESSAGES] API call for messages with user:', userId, 'contact:', contact.pseudo);
 
+    const response = await fetch(apiUrl);
     const result = await response.json();
     console.log('[MESSAGES] Messages API Response:', result);
 
@@ -395,23 +420,45 @@ Object.assign(Dashboard.prototype, {
   },
 
   async callSendMessageAPI(userId, message) {
-    const apiUrl = `/api/spice-multi-test?endpoint=/ajax_api/send_message&method=GET&session_id=${window.authManager.sessionId}&id=${userId}&message=${encodeURIComponent(message)}`;
+    const sessionId = window.authManager?.sessionId;
+    if (!sessionId) {
+      return { success: false, error: 'No session ID available' };
+    }
+
+    // Найдем контакт по userId для получения nickname
+    const contact = this.contacts.find(c => (c.m_id || c.id || c.user_id) == userId);
+    if (!contact) {
+      return { success: false, error: 'Contact not found' };
+    }
+
+    // Получаем API ключ
+    const apiConfigResponse = await fetch('/api/get-api-key');
+    const apiConfig = await apiConfigResponse.json();
     
-    console.log('[MESSAGES] API call to send message');
+    if (!apiConfig.apiKey) {
+      return { success: false, error: 'No API key available' };
+    }
 
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      }
+    // Параметры согласно документации: session_id, dest (nickname), msg (текст сообщения)
+    const sendParams = new URLSearchParams({
+      api_key: apiConfig.apiKey,
+      session_id: sessionId,
+      dest: contact.pseudo || contact.username || contact.name || '',
+      msg: message
     });
+    
+    const apiUrl = `/api/spice-multi-test?endpoint=/ajax_api/send_message&method=GET&${sendParams.toString()}`;
+    
+    console.log('[MESSAGES] API call to send message to:', contact.pseudo, 'message:', message);
 
+    const response = await fetch(apiUrl);
     const result = await response.json();
     console.log('[MESSAGES] Send message API Response:', result);
 
-    if (result.success) {
+    if (result.success && result.data) {
       return {
-        success: true
+        success: true,
+        data: result.data
       };
     } else {
       return {

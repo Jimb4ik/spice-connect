@@ -234,6 +234,9 @@
             // Создаем объект с методами из messages-extension.js
             const messagesSystem = Object.assign({}, Dashboard.prototype);
             
+            // Сохраняем глобально для доступа из других функций
+            window.messagesSystem = messagesSystem;
+            
             try {
                 // Загружаем контакты
                 await messagesSystem.loadContacts.call(messagesSystem);
@@ -265,6 +268,80 @@
                     // TODO: Фильтрация контактов
                     console.log('[MESSAGES] Search:', e.target.value);
                 });
+            }
+            
+            // Кнопка отправки сообщения
+            const sendBtn = document.getElementById('sendBtn');
+            const messageInput = document.getElementById('messageInput');
+            
+            if (sendBtn && messageInput) {
+                // Обработчик клика по кнопке
+                sendBtn.addEventListener('click', () => {
+                    handleSendMessage();
+                });
+                
+                // Обработчик Enter в поле ввода
+                messageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSendMessage();
+                    }
+                });
+            }
+        }
+        
+        // Функция отправки сообщения
+        async function handleSendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const sendBtn = document.getElementById('sendBtn');
+            
+            if (!messageInput || !sendBtn) return;
+            
+            const messageText = messageInput.value.trim();
+            if (!messageText) return;
+            
+            if (!window.messagesSystem || !window.messagesSystem.currentChatUserId) {
+                console.error('[MESSAGES] No active chat selected');
+                return;
+            }
+            
+            try {
+                // Показываем состояние отправки
+                sendBtn.disabled = true;
+                sendBtn.textContent = 'Sending...';
+                
+                // Отправляем сообщение через API
+                const result = await window.messagesSystem.callSendMessageAPI(
+                    window.messagesSystem.currentChatUserId, 
+                    messageText
+                );
+                
+                if (result.success) {
+                    // Очищаем поле ввода
+                    messageInput.value = '';
+                    
+                    // Добавляем сообщение в чат локально
+                    const message = {
+                        text: messageText,
+                        isOwn: true,
+                        timestamp: new Date().toISOString(),
+                        sender: 'You'
+                    };
+                    
+                    window.messagesSystem.addMessageToChat(message);
+                    
+                    console.log('[MESSAGES] ✅ Message sent successfully');
+                } else {
+                    console.error('[MESSAGES] ❌ Failed to send message:', result.error);
+                    alert('Failed to send message: ' + result.error);
+                }
+            } catch (error) {
+                console.error('[MESSAGES] Error sending message:', error);
+                alert('Error sending message: ' + error.message);
+            } finally {
+                // Восстанавливаем кнопку
+                sendBtn.disabled = false;
+                sendBtn.textContent = 'Send';
             }
         }
         
