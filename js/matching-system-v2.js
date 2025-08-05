@@ -30,12 +30,36 @@ class MatchingSystemV2 {
     this.init();
   }
 
+  getUserId() {
+    // Пробуем разные способы получения ID пользователя
+    if (window.authManager?.userId) {
+      return window.authManager.userId;
+    }
+    
+    if (window.authManager?.currentUser?.id) {
+      return window.authManager.currentUser.id;
+    }
+    
+    // Fallback к localStorage
+    const savedUser = localStorage.getItem('lavrilo_user');
+    if (savedUser) {
+      try {
+        const user = JSON.parse(savedUser);
+        return user.id || user.user_id;
+      } catch (error) {
+        console.error('[MATCHING-V2] Error parsing saved user:', error);
+      }
+    }
+    
+    return localStorage.getItem('user_id');
+  }
+
   async init() {
     console.log('[MATCHING-V2] Initializing new matching system...');
     
     // Получаем данные пользователя
-    this.userId = window.authManager?.userId || localStorage.getItem('user_id');
-    this.sessionId = window.authManager?.sessionId || localStorage.getItem('session_id');
+    this.userId = this.getUserId();
+    this.sessionId = window.authManager?.sessionId || localStorage.getItem('session_id') || localStorage.getItem('lavrilo_session');
     
     if (!this.userId || !this.sessionId) {
       console.error('[MATCHING-V2] No user ID or session ID found');
@@ -708,14 +732,23 @@ window.MatchingSystemV2 = MatchingSystemV2;
 document.addEventListener('DOMContentLoaded', () => {
   // Ждем инициализации authManager
   const initMatching = () => {
-    if (window.authManager && window.authManager.isAuthenticated()) {
-      console.log('[MATCHING-V2] Initializing new matching system...');
-      window.matchingSystem = new MatchingSystemV2();
+    if (window.authManager) {
+      if (typeof window.authManager.isAuthenticated === 'function' && window.authManager.isAuthenticated()) {
+        console.log('[MATCHING-V2] Initializing new matching system...');
+        window.matchingSystem = new MatchingSystemV2();
+      } else if (window.authManager.isLoggedIn && window.authManager.sessionId) {
+        console.log('[MATCHING-V2] Initializing new matching system (fallback check)...');
+        window.matchingSystem = new MatchingSystemV2();
+      } else {
+        console.log('[MATCHING-V2] User not authenticated, retrying...');
+        setTimeout(initMatching, 1000);
+      }
     } else {
-      // Если authManager еще не готов, ждем немного
+      console.log('[MATCHING-V2] AuthManager not ready, retrying...');
       setTimeout(initMatching, 500);
     }
   };
   
-  initMatching();
+  // Начинаем инициализацию через небольшую задержку
+  setTimeout(initMatching, 100);
 });

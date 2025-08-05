@@ -15,6 +15,20 @@ class AuthManager {
   }
 
   /**
+   * Check if user is authenticated
+   */
+  isAuthenticated() {
+    return this.isLoggedIn && this.sessionId && this.currentUser;
+  }
+
+  /**
+   * Get user ID
+   */
+  get userId() {
+    return this.currentUser ? this.currentUser.id : null;
+  }
+
+  /**
    * Load saved session from localStorage
    */
   loadSavedSession() {
