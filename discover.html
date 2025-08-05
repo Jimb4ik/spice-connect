@@ -298,6 +298,8 @@
         let currentProfile = null;
         let currentProfileIndex = 0;
         let profilesBuffer = [];
+        let currentPage = 1; // Начинаем с первой страницы
+        let isLoadingMoreProfiles = false;
         
         async function loadNextProfile() {
             try {
@@ -325,7 +327,7 @@
                     return;
                 }
                 
-                const apiUrl = `/api/spice-multi-test?endpoint=/index_api/search&method=POST&session_id=${sessionId}&page=1&pas=30&searchAgeMin=18&searchAgeMax=80&searchSexe=all`;
+                const apiUrl = `/api/spice-multi-test?endpoint=/index_api/search&method=POST&session_id=${sessionId}&page=${currentPage}&pas=30&searchAgeMin=18&searchAgeMax=80&searchSexe=all`;
                 
                 const response = await fetch(apiUrl);
                 const data = await response.json();
@@ -333,13 +335,26 @@
                 console.log('[DISCOVER] API Response:', data);
                 
                 if (data.success && data.data?.result?.length > 0) {
-                    profilesBuffer = data.data.result;
-                    currentProfileIndex = 0;
-                    currentProfile = profilesBuffer[0];
-                    displayCurrentProfile(currentProfile);
+                    const newProfiles = data.data.result;
+                    console.log(`[DISCOVER] Loaded ${newProfiles.length} new profiles from page ${currentPage}`);
+                    
+                    // Добавляем новые профили к существующему буферу
+                    profilesBuffer = [...profilesBuffer, ...newProfiles];
+                    
+                    // Если это первая загрузка, устанавливаем текущий профиль
+                    if (currentProfileIndex === 0 && profilesBuffer.length > 0) {
+                        currentProfile = profilesBuffer[0];
+                        displayCurrentProfile(currentProfile);
+                    }
+                    
                     updateProfileCounter();
+                    currentPage++; // Готовимся к следующей странице
+                    
                 } else {
-                    showNoProfilesState();
+                    console.log('[DISCOVER] No more profiles available');
+                    if (profilesBuffer.length === 0) {
+                        showNoProfilesState();
+                    }
                 }
                 
                 showLoadingState(false);
@@ -520,19 +535,28 @@
             console.log('[DISCOVER] Reset profiles');
             currentProfileIndex = 0;
             profilesBuffer = [];
+            currentPage = 1; // Сбрасываем на первую страницу
+            isLoadingMoreProfiles = false;
             await loadNextProfile();
         }
         
         function moveToNextProfile() {
             currentProfileIndex++;
             
+            // Проверяем, нужно ли загрузить следующую страницу (когда остается 5 профилей)
+            const remainingProfiles = profilesBuffer.length - currentProfileIndex;
+            if (remainingProfiles <= 5 && !isLoadingMoreProfiles) {
+                console.log(`[DISCOVER] Preloading next page (${remainingProfiles} profiles remaining)`);
+                loadNextProfile();
+            }
+            
             if (currentProfileIndex < profilesBuffer.length) {
                 currentProfile = profilesBuffer[currentProfileIndex];
                 displayCurrentProfile(currentProfile);
                 updateProfileCounter();
             } else {
-                // Загружаем новую порцию профилей
-                loadNextProfile();
+                // Если закончились профили, показываем состояние "нет профилей"
+                showNoProfilesState();
             }
         }
         
