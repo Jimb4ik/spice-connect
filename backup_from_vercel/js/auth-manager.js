@@ -1,0 +1,388 @@
+/**
+ * Lavrilo Authentication Manager
+ * Handles user sessions, login/logout, and auto-login functionality
+ */
+
+class AuthManager {
+  constructor() {
+    this.currentUser = null;
+    this.sessionId = null;
+    this.tokenLogin = null;
+    this.isLoggedIn = false;
+    
+    // Load saved session on initialization
+    this.loadSavedSession();
+  }
+
+  /**
+   * Load saved session from localStorage
+   */
+  loadSavedSession() {
+    try {
+      const savedUser = localStorage.getItem('lavrilo_user');
+      const savedToken = localStorage.getItem('lavrilo_token');
+      const savedSession = localStorage.getItem('lavrilo_session');
+      
+      if (savedUser && savedToken && savedSession) {
+        this.currentUser = JSON.parse(savedUser);
+        this.tokenLogin = savedToken;
+        this.sessionId = savedSession;
+        this.isLoggedIn = true;
+        
+        console.log('[AUTH] Loaded saved session for user:', this.currentUser.pseudo);
+        
+        // Verify session is still valid
+        this.verifySession();
+      }
+    } catch (error) {
+      console.error('[AUTH] Error loading saved session:', error);
+      this.clearSession();
+    }
+  }
+
+  /**
+   * Save session to localStorage
+   */
+  saveSession() {
+    try {
+      if (this.currentUser && this.tokenLogin && this.sessionId) {
+        localStorage.setItem('lavrilo_user', JSON.stringify(this.currentUser));
+        localStorage.setItem('lavrilo_token', this.tokenLogin);
+        localStorage.setItem('lavrilo_session', this.sessionId);
+        console.log('[AUTH] Session saved to localStorage');
+      }
+    } catch (error) {
+      console.error('[AUTH] Error saving session:', error);
+    }
+  }
+
+  /**
+   * Clear session from localStorage
+   */
+  clearSession() {
+    localStorage.removeItem('lavrilo_user');
+    localStorage.removeItem('lavrilo_token');
+    localStorage.removeItem('lavrilo_session');
+    
+    this.currentUser = null;
+    this.sessionId = null;
+    this.tokenLogin = null;
+    this.isLoggedIn = false;
+    
+    console.log('[AUTH] Session cleared');
+  }
+
+  /**
+   * Login user with username and password
+   */
+  async login(username, password, rememberMe = true) {
+    try {
+      console.log('[AUTH] Attempting login for:', username);
+      
+      const response = await fetch('/api/auth', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'login',
+          login: username,
+          pass: password,
+          rememberme: rememberMe ? '1' : '0'
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.success && data.connected === 1) {
+        // Login successful
+        this.currentUser = {
+          id: data.user_id,
+          pseudo: username,
+          lang: data.lang_ui
+        };
+        this.sessionId = data.session_id;
+        this.tokenLogin = data.token_login;
+        this.isLoggedIn = true;
+        
+        if (rememberMe) {
+          this.saveSession();
+        }
+        
+        console.log('[AUTH] Login successful for:', username);
+        this.onLoginSuccess();
+        
+        return { success: true, user: this.currentUser };
+      } else {
+        console.log('[AUTH] Login failed:', data);
+        return { success: false, error: data.error || 'Invalid credentials' };
+      }
+      
+    } catch (error) {
+      console.error('[AUTH] Login error:', error);
+      return { success: false, error: 'Network error' };
+    }
+  }
+
+  /**
+   * Auto-login with saved token
+   */
+  async autoLogin() {
+    if (!this.tokenLogin) return false;
+    
+    try {
+      console.log('[AUTH] Attempting auto-login with token');
+      
+      // Use token as password for auto-login
+      const result = await this.login(this.currentUser.pseudo, this.tokenLogin, true);
+      
+      if (result.success) {
+        console.log('[AUTH] Auto-login successful');
+        return true;
+      } else {
+        console.log('[AUTH] Auto-login failed, clearing session');
+        this.clearSession();
+        return false;
+      }
+      
+    } catch (error) {
+      console.error('[AUTH] Auto-login error:', error);
+      this.clearSession();
+      return false;
+    }
+  }
+
+  /**
+   * Register new user
+   */
+  async register(userData) {
+    try {
+      console.log('[AUTH] Attempting registration for:', userData.login);
+      
+      // Get user IP for registration
+      const userIP = await this.getUserIP();
+      
+      const response = await fetch('/api/auth', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'register',
+          login: userData.login,
+          pass: userData.pass,
+          mail: userData.email,
+          sex: userData.gender,
+          cherche1: userData.looking_for,
+          year: userData.birth_year,
+          month: userData.birth_month,
+          day: userData.birth_day,
+          ip_adress: userIP,
+          city: userData.city || 1, // Default city if not provided
+          region: userData.region || 1, // Default region
+          countryObj: userData.country || 64, // Default to France
+          'fast-part': userData.fastRegistration ? '1' : '0'
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.success && data.session_id) {
+        console.log('[AUTH] Registration successful for:', userData.login);
+        
+        // Auto-login after successful registration
+        this.currentUser = {
+          id: data.user_id,
+          pseudo: userData.login,
+          lang: data.lang_ui
+        };
+        this.sessionId = data.session_id;
+        this.isLoggedIn = true;
+        
+        this.saveSession();
+        this.onLoginSuccess();
+        
+        return { success: true, user: this.currentUser };
+      } else {
+        console.log('[AUTH] Registration failed:', data);
+        return { success: false, error: data.error || 'Registration failed' };
+      }
+      
+    } catch (error) {
+      console.error('[AUTH] Registration error:', error);
+      return { success: false, error: 'Network error' };
+    }
+  }
+
+  /**
+   * Logout user
+   */
+  async logout() {
+    try {
+      if (this.sessionId) {
+        await fetch('/api/auth', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            action: 'logout',
+            session_id: this.sessionId
+          })
+        });
+      }
+      
+      console.log('[AUTH] Logout successful');
+      this.clearSession();
+      this.onLogout();
+      
+    } catch (error) {
+      console.error('[AUTH] Logout error:', error);
+      // Clear session anyway
+      this.clearSession();
+      this.onLogout();
+    }
+  }
+
+  /**
+   * Verify current session is still valid
+   */
+  async verifySession() {
+    if (!this.sessionId) return false;
+    
+    try {
+      // Use any authenticated endpoint to verify session
+      const response = await fetch(`/api/spice-multi-test?endpoint=/ajax_api/online&session_id=${this.sessionId}`);
+      const data = await response.json();
+      
+      if (data.connected === 1) {
+        console.log('[AUTH] Session verified as valid');
+        return true;
+      } else {
+        console.log('[AUTH] Session invalid, clearing');
+        this.clearSession();
+        return false;
+      }
+      
+    } catch (error) {
+      console.error('[AUTH] Session verification error:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Get user's IP address
+   */
+  async getUserIP() {
+    try {
+      const response = await fetch('https://api.ipify.org?format=json');
+      const data = await response.json();
+      return data.ip || '127.0.0.1';
+    } catch (error) {
+      console.error('[AUTH] Error getting IP:', error);
+      return '127.0.0.1';
+    }
+  }
+
+  /**
+   * Called after successful login
+   */
+  onLoginSuccess() {
+    // Update UI elements
+    this.updateUIForLoggedInUser();
+    
+    // Dispatch custom event
+    window.dispatchEvent(new CustomEvent('userLoggedIn', {
+      detail: { user: this.currentUser }
+    }));
+  }
+
+  /**
+   * Called after logout
+   */
+  onLogout() {
+    // Update UI elements
+    this.updateUIForLoggedOutUser();
+    
+    // Dispatch custom event
+    window.dispatchEvent(new CustomEvent('userLoggedOut'));
+  }
+
+  /**
+   * Update UI for logged in user
+   */
+  updateUIForLoggedInUser() {
+    // Hide login/register buttons, show user menu
+    const loginBtn = document.querySelector('.login-btn');
+    const registerSection = document.querySelector('.registration-section');
+    
+    if (loginBtn) loginBtn.style.display = 'none';
+    if (registerSection) registerSection.style.display = 'none';
+    
+    // Show user info in header
+    this.createUserMenu();
+  }
+
+  /**
+   * Update UI for logged out user
+   */
+  updateUIForLoggedOutUser() {
+    const loginBtn = document.querySelector('.login-btn');
+    const registerSection = document.querySelector('.registration-section');
+    const userMenu = document.querySelector('.user-menu');
+    
+    if (loginBtn) loginBtn.style.display = 'block';
+    if (registerSection) registerSection.style.display = 'block';
+    if (userMenu) userMenu.remove();
+  }
+
+  /**
+   * Create user menu in header
+   */
+  createUserMenu() {
+    const header = document.querySelector('header nav');
+    if (!header || document.querySelector('.user-menu')) return;
+    
+    const userMenu = document.createElement('div');
+    userMenu.className = 'user-menu';
+    userMenu.innerHTML = `
+      <div class="user-info">
+        <span class="user-name">Hello, ${this.currentUser.pseudo}!</span>
+        <div class="user-dropdown">
+          <button class="dashboard-btn">Dashboard</button>
+          <button class="logout-btn">Logout</button>
+        </div>
+      </div>
+    `;
+    
+    header.appendChild(userMenu);
+    
+    // Add event listeners
+    userMenu.querySelector('.dashboard-btn').addEventListener('click', () => {
+      this.goToDashboard();
+    });
+    
+    userMenu.querySelector('.logout-btn').addEventListener('click', () => {
+      this.logout();
+    });
+  }
+
+  /**
+   * Navigate to user dashboard
+   */
+  goToDashboard() {
+    window.location.href = '/dashboard.html';
+  }
+}
+
+// Create global instance
+window.authManager = new AuthManager();
+
+// Auto-login on page load if session exists
+document.addEventListener('DOMContentLoaded', () => {
+  if (window.authManager.tokenLogin && !window.authManager.isLoggedIn) {
+    window.authManager.autoLogin();
+  }
+});
+
+console.log('[AUTH] AuthManager initialized');
