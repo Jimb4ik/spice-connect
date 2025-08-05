@@ -28,28 +28,16 @@ async function loadUserAvatar() {
             return;
         }
         
-        const apiConfigResponse = await fetch('/api/get-api-key');
-        const apiConfig = await apiConfigResponse.json();
+        // Используем прокси API как в profile.html
+        const apiUrl = `/api/spice-multi-test?endpoint=/index_api/user&method=POST&session_id=${sessionId}&id=${userId}&get_picture_430=1`;
         
-        // Используем POST запрос согласно API документации
-        const formData = new URLSearchParams();
-        formData.append('session_id', sessionId);
-        formData.append('id', userId);
-        formData.append('get_picture_430', '1');  // Получаем фотографии
-        
-        const response = await fetch(`${apiConfig.baseUrl}/index_api/user?api_key=${apiConfig.apiKey}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: formData
-        });
+        const response = await fetch(apiUrl);
         const userData = await response.json();
         
         console.log('[HEADER-AVATAR] API response:', userData);
         
-        if (userData && userData.result) {
-            const user = userData.result;
+        if (userData && userData.success && userData.data?.result) {
+            const user = userData.data.result;
             const avatarImg = document.getElementById('userAvatarImg');
             const avatarText = document.getElementById('userAvatarText');
             

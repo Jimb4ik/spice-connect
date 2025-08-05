@@ -556,9 +556,24 @@
                         }
                     }, 1000);
                 } else {
-                    console.error('[PROFILE] PhotoManager not found!');
+                    console.error('[PROFILE] PhotoManager not found! Retrying...');
+                    // Повторная попытка через 2 секунды
+                    setTimeout(async () => {
+                        if (window.PhotoManager) {
+                            console.log('[PROFILE] PhotoManager found on retry, initializing...');
+                            window.photoManager = new PhotoManager();
+                            await window.photoManager.init();
+                            setTimeout(() => {
+                                if (window.photoManager.renderPhotoGallery) {
+                                    window.photoManager.renderPhotoGallery();
+                                }
+                            }, 500);
+                        } else {
+                            console.error('[PROFILE] PhotoManager still not found after retry');
+                        }
+                    }, 2000);
                 }
-            }, 1000); // Увеличиваем задержку еще больше
+            }, 1500); // Увеличиваем задержку еще больше
             
             // Кнопка Add Photo удалена по запросу пользователя
             
