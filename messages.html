@@ -321,19 +321,21 @@
                         sender: 'You'
                     };
                     
-                    // НЕ сохраняем локально - API возвращает все сообщения
-                    console.log('[MESSAGES] 📤 Отправляем сообщение через API, затем перезагружаем чат');
+                    // Сохраняем сообщение в БД
+                    const savedMessage = await window.messagesSystem.saveMessageToDB(
+                        window.messagesSystem.currentChatUserId, 
+                        messageText
+                    );
                     
-                    // Добавляем сообщение в чат немедленно для UX
-                    window.messagesSystem.addMessageToChat(message);
-                    
-                    // Перезагружаем все сообщения с сервера через 1 секунду
-                    setTimeout(() => {
-                        console.log('[MESSAGES] 🔄 Перезагружаем сообщения с API после отправки');
-                        window.messagesSystem.loadChatMessages(window.messagesSystem.currentChatUserId);
-                    }, 1000);
-                    
-                    console.log('[MESSAGES] ✅ Message sent, полагаемся на API для получения всех сообщений');
+                    if (savedMessage) {
+                        console.log('[MESSAGES] ✅ Message saved to database');
+                        // Добавляем сообщение в чат
+                        window.messagesSystem.addMessageToChat(message);
+                    } else {
+                        console.error('[MESSAGES] ⚠️ Failed to save message to database, but sent via API');
+                        // Всё равно показываем сообщение в чате
+                        window.messagesSystem.addMessageToChat(message);
+                    }
                 } else {
                     console.error('[MESSAGES] ❌ Failed to send message:', result.error);
                     alert('Failed to send message: ' + result.error);

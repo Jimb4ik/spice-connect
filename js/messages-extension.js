@@ -216,60 +216,130 @@ Object.assign(Dashboard.prototype, {
     console.log(`[MESSAGES] Loading messages for user: ${userId}`);
     
     try {
-      // Загружаем ТОЛЬКО сообщения с сервера (API возвращает все сообщения)
+      // Загружаем сообщения из нашей БД
+      const dbMessages = await this.getMessagesFromDB(userId);
+      
+      // Загружаем сообщения с внешнего API
       const result = await this.callMessagesAPI(userId);
       
       let allMessages = [];
       
-      if (result.success && result.messages) {
-        allMessages = result.messages;
-        console.log(`[MESSAGES] ✅ Loaded ${result.messages.length} messages from API server`);
-        
-        // Сортируем по времени
-        allMessages.sort((a, b) => {
-          const timeA = new Date(a.timestamp || a.created_at || a.date || 0);
-          const timeB = new Date(b.timestamp || b.created_at || b.date || 0);
-          return timeA - timeB;
-        });
-      } else {
-        console.log(`[MESSAGES] ❌ No messages received from API`);
+      // Добавляем сообщения из нашей БД (отправленные нами)
+      if (dbMessages.length > 0) {
+        // Преобразуем формат БД в формат сообщений
+        const formattedDbMessages = dbMessages.map(msg => ({
+          message: msg.message_text,
+          timestamp: msg.created_at,
+          from_me: msg.is_own,
+          text: msg.message_text,
+          created_at: msg.created_at
+        }));
+        allMessages = [...formattedDbMessages];
+        console.log(`[MESSAGES] Loaded ${dbMessages.length} messages from DB`);
       }
       
+      // Объединяем с внешними сообщениями
+      if (result.success && result.messages) {
+        allMessages = [...allMessages, ...result.messages];
+        console.log(`[MESSAGES] Added ${result.messages.length} messages from external API`);
+      }
+      
+      // Сортируем по времени
+      allMessages.sort((a, b) => {
+        const timeA = new Date(a.timestamp || a.created_at || 0);
+        const timeB = new Date(b.timestamp || b.created_at || 0);
+        return timeA - timeB;
+      });
+      
       this.displayChatMessages(allMessages);
-      console.log(`[MESSAGES] 📋 Total displayed: ${allMessages.length} messages`);
+      console.log(`[MESSAGES] Total displayed: ${allMessages.length} messages`);
       
     } catch (error) {
       console.error('[MESSAGES] Error loading messages:', error);
-      // Показываем хотя бы локальные сообщения при ошибке
-      const localMessages = this.getLocalMessages(userId);
-      if (localMessages.length > 0) {
-        this.displayChatMessages(localMessages);
-      } else {
-        this.showChatError(error.message);
-      }
+      this.showChatError(error.message);
     }
   },
 
-  // Получение локальных сообщений из localStorage
-  getLocalMessages(userId) {
+  // Получение сообщений из БД
+  async getMessagesFromDB(contactId) {
     try {
-      const localMessages = localStorage.getItem(`messages_${userId}`);
-      return localMessages ? JSON.parse(localMessages) : [];
+      const authManager = window.authManager;
+      const sessionId = authManager?.getSessionId();
+      const userId = authManager?.getUserId();
+      
+      if (!sessionId || !userId) {
+        console.error('[MESSAGES] Нет данных сессии для получения сообщений');
+        return [];
+      }
+      
+      const params = new URLSearchParams({
+        action: 'get_messages',
+        user_id: userId,
+        contact_id: contactId,
+        session_id: sessionId
+      });
+      
+      const response = await fetch(`/api/messages?${params.toString()}`);
+      const result = await response.json();
+      console.log('[MESSAGES] Ответ получения из БД:', result);
+      
+      if (result.success) {
+        return result.data || [];
+      } else {
+        console.error('[MESSAGES] Ошибка получения из БД:', result.error);
+        return [];
+      }
     } catch (error) {
-      console.error('[MESSAGES] Error loading local messages:', error);
+      console.error('[MESSAGES] Ошибка запроса к БД:', error);
       return [];
     }
   },
 
-  // Сохранение сообщения в localStorage
-  saveLocalMessage(userId, message) {
+  // Сохранение сообщения в БД
+  async saveMessageToDB(recipientId, messageText) {
     try {
-      const localMessages = this.getLocalMessages(userId);
-      localMessages.push(message);
-      localStorage.setItem(`messages_${userId}`, JSON.stringify(localMessages));
-      console.log('[MESSAGES] Message saved locally');
+      const authManager = window.authManager;
+      const sessionId = authManager?.getSessionId();
+      const userId = authManager?.getUserId();
+      
+      if (!sessionId || !userId) {
+        console.error('[MESSAGES] Нет данных сессии для сохранения сообщения');
+        return null;
+      }
+      
+      console.log('[MESSAGES] Сохраняем сообщение в БД:', {
+        sender_id: userId,
+        recipient_id: recipientId,
+        message_text: messageText,
+        session_id: sessionId
+      });
+      
+      const response = await fetch('/api/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          action: 'save_message',
+          sender_id: userId,
+          recipient_id: recipientId,
+          message_text: messageText,
+          session_id: sessionId
+        })
+      });
+      
+      const result = await response.json();
+      console.log('[MESSAGES] Ответ сохранения в БД:', result);
+      
+      if (result.success) {
+        return result.data;
+      } else {
+        console.error('[MESSAGES] Ошибка сохранения в БД:', result.error);
+        return null;
+      }
     } catch (error) {
-      console.error('[MESSAGES] Error saving local message:', error);
+      console.error('[MESSAGES] Ошибка запроса к БД:', error);
+      return null;
     }
   },
 
@@ -368,14 +438,9 @@ Object.assign(Dashboard.prototype, {
   },
 
   createSimpleMessageItem(message) {
-    // Определяем отправитель ли это мы (можно по разным полям из API)
-    const isOwn = message.isOwn || message.from_me || message.sender === 'You' || false;
-    
-    // Текст сообщения
+    const isOwn = message.isOwn || message.from_me || false;
     const text = message.text || message.message || message.content || '';
-    
-    // Время сообщения (API возвращает поле date)
-    const time = this.formatMessageTime(message.date || message.timestamp || message.created_at || Date.now());
+    const time = this.formatMessageTime(message.timestamp || message.created_at || Date.now());
     
     return `
       <div class="message-item ${isOwn ? 'own' : ''}">
