@@ -1320,73 +1320,7 @@ body {
   }
 }
 
-/* Messages layout */
-.messages-container {
-  display: grid;
-  grid-template-columns: 300px 1fr;
-  gap: 2rem;
-  height: calc(100vh - 200px);
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: var(--border-radius);
-  overflow: hidden;
-}
-
-.messages-sidebar {
-  background: rgba(255, 255, 255, 0.5);
-  border-right: 1px solid rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-}
-
-.sidebar-header {
-  padding: 1.5rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.search-contacts {
-  padding: 1rem;
-}
-
-.contacts-list {
-  flex: 1;
-  overflow-y: auto;
-}
-
-.chat-area {
-  display: flex;
-  flex-direction: column;
-}
-
-.chat-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: var(--text-light);
-}
-
-.empty-icon {
-  font-size: 4rem;
-  margin-bottom: 1rem;
-}
-
-.chat-header {
-  padding: 1.5rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.chat-user-info {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
+/* Messages layout - стили перенесены в css/messages.css */
 
 .chat-avatar {
   width: 50px;
