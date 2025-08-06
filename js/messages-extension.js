@@ -236,6 +236,9 @@ Object.assign(Dashboard.prototype, {
         }));
         allMessages = [...formattedDbMessages];
         console.log(`[MESSAGES] Loaded ${dbMessages.length} messages from DB`);
+        console.log('[MESSAGES] Formatted DB messages:', formattedDbMessages);
+      } else {
+        console.log('[MESSAGES] ⚠️ No messages found in DB for this conversation');
       }
       
       // Объединяем с внешними сообщениями
@@ -298,9 +301,24 @@ Object.assign(Dashboard.prototype, {
         session_id: sessionId
       });
       
+      console.log('[MESSAGES] Запрос к БД:', `/api/messages?${params.toString()}`);
+      
       const response = await fetch(`/api/messages?${params.toString()}`);
       const result = await response.json();
-      console.log('[MESSAGES] Ответ получения из БД:', result);
+      
+      console.log('[MESSAGES] ========== ДЕТАЛЬНЫЙ ОТВЕТ БД ==========');
+      console.log('[MESSAGES] Response status:', response.status);
+      console.log('[MESSAGES] Response ok:', response.ok);
+      console.log('[MESSAGES] Result:', result);
+      console.log('[MESSAGES] Result.success:', result.success);
+      console.log('[MESSAGES] Result.data:', result.data);
+      if (result.data && Array.isArray(result.data)) {
+        console.log('[MESSAGES] Количество сообщений в БД:', result.data.length);
+        result.data.forEach((msg, index) => {
+          console.log(`[MESSAGES] Сообщение ${index}:`, msg);
+        });
+      }
+      console.log('[MESSAGES] ============================================');
       
       if (result.success) {
         return result.data || [];

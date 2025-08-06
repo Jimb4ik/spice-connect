@@ -56,17 +56,17 @@ async function saveMessage(senderUserId, recipientUserId, messageText, sessionId
 async function getMessages(userId, contactId, sessionId) {
   const client = await pool.connect();
   try {
+    // Ищем сообщения без привязки к session_id для персистентности между сессиями
     const result = await client.query(`
       SELECT * FROM user_messages 
       WHERE (
         (sender_id = $1 AND recipient_id = $2) OR 
         (sender_id = $2 AND recipient_id = $1)
       )
-      AND session_id = $3
       ORDER BY created_at ASC
-    `, [userId, contactId, sessionId]);
+    `, [userId, contactId]);
     
-    console.log(`[MESSAGES-DB] Найдено ${result.rows.length} сообщений между ${userId} и ${contactId}`);
+    console.log(`[MESSAGES-DB] Найдено ${result.rows.length} сообщений между ${userId} и ${contactId} (любые сессии)`);
     return result.rows;
   } catch (error) {
     console.error('[MESSAGES-DB] Ошибка получения сообщений:', error);
