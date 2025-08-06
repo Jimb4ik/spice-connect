@@ -216,70 +216,30 @@ Object.assign(Dashboard.prototype, {
     console.log(`[MESSAGES] Loading messages for user: ${userId}`);
     
     try {
-      // Сначала загружаем локальные сообщения
-      const localMessages = this.getLocalMessages(userId);
-      
-      // Затем загружаем сообщения с сервера
+      // Загружаем все сообщения с сервера
       const result = await this.callMessagesAPI(userId);
       
-      let allMessages = [];
-      
-      // Объединяем локальные и серверные сообщения
       if (result.success && result.messages) {
-        allMessages = [...result.messages];
-        console.log(`[MESSAGES] Loaded ${result.messages.length} messages from server`);
+        // Сортируем сообщения по времени
+        const messages = result.messages.sort((a, b) => {
+          const timeA = new Date(a.timestamp || a.created_at || a.date || 0);
+          const timeB = new Date(b.timestamp || b.created_at || b.date || 0);
+          return timeA - timeB;
+        });
+        
+        this.displayChatMessages(messages);
+        console.log(`[MESSAGES] Displayed ${messages.length} messages from server`);
+      } else {
+        this.showChatError('No messages found');
       }
-      
-      // Добавляем локальные сообщения (отправленные нами)
-      if (localMessages.length > 0) {
-        allMessages = [...allMessages, ...localMessages];
-        console.log(`[MESSAGES] Added ${localMessages.length} local messages`);
-      }
-      
-      // Сортируем по времени
-      allMessages.sort((a, b) => {
-        const timeA = new Date(a.timestamp || a.created_at || 0);
-        const timeB = new Date(b.timestamp || b.created_at || 0);
-        return timeA - timeB;
-      });
-      
-      this.displayChatMessages(allMessages);
-      console.log(`[MESSAGES] Total displayed: ${allMessages.length} messages`);
       
     } catch (error) {
       console.error('[MESSAGES] Error loading messages:', error);
-      // Показываем хотя бы локальные сообщения при ошибке
-      const localMessages = this.getLocalMessages(userId);
-      if (localMessages.length > 0) {
-        this.displayChatMessages(localMessages);
-      } else {
-        this.showChatError(error.message);
-      }
+      this.showChatError(error.message);
     }
   },
 
-  // Получение локальных сообщений из localStorage
-  getLocalMessages(userId) {
-    try {
-      const localMessages = localStorage.getItem(`messages_${userId}`);
-      return localMessages ? JSON.parse(localMessages) : [];
-    } catch (error) {
-      console.error('[MESSAGES] Error loading local messages:', error);
-      return [];
-    }
-  },
-
-  // Сохранение сообщения в localStorage
-  saveLocalMessage(userId, message) {
-    try {
-      const localMessages = this.getLocalMessages(userId);
-      localMessages.push(message);
-      localStorage.setItem(`messages_${userId}`, JSON.stringify(localMessages));
-      console.log('[MESSAGES] Message saved locally');
-    } catch (error) {
-      console.error('[MESSAGES] Error saving local message:', error);
-    }
-  },
+  // Локальное хранение удалено - все сообщения получаем через API
 
   async callMessagesAPI(userId) {
     const sessionId = window.authManager?.sessionId;
@@ -339,9 +299,34 @@ Object.assign(Dashboard.prototype, {
     console.log('🔍 [MESSAGES] ===================================================');
 
     if (result.success && result.data) {
+      // Парсим сообщения из разных возможных мест
+      let parsedMessages = [];
+      
+      // Основные сообщения
+      const rawMessages = result.data.result || result.data.messages || [];
+      
+      if (Array.isArray(rawMessages)) {
+        parsedMessages = rawMessages.map(msg => {
+          // Если сообщение имеет структуру как из API
+          if (typeof msg === 'object' && msg !== null) {
+            return {
+              id: msg.id_last || msg.id || Date.now(),
+              message: msg.message || msg.text || msg.content || '',
+              date: msg.date || msg.timestamp || msg.created_at,
+              from_me: msg.from_me || false,
+              isOwn: msg.from_me || false,
+              sender: msg.sender || (msg.from_me ? 'You' : 'Contact')
+            };
+          }
+          return msg;
+        });
+      }
+      
+      console.log('[MESSAGES] ✅ Parsed messages:', parsedMessages);
+      
       return {
         success: true,
-        messages: result.data.result || result.data.messages || []
+        messages: parsedMessages
       };
     } else {
       return {
@@ -376,9 +361,17 @@ Object.assign(Dashboard.prototype, {
   },
 
   createSimpleMessageItem(message) {
+    console.log('[MESSAGES] Creating message item for:', message);
+    
     const isOwn = message.isOwn || message.from_me || false;
-    const text = message.text || message.message || message.content || '';
-    const time = this.formatMessageTime(message.timestamp || message.created_at || Date.now());
+    const text = message.message || message.text || message.content || '';
+    const time = this.formatMessageTime(message.date || message.timestamp || message.created_at || Date.now());
+    
+    // Если нет текста, не показываем сообщение
+    if (!text) {
+      console.log('[MESSAGES] ⚠️ Empty message text, skipping:', message);
+      return '';
+    }
     
     return `
       <div class="message-item ${isOwn ? 'own' : ''}">

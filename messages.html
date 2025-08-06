@@ -321,13 +321,10 @@
                         sender: 'You'
                     };
                     
-                    // Сохраняем сообщение локально
-                    window.messagesSystem.saveLocalMessage(window.messagesSystem.currentChatUserId, message);
+                    // Перезагружаем чат с сервера чтобы увидеть отправленное сообщение
+                    await window.messagesSystem.loadChatMessages(window.messagesSystem.currentChatUserId);
                     
-                    // Добавляем сообщение в чат
-                    window.messagesSystem.addMessageToChat(message);
-                    
-                    console.log('[MESSAGES] ✅ Message sent and saved locally');
+                    console.log('[MESSAGES] ✅ Message sent, chat reloaded');
                 } else {
                     console.error('[MESSAGES] ❌ Failed to send message:', result.error);
                     alert('Failed to send message: ' + result.error);
