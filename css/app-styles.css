@@ -49,15 +49,16 @@ body {
 .header-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0.4rem 2rem;
+  padding: 0 2rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  height: 70px; /* Такая же высота как на главной странице */
 }
 
 .logo {
-  font-size: 1.6rem;
-  font-weight: 800;
+  font-size: 1.8rem; /* Такой же размер как на главной странице */
+  font-weight: 700; /* Такой же вес как на главной */
   background: var(--gradient-primary);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;

@@ -9,11 +9,7 @@
 /* Стили точно как у profile-hero-section */
 .messages-container {
   margin-bottom: 3rem;
-  /* Убеждаемся что наследуется ширина от app-main */
-  width: 100%;
-  max-width: 1200px; /* Явно устанавливаем такую же ширину как у app-main */
-  margin-left: auto;
-  margin-right: auto;
+  /* Убираем лишние стили - ширина должна наследоваться от app-main естественно */
 }
 
 .messages-chat-card {
@@ -27,8 +23,7 @@
   height: calc(100vh - 300px); /* Адаптивная высота */
   min-height: 500px;
   overflow: hidden;
-  width: 100%; /* Занимает всю ширину контейнера app-main */
-  max-width: none; /* Убираем ограничения, чтобы наследовать от app-main */
+  /* Убираем width и max-width - пусть наследует естественно от родителя */
 }
 
 /* Sidebar с контактами */
