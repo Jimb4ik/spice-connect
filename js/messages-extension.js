@@ -264,17 +264,36 @@ Object.assign(Dashboard.prototype, {
   async getMessagesFromDB(contactId) {
     try {
       const authManager = window.authManager;
-      const sessionId = authManager?.getSessionId();
-      const userId = authManager?.getUserId();
+      const sessionId = authManager?.sessionId;
+      const userId = authManager?.userId;
       
       if (!sessionId || !userId) {
         console.error('[MESSAGES] Нет данных сессии для получения сообщений');
-        return [];
+        console.log('[MESSAGES] authManager:', authManager);
+        console.log('[MESSAGES] sessionId:', sessionId, 'userId:', userId);
+        console.log('[MESSAGES] currentUser:', authManager?.currentUser);
+        
+        // Попробуем альтернативные поля для userId
+        const alternativeUserId = authManager?.currentUser?.m_id || 
+                                  authManager?.currentUser?.user_id || 
+                                  authManager?.currentUser?.pseudo;
+        
+        if (sessionId && alternativeUserId) {
+          console.log('[MESSAGES] Используем альтернативный userId:', alternativeUserId);
+          // Продолжаем с альтернативным ID
+        } else {
+          return [];
+        }
       }
+      
+      // Определяем финальный userId
+      const finalUserId = userId || authManager?.currentUser?.m_id || 
+                          authManager?.currentUser?.user_id || 
+                          authManager?.currentUser?.pseudo;
       
       const params = new URLSearchParams({
         action: 'get_messages',
-        user_id: userId,
+        user_id: finalUserId,
         contact_id: contactId,
         session_id: sessionId
       });
@@ -299,16 +318,24 @@ Object.assign(Dashboard.prototype, {
   async saveMessageToDB(recipientId, messageText) {
     try {
       const authManager = window.authManager;
-      const sessionId = authManager?.getSessionId();
-      const userId = authManager?.getUserId();
+      const sessionId = authManager?.sessionId;
+      const userId = authManager?.userId;
       
-      if (!sessionId || !userId) {
+      // Определяем финальный userId
+      const finalUserId = userId || authManager?.currentUser?.m_id || 
+                          authManager?.currentUser?.user_id || 
+                          authManager?.currentUser?.pseudo;
+      
+      if (!sessionId || !finalUserId) {
         console.error('[MESSAGES] Нет данных сессии для сохранения сообщения');
+        console.log('[MESSAGES] authManager:', authManager);
+        console.log('[MESSAGES] sessionId:', sessionId, 'finalUserId:', finalUserId);
+        console.log('[MESSAGES] currentUser:', authManager?.currentUser);
         return null;
       }
       
       console.log('[MESSAGES] Сохраняем сообщение в БД:', {
-        sender_id: userId,
+        sender_id: finalUserId,
         recipient_id: recipientId,
         message_text: messageText,
         session_id: sessionId
@@ -321,7 +348,7 @@ Object.assign(Dashboard.prototype, {
         },
         body: JSON.stringify({
           action: 'save_message',
-          sender_id: userId,
+          sender_id: finalUserId,
           recipient_id: recipientId,
           message_text: messageText,
           session_id: sessionId
