@@ -321,10 +321,19 @@
                         sender: 'You'
                     };
                     
-                    // Перезагружаем чат с сервера чтобы увидеть отправленное сообщение
-                    await window.messagesSystem.loadChatMessages(window.messagesSystem.currentChatUserId);
+                    // НЕ сохраняем локально - API возвращает все сообщения
+                    console.log('[MESSAGES] 📤 Отправляем сообщение через API, затем перезагружаем чат');
                     
-                    console.log('[MESSAGES] ✅ Message sent, chat reloaded');
+                    // Добавляем сообщение в чат немедленно для UX
+                    window.messagesSystem.addMessageToChat(message);
+                    
+                    // Перезагружаем все сообщения с сервера через 1 секунду
+                    setTimeout(() => {
+                        console.log('[MESSAGES] 🔄 Перезагружаем сообщения с API после отправки');
+                        window.messagesSystem.loadChatMessages(window.messagesSystem.currentChatUserId);
+                    }, 1000);
+                    
+                    console.log('[MESSAGES] ✅ Message sent, полагаемся на API для получения всех сообщений');
                 } else {
                     console.error('[MESSAGES] ❌ Failed to send message:', result.error);
                     alert('Failed to send message: ' + result.error);
