@@ -1392,11 +1392,12 @@ body {
   display: flex;
   flex-direction: column;
   margin-bottom: 2rem; /* Отступ от кнопок */
+  min-height: 480px; /* чтобы лоадер центрировался ниже подзаголовка и не налезал */
 }
 
 .discover-loading {
   position: absolute;
-  top: 50%;
+  top: calc(50% + 40px);
   left: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
