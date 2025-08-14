@@ -112,6 +112,61 @@ Object.assign(Dashboard.prototype, {
         this.selectChat(userId);
       });
     });
+
+    // Префетчим превью последнего сообщения для первых контактов
+    this.prefetchLastPreviews(contacts).catch(err => {
+      console.warn('[MESSAGES] Prefetch previews error:', err);
+    });
+  },
+
+  async prefetchLastPreviews(contacts) {
+    try {
+      const authManager = window.authManager;
+      const sessionId = authManager?.sessionId;
+      const userId = authManager?.userId || authManager?.currentUser?.m_id || authManager?.currentUser?.user_id || authManager?.currentUser?.pseudo;
+      if (!sessionId || !userId) return;
+
+      const sample = contacts.slice(0, 12); // ограничим количество запросов на старте
+
+      await Promise.all(sample.map(async (contact) => {
+        const contactId = contact.m_id || contact.id || contact.user_id;
+        if (!contactId) return;
+
+        // 1) Пытаемся взять последнее наше сохранённое сообщение из БД
+        try {
+          const params = new URLSearchParams({
+            action: 'get_messages',
+            user_id: userId,
+            contact_id: String(contactId),
+            session_id: sessionId
+          });
+          const r = await fetch(`/api/messages?${params.toString()}`);
+          const data = await r.json();
+          if (data?.success && Array.isArray(data.data) && data.data.length) {
+            const last = data.data[data.data.length - 1];
+            this.updateContactPreview(String(contactId), last.message_text || '', last.created_at);
+            return; // превью обновлено
+          }
+        } catch (e) {
+          console.warn('[MESSAGES] DB preview fetch failed for', contactId, e);
+        }
+
+        // 2) Фоллбэк: берём последнее сообщение с внешнего API (для контактов без локальных записей)
+        try {
+          const external = await this.callMessagesAPI(String(contactId));
+          if (external?.success && Array.isArray(external.messages) && external.messages.length) {
+            const last = external.messages[external.messages.length - 1];
+            const text = last.text || last.message || last.content || '';
+            const time = last.timestamp || last.created_at || new Date().toISOString();
+            this.updateContactPreview(String(contactId), text, time);
+          }
+        } catch (e) {
+          console.warn('[MESSAGES] External preview fetch failed for', contactId, e);
+        }
+      }));
+    } catch (error) {
+      console.warn('[MESSAGES] prefetchLastPreviews error root:', error);
+    }
   },
 
   createContactItem(contact) {
