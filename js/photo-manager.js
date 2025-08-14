@@ -275,7 +275,7 @@ class PhotoManager {
           serverId: uploadResult.id_photo,
           file: file,
           previewUrl: URL.createObjectURL(file),
-          isNew: true,
+          isNew: false, // mark as real so we don't create phantom entries
           accepted: 0,
           isDemo: uploadResult.isDemo || false
         };
@@ -977,11 +977,12 @@ class PhotoManager {
     gallery.innerHTML = '';
     console.log('[PHOTO MANAGER] Gallery cleared');
     
-    // Update photo count
+    // Update photo count (exclude temporary new photos)
     const photoCount = document.getElementById('photoCount');
     console.log('[PHOTO MANAGER] Photo count element found:', !!photoCount);
     if (photoCount) {
-      photoCount.textContent = `${this.photos.length}/10 photos`;
+      const realCount = this.photos.filter(p => !p.isNew).length;
+      photoCount.textContent = `${realCount}/10 photos`;
       console.log('[PHOTO MANAGER] Photo count updated to:', photoCount.textContent);
     } else {
       console.error('[PHOTO MANAGER] Photo count element not found! Looking for #photoCount');
@@ -1029,8 +1030,8 @@ class PhotoManager {
       return;
     }
 
-    // Render existing photos
-    this.photos.forEach(photo => {
+    // Render existing photos (skip temporary items created during upload)
+    this.photos.filter(p => !p.isNew).forEach(photo => {
       const photoCard = document.createElement('div');
       photoCard.className = 'photo-card';
       if (photo.isMain) photoCard.classList.add('main-photo');
