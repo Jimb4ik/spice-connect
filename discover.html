@@ -584,7 +584,8 @@
                 loadingElement.style.display = show ? 'block' : 'none';
             }
             if (cardElement) {
-                cardElement.style.display = show ? 'none' : 'block';
+                // Всегда используем grid, чтобы избежать перерисовки ширины
+                cardElement.style.display = show ? 'none' : 'grid';
             }
             if (actionsElement) {
                 actionsElement.style.display = show ? 'none' : 'flex';
