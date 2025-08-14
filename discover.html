@@ -100,11 +100,7 @@
                     
                     <!-- Информация под фото -->
                     <div class="profile-info-section">
-                        <div class="profile-name-row">
-                            <button class="name-action-btn pass" id="dislikeBtnName" title="Pass">✕</button>
-                            <h2 class="profile-main-name" id="cardName">Name</h2>
-                            <button class="name-action-btn like" id="likeBtnName" title="Like">💖</button>
-                        </div>
+                        <h2 class="profile-main-name" id="cardName">Name</h2>
                         <p class="profile-location-text" id="cardLocation">Location</p>
                     </div>
                 </div>
@@ -332,11 +328,7 @@
                 likeBtn.addEventListener('click', () => handleLike());
             }
 
-            // Кнопки в белой плашке (ряд с именем)
-            const dislikeBtnName = document.getElementById('dislikeBtnName');
-            const likeBtnName = document.getElementById('likeBtnName');
-            if (dislikeBtnName) dislikeBtnName.addEventListener('click', (e) => { e.stopPropagation(); handleDislike(); });
-            if (likeBtnName) likeBtnName.addEventListener('click', (e) => { e.stopPropagation(); handleLike(); });
+            // Кнопки рядом с именем удалены
             
             if (resetBtn) {
                 resetBtn.addEventListener('click', () => handleReset());
