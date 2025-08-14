@@ -104,6 +104,12 @@
                     </div>
                 </div>
 
+                <!-- Side Actions for desktop/laptop -->
+                <div class="actions-side" id="discoverActionsSide" style="display: none;">
+                    <button class="side-btn pass" id="dislikeBtnSide" title="Pass">✕</button>
+                    <button class="side-btn like" id="likeBtnSide" title="Like">💖</button>
+                </div>
+
                 <!-- No Profiles State -->
                 <div class="no-profiles-state" id="noProfilesState" style="display: none;">
                     <div class="no-profiles-icon">🎯</div>
@@ -317,6 +323,8 @@
             // Добавляем обработчики кнопок
             const dislikeBtn = document.getElementById('dislikeBtn');
             const likeBtn = document.getElementById('likeBtn');
+            const dislikeBtnSide = document.getElementById('dislikeBtnSide');
+            const likeBtnSide = document.getElementById('likeBtnSide');
             const resetBtn = document.getElementById('resetProfilesBtn');
             
             if (dislikeBtn) {
@@ -333,6 +341,10 @@
                 resetBtn.addEventListener('click', () => handleReset());
             }
             
+            // Desktop side buttons
+            if (dislikeBtnSide) dislikeBtnSide.addEventListener('click', () => handleDislike());
+            if (likeBtnSide) likeBtnSide.addEventListener('click', () => handleLike());
+
             // Загружаем первый профиль
             loadNextProfile();
         }
@@ -526,10 +538,14 @@
             const discoverCard = document.getElementById('discoverCard');
             const noProfilesState = document.getElementById('noProfilesState');
             const actionsFixed = document.getElementById('discoverActionsFixed');
+            const actionsSide = document.getElementById('discoverActionsSide');
             
             if (discoverCard) discoverCard.style.display = 'grid';
             if (noProfilesState) noProfilesState.style.display = 'none';
-            if (actionsFixed) actionsFixed.style.display = 'flex';
+            // Показываем мобильные или десктопные кнопки
+            const isWide = window.innerWidth > window.innerHeight + 120; // широкие экраны
+            if (actionsFixed) actionsFixed.style.display = isWide ? 'none' : 'flex';
+            if (actionsSide) actionsSide.style.display = isWide ? 'block' : 'none';
         }
         
         function updateProfilePhoto(profile) {

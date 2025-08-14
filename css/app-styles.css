@@ -1760,6 +1760,32 @@ body {
   padding: 0 2rem;
 }
 
+/* Side actions for desktop */
+.actions-side {
+  position: absolute;
+  inset: 0;
+  pointer-events: none; /* кликаются только кнопки */
+}
+.actions-side .side-btn {
+  position: absolute;
+  top: 45%;
+  transform: translateY(-50%);
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  border: none;
+  box-shadow: var(--shadow);
+  font-size: 24px;
+  cursor: pointer;
+  pointer-events: auto;
+}
+.actions-side .side-btn.pass { left: -90px; background: #f0f0f0; color: #555; }
+.actions-side .side-btn.like { right: -90px; background: var(--gradient-primary); color: #fff; }
+
+@media (max-width: 1024px) {
+  .actions-side { display: none !important; }
+}
+
 .action-btn-new {
   width: 60px;
   height: 60px;
