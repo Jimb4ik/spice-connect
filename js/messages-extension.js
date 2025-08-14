@@ -256,6 +256,14 @@ Object.assign(Dashboard.prototype, {
       
       this.displayChatMessages(allMessages);
       console.log(`[MESSAGES] Total displayed: ${allMessages.length} messages`);
+
+      // Обновляем превью последнего сообщения в списке контактов
+      if (allMessages.length > 0) {
+        const last = allMessages[allMessages.length - 1];
+        const lastText = last.text || last.message || last.content || '';
+        const lastTime = last.timestamp || last.created_at || new Date().toISOString();
+        this.updateContactPreview(userId, lastText, lastTime);
+      }
       
     } catch (error) {
       console.error('[MESSAGES] Error loading messages:', error);
@@ -679,6 +687,33 @@ Object.assign(Dashboard.prototype, {
     
     // Scroll to bottom
     this.scrollToBottom();
+
+    // Обновляем превью для активного контакта
+    try {
+      const userId = this.currentChatUserId;
+      const text = message.text || message.message || message.content || '';
+      const time = message.timestamp || message.created_at || new Date().toISOString();
+      if (userId && text) {
+        this.updateContactPreview(userId, text, time);
+      }
+    } catch (e) {
+      console.warn('[MESSAGES] Failed to update contact preview:', e);
+    }
+  },
+
+  // Обновление превью в левом списке контактов
+  updateContactPreview(userId, text, timestamp) {
+    const item = document.querySelector(`.contact-item[data-user-id="${userId}"]`);
+    if (!item) return;
+    const lastEl = item.querySelector('.contact-last-message');
+    const timeEl = item.querySelector('.contact-time');
+    if (lastEl) {
+      const normalized = String(text || '').replace(/\s+/g, ' ').trim();
+      lastEl.textContent = normalized.length > 70 ? `${normalized.slice(0, 67)}...` : normalized || '—';
+    }
+    if (timeEl) {
+      timeEl.textContent = this.formatMessageTime(timestamp);
+    }
   },
 
   scrollToBottom() {
