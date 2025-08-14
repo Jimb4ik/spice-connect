@@ -1692,7 +1692,7 @@ body {
 
 /* Новый дизайн Discover в стиле скриншота */
 .profile-card-new {
-  max-width: 780px; /* +50% шире */
+  max-width: 900px; /* нормальная ширина для десктопа */
   min-width: 360px;
   width: 100%;
   margin: 0 auto;
@@ -1708,7 +1708,8 @@ body {
 .profile-photo-wrapper {
   position: relative;
   width: 100%;
-  height: 650px; /* пропорционально увеличили высоту под новую ширину */
+  aspect-ratio: 4 / 5; /* соотношение сторон для портретных фото на вебе */
+  height: auto;
   overflow: hidden;
 }
 
