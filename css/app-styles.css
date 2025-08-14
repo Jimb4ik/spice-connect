@@ -12,7 +12,7 @@
   --border-light: #e9ecef;
   --gradient-primary: linear-gradient(135deg, #ff4458 0%, #ff6b7a 100%);
   --gradient-secondary: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
-  --gradient-hero: linear-gradient(135deg, #ff4458 0%, #6c5ce7 100%);
+  --gradient-hero: linear-gradient(135deg, rgba(255, 68, 88, 0.14) 0%, rgba(108, 92, 231, 0.14) 100%);
   --shadow: 0 4px 20px rgba(0,0,0,0.15);
   --shadow-hover: 0 10px 40px rgba(0,0,0,0.2);
   --border-radius: 20px;
@@ -413,7 +413,7 @@ body {
   margin: 2rem 0;
 }
 
-.stat-card, .stat-item {
+.stat-item {
   text-align: center;
   padding: 1.5rem;
   background: rgba(255, 255, 255, 0.1);
@@ -421,19 +421,19 @@ body {
   transition: var(--transition);
 }
 
-.stat-card:hover {
+.stat-item:hover {
   transform: translateY(-2px);
   background: rgba(255, 255, 255, 0.15);
 }
 
-.stat-number {
+.stat-item .stat-number {
   font-size: 2.5rem;
   font-weight: 800;
   color: var(--primary-color);
   margin-bottom: 0.5rem;
 }
 
-.stat-label {
+.stat-item .stat-label {
   color: var(--text-light);
   font-weight: 500;
 }
@@ -546,37 +546,58 @@ body {
 }
 
 .stat-card {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border-radius: 15px;
-  padding: 2rem;
+  background: linear-gradient(135deg, #f472b6 0%, #e879f9 25%, #a855f7 75%, #8b5cf6 100%);
+  border-radius: 24px;
+  padding: 2.5rem 2rem;
   text-align: center;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: var(--transition);
+  border: none;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(168, 85, 247, 0.2);
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+  border-radius: 24px;
+  pointer-events: none;
 }
 
 .stat-card:hover {
   transform: translateY(-5px);
-  box-shadow: var(--shadow-hover);
+  box-shadow: 0 20px 40px rgba(168, 85, 247, 0.3);
 }
 
 .stat-number {
-  font-size: 2.5rem;
+  font-size: 3rem;
   font-weight: 800;
-  color: var(--primary-color);
+  color: white;
   margin-bottom: 0.5rem;
+  position: relative;
+  z-index: 1;
 }
 
 .stat-label {
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.9);
   font-weight: 600;
   margin-bottom: 0.5rem;
+  font-size: 1rem;
+  position: relative;
+  z-index: 1;
 }
 
 .stat-trend {
-  color: #2ed573;
+  color: #10b981;
   font-size: 0.9rem;
-  font-weight: 500;
+  font-weight: 600;
+  position: relative;
+  z-index: 1;
 }
 
 /* Profile Content Grid */
@@ -1413,6 +1434,7 @@ body {
   height: 120px;
   display: grid;
   place-items: center;
+  margin: 0 auto;
 }
 .heart-loader .heart {
   font-size: 42px;
