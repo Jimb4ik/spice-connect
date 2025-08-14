@@ -839,7 +839,7 @@ class PhotoManager {
     
     try {
       // Use server proxy to ensure JSON and correct auth
-      const apiUrl = `/api/spice-multi-test?endpoint=/index_api/user_edit_photos/del&method=POST&session_id=${window.authManager.sessionId}&photo_num=${Number(photoId)}`;
+      const apiUrl = `/api/spice-multi-test?endpoint=/index_api/user_edit_photos/del&method=GET&session_id=${window.authManager.sessionId}&photo_num=${Number(photoId)}`;
       const response = await fetch(apiUrl);
       const result = await response.json();
       console.log('[PHOTO MANAGER] Delete result (proxy):', result);
@@ -906,7 +906,7 @@ class PhotoManager {
     
     try {
       // Use server proxy to ensure JSON and correct auth
-      const apiUrl = `/api/spice-multi-test?endpoint=/index_api/user_edit_photos/del&method=POST&session_id=${window.authManager.sessionId}&photo_num=${photoNum}`;
+      const apiUrl = `/api/spice-multi-test?endpoint=/index_api/user_edit_photos/del&method=GET&session_id=${window.authManager.sessionId}&photo_num=${photoNum}`;
       console.log('[PHOTO MANAGER] API URL (proxy):', apiUrl);
       const response = await fetch(apiUrl);
       const result = await response.json();
