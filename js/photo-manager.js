@@ -872,8 +872,13 @@ class PhotoManager {
       return;
     }
     
+    // Allow fallback to serverId if photoNum is missing
+    if (!this.currentEditingPhoto.photoNum && this.currentEditingPhoto.serverId) {
+      this.currentEditingPhoto.photoNum = this.currentEditingPhoto.serverId;
+    }
     if (!this.currentEditingPhoto.photoNum) {
-      console.error('[PHOTO MANAGER] ERROR: Current editing photo has no photoNum!', this.currentEditingPhoto);
+      console.error('[PHOTO MANAGER] ERROR: Current editing photo has no valid photoNum or serverId!', this.currentEditingPhoto);
+      this.showNotification('Cannot delete this photo. Try again.', 'error');
       return;
     }
     
@@ -889,7 +894,7 @@ class PhotoManager {
       return;
     }
     
-    const photoNum = this.currentEditingPhoto.photoNum;
+    const photoNum = this.currentEditingPhoto.photoNum || this.currentEditingPhoto.serverId;
     
     this.showNotification('Deleting photo...', 'info');
     this.showGlobalLoading('Deleting photo...');
