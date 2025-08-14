@@ -6,21 +6,26 @@
   height: 100vh;
 }
 
+/* Увеличиваем ширину контента только на странице сообщений */
+.messages-page .app-main {
+  max-width: 1400px;
+}
+
 /* Стили точно как у profile-hero-section */
 .messages-container {
   margin-bottom: 3rem;
-  /* Убираем лишние стили - ширина должна наследоваться от app-main естественно */
+  /* Расширяем рабочую область сообщений */
   width: 100%;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0 1.5rem;
 }
 
 .messages-chat-card {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
   border-radius: var(--border-radius);
-  padding: 0; /* Убираем внутренний отступ, он будет в дочерних элементах */
+  padding: 0; /* Внутренние отступы задаются дочерним областям */
   box-shadow: var(--shadow);
   border: 1px solid rgba(255, 255, 255, 0.2);
   display: flex;
@@ -33,7 +38,7 @@
 
 /* Sidebar с контактами */
 .messages-sidebar {
-  width: 350px;
+  width: 380px;
   background: #f8fafc;
   border-right: 1px solid #e2e8f0;
   display: flex;
@@ -188,7 +193,7 @@
 }
 
 .chat-header {
-  padding: 20px 24px;
+  padding: 24px 28px;
   border-bottom: 1px solid #e2e8f0;
   display: flex;
   justify-content: space-between;
@@ -232,14 +237,14 @@
 
 .chat-messages {
   flex: 1;
-  padding: 24px;
+  padding: 28px 32px;
   overflow-y: auto;
   background: #ffffff;
 }
 
 .message-item {
   display: flex;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
   align-items: flex-end;
 }
 
@@ -248,8 +253,8 @@
 }
 
 .message-avatar {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   margin: 0 8px;
   background: #e2e8f0;
@@ -260,12 +265,12 @@
 }
 
 .message-content {
-  max-width: 70%;
+  max-width: 74%;
   position: relative;
 }
 
 .message-bubble {
-  padding: 12px 16px;
+  padding: 14px 18px;
   border-radius: 18px;
   background: #f1f5f9;
   color: #1e293b;
@@ -279,9 +284,9 @@
 }
 
 .message-time {
-  font-size: 11px;
+  font-size: 12px;
   color: #64748b;
-  margin-top: 4px;
+  margin-top: 6px;
   text-align: right;
 }
 
@@ -290,7 +295,7 @@
 }
 
 .chat-input-area {
-  padding: 20px 24px;
+  padding: 24px 28px;
   border-top: 1px solid #e2e8f0;
   background: #f8fafc;
 }
@@ -298,19 +303,19 @@
 .chat-input-container {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   background: white;
   border: 1px solid #e2e8f0;
-  border-radius: 24px;
-  padding: 8px 16px;
+  border-radius: 28px;
+  padding: 10px 18px;
 }
 
 .chat-input-container input {
   flex: 1;
   border: none;
   outline: none;
-  padding: 8px 0;
-  font-size: 14px;
+  padding: 10px 0;
+  font-size: 15px;
 }
 
 .chat-input-container .app-btn {
@@ -382,16 +387,16 @@
   }
   
   .messages-sidebar {
-    width: 280px;
+    width: 300px;
   }
   
   .contact-avatar {
-    width: 44px;
-    height: 44px;
+    width: 46px;
+    height: 46px;
   }
   
   .chat-messages {
-    padding: 16px;
+    padding: 20px;
   }
 }
 
