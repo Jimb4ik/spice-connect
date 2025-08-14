@@ -193,6 +193,9 @@ class PhotoManager {
   handleAddPhoto() {
     console.log('[PHOTO MANAGER] handleAddPhoto called');
     
+    // Show global loading while waiting for file picker
+    this.showGlobalLoading('Select a photo...');
+    
     // Create a temporary file input
     const fileInput = document.createElement('input');
     fileInput.type = 'file';
@@ -202,8 +205,17 @@ class PhotoManager {
     // Add event listener
     fileInput.addEventListener('change', (e) => {
       console.log('[PHOTO MANAGER] File selected:', e.target.files[0]);
+      // Hide waiting overlay as soon as selection is made
+      this.hideGlobalLoading();
       this.handleFileSelect(e);
     });
+    
+    // Fallback: hide overlay when window regains focus (user closed picker without selecting)
+    const onWindowFocus = () => {
+      this.hideGlobalLoading();
+      window.removeEventListener('focus', onWindowFocus);
+    };
+    window.addEventListener('focus', onWindowFocus, { once: true });
     
     // Add to body temporarily
     document.body.appendChild(fileInput);
@@ -249,6 +261,7 @@ class PhotoManager {
 
     // Show loading
     this.showNotification('Uploading photo...', 'info');
+    this.showGlobalLoading('Uploading photo...');
 
     try {
       // Step 1: Upload the photo
@@ -275,13 +288,17 @@ class PhotoManager {
         // Open crop modal for this photo
         console.log('[PHOTO MANAGER] Calling openCropModal...');
         this.openCropModal(tempPhoto);
+        // Hide global loader once modal is opening
+        this.hideGlobalLoading();
       } else {
         console.log('[PHOTO MANAGER] Upload failed:', uploadResult.error);
         this.showNotification(uploadResult.error || 'Upload failed', 'error');
+        this.hideGlobalLoading();
       }
     } catch (error) {
       console.error('[PHOTO MANAGER] Upload error:', error);
       this.showNotification('Upload failed', 'error');
+      this.hideGlobalLoading();
     }
 
     // Reset file input if it exists
@@ -426,6 +443,8 @@ class PhotoManager {
     modal.style.display = 'block';
     document.body.style.overflow = 'hidden';
     console.log('[PHOTO MANAGER] Modal displayed');
+    // Ensure any global loading is hidden once modal is visible
+    this.hideGlobalLoading();
 
     // Render thumbnails
     this.renderThumbnails();
@@ -873,6 +892,7 @@ class PhotoManager {
     const photoNum = this.currentEditingPhoto.photoNum;
     
     this.showNotification('Deleting photo...', 'info');
+    this.showGlobalLoading('Deleting photo...');
     
     console.log('[PHOTO MANAGER] Proceeding with deletion, photoNum:', photoNum);
     console.log('[PHOTO MANAGER] Photos before deletion:', this.photos.length);
@@ -894,7 +914,9 @@ class PhotoManager {
         
         this.showNotification('Photo deleted successfully!', 'success');
         
-        // Simple solution: reload the page to refresh everything
+        // Close crop modal, then reload the page to refresh everything
+        this.closeCropModal();
+        this.hideGlobalLoading();
         console.log('[PHOTO MANAGER] Reloading page to refresh gallery...');
         window.location.reload();
         
@@ -902,10 +924,12 @@ class PhotoManager {
       } else {
         console.log('[PHOTO MANAGER] API deletion failed:', result);
         this.showNotification('Failed to delete photo', 'error');
+        this.hideGlobalLoading();
       }
     } catch (error) {
       console.error('[PHOTO MANAGER] Error deleting photo:', error);
       this.showNotification('Error deleting photo', 'error');
+      this.hideGlobalLoading();
     }
   }
 
@@ -1081,8 +1105,9 @@ class PhotoManager {
       const confirmBtn = document.getElementById('confirmationConfirm');
 
       if (!modal || !messageEl || !cancelBtn || !confirmBtn) {
-        console.error('[PHOTO MANAGER] Confirmation modal elements not found');
-        resolve(false);
+        console.warn('[PHOTO MANAGER] Confirmation modal elements not found, using native confirm()');
+        const ok = window.confirm(message || 'Are you sure?');
+        resolve(!!ok);
         return;
       }
 
@@ -1116,6 +1141,34 @@ class PhotoManager {
         }
       });
     });
+  }
+
+  // Global loading overlay helpers
+  ensureGlobalLoadingOverlay() {
+    let overlay = document.getElementById('loadingOverlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'loadingOverlay';
+      overlay.className = 'loading-overlay';
+      overlay.innerHTML = `
+        <div class="loading-spinner"></div>
+        <p id="loadingOverlayText">Loading...</p>
+      `;
+      document.body.appendChild(overlay);
+    }
+    return overlay;
+  }
+
+  showGlobalLoading(text = 'Loading...') {
+    const overlay = this.ensureGlobalLoadingOverlay();
+    const textEl = document.getElementById('loadingOverlayText');
+    if (textEl) textEl.textContent = text;
+    overlay.classList.add('active');
+  }
+
+  hideGlobalLoading() {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) overlay.classList.remove('active');
   }
 }
 
