@@ -1709,10 +1709,11 @@ body {
 .profile-photo-wrapper {
   position: relative;
   width: 100%;
-  height: clamp(440px, 60vh, 720px); /* стабильный размер, адаптив под экран */
+  height: clamp(500px, 62vh, 720px); /* под 14" мак и выше */
+  aspect-ratio: 4 / 5; /* возвращаем стандарт 4:5 независимо от исходника */
   overflow: hidden;
 }
-.profile-main-photo { width: 100%; height: 100%; object-fit: cover; }
+.profile-main-photo { width: 100%; height: 100%; object-fit: cover; object-position: center; }
 
 .profile-main-photo {
   width: 100%;
