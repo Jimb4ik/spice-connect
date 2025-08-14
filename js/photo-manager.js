@@ -122,13 +122,14 @@ class PhotoManager {
       console.log('[PHOTO MANAGER] Photos array length:', photosArr.length);
       
       if (photosArr.length > 0) {
-        // Filter out invalid photos (num should be valid)
+        // Filter out invalid photos (must have numeric id and a URL)
         photosArr = photosArr.filter(p => {
           const photoNum = Number(p.num || p.id_photo || p.id || 0);
-          return photoNum >= 0; // Allow 0 and positive numbers
+          const photoUrl = p.url_big || p.url_middle || p.url_small || p.sq_430 || p.normal;
+          return photoNum > 0 && !!photoUrl;
         });
         
-        this.photos = photosArr.map((p, idx) => ({
+        const mapped = photosArr.map((p, idx) => ({
           id: p.num || p.id_photo || p.id || `server-${idx}`,
           serverId: p.num || p.id_photo || p.id,
           photoNum: p.num, // For API calls - this is the correct field for deletion
@@ -142,6 +143,14 @@ class PhotoManager {
           isPrivate: p.is_private || 0,
           date: p.date
         }));
+        // Deduplicate by serverId
+        const seenIds = new Set();
+        this.photos = mapped.filter(ph => {
+          const key = String(ph.serverId);
+          if (seenIds.has(key)) return false;
+          seenIds.add(key);
+          return true;
+        });
 
         // Find main photo
         const main = this.photos.find(ph => ph.isMain) || this.photos[0];
@@ -162,7 +171,7 @@ class PhotoManager {
         
         if (d2.success && d2.data) {
           const photos = d2.data.photos_v2 || d2.data.photos || [];
-          this.photos = photos.filter(p => p.id > 0).map((p, idx) => ({
+          const mapped2 = photos.filter(p => p.id > 0 && (p.sq_430 || p.normal || p.url_big)).map((p, idx) => ({
             id: p.id || `server-${idx}`,
             serverId: p.id,
             photoNum: p.num || p.id_photo || p.id || 0, // Важно для удаления!
@@ -172,6 +181,15 @@ class PhotoManager {
             isMain: p.is_main === 1 || idx === 0,
             accepted: p.accepted || 0
           }));
+
+          // Deduplicate by serverId
+          const seen2 = new Set();
+          this.photos = mapped2.filter(ph => {
+            const key = String(ph.serverId);
+            if (seen2.has(key)) return false;
+            seen2.add(key);
+            return true;
+          });
 
           if (this.photos.length > 0) {
             this.mainPhotoId = this.photos[0].id;
@@ -333,8 +351,8 @@ class PhotoManager {
     formData.append('file', file);
     formData.append('contenttype', 'photo'); // Добавляем как в документации
 
-    // Try direct API call (no proxy) since Test 1 worked perfectly
-    const apiUrl = `${this.apiConfig.baseUrl}/ajax_api/upload_photo?session_id=${window.authManager.sessionId}&api_key=${this.apiConfig.apiKey}&is_private=0`;
+    // Upload through proxy to normalize responses and avoid CORS/format issues
+    const apiUrl = `/api/upload-photo?session_id=${window.authManager.sessionId}&is_private=0`;
     console.log('[PHOTO MANAGER] Upload URL:', apiUrl);
     console.log('[PHOTO MANAGER] FormData contents:');
     for (let [key, value] of formData.entries()) {
@@ -351,10 +369,7 @@ class PhotoManager {
     }
     
     try {
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        body: formData
-      });
+      const response = await fetch(apiUrl, { method: 'POST', body: formData });
 
       const result = await response.json();
       console.log('[PHOTO MANAGER] Full upload response:', JSON.stringify(result, null, 2));
