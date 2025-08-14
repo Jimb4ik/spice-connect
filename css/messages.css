@@ -8,7 +8,12 @@
 
 /* Увеличиваем ширину контента только на странице сообщений */
 .messages-page .app-main {
-  max-width: 1400px;
+  max-width: 1440px;
+  padding-bottom: 1rem;
+}
+
+.messages-page .header-container {
+  max-width: 1440px;
 }
 
 /* Стили точно как у profile-hero-section */
@@ -16,7 +21,7 @@
   margin-bottom: 3rem;
   /* Расширяем рабочую область сообщений */
   width: 100%;
-  max-width: 1400px;
+  max-width: 1440px;
   margin: 0 auto;
   padding: 0 1.5rem;
 }
