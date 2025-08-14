@@ -1692,7 +1692,8 @@ body {
 
 /* Новый дизайн Discover в стиле скриншота */
 .profile-card-new {
-  width: min(900px, 92vw); /* фиксированно от вьюпорта, не прыгает */
+  /* ширина ограничена не только vw, но и доступной высотой экрана с учетом 4:5 */
+  width: min(900px, 92vw, calc(82vh * 0.8));
   max-width: 900px;
   min-width: 360px;
   margin: 0 auto;
@@ -1709,8 +1710,7 @@ body {
 .profile-photo-wrapper {
   position: relative;
   width: 100%;
-  height: clamp(500px, 62vh, 720px); /* под 14" мак и выше */
-  aspect-ratio: 4 / 5; /* возвращаем стандарт 4:5 независимо от исходника */
+  aspect-ratio: 4 / 5; /* жёстко 4:5 на любых экранах */
   overflow: hidden;
 }
 .profile-main-photo { width: 100%; height: 100%; object-fit: cover; object-position: center; }
