@@ -838,24 +838,14 @@ class PhotoManager {
     console.log('[PHOTO MANAGER] Current photos before delete:', this.photos.map(p => ({ id: p.id, serverId: p.serverId, photoNum: p.photoNum })));
     
     try {
-      // Direct API call (no proxy) – use GET with query per working examples
-      const apiUrl = `${this.apiConfig.baseUrl}/index_api/user_edit_photos/del?session_id=${window.authManager.sessionId}&api_key=${this.apiConfig.apiKey}&photo_num=${Number(photoId)}`;
+      // Use server proxy to ensure JSON and correct auth
+      const apiUrl = `/api/spice-multi-test?endpoint=/index_api/user_edit_photos/del&method=POST&session_id=${window.authManager.sessionId}&photo_num=${Number(photoId)}`;
+      const response = await fetch(apiUrl);
+      const result = await response.json();
+      console.log('[PHOTO MANAGER] Delete result (proxy):', result);
       
-      const response = await fetch(apiUrl, {
-        method: 'GET'
-      });
-      
-      const responseText = await response.text();
-      let result;
-      try {
-        result = JSON.parse(responseText);
-      } catch (e) {
-        console.error('[PHOTO MANAGER] Delete parse error:', e, 'body:', responseText);
-        throw new Error('Delete failed: invalid JSON response');
-      }
-      console.log('[PHOTO MANAGER] Delete result:', result);
-      
-      if (result.success || result.modify === "success" || result.result?.del === "success") {
+      const isSuccess = result.success || result.modify === 'success' || result.result?.del === 'success' || result.data?.result?.del === 'success';
+      if (isSuccess) {
         this.showNotification('Photo deleted successfully!', 'success');
         
         // Simple solution: reload the page to refresh everything
@@ -915,30 +905,15 @@ class PhotoManager {
     console.log('[PHOTO MANAGER] Photos before deletion:', this.photos.length);
     
     try {
-      // Prefer POST as per Swagger; keep api_key in query
-      const baseUrl = `${this.apiConfig.baseUrl}/index_api/user_edit_photos/del?session_id=${window.authManager.sessionId}&api_key=${this.apiConfig.apiKey}&photo_num=${photoNum}`;
-      console.log('[PHOTO MANAGER] API URL (POST first):', baseUrl);
+      // Use server proxy to ensure JSON and correct auth
+      const apiUrl = `/api/spice-multi-test?endpoint=/index_api/user_edit_photos/del&method=POST&session_id=${window.authManager.sessionId}&photo_num=${photoNum}`;
+      console.log('[PHOTO MANAGER] API URL (proxy):', apiUrl);
+      const response = await fetch(apiUrl);
+      const result = await response.json();
+      console.log('[PHOTO MANAGER] API Delete result (proxy):', result);
       
-      let response = await fetch(baseUrl, { method: 'POST' });
-      let responseText = await response.text();
-      let result;
-      try {
-        result = responseText ? JSON.parse(responseText) : {};
-      } catch (e) {
-        console.warn('[PHOTO MANAGER] Delete POST parse error, will try GET fallback. Body:', responseText);
-        // Fallback to GET if POST returns non-JSON/HTML or server error
-        response = await fetch(baseUrl, { method: 'GET' });
-        responseText = await response.text();
-        try {
-          result = responseText ? JSON.parse(responseText) : {};
-        } catch (e2) {
-          console.error('[PHOTO MANAGER] Delete GET parse error:', e2, 'body:', responseText);
-          throw new Error('Delete failed: invalid JSON response');
-        }
-      }
-      console.log('[PHOTO MANAGER] API Delete result:', result);
-      
-      if (result.success || result.modify === "success" || result.result?.del === "success") {
+      const isSuccess = result.success || result.modify === 'success' || result.result?.del === 'success' || result.data?.result?.del === 'success';
+      if (isSuccess) {
         console.log('[PHOTO MANAGER] API deletion successful, updating local data...');
         
         this.showNotification('Photo deleted successfully!', 'success');
