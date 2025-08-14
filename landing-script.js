@@ -206,9 +206,29 @@ class SpiceLanding {
                 profile.sexe1 === this.currentFilter
             );
         }
-        
-        // Take first 15 profiles for display
-        const displayProfiles = filteredProfiles.slice(0, 15);
+
+        // Balance genders roughly 50/50 among the first 15 shown when 'all' filter
+        let displayProfiles;
+        if (this.currentFilter === 'all') {
+            const males = filteredProfiles.filter(p => String(p.sexe1) === '1');
+            const females = filteredProfiles.filter(p => String(p.sexe1) === '2');
+            const targetPerGender = 7; // 7 + 7 = 14, one extra from the larger pool
+            const pick = (arr, n) => arr.slice(0, n);
+            const chosenM = pick(males, targetPerGender);
+            const chosenF = pick(females, targetPerGender);
+            const remainderCount = 15 - (chosenM.length + chosenF.length);
+            let remainder = [];
+            if (remainderCount > 0) {
+                const remainingM = males.slice(chosenM.length);
+                const remainingF = females.slice(chosenF.length);
+                const pool = remainingM.concat(remainingF);
+                remainder = pool.slice(0, remainderCount);
+            }
+            displayProfiles = [...chosenM, ...chosenF, ...remainder];
+        } else {
+            // Specific gender filter: just take first 15
+            displayProfiles = filteredProfiles.slice(0, 15);
+        }
         
         grid.innerHTML = displayProfiles.map(profile => this.createProfileCard(profile)).join('');
         
@@ -225,6 +245,9 @@ class SpiceLanding {
                 window.profileObserver.observe(card);
             });
         }
+
+        // Add/update blur overlay for desktop only
+        this.applyProfilesBlurOverlay();
     }
 
     // Create individual profile card HTML
@@ -386,6 +409,41 @@ class SpiceLanding {
             navbar.style.background = 'rgba(255, 255, 255, 0.95)';
         }
     }
+
+    // Add a blur/gradient overlay starting mid of second row (desktop only)
+    applyProfilesBlurOverlay() {
+        const grid = document.getElementById('profilesGrid');
+        if (!grid) return;
+
+        // Remove previous overlay if any
+        const existing = grid.querySelector('.profiles-blur-overlay');
+        if (existing) existing.remove();
+
+        // Only apply on desktops (keep mobile as-is)
+        if (window.innerWidth <= 768) return;
+
+        // Compute card height + row gap
+        const firstCard = grid.querySelector('.profile-card');
+        if (!firstCard) return;
+
+        const cardRect = firstCard.getBoundingClientRect();
+        const styles = window.getComputedStyle(grid);
+        const rowGap = parseFloat(styles.rowGap || styles.gap || '20');
+        const rowHeight = cardRect.height + rowGap;
+
+        // Start at mid of second row: 1.5 rows from top
+        const startOffset = rowHeight * 1.5;
+
+        // Overlay should cover from startOffset to bottom of grid
+        const overlay = document.createElement('div');
+        overlay.className = 'profiles-blur-overlay';
+        overlay.style.top = `${startOffset}px`;
+        overlay.style.height = `calc(100% - ${startOffset}px)`;
+        grid.appendChild(overlay);
+
+        // Also ensure bottom fade helper works on large screens
+        // Nothing needed in JS; CSS ::after handles it
+    }
 }
 
 // Initialize the landing page when DOM is loaded
@@ -396,6 +454,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Handle navbar background on scroll
     window.addEventListener('scroll', () => {
         window.spiceLanding.handleNavbarScroll();
+    });
+    
+    // Recompute profiles blur overlay on resize
+    window.addEventListener('resize', () => {
+        if (window.spiceLanding && typeof window.spiceLanding.applyProfilesBlurOverlay === 'function') {
+            window.spiceLanding.applyProfilesBlurOverlay();
+        }
     });
     
     // Initialize hamburger menu

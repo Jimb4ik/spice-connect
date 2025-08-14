@@ -9,7 +9,7 @@
 /* Увеличиваем ширину контента только на странице сообщений */
 .messages-page .app-main {
   max-width: 1440px;
-  padding-bottom: 3rem;
+  padding-bottom: 1rem;
 }
 
 .messages-page .header-container {
@@ -31,6 +31,7 @@
   backdrop-filter: blur(20px);
   border-radius: var(--border-radius);
   padding: 0; /* Внутренние отступы задаются дочерним областям */
+  padding-bottom: 1rem;
   box-shadow: var(--shadow);
   border: 1px solid rgba(255, 255, 255, 0.2);
   display: flex;
