@@ -96,17 +96,15 @@
                     <!-- Большое фото профиля -->
                     <div class="profile-photo-wrapper">
                         <img id="cardMainPhoto" src="" alt="Profile photo" class="profile-main-photo">
-                        <!-- Имя пользователя и действия на фото -->
-                        <div class="profile-name-badge" id="cardNameBadge">
-                            <button class="badge-action pass" id="dislikeBtnBadge" title="Pass">✕</button>
-                            <span class="badge-name" id="cardNameBadgeText">username</span>
-                            <button class="badge-action like" id="likeBtnBadge" title="Like">💖</button>
-                        </div>
                     </div>
                     
                     <!-- Информация под фото -->
                     <div class="profile-info-section">
-                        <h2 class="profile-main-name" id="cardName">Name</h2>
+                        <div class="profile-name-row">
+                            <button class="name-action-btn pass" id="dislikeBtnName" title="Pass">✕</button>
+                            <h2 class="profile-main-name" id="cardName">Name</h2>
+                            <button class="name-action-btn like" id="likeBtnName" title="Like">💖</button>
+                        </div>
                         <p class="profile-location-text" id="cardLocation">Location</p>
                     </div>
                 </div>
@@ -334,11 +332,11 @@
                 likeBtn.addEventListener('click', () => handleLike());
             }
 
-            // Кнопки в бейдже имени
-            const dislikeBtnBadge = document.getElementById('dislikeBtnBadge');
-            const likeBtnBadge = document.getElementById('likeBtnBadge');
-            if (dislikeBtnBadge) dislikeBtnBadge.addEventListener('click', (e) => { e.stopPropagation(); handleDislike(); });
-            if (likeBtnBadge) likeBtnBadge.addEventListener('click', (e) => { e.stopPropagation(); handleLike(); });
+            // Кнопки в белой плашке (ряд с именем)
+            const dislikeBtnName = document.getElementById('dislikeBtnName');
+            const likeBtnName = document.getElementById('likeBtnName');
+            if (dislikeBtnName) dislikeBtnName.addEventListener('click', (e) => { e.stopPropagation(); handleDislike(); });
+            if (likeBtnName) likeBtnName.addEventListener('click', (e) => { e.stopPropagation(); handleLike(); });
             
             if (resetBtn) {
                 resetBtn.addEventListener('click', () => handleReset());
@@ -497,10 +495,7 @@
             
             // Обновляем имя пользователя в бейдже на фото
             const nameBadgeElement = document.getElementById('cardNameBadge');
-            if (nameBadgeElement) {
-                const nameSpan = document.getElementById('cardNameBadgeText');
-                if (nameSpan) nameSpan.textContent = profile.pseudo || profile.login || 'user';
-            }
+            // Бейдж на фото убрали
             
             // Обновляем полное имя под фото
             const nameElement = document.getElementById('cardName');
