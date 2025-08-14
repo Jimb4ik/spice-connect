@@ -88,7 +88,7 @@
                 <!-- Loading State -->
                 <div class="discover-loading" id="discoverLoading">
                     <div class="loading-spinner"></div>
-                    <p>Loading profiles...</p>
+                    <p>Finding someone just for you...</p>
                 </div>
 
                 <!-- Profile Card в новом стиле -->
@@ -96,8 +96,12 @@
                     <!-- Большое фото профиля -->
                     <div class="profile-photo-wrapper">
                         <img id="cardMainPhoto" src="" alt="Profile photo" class="profile-main-photo">
-                        <!-- Имя пользователя на фото -->
-                        <div class="profile-name-badge" id="cardNameBadge">username</div>
+                        <!-- Имя пользователя и действия на фото -->
+                        <div class="profile-name-badge" id="cardNameBadge">
+                            <button class="badge-action pass" id="dislikeBtnBadge" title="Pass">✕</button>
+                            <span class="badge-name" id="cardNameBadgeText">username</span>
+                            <button class="badge-action like" id="likeBtnBadge" title="Like">💖</button>
+                        </div>
                     </div>
                     
                     <!-- Информация под фото -->
@@ -329,6 +333,12 @@
             if (likeBtn) {
                 likeBtn.addEventListener('click', () => handleLike());
             }
+
+            // Кнопки в бейдже имени
+            const dislikeBtnBadge = document.getElementById('dislikeBtnBadge');
+            const likeBtnBadge = document.getElementById('likeBtnBadge');
+            if (dislikeBtnBadge) dislikeBtnBadge.addEventListener('click', (e) => { e.stopPropagation(); handleDislike(); });
+            if (likeBtnBadge) likeBtnBadge.addEventListener('click', (e) => { e.stopPropagation(); handleLike(); });
             
             if (resetBtn) {
                 resetBtn.addEventListener('click', () => handleReset());
@@ -488,7 +498,8 @@
             // Обновляем имя пользователя в бейдже на фото
             const nameBadgeElement = document.getElementById('cardNameBadge');
             if (nameBadgeElement) {
-                nameBadgeElement.textContent = profile.pseudo || profile.login || 'user';
+                const nameSpan = document.getElementById('cardNameBadgeText');
+                if (nameSpan) nameSpan.textContent = profile.pseudo || profile.login || 'user';
             }
             
             // Обновляем полное имя под фото
