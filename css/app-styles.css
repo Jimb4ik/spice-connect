@@ -1382,7 +1382,7 @@ body {
   width: 100%;
   display: flex;
   flex-direction: column;
-  max-width: 1100px; /* увеличили контейнер, чтобы карточка не ужималась при показе */
+  max-width: min(1100px, 95vw);
   margin: 0 auto;
   padding-bottom: 2rem; /* Добавляем отступ снизу */
 }
@@ -1692,9 +1692,9 @@ body {
 
 /* Новый дизайн Discover в стиле скриншота */
 .profile-card-new {
-  max-width: 900px; /* нормальная ширина для десктопа */
+  width: min(900px, 92vw); /* фиксированно от вьюпорта, не прыгает */
+  max-width: 900px;
   min-width: 360px;
-  width: 100%;
   margin: 0 auto;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
@@ -1709,8 +1709,7 @@ body {
 .profile-photo-wrapper {
   position: relative;
   width: 100%;
-  aspect-ratio: 4 / 5; /* соотношение сторон для портретных фото на вебе */
-  height: auto;
+  height: clamp(440px, 60vh, 720px); /* стабильный размер, адаптив под экран */
   overflow: hidden;
 }
 .profile-main-photo { width: 100%; height: 100%; object-fit: cover; }
@@ -1756,7 +1755,7 @@ body {
   display: flex;
   justify-content: center;
   gap: 2rem;
-  margin: 1rem 0; /* было 2rem → подняли ближе к карточке */
+  margin: clamp(8px, 1vh, 16px) 0; /* поднимаем ближе и адаптируем по высоте экрана */
   padding: 0 2rem;
 }
 
@@ -1828,14 +1827,9 @@ body {
 
 /* Мобильная адаптивность для нового дизайна */
 @media (max-width: 768px) {
-  .profile-card-new {
-    max-width: 100%;
-    margin: 0 1rem;
-  }
+  .profile-card-new { width: 95vw; max-width: 95vw; margin: 0 1rem; }
   
-  .profile-photo-wrapper {
-    height: 350px;
-  }
+  .profile-photo-wrapper { height: 65vh; }
   
   .profile-info-section {
     padding: 1rem;
