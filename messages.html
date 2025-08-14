@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Messages - Lavrilo</title>
     <link rel="stylesheet" href="css/app-styles.css">
-    <link rel="stylesheet" href="css/messages.css?v=1.0">
+    <link rel="stylesheet" href="css/messages.css?v=1.1">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -81,7 +81,7 @@
             <p class="page-subtitle">Chat with your connections and matches</p>
         </div>
 
-        <div class="messages-container fade-in-up">
+        <div class="messages-container profile-hero-section fade-in-up">
             <div class="messages-chat-card">
                 <!-- Sidebar с контактами -->
                 <div class="messages-sidebar">
@@ -95,7 +95,7 @@
                 
                 <div class="contacts-list" id="contactsList">
                     <!-- Контакты будут загружены динамически -->
-                    <div class="loading-contacts">
+                    <div class="loading-contacts" id="contactsLoading">
                         <div class="loading-spinner"></div>
                         <p>Loading conversations...</p>
                     </div>
@@ -225,7 +225,7 @@
         window.dashboard = new Dashboard();
     </script>
     
-    <script src="js/messages-extension.js?v=1.0"></script>
+    <script src="js/messages-extension.js?v=1.1"></script>
     
     <script>
         // Функция инициализации страницы сообщений

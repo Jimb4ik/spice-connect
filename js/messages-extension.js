@@ -410,7 +410,7 @@ Object.assign(Dashboard.prototype, {
 
     // Параметры согласно документации: api-key, session_id, contact (nickname), contact_id
     const messageParams = new URLSearchParams({
-      'api-key': apiConfig.apiKey,
+      api_key: apiConfig.apiKey,
       session_id: sessionId,
       contact: contact.pseudo || contact.username || contact.name || '',
       contact_id: userId
