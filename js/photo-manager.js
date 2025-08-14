@@ -4,6 +4,7 @@ class PhotoManager {
     this.photos = [];
     this.mainPhotoId = null;
     this.currentEditingPhoto = null;
+    this.listenersAttached = false;
     this.cropBox = null;
     this.cropContainer = null;
     this.isResizing = false;
@@ -49,6 +50,9 @@ class PhotoManager {
   }
 
   attachEventListeners() {
+    if (this.listenersAttached) {
+      return;
+    }
     // Crop modal events
     const closeBtn = document.getElementById('closePhotoCropModal');
     if (closeBtn) {
@@ -73,6 +77,7 @@ class PhotoManager {
 
     // Initialize crop box events
     this.initializeCropBox();
+    this.listenersAttached = true;
   }
 
   async loadExistingPhotos() {
@@ -501,9 +506,7 @@ class PhotoManager {
       thumb.appendChild(img);
       
       thumb.addEventListener('click', () => {
-        if (photo.id !== this.currentEditingPhoto?.id) {
-          this.openCropModal(photo);
-        }
+        this.openCropModal(photo);
       });
       
       container.appendChild(thumb);
@@ -880,6 +883,7 @@ class PhotoManager {
     }
     
     console.log('[PHOTO MANAGER] Ready to delete photo with photoNum:', this.currentEditingPhoto.photoNum);
+    console.log('[PHOTO MANAGER] Photos snapshot:', this.photos.map(p => ({ id: p.id, serverId: p.serverId, num: p.photoNum })));
     
     // Use custom confirmation modal instead of system confirm
     console.log('[PHOTO MANAGER] Showing confirmation modal...');
@@ -1177,7 +1181,8 @@ class PhotoManager {
   }
 }
 
-// Create and export instance
-const photoManager = new PhotoManager();
-window.photoManager = photoManager; // Make it globally accessible
+// Create and export instance (singleton)
+if (!window.photoManager) {
+  window.photoManager = new PhotoManager();
+}
 window.PhotoManager = PhotoManager; // Make class accessible too
