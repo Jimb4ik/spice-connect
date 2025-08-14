@@ -287,8 +287,14 @@ class PhotoManager {
         
         console.log('[PHOTO MANAGER] Temp photo created:', tempPhoto);
         
-        // Add to photos array
-        this.photos.push(tempPhoto);
+        // Deduplicate by serverId to avoid double rendering
+        const alreadyExists = this.photos.some(p => Number(p.serverId) === Number(tempPhoto.serverId));
+        if (!alreadyExists) {
+          // Add to photos array
+          this.photos.push(tempPhoto);
+        } else {
+          console.warn('[PHOTO MANAGER] Skipping temp add, photo with same serverId already exists');
+        }
         
         // Open crop modal for this photo
         console.log('[PHOTO MANAGER] Calling openCropModal...');
@@ -1034,8 +1040,16 @@ class PhotoManager {
       return;
     }
 
-    // Render existing photos (include both accepted and pending items that have serverId)
-    this.photos.filter(p => p.serverId || !p.isNew).forEach(photo => {
+    // Render existing photos (unique by serverId to avoid duplicates)
+    const seen = new Set();
+    const uniquePhotos = this.photos.filter(p => {
+      const key = String(p.serverId || p.id);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    }).filter(p => p.serverId || !p.isNew);
+
+    uniquePhotos.forEach(photo => {
       const photoCard = document.createElement('div');
       photoCard.className = 'photo-card';
       if (photo.isMain) photoCard.classList.add('main-photo');

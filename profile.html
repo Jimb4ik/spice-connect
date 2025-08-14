@@ -561,7 +561,10 @@
                 
                 if (window.PhotoManager && window.authManager?.sessionId) {
                     console.log('[PROFILE] PhotoManager and AuthManager ready, initializing...');
-                    window.photoManager = new PhotoManager();
+                    // Use singleton instance created in photo-manager.js
+                    if (!window.photoManager) {
+                        window.photoManager = new PhotoManager();
+                    }
                     
                     window.photoManager.init().then(() => {
                         console.log('[PROFILE] PhotoManager initialized successfully');
