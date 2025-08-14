@@ -1752,7 +1752,7 @@ body {
   display: flex;
   justify-content: center;
   gap: 2rem;
-  margin: 2rem 0;
+  margin: 1rem 0; /* было 2rem → подняли ближе к карточке */
   padding: 0 2rem;
 }
 
