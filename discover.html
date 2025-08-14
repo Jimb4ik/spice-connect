@@ -594,21 +594,15 @@
             const loadingElement = document.getElementById('discoverLoading');
             const cardElement = document.getElementById('discoverCard');
             const actionsElement = document.getElementById('discoverActionsFixed');
+            const actionsSide = document.getElementById('discoverActionsSide');
             const viewAllElement = document.getElementById('viewAllMatches');
             
-            if (loadingElement) {
-                loadingElement.style.display = show ? 'block' : 'none';
-            }
-            if (cardElement) {
-                // Всегда используем grid, чтобы избежать перерисовки ширины
-                cardElement.style.display = show ? 'none' : 'grid';
-            }
-            if (actionsElement) {
-                actionsElement.style.display = show ? 'none' : 'flex';
-            }
-            if (viewAllElement) {
-                viewAllElement.style.display = show ? 'none' : 'block';
-            }
+            if (loadingElement) loadingElement.style.display = show ? 'block' : 'none';
+            if (cardElement) cardElement.style.display = show ? 'none' : 'grid';
+            const isWide = window.innerWidth > window.innerHeight + 120;
+            if (actionsElement) actionsElement.style.display = show ? 'none' : (isWide ? 'none' : 'flex');
+            if (actionsSide) actionsSide.style.display = show ? 'none' : (isWide ? 'block' : 'none');
+            if (viewAllElement) viewAllElement.style.display = show ? 'none' : 'block';
         }
         
         function showNoProfilesState() {
