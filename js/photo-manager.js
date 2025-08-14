@@ -838,14 +838,21 @@ class PhotoManager {
     console.log('[PHOTO MANAGER] Current photos before delete:', this.photos.map(p => ({ id: p.id, serverId: p.serverId, photoNum: p.photoNum })));
     
     try {
-      // Direct API call (no proxy)
-      const apiUrl = `${this.apiConfig.baseUrl}/index_api/user_edit_photos/del?session_id=${window.authManager.sessionId}&api_key=${this.apiConfig.apiKey}&photo_num=${photoId}`;
+      // Direct API call (no proxy) – use GET with query per working examples
+      const apiUrl = `${this.apiConfig.baseUrl}/index_api/user_edit_photos/del?session_id=${window.authManager.sessionId}&api_key=${this.apiConfig.apiKey}&photo_num=${Number(photoId)}`;
       
       const response = await fetch(apiUrl, {
-        method: 'POST'
+        method: 'GET'
       });
       
-      const result = await response.json();
+      const responseText = await response.text();
+      let result;
+      try {
+        result = JSON.parse(responseText);
+      } catch (e) {
+        console.error('[PHOTO MANAGER] Delete parse error:', e, 'body:', responseText);
+        throw new Error('Delete failed: invalid JSON response');
+      }
       console.log('[PHOTO MANAGER] Delete result:', result);
       
       if (result.success || result.modify === "success" || result.result?.del === "success") {
@@ -903,15 +910,22 @@ class PhotoManager {
     console.log('[PHOTO MANAGER] Photos before deletion:', this.photos.length);
     
     try {
-      // Direct API call (no proxy)
-      const apiUrl = `${this.apiConfig.baseUrl}/index_api/user_edit_photos/del?session_id=${window.authManager.sessionId}&api_key=${this.apiConfig.apiKey}&photo_num=${photoNum}`;
+      // Direct API call (no proxy) – use GET with query per working examples
+      const apiUrl = `${this.apiConfig.baseUrl}/index_api/user_edit_photos/del?session_id=${window.authManager.sessionId}&api_key=${this.apiConfig.apiKey}&photo_num=${Number(photoNum)}`;
       console.log('[PHOTO MANAGER] API URL:', apiUrl);
       
       const response = await fetch(apiUrl, {
-        method: 'POST'
+        method: 'GET'
       });
       
-      const result = await response.json();
+      const responseText = await response.text();
+      let result;
+      try {
+        result = JSON.parse(responseText);
+      } catch (e) {
+        console.error('[PHOTO MANAGER] API Delete parse error:', e, 'body:', responseText);
+        throw new Error('Delete failed: invalid JSON response');
+      }
       console.log('[PHOTO MANAGER] API Delete result:', result);
       
       if (result.success || result.modify === "success" || result.result?.del === "success") {
