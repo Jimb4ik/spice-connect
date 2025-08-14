@@ -52,7 +52,7 @@ header nav .nav-links a.active {
 
 .dashboard-main {
   min-height: 100vh;
-  background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 50%, #6366f1 100%);
+  background: linear-gradient(135deg, #ff6b9d 0%, #c44569 25%, #f8b500 50%, #ff6348 75%, #ff4757 100%);
   padding: 100px 0 40px;
   position: relative;
   overflow: hidden;
