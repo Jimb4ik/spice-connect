@@ -901,7 +901,12 @@ class PhotoManager {
       return;
     }
     
-    const photoNum = this.currentEditingPhoto.photoNum || this.currentEditingPhoto.serverId;
+    const photoNum = Number(this.currentEditingPhoto.photoNum || this.currentEditingPhoto.serverId);
+    if (!Number.isFinite(photoNum)) {
+      console.error('[PHOTO MANAGER] ERROR: photoNum is not numeric:', photoNum);
+      this.showNotification('Invalid photo id', 'error');
+      return;
+    }
     
     this.showNotification('Deleting photo...', 'info');
     this.showGlobalLoading('Deleting photo...');
@@ -910,21 +915,26 @@ class PhotoManager {
     console.log('[PHOTO MANAGER] Photos before deletion:', this.photos.length);
     
     try {
-      // Direct API call (no proxy) – use GET with query per working examples
-      const apiUrl = `${this.apiConfig.baseUrl}/index_api/user_edit_photos/del?session_id=${window.authManager.sessionId}&api_key=${this.apiConfig.apiKey}&photo_num=${Number(photoNum)}`;
-      console.log('[PHOTO MANAGER] API URL:', apiUrl);
+      // Prefer POST as per Swagger; keep api_key in query
+      const baseUrl = `${this.apiConfig.baseUrl}/index_api/user_edit_photos/del?session_id=${window.authManager.sessionId}&api_key=${this.apiConfig.apiKey}&photo_num=${photoNum}`;
+      console.log('[PHOTO MANAGER] API URL (POST first):', baseUrl);
       
-      const response = await fetch(apiUrl, {
-        method: 'GET'
-      });
-      
-      const responseText = await response.text();
+      let response = await fetch(baseUrl, { method: 'POST' });
+      let responseText = await response.text();
       let result;
       try {
-        result = JSON.parse(responseText);
+        result = responseText ? JSON.parse(responseText) : {};
       } catch (e) {
-        console.error('[PHOTO MANAGER] API Delete parse error:', e, 'body:', responseText);
-        throw new Error('Delete failed: invalid JSON response');
+        console.warn('[PHOTO MANAGER] Delete POST parse error, will try GET fallback. Body:', responseText);
+        // Fallback to GET if POST returns non-JSON/HTML or server error
+        response = await fetch(baseUrl, { method: 'GET' });
+        responseText = await response.text();
+        try {
+          result = responseText ? JSON.parse(responseText) : {};
+        } catch (e2) {
+          console.error('[PHOTO MANAGER] Delete GET parse error:', e2, 'body:', responseText);
+          throw new Error('Delete failed: invalid JSON response');
+        }
       }
       console.log('[PHOTO MANAGER] API Delete result:', result);
       
