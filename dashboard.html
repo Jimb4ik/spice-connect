@@ -8,7 +8,7 @@
     <!-- CSS -->
     <link rel="stylesheet" href="landing-styles.css?v=3.8">
     <link rel="stylesheet" href="css/auth-modal.css?v=1.0">
-            <link rel="stylesheet" href="css/dashboard.css?v=9.2">
+            <link rel="stylesheet" href="css/dashboard.css?v=7.1">
     
     <!-- Favicon removed - file not exist -->
 </head>
@@ -40,66 +40,55 @@
     <!-- Dashboard Content -->
     <main class="dashboard-main">
         <div class="dashboard-container">
-            <!-- Page Title -->
-            <div class="page-title">
-                <h1>My Profile</h1>
-            </div>
-
-            <!-- Main Profile Card -->
+            <!-- Welcome Section -->
             <section class="dashboard-welcome">
-                <div class="profile-avatar-section">
-                    <div class="profile-avatar" id="profileAvatar">
-                        👤
-                    </div>
-                    <div class="online-indicator"></div>
-                </div>
-                
-                <div class="profile-main-info">
-                    <h2 class="profile-title" id="profileName">emmavercher</h2>
-                    <p class="profile-subtitle" id="profileAge">30 years old years • Riga, Latvia</p>
-                    
-                    <div class="profile-status">
-                        <div class="status-dot"></div>
-                        <span class="status-text">Online now</span>
-                    </div>
-                    
-                    <div class="profile-actions">
-                        <button class="btn-edit-profile" id="editProfileBtn">
-                            ✏️ Edit Profile
-                        </button>
-                        <button class="btn-view-profile" id="viewProfileBtn">
-                            ▶️ View Profile
-                        </button>
-                    </div>
+                <div class="welcome-content">
+                    <h2 id="welcomeTitle">Welcome to your Dashboard!</h2>
+                    <p id="welcomeSubtitle">Manage your profile, connections, and more.</p>
                 </div>
             </section>
 
-            <!-- Statistics Cards -->
-            <div class="stats-container">
-                <div class="stat-card">
-                    <div class="stat-number">—</div>
-                    <div class="stat-label">Profile Views</div>
-                    <div class="stat-change positive">+12% this week</div>
+            <!-- Dashboard Navigation -->
+            <nav class="dashboard-nav">
+                <div class="nav-cards">
+                    <a href="#profile" class="nav-card active" data-section="profile">
+                        <div class="nav-card-icon">👤</div>
+                        <h3>My Profile</h3>
+                        <p>View and edit your profile information</p>
+                    </a>
+                    
+                    <a href="#messages" class="nav-card" data-section="messages">
+                        <div class="nav-card-icon">💬</div>
+                        <h3>Messages</h3>
+                        <p>Chat with your connections</p>
+                        <span class="notification-badge" id="messagesBadge">3</span>
+                    </a>
+                    
+                    <a href="#matches" class="nav-card" data-section="matches">
+                        <div class="nav-card-icon">💕</div>
+                        <h3>Matches</h3>
+                        <p>See who likes you back</p>
+                    </a>
+                    
+                    <a href="#visitors" class="nav-card" data-section="visitors">
+                        <div class="nav-card-icon">👁️</div>
+                        <h3>Profile Visitors</h3>
+                        <p>Who viewed your profile</p>
+                    </a>
+                    
+                    <a href="#search" class="nav-card" data-section="search">
+                        <div class="nav-card-icon">🔍</div>
+                        <h3>Search</h3>
+                        <p>Find new connections</p>
+                    </a>
+                    
+                    <a href="#settings" class="nav-card" data-section="settings">
+                        <div class="nav-card-icon">⚙️</div>
+                        <h3>Settings</h3>
+                        <p>Manage your account preferences</p>
+                    </a>
                 </div>
-                
-                <div class="stat-card">
-                    <div class="stat-number">—</div>
-                    <div class="stat-label">Likes Received</div>
-                    <div class="stat-change positive">+8% this week</div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-number">—</div>
-                    <div class="stat-label">Total Matches</div>
-                    <div class="stat-change positive">+25% this week</div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-number">3</div>
-                    <div class="stat-label">Active Chats</div>
-                    <div class="stat-change positive">2 new today</div>
-                </div>
-            </div>
+            </nav>
 
             <!-- Dashboard Content Sections -->
             <div class="dashboard-content">
