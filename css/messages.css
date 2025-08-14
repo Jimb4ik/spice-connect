@@ -165,6 +165,7 @@
   display: flex;
   flex-direction: column;
   background: white;
+  min-width: 800px; /* гарантируем комфортную ширину области чата на десктопе */
 }
 
 .chat-empty {
@@ -390,6 +391,8 @@
     margin: 10px;
     height: calc(100vh - 160px);
   }
+  /* На мобильных ширина автоматически 100% */
+  .chat-area { min-width: 0; }
   
   .messages-sidebar {
     width: 300px;
