@@ -1029,7 +1029,31 @@ class PhotoManager {
       gallery.appendChild(photoCard);
     });
 
-    // Кнопка "Add Photo" убрана по запросу пользователя
+    // Добавляем плитку "+" для добавления нового фото
+    const addCard = document.createElement('div');
+    addCard.className = 'photo-card add-photo-card';
+    addCard.innerHTML = `
+      <button type="button" class="add-photo-btn" aria-label="Add Photo">
+        <div class="add-icon">+</div>
+        <div>Add Photo</div>
+      </button>
+    `;
+    const addClick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.handleAddPhoto();
+    };
+    addCard.addEventListener('click', addClick);
+    const addBtn = addCard.querySelector('.add-photo-btn');
+    if (addBtn) {
+      addBtn.addEventListener('click', addClick);
+      addBtn.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          addClick(e);
+        }
+      });
+    }
+    gallery.appendChild(addCard);
   }
 
   showNotification(message, type = 'info') {
