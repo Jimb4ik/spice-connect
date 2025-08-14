@@ -275,7 +275,7 @@ class PhotoManager {
           serverId: uploadResult.id_photo,
           file: file,
           previewUrl: URL.createObjectURL(file),
-          isNew: false, // mark as real so we don't create phantom entries
+          isNew: true,
           accepted: 0,
           isDemo: uploadResult.isDemo || false
         };
@@ -1030,8 +1030,8 @@ class PhotoManager {
       return;
     }
 
-    // Render existing photos (skip temporary items created during upload)
-    this.photos.filter(p => !p.isNew).forEach(photo => {
+    // Render existing photos (include both accepted and pending items that have serverId)
+    this.photos.filter(p => p.serverId || !p.isNew).forEach(photo => {
       const photoCard = document.createElement('div');
       photoCard.className = 'photo-card';
       if (photo.isMain) photoCard.classList.add('main-photo');
