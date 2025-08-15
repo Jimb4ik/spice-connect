@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Lavrilo</title>
+    <title>Feed - Lavrilo</title>
     <link rel="stylesheet" href="css/app-styles.css">
     <link rel="stylesheet" href="css/dashboard.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -12,13 +12,13 @@
     <!-- Хедер -->
     <header class="app-header">
         <div class="header-container">
-            <a href="dashboard.html" class="logo">Lavrilo</a>
+            <a href="feed.html" class="logo">Lavrilo</a>
             
             <nav>
                 <ul class="nav-menu">
                     <li class="nav-item">
-                        <a href="dashboard.html" class="nav-link active">
-                            <span>🏠</span> Dashboard
+                        <a href="feed.html" class="nav-link active">
+                            <span>🏠</span> Feed
                         </a>
                     </li>
                     <li class="nav-item">
@@ -96,8 +96,8 @@
         <div class="page-header fade-in-up">
             <h1 class="page-title">Welcome back!</h1>
             <p class="page-subtitle">Stay connected with your community</p>
-                        </div>
-                        
+        </div>
+        
         <div class="dashboard-container fade-in-up">
             <!-- Левая колонка -->
             <aside class="dashboard-sidebar">
@@ -120,8 +120,8 @@
                             <div class="stat-label">Friends Online</div>
                         </div>
                     </div>
-                    </div>
-                    
+                </div>
+                
                 <!-- Друзья онлайн -->
                 <div class="section-card online-friends-card">
                     <div class="section-header">
@@ -130,11 +130,11 @@
                     </div>
                     <div class="online-friends-list" id="onlineFriendsList">
                         <div class="loading-state">
-                                    <div class="loading-spinner"></div>
+                            <div class="loading-spinner"></div>
                             <p>Loading friends...</p>
                         </div>
                     </div>
-                            </div>
+                </div>
             </aside>
 
             <!-- Основная колонка -->
@@ -151,8 +151,8 @@
                             <p>Loading activities...</p>
                         </div>
                     </div>
-                        </div>
-                        
+                </div>
+                
                 <!-- Топ профили -->
                 <div class="section-card top-members-card">
                     <div class="section-header">
@@ -165,9 +165,9 @@
                     </div>
                     <div class="top-members-carousel" id="topMembersCarousel">
                         <div class="loading-state">
-        <div class="loading-spinner"></div>
+                            <div class="loading-spinner"></div>
                             <p>Loading top members...</p>
-                    </div>
+                        </div>
                     </div>
                 </div>
                 
@@ -177,7 +177,7 @@
                     <div class="section-card visitors-card">
                         <div class="section-header">
                             <h3>👁️ Recent Visitors</h3>
-                            <a href="#" class="view-all-link">View All</a>
+                            <a href="visitors.html" class="view-all-link">View All</a>
                         </div>
                         <div class="visitors-list" id="visitorsList">
                             <div class="loading-state">
@@ -200,7 +200,7 @@
                             </div>
                         </div>
                     </div>
-                    </div>
+                </div>
             </div>
         </div>
     </main>
@@ -226,13 +226,13 @@
                         <a href="#about">About Us</a>
                         <a href="#careers">Careers</a>
                         <a href="#press">Press</a>
-                </div>
+                    </div>
                     <div class="footer-column">
                         <h4>Support</h4>
                         <a href="#help">Help Center</a>
                         <a href="#safety">Safety Tips</a>
                         <a href="#contact">Contact Us</a>
-            </div>
+                    </div>
                     <div class="footer-column">
                         <h4>Legal</h4>
                         <a href="#privacy">Privacy Policy</a>
@@ -250,6 +250,6 @@
     <!-- JavaScript -->
     <script src="js/auth-manager.js?v=1.2"></script>
     <script src="js/header-avatar.js?v=1.4"></script>
-    <script src="js/dashboard-main.js"></script>
+    <script src="js/feed.js"></script>
 </body>
 </html>
