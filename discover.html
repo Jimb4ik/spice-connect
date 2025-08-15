@@ -19,28 +19,28 @@
                 <ul class="nav-menu">
                     <li class="nav-item">
                         <a href="main.html" class="nav-link">
-                            <span>🏠</span> Main
+                            <img src="icons/home.png" alt="Main" class="nav-icon"> Main
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="messages.html" class="nav-link">
-                            <span>💬</span> Messages
+                            <img src="icons/messages.png" alt="Messages" class="nav-icon"> Messages
                             <span class="nav-badge" id="messagesBadge">0</span>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="discover.html" class="nav-link active">
-                            <span>🔥</span> Discover
+                            <img src="icons/discover.png" alt="Discover" class="nav-icon"> Discover
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="matches.html" class="nav-link">
-                            <span>💕</span> Matches
+                            <img src="icons/matches.png" alt="Matches" class="nav-icon"> Matches
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="search.html" class="nav-link">
-                            <span>🔍</span> Search
+                            <img src="icons/search.png" alt="Search" class="nav-icon"> Search
                         </a>
                     </li>
                 </ul>
@@ -66,14 +66,14 @@
                     </div>
                     <div class="dropdown-divider"></div>
                     <a href="profile.html" class="dropdown-item">
-                        <span class="dropdown-icon">👤</span>
+                        <img src="icons/profile.png" alt="Profile" class="dropdown-icon">
                         <div class="dropdown-item-content">
                             <span class="dropdown-item-title">My Profile</span>
                             <span class="dropdown-item-subtitle">View and edit profile</span>
                         </div>
                     </a>
                     <a href="settings.html" class="dropdown-item">
-                        <span class="dropdown-icon">⚙️</span>
+                        <img src="icons/settings.png" alt="Settings" class="dropdown-icon">
                         <div class="dropdown-item-content">
                             <span class="dropdown-item-title">Settings</span>
                             <span class="dropdown-item-subtitle">Manage your account</span>
@@ -81,7 +81,7 @@
                     </a>
                     <div class="dropdown-divider"></div>
                     <button class="dropdown-item logout" id="logoutBtn">
-                        <span class="dropdown-icon">🚪</span>
+                        <img src="icons/logout.png" alt="Logout" class="dropdown-icon">
                         <div class="dropdown-item-content">
                             <span class="dropdown-item-title">Logout</span>
                             <span class="dropdown-item-subtitle">Sign out of your account</span>
@@ -95,7 +95,7 @@
     <!-- Основной контент -->
     <main class="app-main">
         <div class="page-header fade-in-up">
-            <h1 class="page-title">Discover</h1>
+            <h1 class="page-title"><img src="icons/discover-white.png" alt="Discover" class="page-title-icon"> Discover</h1>
         </div>
 
         <!-- Discover Interface -->
@@ -136,7 +136,7 @@
                 <!-- Age Filter Slider - справа от карточки -->
                 <div class="age-filter-side" id="ageFilterSide">
                     <div class="age-filter-card">
-                        <h3 class="age-filter-title">🎯 Age Range</h3>
+                        <h3 class="age-filter-title"><img src="icons/target.png" alt="Target" class="inline-icon"> Age Range</h3>
                         <div class="age-range-container">
                             <div class="age-input-group">
                                 <label for="ageMinSide">Min:</label>
@@ -153,15 +153,15 @@
                             <span id="ageSummary">18 - 80 years</span>
                         </div>
                         <button class="apply-filter-btn" id="applyAgeFilter">
-                            🔄 Apply Filter
+                            <img src="icons/refresh.png" alt="Refresh" class="inline-icon"> Apply Filter
                         </button>
                     </div>
                 </div>
 
                 <!-- Side Actions for desktop/laptop -->
                 <div class="actions-side" id="discoverActionsSide" style="display: none;">
-                    <button class="side-btn pass" id="dislikeBtnSide" title="Pass">✕</button>
-                    <button class="side-btn like" id="likeBtnSide" title="Like">💖</button>
+                    <button class="side-btn pass" id="dislikeBtnSide" title="Pass"><img src="icons/pass-white.png" alt="Pass" class="btn-icon"></button>
+                    <button class="side-btn like" id="likeBtnSide" title="Like"><img src="icons/like-white.png" alt="Like" class="btn-icon"></button>
                 </div>
 
                 <!-- No Profiles State -->
@@ -170,7 +170,7 @@
                     <h3>You've seen everyone!</h3>
                     <p>Check back later for new people in your area.</p>
                     <button class="app-btn app-btn-primary" id="resetProfilesBtn">
-                        🔄 Reset and Start Over
+                        <img src="icons/refresh.png" alt="Refresh" class="inline-icon"> Reset and Start Over
                     </button>
                 </div>
             </div>
@@ -178,11 +178,11 @@
             <!-- Action Buttons в новом стиле -->
             <div class="action-buttons-new" id="discoverActionsFixed" style="display: none;">
                 <button class="action-btn-new pass-btn" id="dislikeBtn" title="Pass">
-                    <span class="btn-icon-new">✕</span>
+                    <img src="icons/pass-white.png" alt="Pass" class="btn-icon-new">
                 </button>
                 
                 <button class="action-btn-new like-btn" id="likeBtn" title="Like">
-                    <span class="btn-icon-new">💖</span>
+                    <img src="icons/like-white.png" alt="Like" class="btn-icon-new">
                 </button>
             </div>
 

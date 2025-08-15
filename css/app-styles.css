@@ -46,6 +46,52 @@ body {
   transition: var(--transition);
 }
 
+/* Стили для иконок */
+.nav-icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+.dropdown-icon {
+  width: 18px;
+  height: 18px;
+  margin-right: 8px;
+}
+
+.page-title-icon {
+  width: 24px;
+  height: 24px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.inline-icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+.btn-icon {
+  width: 14px;
+  height: 14px;
+  vertical-align: middle;
+}
+
+.btn-icon-new {
+  width: 18px;
+  height: 18px;
+  vertical-align: middle;
+}
+
+.feature-icon-img,
+.action-icon-img {
+  width: 32px;
+  height: 32px;
+}
+
 .header-container {
   max-width: 1400px;
   margin: 0 auto;
