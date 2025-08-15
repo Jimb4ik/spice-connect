@@ -4383,3 +4383,10 @@
 .btn-photo-action.delete {
   color: #dc2626 !important;
 }
+
+/* Harmonize header styles */
+.dashboard-header {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+}
