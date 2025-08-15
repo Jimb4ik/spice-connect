@@ -260,9 +260,9 @@ class DashboardManager {
           return `
             <div class="activity-item">
               <div class="activity-avatar">
-                ${activity.main_photo && activity.main_photo.sqsmall ? 
-                  `<img src="${activity.main_photo.sqsmall}" alt="${activity.pseudo}">` :
-                  activity.pseudo.charAt(0).toUpperCase()
+                ${activity.main_photo && (activity.main_photo.sq_small || activity.main_photo.sqsmall || activity.main_photo.sq_middle) ? 
+                  `<img src="${activity.main_photo.sq_small || activity.main_photo.sqsmall || activity.main_photo.sq_middle || activity.main_photo.normal}" alt="${activity.pseudo}" loading="lazy">` :
+                  `<div class="avatar-placeholder">${activity.pseudo.charAt(0).toUpperCase()}</div>`
                 }
               </div>
               <div class="activity-content">
@@ -310,9 +310,9 @@ class DashboardManager {
         carousel.innerHTML = members.map((member, index) => `
           <div class="top-member-card">
             <div class="top-member-avatar">
-              ${member.main_photo && member.main_photo.sqsmall ? 
-                `<img src="${member.main_photo.sqsmall}" alt="${member.pseudo}">` :
-                member.pseudo.charAt(0).toUpperCase()
+              ${member.main_photo && (member.main_photo.sq_small || member.main_photo.sqsmall || member.main_photo.sq_middle) ? 
+                `<img src="${member.main_photo.sq_small || member.main_photo.sqsmall || member.main_photo.sq_middle || member.main_photo.normal}" alt="${member.pseudo}" loading="lazy">` :
+                `<div class="avatar-placeholder">${member.pseudo.charAt(0).toUpperCase()}</div>`
               }
               <div class="top-member-rank">${index + 1}</div>
             </div>
@@ -357,9 +357,9 @@ class DashboardManager {
         visitorsList.innerHTML = visitors.map(visitor => `
           <div class="visitor-item">
             <div class="visitor-avatar">
-              ${visitor.main_photo && visitor.main_photo.sqsmall ? 
-                `<img src="${visitor.main_photo.sqsmall}" alt="${visitor.pseudo}">` :
-                visitor.pseudo.charAt(0).toUpperCase()
+              ${visitor.main_photo && (visitor.main_photo.sq_small || visitor.main_photo.sqsmall || visitor.main_photo.sq_middle) ? 
+                `<img src="${visitor.main_photo.sq_small || visitor.main_photo.sqsmall || visitor.main_photo.sq_middle || visitor.main_photo.normal}" alt="${visitor.pseudo}" loading="lazy">` :
+                `<div class="avatar-placeholder">${visitor.pseudo.charAt(0).toUpperCase()}</div>`
               }
             </div>
             <div class="visitor-info">
@@ -405,9 +405,9 @@ class DashboardManager {
         votesList.innerHTML = votes.map(vote => `
           <div class="vote-item">
             <div class="vote-avatar">
-              ${vote.main_photo && vote.main_photo.sqsmall ? 
-                `<img src="${vote.main_photo.sqsmall}" alt="${vote.pseudo}">` :
-                vote.pseudo.charAt(0).toUpperCase()
+              ${vote.main_photo && (vote.main_photo.sq_small || vote.main_photo.sqsmall || vote.main_photo.sq_middle) ? 
+                `<img src="${vote.main_photo.sq_small || vote.main_photo.sqsmall || vote.main_photo.sq_middle || vote.main_photo.normal}" alt="${vote.pseudo}" loading="lazy">` :
+                `<div class="avatar-placeholder">${vote.pseudo.charAt(0).toUpperCase()}</div>`
               }
             </div>
             <div class="vote-info">
