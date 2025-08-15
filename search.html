@@ -231,10 +231,10 @@
                 return;
             }
             
-            const userAvatar = document.getElementById('userAvatar');
-            if (window.authManager.currentUser && window.authManager.currentUser.pseudo) {
-                userAvatar.textContent = window.authManager.currentUser.pseudo.charAt(0).toUpperCase();
-            }
+            // const userAvatar = document.getElementById('userAvatar');
+            // if (window.authManager.currentUser && window.authManager.currentUser.pseudo) {
+            //     userAvatar.textContent = window.authManager.currentUser.pseudo.charAt(0).toUpperCase();
+            // }
             
             // Search functionality
             document.getElementById('searchBtn').addEventListener('click', performSearch);
