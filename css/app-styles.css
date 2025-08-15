@@ -2617,11 +2617,12 @@ body[data-page="discover"] .photo-modal,
   width: 100vw !important;
   height: 100vh !important;
   margin: 0 !important;
-  padding: 0 !important;
+  padding: 2rem 1rem !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   transform: none !important;
+  box-sizing: border-box !important;
 }
 
 body[data-page="discover"] .photo-modal-overlay,
@@ -2639,6 +2640,15 @@ body[data-page="discover"] .photo-modal-content,
   margin: auto !important;
   transform: none !important;
   z-index: 10001 !important;
+  max-width: 90vw !important;
+  max-height: 90vh !important;
+}
+
+body[data-page="discover"] .photo-modal-image,
+.discover-page .photo-modal-image {
+  max-height: calc(90vh - 4rem) !important;
+  max-width: calc(90vw - 2rem) !important;
+  object-fit: contain !important;
 }
 
 /* Footer */
@@ -2787,10 +2797,21 @@ body[data-page="discover"] .photo-modal-content,
     padding: 1rem;
   }
   
+  body[data-page="discover"] .photo-modal,
+  .discover-page .photo-modal {
+    padding: 1.5rem 1rem !important;
+  }
+  
   .photo-modal-content {
     max-width: 95vw;
     max-height: 90vh;
     padding: 0.5rem;
+  }
+  
+  body[data-page="discover"] .photo-modal-image,
+  .discover-page .photo-modal-image {
+    max-height: calc(90vh - 3rem) !important;
+    max-width: calc(95vw - 2rem) !important;
   }
   
   .photo-modal-image {
