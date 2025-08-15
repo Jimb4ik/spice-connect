@@ -96,7 +96,7 @@
 }
 
 .contact-item.active {
-  background: #3b82f6;
+  background: #764ba2;
   color: white;
 }
 
@@ -143,8 +143,9 @@
   font-weight: 600;
   font-size: 14px;
   color: #1e293b;
-  truncate: text;
+  text-overflow: ellipsis;
   overflow: hidden;
+  white-space: nowrap;
 }
 
 .contact-time {
@@ -286,7 +287,7 @@
 }
 
 .message-item.own .message-bubble {
-  background: #3b82f6;
+  background: #764ba2;
   color: white;
 }
 
@@ -323,6 +324,18 @@
   outline: none;
   padding: 10px 0;
   font-size: 15px;
+  background: transparent;
+}
+
+.chat-input-container input:focus {
+  outline: none;
+  border: none;
+  box-shadow: none;
+}
+
+.chat-input-container:focus-within {
+  border-color: #e2e8f0;
+  box-shadow: none;
 }
 
 .chat-input-container .app-btn {
@@ -337,12 +350,12 @@
 }
 
 .chat-input-container .app-btn-primary {
-  background: #3b82f6;
+  background: #764ba2;
   color: white;
 }
 
 .chat-input-container .app-btn-primary:hover {
-  background: #2563eb;
+  background: #6c4698;
 }
 
 .chat-input-container .app-btn-outline {
@@ -375,7 +388,7 @@
   width: 32px;
   height: 32px;
   border: 3px solid #f1f5f9;
-  border-top: 3px solid #3b82f6;
+  border-top: 3px solid #764ba2;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 16px;
