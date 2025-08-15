@@ -1323,9 +1323,9 @@ body {
 }
 
 .action-card.outline {
-  background: rgba(255, 255, 255, 0.9);
-  color: var(--text-primary);
-  border-color: rgba(255, 255, 255, 0.5);
+  background: var(--gradient-secondary);
+  color: white;
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .action-card:hover {
