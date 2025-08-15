@@ -48,60 +48,65 @@ body {
 
 /* Стили для иконок */
 .nav-icon {
-  width: 20px;
-  height: 20px;
-  margin-right: 6px;
+  width: 36px;
+  height: 36px;
+  margin-right: 8px;
   vertical-align: middle;
+  border: none !important;
+  outline: none !important;
 }
 
 .dropdown-icon {
-  width: 22px;
-  height: 22px;
-  margin-right: 10px;
+  width: 40px;
+  height: 40px;
+  margin-right: 12px;
+  border: none !important;
+  outline: none !important;
 }
 
 .page-title-icon {
-  width: 28px;
-  height: 28px;
-  margin-right: 10px;
+  width: 50px;
+  height: 50px;
+  margin-right: 12px;
   vertical-align: middle;
+  border: none !important;
+  outline: none !important;
 }
 
 .inline-icon {
-  width: 20px;
-  height: 20px;
-  margin-right: 6px;
+  width: 36px;
+  height: 36px;
+  margin-right: 8px;
   vertical-align: middle;
+  border: none !important;
+  outline: none !important;
 }
 
 .btn-icon {
-  width: 18px;
-  height: 18px;
+  width: 32px;
+  height: 32px;
   vertical-align: middle;
+  border: none !important;
+  outline: none !important;
 }
 
 .btn-icon-new {
-  width: 22px;
-  height: 22px;
+  width: 40px;
+  height: 40px;
   vertical-align: middle;
+  border: none !important;
+  outline: none !important;
 }
 
 .feature-icon-img,
 .action-icon-img {
-  width: 40px;
-  height: 40px;
+  width: 72px;
+  height: 72px;
+  border: none !important;
+  outline: none !important;
 }
 
-/* Анимированные сердечки для кнопки Start Matching */
-.start-matching-btn {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px 40px;
-  text-decoration: none;
-  overflow: hidden;
-}
+/* Старые стили Start Matching - удалены */
 
 .floating-hearts {
   display: flex;
@@ -188,6 +193,48 @@ body {
   background: var(--gradient-primary);
   color: white;
   transform: translateY(-2px);
+}
+
+/* Смена иконок при активном состоянии */
+.nav-link.active .nav-icon[src*="home.png"] {
+  content: url("../icons/home-white.png");
+}
+
+.nav-link.active .nav-icon[src*="messages-new.png"] {
+  content: url("../icons/messages-white-new.png");
+}
+
+.nav-link.active .nav-icon[src*="discover.png"] {
+  content: url("../icons/discover-white.png");
+}
+
+.nav-link.active .nav-icon[src*="matches-new.png"] {
+  content: url("../icons/matches-white-new.png");
+}
+
+.nav-link.active .nav-icon[src*="search.png"] {
+  content: url("../icons/search-white.png");
+}
+
+/* Hover состояние тоже меняет иконки */
+.nav-link:hover .nav-icon[src*="home.png"] {
+  content: url("../icons/home-white.png");
+}
+
+.nav-link:hover .nav-icon[src*="messages-new.png"] {
+  content: url("../icons/messages-white-new.png");
+}
+
+.nav-link:hover .nav-icon[src*="discover.png"] {
+  content: url("../icons/discover-white.png");
+}
+
+.nav-link:hover .nav-icon[src*="matches-new.png"] {
+  content: url("../icons/matches-white-new.png");
+}
+
+.nav-link:hover .nav-icon[src*="search.png"] {
+  content: url("../icons/search-white.png");
 }
 
 .nav-badge {
@@ -794,7 +841,7 @@ body {
 .start-matching-btn {
   display: inline-flex;
   align-items: center;
-  gap: 1.5rem;
+  justify-content: center;
   padding: 2rem 4rem;
   background: linear-gradient(135deg, #ffffff 0%, rgba(255, 255, 255, 0.95) 100%);
   color: #ff4458;
@@ -809,22 +856,73 @@ body {
   border: 4px solid rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(20px);
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 
+/* Анимация вылетающих сердечек */
 .start-matching-btn::before {
-  content: '';
+  content: '💕';
   position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 68, 88, 0.2), transparent);
-  transition: left 0.6s ease;
+  bottom: -30px;
+  left: 20%;
+  font-size: 14px;
+  animation: heartFly1 2s infinite;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.start-matching-btn::after {
+  content: '💖';
+  position: absolute;
+  bottom: -30px;
+  right: 20%;
+  font-size: 12px;
+  animation: heartFly2 2.3s infinite 0.7s;
+  pointer-events: none;
+  opacity: 0;
+}
+
+/* Дополнительные сердечки через псевдоэлементы */
+.start-matching-btn {
+  z-index: 1;
 }
 
 .start-matching-btn:hover::before {
-  left: 100%;
+  animation: heartFly1 1.5s infinite;
+}
+
+.start-matching-btn:hover::after {
+  animation: heartFly2 1.8s infinite 0.3s;
+}
+
+@keyframes heartFly1 {
+  0% {
+    opacity: 0.8;
+    transform: translateY(0px) translateX(0px) rotate(0deg);
+  }
+  50% {
+    opacity: 0.6;
+    transform: translateY(-40px) translateX(-20px) rotate(15deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-80px) translateX(-30px) rotate(25deg);
+  }
+}
+
+@keyframes heartFly2 {
+  0% {
+    opacity: 0.7;
+    transform: translateY(0px) translateX(0px) rotate(0deg);
+  }
+  50% {
+    opacity: 0.5;
+    transform: translateY(-35px) translateX(25px) rotate(-10deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-70px) translateX(40px) rotate(-20deg);
+  }
 }
 
 .start-matching-btn:hover {
@@ -2435,6 +2533,12 @@ body {
   min-height: 480px; /* чтобы лоадер центрировался ниже подзаголовка и не налезал */
 }
 
+/* Основная карточка профиля по центру */
+.profile-card-new {
+  flex: 0 0 auto;
+  margin: 0 auto;
+}
+
 .discover-loading {
   position: absolute;
   top: calc(50% + 20px);
@@ -2584,13 +2688,14 @@ body {
 
 .photo-modal-image {
   max-width: 100%;
-  max-height: 70vh;
+  max-height: 65vh;
   width: auto;
   height: auto;
   object-fit: contain;
   border-radius: calc(var(--border-radius) - 5px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   display: block;
+  margin-top: 2rem;
 }
 
 .photo-modal-close {
@@ -2626,6 +2731,15 @@ body {
   display: block;
   flex-shrink: 0;
   min-width: 250px;
+}
+
+/* Age Filter под карточкой */
+.age-filter-bottom {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  max-width: 400px;
 }
 
 @media (max-width: 768px) {
@@ -2805,9 +2919,10 @@ body[data-page="discover"] .photo-modal-content,
 
 body[data-page="discover"] .photo-modal-image,
 .discover-page .photo-modal-image {
-  max-height: calc(90vh - 4rem) !important;
+  max-height: calc(85vh - 6rem) !important;
   max-width: calc(90vw - 2rem) !important;
   object-fit: contain !important;
+  margin-top: 3rem !important;
 }
 
 /* Footer */
@@ -2969,8 +3084,9 @@ body[data-page="discover"] .photo-modal-image,
   
   body[data-page="discover"] .photo-modal-image,
   .discover-page .photo-modal-image {
-    max-height: calc(90vh - 3rem) !important;
+    max-height: calc(85vh - 5rem) !important;
     max-width: calc(95vw - 2rem) !important;
+    margin-top: 2rem !important;
   }
   
   .photo-modal-image {
@@ -3137,7 +3253,8 @@ body[data-page="discover"] .photo-modal-image,
 
 .action-btn-new.pass-btn {
   background: #f0f0f0;
-  color: #666;
+  color: #333;
+  border: 2px solid #ddd;
 }
 
 .action-btn-new.pass-btn:hover {
@@ -3145,15 +3262,26 @@ body[data-page="discover"] .photo-modal-image,
   transform: scale(1.1);
 }
 
+.action-btn-new.pass-btn .btn-icon-new {
+  filter: brightness(0.2);
+}
+
 .action-btn-new.like-btn {
-  background: var(--gradient-primary);
-  color: white;
+  background: white;
+  color: #ff4757;
+  border: 2px solid #ff4757;
 }
 
 .action-btn-new.like-btn:hover {
-  background: var(--primary-dark);
+  background: #ff4757;
+  color: white;
   transform: scale(1.1);
   box-shadow: var(--shadow-hover);
+}
+
+.action-btn-new.like-btn .btn-icon-new {
+  width: 48px;
+  height: 48px;
 }
 
 .btn-icon-new {

@@ -24,7 +24,7 @@
                     </li>
                     <li class="nav-item">
                         <a href="messages.html" class="nav-link">
-                            <img src="icons/messages.png" alt="Messages" class="nav-icon"> Messages
+                            <img src="icons/messages-new.png" alt="Messages" class="nav-icon"> Messages
                             <span class="nav-badge" id="messagesBadge">0</span>
                         </a>
                     </li>
@@ -35,7 +35,7 @@
                     </li>
                     <li class="nav-item">
                         <a href="matches.html" class="nav-link">
-                            <img src="icons/matches.png" alt="Matches" class="nav-icon"> Matches
+                            <img src="icons/matches-new.png" alt="Matches" class="nav-icon"> Matches
                         </a>
                     </li>
                     <li class="nav-item">
@@ -134,7 +134,7 @@
                 </div>
 
                 <!-- Age Filter Slider - справа от карточки -->
-                <div class="age-filter-side" id="ageFilterSide">
+                <div class="age-filter-side" id="ageFilterSide" style="display: none;">
                     <div class="age-filter-card">
                         <h3 class="age-filter-title"><img src="icons/target.png" alt="Target" class="inline-icon"> Age Range</h3>
                         <div class="age-range-container">
@@ -184,6 +184,31 @@
                 <button class="action-btn-new like-btn" id="likeBtn" title="Like">
                     <img src="icons/like-white.png" alt="Like" class="btn-icon-new">
                 </button>
+            </div>
+
+            <!-- Age Filter под карточкой -->
+            <div class="age-filter-bottom" id="ageFilterBottom">
+                <div class="age-filter-card">
+                    <h3 class="age-filter-title"><img src="icons/target.png" alt="Target" class="inline-icon"> Age Range</h3>
+                    <div class="age-range-container">
+                        <div class="age-input-group">
+                            <label for="ageMinBottom">Min:</label>
+                            <input type="range" id="ageMinBottom" min="18" max="80" value="18" class="age-slider">
+                            <span id="ageMinBottomDisplay">18</span>
+                        </div>
+                        <div class="age-input-group">
+                            <label for="ageMaxBottom">Max:</label>
+                            <input type="range" id="ageMaxBottom" min="18" max="80" value="80" class="age-slider">
+                            <span id="ageMaxBottomDisplay">80</span>
+                        </div>
+                        <div class="age-display">
+                            <span id="ageRangeBottomDisplay">18 - 80 years</span>
+                        </div>
+                        <button class="refresh-btn" onclick="applyAgeFilter()" title="Apply Filter">
+                            <img src="icons/refresh.png" alt="Refresh" class="inline-icon">
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <!-- Кнопка просмотра всех матчей -->
@@ -884,17 +909,34 @@
                         
                         // Сохраняем матч в базу данных
                         try {
+                            console.log('[DISCOVER] 🔍 Starting match save process...');
+                            console.log('[DISCOVER] Current session data:', {
+                                authManager: !!window.authManager,
+                                sessionId: window.authManager?.sessionId,
+                                isLoggedIn: window.authManager?.isLoggedIn()
+                            });
+                            
+                            // Проверяем доступность MatchUtils
+                            if (!window.MatchUtils) {
+                                console.error('[DISCOVER] ❌ MatchUtils not available!');
+                                throw new Error('MatchUtils not loaded');
+                            }
+                            
+                            console.log('[DISCOVER] MatchUtils available:', Object.keys(window.MatchUtils));
+                            
                             const matchSaved = await window.MatchUtils.saveMatchToDatabase(currentProfile);
                             console.log('[DISCOVER] Match save result:', matchSaved);
                             
                             if (!matchSaved) {
                                 console.error('[DISCOVER] ❌ Failed to save match to database');
+                                console.error('[DISCOVER] 🚨 This is a critical issue - matches are not being saved!');
                                 // Показываем модал даже если не удалось сохранить в БД
                             } else {
                                 console.log('[DISCOVER] ✅ Match successfully saved to database');
                             }
                         } catch (saveError) {
                             console.error('[DISCOVER] Error saving match:', saveError);
+                            console.error('[DISCOVER] Stack trace:', saveError.stack);
                         }
                         
                         showMatchModal(currentProfile);
