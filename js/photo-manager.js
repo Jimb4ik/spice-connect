@@ -175,7 +175,7 @@ class PhotoManager {
           const mapped2 = photos.filter(p => p.id > 0 && (p.sq_430 || p.normal || p.url_big)).map((p, idx) => ({
             id: p.id || `server-${idx}`,
             serverId: p.id,
-            photoNum: p.num || p.id_photo || p.id || 0, // Важно для удаления!
+            photoNum: p.id || p.num || p.id_photo || 0, // Важно для удаления! Используем p.id как основной идентификатор
             url: p.sq_430 || p.normal || p.url_big,
             previewUrl: null,
             name: `photo_${idx}.jpg`,
@@ -457,6 +457,7 @@ class PhotoManager {
     console.log('[PHOTO MANAGER] Photo details:');
     console.log('  - ID:', photo.id);
     console.log('  - Server ID:', photo.serverId);
+    console.log('  - Photo Num:', photo.photoNum);
     console.log('  - Name:', photo.name);
     console.log('  - Preview URL:', photo.previewUrl);
     console.log('  - URL:', photo.url);
@@ -469,7 +470,18 @@ class PhotoManager {
       console.log('  - File type:', photo.file.type);
     }
     
-    this.currentEditingPhoto = photo;
+    // Создаем глубокую копию объекта фото для безопасности
+    this.currentEditingPhoto = {
+      ...photo,
+      // Убеждаемся что у нас есть правильный photoNum для удаления
+      photoNum: photo.photoNum || photo.serverId || photo.id
+    };
+    
+    console.log('[PHOTO MANAGER] Set currentEditingPhoto:', {
+      id: this.currentEditingPhoto.id,
+      serverId: this.currentEditingPhoto.serverId,
+      photoNum: this.currentEditingPhoto.photoNum
+    });
     const modal = document.getElementById('photoCropModal');
     if (!modal) {
       console.error('[PHOTO MANAGER] Modal not found!');
@@ -904,18 +916,23 @@ class PhotoManager {
       return;
     }
     
-    // Allow fallback to serverId if photoNum is missing
-    if (!this.currentEditingPhoto.photoNum && this.currentEditingPhoto.serverId) {
-      this.currentEditingPhoto.photoNum = this.currentEditingPhoto.serverId;
-    }
-    if (!this.currentEditingPhoto.photoNum) {
-      console.error('[PHOTO MANAGER] ERROR: Current editing photo has no valid photoNum or serverId!', this.currentEditingPhoto);
-      this.showNotification('Cannot delete this photo. Try again.', 'error');
+    // Создаем снимок данных для удаления, чтобы избежать изменений во время процесса
+    const photoToDelete = {
+      id: this.currentEditingPhoto.id,
+      serverId: this.currentEditingPhoto.serverId,
+      photoNum: this.currentEditingPhoto.photoNum || this.currentEditingPhoto.serverId || this.currentEditingPhoto.id
+    };
+    
+    console.log('[PHOTO MANAGER] Photo to delete snapshot:', photoToDelete);
+    
+    if (!photoToDelete.photoNum || photoToDelete.photoNum <= 0) {
+      console.error('[PHOTO MANAGER] ERROR: Invalid photoNum for deletion!', photoToDelete);
+      this.showNotification('Cannot delete this photo. Invalid photo ID.', 'error');
       return;
     }
     
-    console.log('[PHOTO MANAGER] Ready to delete photo with photoNum:', this.currentEditingPhoto.photoNum);
-    console.log('[PHOTO MANAGER] Photos snapshot:', this.photos.map(p => ({ id: p.id, serverId: p.serverId, num: p.photoNum })));
+    console.log('[PHOTO MANAGER] Ready to delete photo with photoNum:', photoToDelete.photoNum);
+    console.log('[PHOTO MANAGER] All photos snapshot:', this.photos.map(p => ({ id: p.id, serverId: p.serverId, photoNum: p.photoNum })));
     
     // Use custom confirmation modal instead of system confirm
     console.log('[PHOTO MANAGER] Showing confirmation modal...');
@@ -927,7 +944,7 @@ class PhotoManager {
       return;
     }
     
-    const photoNum = Number(this.currentEditingPhoto.photoNum || this.currentEditingPhoto.serverId);
+    const photoNum = Number(photoToDelete.photoNum);
     if (!Number.isFinite(photoNum)) {
       console.error('[PHOTO MANAGER] ERROR: photoNum is not numeric:', photoNum);
       this.showNotification('Invalid photo id', 'error');
@@ -944,6 +961,7 @@ class PhotoManager {
       // Use server proxy to ensure JSON and correct auth
       const apiUrl = `/api/spice-multi-test?endpoint=/index_api/user_edit_photos/del&method=GET&session_id=${window.authManager.sessionId}&photo_num=${photoNum}`;
       console.log('[PHOTO MANAGER] API URL (proxy):', apiUrl);
+      console.log('[PHOTO MANAGER] Deleting photo with final photoNum:', photoNum, 'from photoToDelete:', photoToDelete);
       const response = await fetch(apiUrl);
       const result = await response.json();
       console.log('[PHOTO MANAGER] API Delete result (proxy):', result);
@@ -1093,11 +1111,26 @@ class PhotoManager {
         </div>
       `;
 
-      photoCard.addEventListener('click', () => {
-        if (!photo.isNew) {
+      // Привязываем событие клика к самой карточке (но не к кнопке редактирования)
+      photoCard.addEventListener('click', (e) => {
+        // Проверяем, что клик не был по кнопке редактирования
+        if (!e.target.closest('.btn-photo-action') && !photo.isNew) {
           this.openCropModal(photo);
         }
       });
+      
+      // Отдельно привязываем событие к кнопке редактирования
+      const editBtn = photoCard.querySelector('.btn-photo-action.edit');
+      if (editBtn) {
+        editBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          console.log('[PHOTO MANAGER] Edit button clicked for photo:', photo.id, 'serverId:', photo.serverId, 'photoNum:', photo.photoNum);
+          if (!photo.isNew) {
+            this.openCropModal(photo);
+          }
+        });
+      }
 
       gallery.appendChild(photoCard);
     });
