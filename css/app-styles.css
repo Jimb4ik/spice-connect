@@ -254,30 +254,23 @@ body {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-/* СТЕКЛО - Карточки */
+/* Карточки */
 .card {
-  position: relative;
-  padding: 24px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.10);           /* лёгкая «дымка» */
-  backdrop-filter: blur(22px) saturate(120%);      /* главное: blur позади */
-  -webkit-backdrop-filter: blur(22px) saturate(120%);
-  border: 1px solid rgba(255, 255, 255, 0.28);     /* стеклянная кромка */
-  box-shadow:
-    0 10px 30px rgba(0, 0, 0, 0.20),               /* отрыв от фона */
-    inset 0 1px 0 rgba(255, 255, 255, 0.30);       /* внутренний блик */
-  /* для красивых краёв */
-  background-clip: padding-box;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 20px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   transition: var(--transition);
 }
 
 .card:hover {
   transform: translateY(-2px);
-  background: rgba(255, 255, 255, 0.15);
-  box-shadow:
-    0 15px 40px rgba(0, 0, 0, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.40);
-  border-color: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 .card-grid {
@@ -454,28 +447,21 @@ body {
 }
 
 .profile-hero-card {
-  position: relative;
-  padding: 24px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.10);           /* лёгкая «дымка» */
-  backdrop-filter: blur(22px) saturate(120%);      /* главное: blur позади */
-  -webkit-backdrop-filter: blur(22px) saturate(120%);
-  border: 1px solid rgba(255, 255, 255, 0.28);     /* стеклянная кромка */
-  box-shadow:
-    0 10px 30px rgba(0, 0, 0, 0.20),               /* отрыв от фона */
-    inset 0 1px 0 rgba(255, 255, 255, 0.30);       /* внутренний блик */
-  /* для красивых краёв */
-  background-clip: padding-box;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 20px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   transition: var(--transition);
 }
 
 .profile-hero-card:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
   transform: translateY(-2px);
-  background: rgba(255, 255, 255, 0.15);
-  box-shadow:
-    0 15px 40px rgba(0, 0, 0, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.40);
-  border-color: rgba(255, 255, 255, 0.35);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15);
 }
 
 .profile-main-info {
@@ -575,21 +561,17 @@ body {
 }
 
 .stat-card {
-  position: relative;
-  padding: 24px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.10);           /* лёгкая «дымка» */
-  backdrop-filter: blur(22px) saturate(120%);      /* главное: blur позади */
-  -webkit-backdrop-filter: blur(22px) saturate(120%);
-  border: 1px solid rgba(255, 255, 255, 0.28);     /* стеклянная кромка */
-  box-shadow:
-    0 10px 30px rgba(0, 0, 0, 0.20),               /* отрыв от фона */
-    inset 0 1px 0 rgba(255, 255, 255, 0.30);       /* внутренний блик */
-  /* для красивых краёв */
-  background-clip: padding-box;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 20px;
   text-align: center;
   transition: all 0.3s ease;
+  position: relative;
   overflow: hidden;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 }
 
 .stat-card::before {
@@ -600,24 +582,20 @@ body {
   right: 0;
   bottom: 0;
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
-  border-radius: 20px;
+  border-radius: 16px;
   pointer-events: none;
 }
 
 .stat-card:hover {
   transform: translateY(-3px);
-  background: rgba(255, 255, 255, 0.15);
-  box-shadow:
-    0 15px 40px rgba(0, 0, 0, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.40);
-  border-color: rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 .stat-number {
-  margin: 0;
-  font-size: 36px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
+  font-size: 3rem;
+  font-weight: 800;
   color: white;
   margin-bottom: 0.5rem;
   position: relative;
@@ -626,10 +604,9 @@ body {
 }
 
 .stat-label {
-  margin: 0 0 8px;
-  font-weight: 600;
-  opacity: 0.95;
   color: white;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
   font-size: 1rem;
   position: relative;
   z-index: 1;
@@ -637,10 +614,9 @@ body {
 }
 
 .stat-trend {
-  margin: 6px 0 0;
-  color: #a6ffd1;
-  font-weight: 600;
+  color: #10b981;
   font-size: 0.9rem;
+  font-weight: 600;
   position: relative;
   z-index: 1;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
@@ -658,28 +634,21 @@ body {
 }
 
 .section-card {
-  position: relative;
-  padding: 24px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.10);           /* лёгкая «дымка» */
-  backdrop-filter: blur(22px) saturate(120%);      /* главное: blur позади */
-  -webkit-backdrop-filter: blur(22px) saturate(120%);
-  border: 1px solid rgba(255, 255, 255, 0.28);     /* стеклянная кромка */
-  box-shadow:
-    0 10px 30px rgba(0, 0, 0, 0.20),               /* отрыв от фона */
-    inset 0 1px 0 rgba(255, 255, 255, 0.30);       /* внутренний блик */
-  /* для красивых краёв */
-  background-clip: padding-box;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 20px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   transition: var(--transition);
 }
 
 .section-card:hover {
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
   transform: translateY(-2px);
-  background: rgba(255, 255, 255, 0.15);
-  box-shadow:
-    0 15px 40px rgba(0, 0, 0, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.40);
-  border-color: rgba(255, 255, 255, 0.35);
 }
 
 .section-header {
@@ -1274,27 +1243,20 @@ body {
 
 /* Profile Completion */
 .profile-completion {
-  position: relative;
-  padding: 24px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.10);           /* лёгкая «дымка» */
-  backdrop-filter: blur(22px) saturate(120%);      /* главное: blur позади */
-  -webkit-backdrop-filter: blur(22px) saturate(120%);
-  border: 1px solid rgba(255, 255, 255, 0.28);     /* стеклянная кромка */
-  box-shadow:
-    0 10px 30px rgba(0, 0, 0, 0.20),               /* отрыв от фона */
-    inset 0 1px 0 rgba(255, 255, 255, 0.30);       /* внутренний блик */
-  /* для красивых краёв */
-  background-clip: padding-box;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 20px;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   transition: var(--transition);
 }
 
 .profile-completion:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.35);
-  box-shadow:
-    0 15px 40px rgba(0, 0, 0, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.40);
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15);
 }
 
 .completion-header {

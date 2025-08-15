@@ -10,7 +10,7 @@ export default async function handler(req, res) {
     }
 
     const API_KEY = process.env.SPICE_API_KEY;
-    const BASE_URL = 'https://api.jetsetrdv.com';
+    const BASE_URL = process.env.SPICE_BASE_URL || 'https://dev2018.de5a7.com';
 
     if (!API_KEY) {
         return res.status(500).json({ 
