@@ -90,15 +90,7 @@ class MainDashboard {
                 }
             }
             
-            // Get additional stats from search API (for profile views, etc.)
-            const searchResponse = await fetch(`/api/spice-multi-test?endpoint=/index_api/search&method=POST&session_id=${this.sessionId}&sex=2&page=0&online=1`);
-            const searchData = await searchResponse.json();
-            
-            if (searchData.success && searchData.data?.result) {
-                const onlineCount = searchData.data.result.nb_users || 0;
-                document.getElementById('onlineFriendsCount').textContent = onlineCount;
-                document.getElementById('onlineCountBadge').textContent = onlineCount;
-            }
+            // Note: Friends count is now loaded in loadOnlineFriends() function
             
             // Mock data for profile views and photo votes (these would need specific API endpoints)
             document.getElementById('profileViewsCount').textContent = Math.floor(Math.random() * 50) + 10;
@@ -211,35 +203,51 @@ class MainDashboard {
     }
 
     async loadOnlineFriends() {
-        console.log('[MAIN] Loading online friends...');
+        console.log('[MAIN] Loading friends list...');
         
         try {
-            // Search for online users
-            const response = await fetch(`/api/spice-multi-test?endpoint=/index_api/search&method=POST&session_id=${this.sessionId}&online=1&page=0`);
+            // Load friends list using load_contacts API with filter=3 (friends)
+            const response = await fetch(`/api/spice-multi-test?endpoint=/ajax_api/load_contacts&method=GET&session_id=${this.sessionId}&filter=3`);
             const data = await response.json();
             
-            console.log('[MAIN] Online friends API response:', data);
+            console.log('[MAIN] Friends API response:', data);
             
             const listContainer = document.getElementById('onlineFriendsList');
             
-            if (data.success && data.data?.result && Array.isArray(data.data.result)) {
-                const friends = data.data.result.slice(0, 8); // Show 8 online friends
+            if (data.success && data.data) {
+                // API returns friends in 'contacts' or 'result' field
+                const friends = data.data.contacts || data.data.result || [];
                 
-                if (friends.length === 0) {
-                    listContainer.innerHTML = '<div class="empty-state">No friends online right now</div>';
+                if (!Array.isArray(friends) || friends.length === 0) {
+                    listContainer.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">👥</div>
+                            <p>No friends yet. Start making connections!</p>
+                        </div>
+                    `;
+                    
+                    // Update the badge count to match actual friends count
+                    document.getElementById('onlineCountBadge').textContent = '0';
                     return;
                 }
                 
-                const friendsHTML = friends.map(friend => {
+                // Update the badge count to match actual friends count
+                document.getElementById('onlineCountBadge').textContent = friends.length;
+                
+                // Show up to 8 friends
+                const displayFriends = friends.slice(0, 8);
+                
+                const friendsHTML = displayFriends.map(friend => {
                     const photoUrl = this.getPhotoUrl(friend);
                     const age = friend.age || '--';
+                    const isOnline = friend.is_online === 1 || friend.is_online === '1';
                     
                     return `
                         <div class="friend-item">
                             <div class="friend-avatar">
                                 ${photoUrl ? `<img src="${photoUrl}" alt="${friend.pseudo}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''}
                                 <div class="avatar-fallback" style="${photoUrl ? 'display: none;' : ''}">${(friend.pseudo || 'U').charAt(0).toUpperCase()}</div>
-                                <div class="online-indicator"></div>
+                                ${isOnline ? '<div class="online-indicator"></div>' : ''}
                             </div>
                             <div class="friend-info">
                                 <div class="friend-name">${friend.pseudo || 'Anonymous'}</div>
@@ -252,12 +260,24 @@ class MainDashboard {
                 listContainer.innerHTML = friendsHTML;
                 
             } else {
-                listContainer.innerHTML = '<div class="empty-state">No online friends found</div>';
+                listContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">👥</div>
+                        <p>Unable to load friends</p>
+                    </div>
+                `;
+                document.getElementById('onlineCountBadge').textContent = '0';
             }
             
         } catch (error) {
-            console.error('[MAIN] Error loading online friends:', error);
-            document.getElementById('onlineFriendsList').innerHTML = '<div class="error-state">Failed to load online friends</div>';
+            console.error('[MAIN] Error loading friends:', error);
+            document.getElementById('onlineFriendsList').innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">❌</div>
+                    <p>Failed to load friends</p>
+                </div>
+            `;
+            document.getElementById('onlineCountBadge').textContent = '0';
         }
     }
 
