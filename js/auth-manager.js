@@ -331,8 +331,8 @@ class AuthManager {
     console.log('[AUTH] redirectToProfile() called, scheduling redirect in 800ms');
     // Small delay to ensure UI updates are complete
     setTimeout(() => {
-      console.log('[AUTH] Executing redirect to profile.html NOW');
-      window.location.href = 'profile.html';
+      console.log('[AUTH] Executing redirect to dashboard.html NOW');
+      window.location.href = 'dashboard.html';
     }, 800);
   }
 
@@ -426,10 +426,10 @@ class AuthManager {
   }
 
   /**
-   * Navigate to user profile
+   * Navigate to user dashboard
    */
   goToProfile() {
-    window.location.href = '/profile.html';
+    window.location.href = '/dashboard.html';
   }
 }
 
