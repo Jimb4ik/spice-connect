@@ -22,11 +22,6 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="profile.html" class="nav-link">
-                            <span>👤</span> My Profile
-                        </a>
-                    </li>
-                    <li class="nav-item">
                         <a href="messages.html" class="nav-link">
                             <span>💬</span> Messages
                             <span class="nav-badge" id="messagesBadge">0</span>
@@ -47,11 +42,6 @@
                             <span>🔍</span> Search
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a href="settings.html" class="nav-link">
-                            <span>⚙️</span> Settings
-                        </a>
-                    </li>
                 </ul>
             </nav>
             
@@ -61,17 +51,40 @@
                     <span id="userAvatarText">U</span>
                 </div>
                 <div class="user-dropdown">
+                    <div class="dropdown-header">
+                        <div class="dropdown-user-info">
+                            <div class="dropdown-avatar">
+                                <img id="dropdownAvatarImg" alt="User Avatar" style="display: none;">
+                                <span id="dropdownAvatarText">U</span>
+                            </div>
+                            <div class="dropdown-user-details">
+                                <div class="dropdown-username" id="dropdownUsername">Username</div>
+                                <div class="dropdown-status">Online</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dropdown-divider"></div>
                     <a href="profile.html" class="dropdown-item">
                         <span class="dropdown-icon">👤</span>
-                        My Profile
+                        <div class="dropdown-item-content">
+                            <span class="dropdown-item-title">My Profile</span>
+                            <span class="dropdown-item-subtitle">View and edit profile</span>
+                        </div>
                     </a>
                     <a href="settings.html" class="dropdown-item">
                         <span class="dropdown-icon">⚙️</span>
-                        Settings
+                        <div class="dropdown-item-content">
+                            <span class="dropdown-item-title">Settings</span>
+                            <span class="dropdown-item-subtitle">Manage your account</span>
+                        </div>
                     </a>
+                    <div class="dropdown-divider"></div>
                     <button class="dropdown-item logout" id="logoutBtn">
                         <span class="dropdown-icon">🚪</span>
-                        Logout
+                        <div class="dropdown-item-content">
+                            <span class="dropdown-item-title">Logout</span>
+                            <span class="dropdown-item-subtitle">Sign out of your account</span>
+                        </div>
                     </button>
                 </div>
                     </div>
