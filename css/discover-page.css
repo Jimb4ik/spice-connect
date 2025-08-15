@@ -1,5 +1,14 @@
 /* Стили только для страницы discover.html */
 
+/* ВАЖНО: Всегда используем центральные кнопки, убираем боковые */
+.actions-side {
+  display: none !important;
+}
+
+.action-buttons-new {
+  display: flex !important;
+}
+
 /* 1. Приближаем кнопки к карточке профиля и делаем их больше */
 .action-buttons-new {
   display: flex;
