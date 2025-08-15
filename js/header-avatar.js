@@ -40,9 +40,30 @@ async function updateDropdownUserInfo(user) {
                     
                     if (apiData && apiData.success && apiData.data) {
                         const photos = apiData.data || [];
-                        if (photos.length > 0) {
+                        if (Array.isArray(photos) && photos.length > 0) {
                             const mainPhoto = photos.find(p => p.num === 0) || photos[0];
                             photoUrl = mainPhoto.sq_430 || mainPhoto.sq_middle || mainPhoto.normal || mainPhoto.sq_small;
+                        }
+                    }
+                    
+                    // Если фотографий нет, пробуем fallback на /index_api/user
+                    if (!photoUrl) {
+                        const userDataString = localStorage.getItem('lavrilo_user');
+                        if (userDataString) {
+                            const userData = JSON.parse(userDataString);
+                            const userId = userData.id;
+                            
+                            const apiUrl2 = `/api/spice-multi-test?endpoint=/index_api/user&method=POST&session_id=${sessionId}&id=${userId}&get_picture_430=1`;
+                            const response2 = await fetch(apiUrl2);
+                            const apiData2 = await response2.json();
+                            
+                            if (apiData2 && apiData2.success && apiData2.data?.result) {
+                                const user = apiData2.data.result;
+                                if (user.photos_v2 && user.photos_v2.length > 0) {
+                                    const mainPhoto = user.photos_v2.find(p => p.num === 0) || user.photos_v2[0];
+                                    photoUrl = mainPhoto.sq_430 || mainPhoto.sq_middle || mainPhoto.normal || mainPhoto.sq_small;
+                                }
+                            }
                         }
                     }
                 } catch (error) {
@@ -125,19 +146,40 @@ async function loadUserAvatar() {
         
         if (apiData && apiData.success && apiData.data) {
             const photos = apiData.data || [];
+            let photoUrl = null;
+            
+            // Проверяем, есть ли фотографии в user_edit_photos
+            if (Array.isArray(photos) && photos.length > 0) {
+                const mainPhoto = photos.find(p => p.num === 0) || photos[0];
+                photoUrl = mainPhoto.sq_430 || mainPhoto.sq_middle || mainPhoto.normal || mainPhoto.sq_small;
+            }
+            
+            // Если фотографий нет, пробуем fallback на /index_api/user
+            if (!photoUrl) {
+                console.log('[HEADER-AVATAR] No photos in user_edit_photos, trying fallback to /index_api/user');
+                try {
+                    const apiUrl2 = `/api/spice-multi-test?endpoint=/index_api/user&method=POST&session_id=${sessionId}&id=${userId}&get_picture_430=1`;
+                    const response2 = await fetch(apiUrl2);
+                    const apiData2 = await response2.json();
+                    
+                    console.log('[HEADER-AVATAR] Fallback API response:', apiData2);
+                    
+                    if (apiData2 && apiData2.success && apiData2.data?.result) {
+                        const user = apiData2.data.result;
+                        if (user.photos_v2 && user.photos_v2.length > 0) {
+                            const mainPhoto = user.photos_v2.find(p => p.num === 0) || user.photos_v2[0];
+                            photoUrl = mainPhoto.sq_430 || mainPhoto.sq_middle || mainPhoto.normal || mainPhoto.sq_small;
+                        }
+                    }
+                } catch (error) {
+                    console.warn('[HEADER-AVATAR] Fallback API failed:', error);
+                }
+            }
+            
             const avatarImg = document.getElementById('userAvatarImg');
             const avatarText = document.getElementById('userAvatarText');
             
             if (avatarImg && avatarText) {
-                let photoUrl = null;
-                
-                // Ищем главное фото пользователя (num: 0)
-                if (photos.length > 0) {
-                    const mainPhoto = photos.find(p => p.num === 0) || photos[0];
-                    // Приоритет: sq_430 (430x430), sq_middle (215x215), normal (оригинал), sq_small (80x80)
-                    photoUrl = mainPhoto.sq_430 || mainPhoto.sq_middle || mainPhoto.normal || mainPhoto.sq_small;
-                }
-                
                 if (photoUrl) {
                     console.log('[HEADER-AVATAR] Found photo URL:', photoUrl);
                     // Показываем фото
