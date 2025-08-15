@@ -1,0 +1,142 @@
+/* Стили только для страницы discover.html */
+
+/* 1. Приближаем кнопки к карточке профиля и делаем их больше */
+.action-buttons-new {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem; /* Уменьшил с 2rem до 1.5rem */
+  margin: 1rem 0 1.5rem; /* Уменьшил отступ сверху с clamp(8px, 1vh, 16px) до 1rem */
+  padding: 0 2rem;
+}
+
+.action-btn-new {
+  width: 70px; /* Увеличил с 60px до 70px */
+  height: 70px; /* Увеличил с 60px до 70px */
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem; /* Увеличил с 1.5rem до 1.8rem */
+  transition: var(--transition);
+  box-shadow: var(--shadow);
+}
+
+.btn-icon-new {
+  font-size: 1.8rem; /* Увеличил с 1.5rem до 1.8rem */
+}
+
+/* 2. Убираем белый фон модального окна фото и центрируем изображение */
+.photo-modal-content {
+  position: relative;
+  max-width: 90vw;
+  max-height: 90vh;
+  width: auto;
+  height: auto;
+  z-index: 10000;
+  background: transparent; /* Убрал белый фон */
+  backdrop-filter: none; /* Убрал blur эффект */
+  -webkit-backdrop-filter: none;
+  border-radius: 0; /* Убрал скругления */
+  padding: 0; /* Убрал padding */
+  box-shadow: none; /* Убрал тень */
+  border: none; /* Убрал границу */
+  transform: scale(0.8);
+  transition: transform 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.photo-modal-image {
+  max-width: 90vw;
+  max-height: 90vh;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 12px; /* Небольшое скругление для самого изображения */
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6); /* Тень только для изображения */
+  display: block;
+}
+
+/* Кнопка закрытия остается видимой */
+.photo-modal-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.7);
+  border: none;
+  color: white;
+  font-size: 1.8rem;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  font-weight: bold;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.photo-modal-close:hover {
+  background: rgba(0, 0, 0, 0.9);
+  transform: scale(1.1);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
+}
+
+/* Мобильная адаптация для новых стилей */
+@media (max-width: 768px) {
+  .action-buttons-new {
+    gap: 1.2rem;
+    margin: 0.8rem 0 1.2rem;
+  }
+  
+  .action-btn-new {
+    width: 65px;
+    height: 65px;
+    font-size: 1.6rem;
+  }
+  
+  .btn-icon-new {
+    font-size: 1.6rem;
+  }
+  
+  .photo-modal-close {
+    top: 15px;
+    right: 15px;
+    width: 45px;
+    height: 45px;
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .action-buttons-new {
+    gap: 1rem;
+    margin: 0.6rem 0 1rem;
+  }
+  
+  .action-btn-new {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+  }
+  
+  .btn-icon-new {
+    font-size: 1.5rem;
+  }
+  
+  .photo-modal-close {
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    font-size: 1.3rem;
+  }
+}
