@@ -96,7 +96,7 @@
 }
 
 .contact-item.active {
-  background: #764ba2;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
 }
 
@@ -287,7 +287,7 @@
 }
 
 .message-item.own .message-bubble {
-  background: #764ba2;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
 }
 
@@ -350,12 +350,12 @@
 }
 
 .chat-input-container .app-btn-primary {
-  background: #764ba2;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
 }
 
 .chat-input-container .app-btn-primary:hover {
-  background: #6c4698;
+  background: linear-gradient(135deg, #5a6fd8 0%, #6c4698 100%);
 }
 
 .chat-input-container .app-btn-outline {
@@ -388,7 +388,7 @@
   width: 32px;
   height: 32px;
   border: 3px solid #f1f5f9;
-  border-top: 3px solid #764ba2;
+  border-top: 3px solid #667eea;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 16px;
