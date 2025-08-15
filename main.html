@@ -93,24 +93,22 @@
 
     <!-- Основной контент -->
     <main class="app-main">
-        <div class="page-header fade-in-up">
-            <h1 class="page-title">Main</h1>
-            <p class="page-subtitle">Your activity dashboard</p>
-        </div>
 
-        <!-- Welcome Text -->
-        <div class="welcome-text-section fade-in-up">
-            <div class="welcome-content">
-                <h2 class="welcome-title">Find Your Perfect Match</h2>
-                <p class="welcome-description">
-                    Discover meaningful connections with people who share your interests and values. 
-                    Start conversations, explore profiles, and find someone special today.
+
+        <!-- Matching Invitation -->
+        <div class="matching-invitation-section fade-in-up">
+            <div class="invitation-content">
+                <h2 class="invitation-title">Ready to Find Love?</h2>
+                <p class="invitation-description">
+                    Start discovering amazing people near you. Swipe, match, and connect with someone special today!
                 </p>
-                <div class="welcome-features">
-                    <span class="feature-item">💕 Real connections</span>
-                    <span class="feature-item">🌟 Verified profiles</span>
-                    <span class="feature-item">🔒 Safe & secure</span>
-                    <span class="feature-item">💬 Instant messaging</span>
+                <div class="invitation-actions">
+                    <a href="discover.html" class="start-matching-btn">
+                        <span class="btn-icon">💕</span>
+                        <span class="btn-text">Start Matching</span>
+                        <span class="btn-arrow">→</span>
+                    </a>
+                    <p class="invitation-hint">Thousands of singles are waiting for you</p>
                 </div>
             </div>
         </div>
@@ -124,7 +122,10 @@
                         <button class="refresh-btn" id="refreshActivityBtn">🔄</button>
                     </div>
                     <div class="activity-feed" id="activityFeed">
-                        <div class="loading-spinner">Loading activities...</div>
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📰</div>
+                            <p>Your activity will appear here</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -140,7 +141,10 @@
                         </div>
                     </div>
                     <div class="top-members-list" id="topMembersList">
-                        <div class="loading-spinner">Loading top members...</div>
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🏆</div>
+                            <p>Top members will appear here</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -153,7 +157,10 @@
                         <span class="online-count" id="onlineCountBadge">0</span>
                     </div>
                     <div class="online-friends-list" id="onlineFriendsList">
-                        <div class="loading-spinner">Loading online friends...</div>
+                        <div class="empty-state">
+                            <div class="empty-state-icon">🟢</div>
+                            <p>Online friends will appear here</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -166,7 +173,10 @@
                         <a href="visitors.html" class="view-all-link">View All</a>
                     </div>
                     <div class="visitors-list" id="visitorsList">
-                        <div class="loading-spinner">Loading recent visitors...</div>
+                        <div class="empty-state">
+                            <div class="empty-state-icon">👀</div>
+                            <p>Recent visitors will appear here</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -179,7 +189,10 @@
                         <span class="votes-count" id="votesCountBadge">0</span>
                     </div>
                     <div class="photo-votes-list" id="photoVotesList">
-                        <div class="loading-spinner">Loading photo votes...</div>
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📸</div>
+                            <p>Photo votes will appear here</p>
+                        </div>
                     </div>
                 </div>
             </div>
