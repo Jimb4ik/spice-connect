@@ -1,0 +1,554 @@
+/**
+ * Main Dashboard JavaScript
+ * Handles Activity Feed, Quick Stats, Top Members, Friends Online, Recent Visitors, Photo Votes
+ */
+
+class MainDashboard {
+    constructor() {
+        this.sessionId = null;
+        this.currentUser = null;
+        this.refreshInterval = null;
+        
+        console.log('[MAIN] MainDashboard initialized');
+    }
+
+    async init() {
+        console.log('[MAIN] Initializing MainDashboard...');
+        
+        // Check authentication
+        if (!window.authManager || !window.authManager.isLoggedIn) {
+            console.error('[MAIN] User not authenticated, redirecting...');
+            window.location.href = 'index.html';
+            return;
+        }
+
+        this.sessionId = window.authManager.sessionId;
+        this.currentUser = window.authManager.currentUser;
+        
+        if (!this.sessionId) {
+            console.error('[MAIN] No session ID available');
+            return;
+        }
+
+        console.log('[MAIN] Session ID:', this.sessionId);
+        
+        // Initialize all sections
+        await this.loadAllSections();
+        
+        // Set up event listeners
+        this.setupEventListeners();
+        
+        // Set up auto-refresh for online status
+        this.startAutoRefresh();
+        
+        console.log('[MAIN] MainDashboard initialization complete');
+    }
+
+    async loadAllSections() {
+        console.log('[MAIN] Loading all sections...');
+        
+        // Load sections in parallel for better performance
+        const promises = [
+            this.loadQuickStats(),
+            this.loadActivityFeed(),
+            this.loadTopMembers(2), // Default to women
+            this.loadOnlineFriends(),
+            this.loadRecentVisitors(),
+            this.loadPhotoVotes()
+        ];
+
+        try {
+            await Promise.allSettled(promises);
+            console.log('[MAIN] All sections loaded');
+        } catch (error) {
+            console.error('[MAIN] Error loading sections:', error);
+        }
+    }
+
+    async loadQuickStats() {
+        console.log('[MAIN] Loading quick stats...');
+        
+        try {
+            // Get online status and message count
+            const onlineResponse = await fetch(`/api/spice-multi-test?endpoint=/ajax_api/online&method=GET&session_id=${this.sessionId}`);
+            const onlineData = await onlineResponse.json();
+            
+            console.log('[MAIN] Online API response:', onlineData);
+            
+            if (onlineData.success && onlineData.data?.result) {
+                const result = onlineData.data.result;
+                
+                // Update new messages count
+                const newMessages = result.nb_new_message || 0;
+                document.getElementById('newMessagesCount').textContent = newMessages;
+                
+                // Update message badge in header
+                const messagesBadge = document.getElementById('messagesBadge');
+                if (messagesBadge) {
+                    messagesBadge.textContent = newMessages;
+                    messagesBadge.style.display = newMessages > 0 ? 'inline' : 'none';
+                }
+            }
+            
+            // Get additional stats from search API (for profile views, etc.)
+            const searchResponse = await fetch(`/api/spice-multi-test?endpoint=/index_api/search&method=POST&session_id=${this.sessionId}&sex=2&page=0&online=1`);
+            const searchData = await searchResponse.json();
+            
+            if (searchData.success && searchData.data?.result) {
+                const onlineCount = searchData.data.result.nb_users || 0;
+                document.getElementById('onlineFriendsCount').textContent = onlineCount;
+                document.getElementById('onlineCountBadge').textContent = onlineCount;
+            }
+            
+            // Mock data for profile views and photo votes (these would need specific API endpoints)
+            document.getElementById('profileViewsCount').textContent = Math.floor(Math.random() * 50) + 10;
+            document.getElementById('photoVotesCount').textContent = Math.floor(Math.random() * 20) + 5;
+            
+        } catch (error) {
+            console.error('[MAIN] Error loading quick stats:', error);
+        }
+    }
+
+    async loadActivityFeed() {
+        console.log('[MAIN] Loading activity feed...');
+        
+        try {
+            const response = await fetch(`/api/spice-multi-test?endpoint=/index_api/wall&method=POST&session_id=${this.sessionId}`);
+            const data = await response.json();
+            
+            console.log('[MAIN] Activity feed API response:', data);
+            
+            const feedContainer = document.getElementById('activityFeed');
+            
+            if (data.success && data.data?.result && Array.isArray(data.data.result)) {
+                const activities = data.data.result.slice(0, 10); // Show last 10 activities
+                
+                if (activities.length === 0) {
+                    feedContainer.innerHTML = '<div class="empty-state">No recent activities from your friends</div>';
+                    return;
+                }
+                
+                const feedHTML = activities.map(activity => {
+                    const photoUrl = this.getPhotoUrl(activity);
+                    const activityText = this.formatActivityText(activity);
+                    const timeAgo = this.formatTimeAgo(activity.date_action);
+                    
+                    return `
+                        <div class="activity-item">
+                            <div class="activity-avatar">
+                                ${photoUrl ? `<img src="${photoUrl}" alt="${activity.pseudo}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''}
+                                <div class="avatar-fallback" style="${photoUrl ? 'display: none;' : ''}">${(activity.pseudo || 'U').charAt(0).toUpperCase()}</div>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-text">${activityText}</div>
+                                <div class="activity-time">${timeAgo}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                feedContainer.innerHTML = feedHTML;
+                
+            } else {
+                feedContainer.innerHTML = '<div class="empty-state">No recent activities available</div>';
+            }
+            
+        } catch (error) {
+            console.error('[MAIN] Error loading activity feed:', error);
+            document.getElementById('activityFeed').innerHTML = '<div class="error-state">Failed to load activities</div>';
+        }
+    }
+
+    async loadTopMembers(gender = 2) {
+        console.log('[MAIN] Loading top members for gender:', gender);
+        
+        try {
+            const response = await fetch(`/api/spice-multi-test?endpoint=/index_api/topmembers&method=POST&session_id=${this.sessionId}&sex=${gender}&age_range=18-65&page=0`);
+            const data = await response.json();
+            
+            console.log('[MAIN] Top members API response:', data);
+            
+            const listContainer = document.getElementById('topMembersList');
+            
+            if (data.success && data.data?.result && Array.isArray(data.data.result)) {
+                const members = data.data.result.slice(0, 5); // Show top 5
+                
+                if (members.length === 0) {
+                    listContainer.innerHTML = '<div class="empty-state">No top members found</div>';
+                    return;
+                }
+                
+                const membersHTML = members.map((member, index) => {
+                    const photoUrl = this.getPhotoUrl(member);
+                    const age = member.age || '--';
+                    const location = member.ville || member.region || 'Unknown';
+                    
+                    return `
+                        <div class="member-item">
+                            <div class="member-rank">#${index + 1}</div>
+                            <div class="member-avatar">
+                                ${photoUrl ? `<img src="${photoUrl}" alt="${member.pseudo}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''}
+                                <div class="avatar-fallback" style="${photoUrl ? 'display: none;' : ''}">${(member.pseudo || 'U').charAt(0).toUpperCase()}</div>
+                            </div>
+                            <div class="member-info">
+                                <div class="member-name">${member.pseudo || 'Anonymous'}</div>
+                                <div class="member-details">${age} years • ${location}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                listContainer.innerHTML = membersHTML;
+                
+            } else {
+                listContainer.innerHTML = '<div class="empty-state">No top members available</div>';
+            }
+            
+        } catch (error) {
+            console.error('[MAIN] Error loading top members:', error);
+            document.getElementById('topMembersList').innerHTML = '<div class="error-state">Failed to load top members</div>';
+        }
+    }
+
+    async loadOnlineFriends() {
+        console.log('[MAIN] Loading online friends...');
+        
+        try {
+            // Search for online users
+            const response = await fetch(`/api/spice-multi-test?endpoint=/index_api/search&method=POST&session_id=${this.sessionId}&online=1&page=0`);
+            const data = await response.json();
+            
+            console.log('[MAIN] Online friends API response:', data);
+            
+            const listContainer = document.getElementById('onlineFriendsList');
+            
+            if (data.success && data.data?.result && Array.isArray(data.data.result)) {
+                const friends = data.data.result.slice(0, 8); // Show 8 online friends
+                
+                if (friends.length === 0) {
+                    listContainer.innerHTML = '<div class="empty-state">No friends online right now</div>';
+                    return;
+                }
+                
+                const friendsHTML = friends.map(friend => {
+                    const photoUrl = this.getPhotoUrl(friend);
+                    const age = friend.age || '--';
+                    
+                    return `
+                        <div class="friend-item">
+                            <div class="friend-avatar">
+                                ${photoUrl ? `<img src="${photoUrl}" alt="${friend.pseudo}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''}
+                                <div class="avatar-fallback" style="${photoUrl ? 'display: none;' : ''}">${(friend.pseudo || 'U').charAt(0).toUpperCase()}</div>
+                                <div class="online-indicator"></div>
+                            </div>
+                            <div class="friend-info">
+                                <div class="friend-name">${friend.pseudo || 'Anonymous'}</div>
+                                <div class="friend-age">${age} years</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                listContainer.innerHTML = friendsHTML;
+                
+            } else {
+                listContainer.innerHTML = '<div class="empty-state">No online friends found</div>';
+            }
+            
+        } catch (error) {
+            console.error('[MAIN] Error loading online friends:', error);
+            document.getElementById('onlineFriendsList').innerHTML = '<div class="error-state">Failed to load online friends</div>';
+        }
+    }
+
+    async loadRecentVisitors() {
+        console.log('[MAIN] Loading recent visitors...');
+        
+        try {
+            // Use search API to get recent users (simulating visitors)
+            const response = await fetch(`/api/spice-multi-test?endpoint=/index_api/search&method=POST&session_id=${this.sessionId}&page=0`);
+            const data = await response.json();
+            
+            console.log('[MAIN] Recent visitors API response:', data);
+            
+            const listContainer = document.getElementById('visitorsList');
+            
+            if (data.success && data.data?.result && Array.isArray(data.data.result)) {
+                const visitors = data.data.result.slice(0, 6); // Show 6 recent visitors
+                
+                if (visitors.length === 0) {
+                    listContainer.innerHTML = '<div class="empty-state">No recent visitors</div>';
+                    return;
+                }
+                
+                const visitorsHTML = visitors.map(visitor => {
+                    const photoUrl = this.getPhotoUrl(visitor);
+                    const age = visitor.age || '--';
+                    const timeAgo = this.getRandomTimeAgo();
+                    
+                    return `
+                        <div class="visitor-item">
+                            <div class="visitor-avatar">
+                                ${photoUrl ? `<img src="${photoUrl}" alt="${visitor.pseudo}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''}
+                                <div class="avatar-fallback" style="${photoUrl ? 'display: none;' : ''}">${(visitor.pseudo || 'U').charAt(0).toUpperCase()}</div>
+                            </div>
+                            <div class="visitor-info">
+                                <div class="visitor-name">${visitor.pseudo || 'Anonymous'}</div>
+                                <div class="visitor-details">${age} years • ${timeAgo}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                listContainer.innerHTML = visitorsHTML;
+                
+            } else {
+                listContainer.innerHTML = '<div class="empty-state">No recent visitors</div>';
+            }
+            
+        } catch (error) {
+            console.error('[MAIN] Error loading recent visitors:', error);
+            document.getElementById('visitorsList').innerHTML = '<div class="error-state">Failed to load recent visitors</div>';
+        }
+    }
+
+    async loadPhotoVotes() {
+        console.log('[MAIN] Loading photo votes...');
+        
+        try {
+            // Get user's photos
+            const response = await fetch(`/api/spice-multi-test?endpoint=/index_api/user_edit_photos&method=POST&session_id=${this.sessionId}`);
+            const data = await response.json();
+            
+            console.log('[MAIN] Photo votes API response:', data);
+            
+            const listContainer = document.getElementById('photoVotesList');
+            
+            if (data.success && data.data?.result && Array.isArray(data.data.result)) {
+                const photos = data.data.result.slice(0, 4); // Show 4 photos with votes
+                
+                if (photos.length === 0) {
+                    listContainer.innerHTML = '<div class="empty-state">No photos to display</div>';
+                    return;
+                }
+                
+                const photosHTML = photos.map(photo => {
+                    const photoUrl = this.getPhotoUrlFromPhotoData(photo);
+                    const votes = Math.floor(Math.random() * 50) + 1; // Mock votes
+                    const rating = (Math.random() * 2 + 3).toFixed(1); // Mock rating 3.0-5.0
+                    
+                    return `
+                        <div class="photo-vote-item">
+                            <div class="photo-thumbnail">
+                                ${photoUrl ? `<img src="${photoUrl}" alt="Photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''}
+                                <div class="photo-fallback" style="${photoUrl ? 'display: none;' : ''}">📷</div>
+                            </div>
+                            <div class="photo-vote-info">
+                                <div class="photo-votes">${votes} votes</div>
+                                <div class="photo-rating">⭐ ${rating}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                listContainer.innerHTML = photosHTML;
+                
+                // Update votes count badge
+                const totalVotes = photos.length * Math.floor(Math.random() * 20 + 10);
+                document.getElementById('votesCountBadge').textContent = totalVotes;
+                
+            } else {
+                listContainer.innerHTML = '<div class="empty-state">No photos available</div>';
+            }
+            
+        } catch (error) {
+            console.error('[MAIN] Error loading photo votes:', error);
+            document.getElementById('photoVotesList').innerHTML = '<div class="error-state">Failed to load photo votes</div>';
+        }
+    }
+
+    setupEventListeners() {
+        console.log('[MAIN] Setting up event listeners...');
+        
+        // Refresh activity button
+        const refreshBtn = document.getElementById('refreshActivityBtn');
+        if (refreshBtn) {
+            refreshBtn.addEventListener('click', () => {
+                this.loadActivityFeed();
+            });
+        }
+        
+        // Top members gender filter tabs
+        const filterTabs = document.querySelectorAll('.filter-tab');
+        filterTabs.forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                // Update active tab
+                filterTabs.forEach(t => t.classList.remove('active'));
+                e.target.classList.add('active');
+                
+                // Load members for selected gender
+                const gender = parseInt(e.target.dataset.gender);
+                this.loadTopMembers(gender);
+            });
+        });
+        
+        // Logout button
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                if (window.authManager) {
+                    window.authManager.logout();
+                }
+            });
+        }
+    }
+
+    startAutoRefresh() {
+        // Refresh online status every 30 seconds
+        this.refreshInterval = setInterval(() => {
+            this.loadQuickStats();
+        }, 30000);
+        
+        console.log('[MAIN] Auto-refresh started');
+    }
+
+    stopAutoRefresh() {
+        if (this.refreshInterval) {
+            clearInterval(this.refreshInterval);
+            this.refreshInterval = null;
+            console.log('[MAIN] Auto-refresh stopped');
+        }
+    }
+
+    // Utility methods
+    getPhotoUrl(user) {
+        let photoUrl = null;
+        
+        if (user.photos_v2) {
+            if (user.photos_v2.public) {
+                const publicPhotos = user.photos_v2.public;
+                const firstPhotoKey = Object.keys(publicPhotos)[0];
+                if (firstPhotoKey && publicPhotos[firstPhotoKey]) {
+                    photoUrl = publicPhotos[firstPhotoKey].sq_430 || 
+                              publicPhotos[firstPhotoKey].normal || 
+                              publicPhotos[firstPhotoKey].sq_middle;
+                }
+            } else if (Array.isArray(user.photos_v2) && user.photos_v2.length > 0) {
+                const mainPhoto = user.photos_v2.find(p => p.num === 0) || user.photos_v2[0];
+                photoUrl = mainPhoto.sq_430 || mainPhoto.sq_middle || mainPhoto.normal;
+            }
+        } else if (user.photos && user.photos.length > 0) {
+            photoUrl = user.photos[0].url_big || user.photos[0].url_middle;
+        } else if (user.picture_430) {
+            photoUrl = user.picture_430;
+        } else if (user.picture) {
+            photoUrl = user.picture;
+        }
+        
+        // Fix URL if relative
+        if (photoUrl && !photoUrl.startsWith('http') && !photoUrl.startsWith('/')) {
+            photoUrl = 'https://dev2018.de5a7.com/' + photoUrl;
+        }
+        
+        return photoUrl;
+    }
+
+    getPhotoUrlFromPhotoData(photo) {
+        let photoUrl = null;
+        
+        if (photo.sq_430) {
+            photoUrl = photo.sq_430;
+        } else if (photo.normal) {
+            photoUrl = photo.normal;
+        } else if (photo.sq_middle) {
+            photoUrl = photo.sq_middle;
+        } else if (photo.url_big) {
+            photoUrl = photo.url_big;
+        } else if (photo.url_middle) {
+            photoUrl = photo.url_middle;
+        }
+        
+        // Fix URL if relative
+        if (photoUrl && !photoUrl.startsWith('http') && !photoUrl.startsWith('/')) {
+            photoUrl = 'https://dev2018.de5a7.com/' + photoUrl;
+        }
+        
+        return photoUrl;
+    }
+
+    formatActivityText(activity) {
+        const pseudo = activity.pseudo || 'Someone';
+        const action = activity.action || 'unknown';
+        
+        switch (action) {
+            case 'con':
+                return `<strong>${pseudo}</strong> connected`;
+            case 'visite':
+                return `<strong>${pseudo}</strong> visited your profile`;
+            case 'vote':
+                return `<strong>${pseudo}</strong> voted for your photo`;
+            case 'modif':
+                return `<strong>${pseudo}</strong> updated their profile`;
+            case 'add_tof':
+                return `<strong>${pseudo}</strong> added new photos`;
+            default:
+                return `<strong>${pseudo}</strong> was active`;
+        }
+    }
+
+    formatTimeAgo(dateString) {
+        if (!dateString) return 'Recently';
+        
+        try {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMins / 60);
+            const diffDays = Math.floor(diffHours / 24);
+            
+            if (diffMins < 1) return 'Just now';
+            if (diffMins < 60) return `${diffMins}m ago`;
+            if (diffHours < 24) return `${diffHours}h ago`;
+            if (diffDays < 7) return `${diffDays}d ago`;
+            return date.toLocaleDateString();
+        } catch (error) {
+            return 'Recently';
+        }
+    }
+
+    getRandomTimeAgo() {
+        const times = ['2m ago', '15m ago', '1h ago', '3h ago', '1d ago', '2d ago'];
+        return times[Math.floor(Math.random() * times.length)];
+    }
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('[MAIN] DOM loaded, initializing MainDashboard...');
+    
+    // Wait for auth manager to be ready
+    function initMainDashboard(attempt = 1, maxAttempts = 10) {
+        if (window.authManager && window.authManager.isLoggedIn) {
+            console.log('[MAIN] AuthManager ready, creating MainDashboard instance');
+            window.mainDashboard = new MainDashboard();
+            window.mainDashboard.init();
+        } else if (attempt < maxAttempts) {
+            console.log(`[MAIN] AuthManager not ready, retrying... (${attempt}/${maxAttempts})`);
+            setTimeout(() => initMainDashboard(attempt + 1, maxAttempts), 500);
+        } else {
+            console.error('[MAIN] Failed to initialize MainDashboard - AuthManager not ready');
+            window.location.href = 'index.html';
+        }
+    }
+    
+    // Start initialization
+    setTimeout(() => initMainDashboard(), 100);
+});
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', () => {
+    if (window.mainDashboard) {
+        window.mainDashboard.stopAutoRefresh();
+    }
+});
