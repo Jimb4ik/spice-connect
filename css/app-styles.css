@@ -1478,25 +1478,34 @@ body {
 /* Heart pulse loader */
 .heart-loader {
   position: relative;
-  width: 120px;
-  height: 120px;
+  width: 140px;
+  height: 140px;
   display: grid;
   place-items: center;
   margin: 0 auto;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
 }
 .heart-loader .heart {
-  font-size: 42px;
+  font-size: 48px;
   color: #ff4458;
   animation: heartBeat 1.4s ease-in-out infinite;
-  text-shadow: 0 6px 20px rgba(255, 68, 88, 0.5);
+  text-shadow: 
+    0 0 10px rgba(255, 255, 255, 0.8),
+    0 0 20px rgba(255, 255, 255, 0.6),
+    0 6px 20px rgba(255, 68, 88, 0.5);
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.7));
 }
 .heart-loader .wave {
   position: absolute;
-  width: 100px;
-  height: 100px;
-  border: 2px solid rgba(255, 68, 88, 0.6);
+  width: 110px;
+  height: 110px;
+  border: 3px solid rgba(255, 255, 255, 0.7);
   border-radius: 50%;
   animation: waveSpread 2.2s ease-out infinite;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
 }
 .heart-loader .wave2 { animation-delay: 0.4s; }
 .heart-loader .wave3 { animation-delay: 0.8s; }
@@ -1507,9 +1516,21 @@ body {
   60% { transform: scale(0.95); }
 }
 @keyframes waveSpread {
-  0% { transform: scale(0.6); opacity: 0.9; }
-  70% { transform: scale(1.5); opacity: 0.25; }
-  100% { transform: scale(1.8); opacity: 0; }
+  0% { 
+    transform: scale(0.7); 
+    opacity: 0.8; 
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+  }
+  70% { 
+    transform: scale(1.6); 
+    opacity: 0.3; 
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
+  }
+  100% { 
+    transform: scale(2.0); 
+    opacity: 0; 
+    box-shadow: 0 0 35px rgba(255, 255, 255, 0.1);
+  }
 }
 .discover-loading p {
   color: rgba(255,255,255,0.95);
