@@ -3,8 +3,14 @@
 /* Исправляем позиционирование боковых кнопок для десктопа */
 .actions-side {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   pointer-events: none;
+  /* Ограничиваем только областью карточки */
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .actions-side .side-btn {
@@ -23,14 +29,14 @@
 }
 
 .actions-side .side-btn.pass { 
-  left: -50px; /* Ближе к карточке - было -90px */
+  left: 10px; /* НАМНОГО ближе к карточке */
   background: rgba(255, 255, 255, 0.95);
   color: #ff4757;
   border: 3px solid rgba(255, 71, 87, 0.3);
 }
 
 .actions-side .side-btn.like { 
-  right: -50px; /* Ближе к карточке - было -90px */
+  right: 10px; /* НАМНОГО ближе к карточке */
   background: linear-gradient(135deg, #ff4458 0%, #ff6b7a 100%);
   color: white;
   border: 3px solid rgba(255, 255, 255, 0.3);
