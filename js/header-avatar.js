@@ -14,6 +14,52 @@ function showInitials(name = 'H') {
 }
 
 /**
+ * Обновляет дропдаун с информацией о пользователе
+ */
+function updateDropdownUserInfo(user) {
+    try {
+        // Обновляем аватар в дропдауне
+        const dropdownAvatarImg = document.getElementById('dropdownAvatarImg');
+        const dropdownAvatarText = document.getElementById('dropdownAvatarText');
+        const dropdownUsername = document.getElementById('dropdownUsername');
+        
+        if (dropdownUsername) {
+            dropdownUsername.textContent = user.pseudo || user.nom_complet || user.login || 'User';
+        }
+        
+        if (dropdownAvatarImg && dropdownAvatarText) {
+            let photoUrl = null;
+            
+            // Ищем главное фото пользователя
+            if (user.photos_v2 && user.photos_v2.length > 0) {
+                const mainPhoto = user.photos_v2.find(p => p.num === 0) || user.photos_v2[0];
+                photoUrl = mainPhoto.sq_430 || mainPhoto.sq_middle || mainPhoto.normal || mainPhoto.sq_small;
+            }
+            
+            if (photoUrl) {
+                dropdownAvatarImg.src = photoUrl;
+                dropdownAvatarImg.style.display = 'block';
+                dropdownAvatarText.style.display = 'none';
+                
+                dropdownAvatarImg.onerror = function() {
+                    dropdownAvatarImg.style.display = 'none';
+                    dropdownAvatarText.style.display = 'flex';
+                    const firstName = user.nom_complet || user.pseudo || user.login || 'U';
+                    dropdownAvatarText.textContent = firstName.charAt(0).toUpperCase();
+                };
+            } else {
+                dropdownAvatarImg.style.display = 'none';
+                dropdownAvatarText.style.display = 'flex';
+                const firstName = user.nom_complet || user.pseudo || user.login || 'U';
+                dropdownAvatarText.textContent = firstName.charAt(0).toUpperCase();
+            }
+        }
+    } catch (error) {
+        console.error('[HEADER-AVATAR] Error updating dropdown:', error);
+    }
+}
+
+/**
  * Загружает и отображает аватар пользователя в header
  */
 async function loadUserAvatar() {
@@ -102,6 +148,9 @@ async function loadUserAvatar() {
                     avatarText.textContent = firstName.charAt(0).toUpperCase();
                 }
             }
+            
+            // Обновляем дропдаун с информацией о пользователе
+            updateDropdownUserInfo(user);
         }
     } catch (error) {
         console.error('[HEADER-AVATAR] Error loading user avatar:', error);

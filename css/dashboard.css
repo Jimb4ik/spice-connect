@@ -1,16 +1,4 @@
-/* Lavrilo Dashboard Styles */
-
-.dashboard-main {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #ff4757 0%, #ff6b7a 100%);
-  padding-top: 80px;
-}
-
-.dashboard-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
-}
+/* Lavrilo Dashboard Styles - Legacy styles removed */
 
 /* Welcome Section */
 .dashboard-welcome {

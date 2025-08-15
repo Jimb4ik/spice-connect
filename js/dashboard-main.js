@@ -10,7 +10,7 @@ class DashboardManager {
     console.log('[DASHBOARD] Initializing dashboard...');
     
     // Check authentication
-    if (!window.authManager || !window.authManager.isLoggedIn()) {
+    if (!window.authManager || !window.authManager.sessionId) {
       console.log('[DASHBOARD] User not logged in, redirecting...');
       window.location.href = 'index.html';
       return;
@@ -96,15 +96,66 @@ class DashboardManager {
         }
       }
 
-      // Placeholder for other stats
-      document.getElementById('profileViewsCount').textContent = '0';
-      document.getElementById('onlineFriendsCount').textContent = '0';
+      // Get profile views from user data
+      const userDataString = localStorage.getItem('lavrilo_user');
+      if (userDataString) {
+        const userData = JSON.parse(userDataString);
+        const userId = userData.id;
+        
+        const userResponse = await fetch(`/api/spice-multi-test?endpoint=/index_api/user&method=POST&session_id=${window.authManager.sessionId}&id=${userId}`);
+        const userApiData = await userResponse.json();
+        
+        if (userApiData.success && userApiData.data?.result) {
+          const profileViews = userApiData.data.result.nb_visite || 0;
+          document.getElementById('profileViewsCount').textContent = profileViews;
+        }
+      }
+
+      // Load online friends count
+      await this.loadOnlineFriendsCount();
 
     } catch (error) {
       console.error('[DASHBOARD] Error loading quick stats:', error);
       document.getElementById('newMessagesCount').textContent = '0';
       document.getElementById('profileViewsCount').textContent = '0';
       document.getElementById('onlineFriendsCount').textContent = '0';
+    }
+  }
+
+  async loadOnlineFriendsCount() {
+    try {
+      // Get contacts and count online ones
+      const contactsResponse = await fetch(`/api/spice-multi-test?endpoint=/ajax_api/load_contacts&method=GET&session_id=${window.authManager.sessionId}&filter=3`);
+      const contactsData = await contactsResponse.json();
+      
+      if (contactsData.success && contactsData.data?.result) {
+        const contacts = contactsData.data.result.slice(0, 20); // Check max 20 contacts
+        let onlineCount = 0;
+        
+        // Check online status for each contact
+        for (const contact of contacts) {
+          try {
+            const onlineResponse = await fetch(`/api/spice-multi-test?endpoint=/index_api/user/is_online&method=POST&pseudo=${contact.pseudo}`);
+            const onlineData = await onlineResponse.json();
+            
+            if (onlineData.success && onlineData.data?.is_online === 1) {
+              onlineCount++;
+            }
+          } catch (error) {
+            console.error('[DASHBOARD] Error checking online status for:', contact.pseudo, error);
+          }
+        }
+        
+        document.getElementById('onlineFriendsCount').textContent = onlineCount;
+        return onlineCount;
+      }
+      
+      document.getElementById('onlineFriendsCount').textContent = '0';
+      return 0;
+    } catch (error) {
+      console.error('[DASHBOARD] Error loading online friends count:', error);
+      document.getElementById('onlineFriendsCount').textContent = '0';
+      return 0;
     }
   }
 
@@ -115,15 +166,67 @@ class DashboardManager {
       const friendsList = document.getElementById('onlineFriendsList');
       const onlineCount = document.getElementById('onlineCount');
       
-      // Placeholder - show empty state for now
-      onlineCount.textContent = '0';
-      friendsList.innerHTML = `
-        <div class="empty-state">
-          <div class="empty-state-icon">👥</div>
-          <h4>No friends online</h4>
-          <p>Your friends will appear here when they're online</p>
-        </div>
-      `;
+      // Get contacts
+      const contactsResponse = await fetch(`/api/spice-multi-test?endpoint=/ajax_api/load_contacts&method=GET&session_id=${window.authManager.sessionId}&filter=3`);
+      const contactsData = await contactsResponse.json();
+      
+      if (contactsData.success && contactsData.data?.result) {
+        const contacts = contactsData.data.result.slice(0, 10); // Show max 10 friends
+        let onlineFriends = [];
+        
+        // Check online status for each contact
+        for (const contact of contacts) {
+          try {
+            const onlineResponse = await fetch(`/api/spice-multi-test?endpoint=/index_api/user/is_online&method=POST&pseudo=${contact.pseudo}`);
+            const onlineData = await onlineResponse.json();
+            
+            if (onlineData.success && onlineData.data?.is_online === 1) {
+              onlineFriends.push(contact);
+            }
+          } catch (error) {
+            console.error('[DASHBOARD] Error checking online status for:', contact.pseudo, error);
+          }
+        }
+        
+        // Update counts
+        onlineCount.textContent = onlineFriends.length;
+        
+        // Render online friends
+        if (onlineFriends.length > 0) {
+          friendsList.innerHTML = onlineFriends.map(friend => `
+            <div class="online-friend-item" onclick="window.location.href='profile.html?user=${friend.pseudo}'">
+              <div class="online-friend-avatar">
+                ${friend.main_photo && friend.main_photo.sqsmall ? 
+                  `<img src="${friend.main_photo.sqsmall}" alt="${friend.pseudo}">` :
+                  friend.pseudo.charAt(0).toUpperCase()
+                }
+                <div class="online-status-dot"></div>
+              </div>
+              <div class="online-friend-info">
+                <div class="online-friend-name">${friend.pseudo}</div>
+                <div class="online-friend-status">Online now</div>
+              </div>
+            </div>
+          `).join('');
+        } else {
+          friendsList.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">👥</div>
+              <h4>No friends online</h4>
+              <p>Your friends will appear here when they're online</p>
+            </div>
+          `;
+        }
+      } else {
+        onlineCount.textContent = '0';
+        friendsList.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-state-icon">👥</div>
+            <h4>No friends yet</h4>
+            <p>Start connecting with people to see them here</p>
+          </div>
+        `;
+      }
       
     } catch (error) {
       console.error('[DASHBOARD] Error loading online friends:', error);
