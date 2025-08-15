@@ -16,7 +16,7 @@ function showInitials(name = 'H') {
 /**
  * Обновляет дропдаун с информацией о пользователе
  */
-function updateDropdownUserInfo(user) {
+async function updateDropdownUserInfo(user) {
     try {
         // Обновляем аватар в дропдауне
         const dropdownAvatarImg = document.getElementById('dropdownAvatarImg');
@@ -30,10 +30,24 @@ function updateDropdownUserInfo(user) {
         if (dropdownAvatarImg && dropdownAvatarText) {
             let photoUrl = null;
             
-            // Ищем главное фото пользователя
-            if (user.photos_v2 && user.photos_v2.length > 0) {
-                const mainPhoto = user.photos_v2.find(p => p.num === 0) || user.photos_v2[0];
-                photoUrl = mainPhoto.sq_430 || mainPhoto.sq_middle || mainPhoto.normal || mainPhoto.sq_small;
+            // Получаем фотографии пользователя из user_edit_photos
+            const sessionId = window.authManager.sessionId;
+            if (sessionId) {
+                try {
+                    const apiUrl = `/api/spice-multi-test?endpoint=/index_api/user_edit_photos&method=POST&session_id=${sessionId}`;
+                    const response = await fetch(apiUrl);
+                    const apiData = await response.json();
+                    
+                    if (apiData && apiData.success && apiData.data) {
+                        const photos = apiData.data || [];
+                        if (photos.length > 0) {
+                            const mainPhoto = photos.find(p => p.num === 0) || photos[0];
+                            photoUrl = mainPhoto.sq_430 || mainPhoto.sq_middle || mainPhoto.normal || mainPhoto.sq_small;
+                        }
+                    }
+                } catch (error) {
+                    console.warn('[HEADER-AVATAR] Error loading photos for dropdown:', error);
+                }
             }
             
             if (photoUrl) {
@@ -95,8 +109,8 @@ async function loadUserAvatar() {
             return;
         }
         
-        // Используем прокси API как в profile.html
-        const apiUrl = `/api/spice-multi-test?endpoint=/index_api/user&method=POST&session_id=${sessionId}&id=${userId}&get_picture_430=1`;
+        // Используем endpoint user_edit_photos как в photo-manager.js
+        const apiUrl = `/api/spice-multi-test?endpoint=/index_api/user_edit_photos&method=POST&session_id=${sessionId}`;
         
         const response = await fetch(apiUrl);
         if (!response.ok) {
@@ -109,18 +123,17 @@ async function loadUserAvatar() {
         
         console.log('[HEADER-AVATAR] API response:', apiData);
         
-        if (apiData && apiData.success && apiData.data?.result) {
-            const user = apiData.data.result;
+        if (apiData && apiData.success && apiData.data) {
+            const photos = apiData.data || [];
             const avatarImg = document.getElementById('userAvatarImg');
             const avatarText = document.getElementById('userAvatarText');
             
             if (avatarImg && avatarText) {
                 let photoUrl = null;
                 
-                // Ищем главное фото пользователя согласно API документации
-                if (user.photos_v2 && user.photos_v2.length > 0) {
-                    // Первая фотография (num: 0) - это главная фотография
-                    const mainPhoto = user.photos_v2.find(p => p.num === 0) || user.photos_v2[0];
+                // Ищем главное фото пользователя (num: 0)
+                if (photos.length > 0) {
+                    const mainPhoto = photos.find(p => p.num === 0) || photos[0];
                     // Приоритет: sq_430 (430x430), sq_middle (215x215), normal (оригинал), sq_small (80x80)
                     photoUrl = mainPhoto.sq_430 || mainPhoto.sq_middle || mainPhoto.normal || mainPhoto.sq_small;
                 }
@@ -137,20 +150,20 @@ async function loadUserAvatar() {
                         console.warn('[HEADER-AVATAR] Failed to load user photo, showing initials');
                         avatarImg.style.display = 'none';
                         avatarText.style.display = 'flex';
-                        const firstName = user.nom_complet || user.pseudo || user.login || 'U';
+                        const firstName = userData.nom_complet || userData.pseudo || userData.login || 'D';
                         avatarText.textContent = firstName.charAt(0).toUpperCase();
                     };
                 } else {
                     // Показываем первую букву имени
                     avatarImg.style.display = 'none';
                     avatarText.style.display = 'flex';
-                    const firstName = user.nom_complet || user.pseudo || user.login || 'U';
+                    const firstName = userData.nom_complet || userData.pseudo || userData.login || 'D';
                     avatarText.textContent = firstName.charAt(0).toUpperCase();
                 }
             }
             
-            // Обновляем дропдаун с информацией о пользователе
-            updateDropdownUserInfo(user);
+            // Обновляем дропдаун с информацией о пользователе (используем данные из localStorage)
+            updateDropdownUserInfo(userData);
         }
     } catch (error) {
         console.error('[HEADER-AVATAR] Error loading user avatar:', error);
