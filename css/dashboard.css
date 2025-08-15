@@ -439,7 +439,7 @@
   align-items: center;
   padding: 25px 30px;
   border-bottom: 1px solid #e2e8f0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  background: var(--gradient-hero) !important;
   color: white !important;
 }
 
