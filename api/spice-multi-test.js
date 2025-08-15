@@ -69,30 +69,32 @@ export default async function handler(req, res) {
         
         // Для POST/PUT запросов обрабатываем тело
         if ((method === 'POST' || method === 'PUT') && req.method === 'POST') {
+            console.log('📤 Обрабатываем тело запроса');
+            
+            // Читаем raw body как Buffer
+            const chunks = [];
+            for await (const chunk of req) {
+                chunks.push(chunk);
+            }
+            const bodyBuffer = Buffer.concat(chunks);
+            
             if (isMultipart) {
-                // Для multipart/form-data передаем raw body и сохраняем Content-Type
-                console.log('📤 Передаем multipart/form-data как raw body');
-                fetchOptions.body = req; // Передаем весь request как stream
+                // Для multipart/form-data передаем raw buffer и сохраняем Content-Type
+                console.log('📤 Передаем multipart/form-data как Buffer, размер:', bodyBuffer.length);
+                fetchOptions.body = bodyBuffer;
                 fetchOptions.headers['Content-Type'] = incomingType;
             } else {
-                // Для других типов контента читаем body как JSON
-                console.log('📤 Передаем JSON body');
-                let bodyData = '';
-                req.on('data', chunk => {
-                    bodyData += chunk.toString();
-                });
+                // Для других типов контента
+                console.log('📤 Передаем как текст/JSON');
+                const bodyText = bodyBuffer.toString('utf8');
                 
-                await new Promise((resolve) => {
-                    req.on('end', resolve);
-                });
-                
-                if (bodyData) {
+                if (bodyText) {
                     try {
-                        const jsonBody = JSON.parse(bodyData);
+                        const jsonBody = JSON.parse(bodyText);
                         fetchOptions.body = JSON.stringify(jsonBody);
                         fetchOptions.headers['Content-Type'] = 'application/json';
                     } catch (e) {
-                        fetchOptions.body = bodyData;
+                        fetchOptions.body = bodyText;
                         fetchOptions.headers['Content-Type'] = 'text/plain';
                     }
                 }
