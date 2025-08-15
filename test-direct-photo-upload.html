@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Direct Photo Upload Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        .section h3 {
+            margin-top: 0;
+            color: #555;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .file-input {
+            margin: 10px 0;
+        }
+        .log {
+            background: #000;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            margin-top: 15px;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .api-info {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .api-info h4 {
+            margin-top: 0;
+            color: #0066cc;
+        }
+        .error-codes {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .error-codes h4 {
+            margin-top: 0;
+            color: #856404;
+        }
+        .error-codes ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Direct Photo Upload Test</h1>
+        <p style="text-align: center; color: #666;">
+            Тестирование прямой загрузки фото на Spice API без прокси
+        </p>
+
+        <div class="api-info">
+            <h4>📋 API Information</h4>
+            <p><strong>Endpoint:</strong> <span id="apiEndpoint">Loading...</span></p>
+            <p><strong>Session ID:</strong> <span id="sessionId">Loading...</span></p>
+            <p><strong>User:</strong> <span id="currentUser">Loading...</span></p>
+        </div>
+
+        <div class="error-codes">
+            <h4>📖 API Error Codes (from documentation)</h4>
+            <ul>
+                <li><strong>id_photo > 0:</strong> ✅ Photo uploaded successfully</li>
+                <li><strong>id_photo = -1:</strong> ❌ Upload error or incorrect format</li>
+                <li><strong>id_photo = -2:</strong> ❌ Too small (need > 215px x 215px)</li>
+                <li><strong>id_photo = -3:</strong> ❌ Video too long (> 15 seconds)</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h3>📤 Upload Test</h3>
+            <div class="file-input">
+                <input type="file" id="fileInput" accept="image/*">
+                <button onclick="uploadFile()" id="uploadBtn">Upload Direct to API</button>
+            </div>
+            <div id="fileInfo"></div>
+        </div>
+
+        <div class="section">
+            <h3>🎨 Generate Test Image</h3>
+            <p>Создать тестовое изображение с заданными размерами:</p>
+            <input type="number" id="imageWidth" value="400" placeholder="Width" min="100" max="2000">
+            <input type="number" id="imageHeight" value="400" placeholder="Height" min="100" max="2000">
+            <button onclick="generateTestImage()">Generate & Upload</button>
+        </div>
+
+        <div id="status"></div>
+        <div class="log" id="log"></div>
+    </div>
+
+    <script>
+        let apiConfig = null;
+        let sessionId = null;
+
+        // Логирование
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logElement = document.getElementById('log');
+            const prefix = type === 'error' ? '❌' : type === 'success' ? '✅' : 'ℹ️';
+            logElement.textContent += `[${timestamp}] ${prefix} ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(`[${type.toUpperCase()}]`, message);
+        }
+
+        // Показать статус
+        function showStatus(message, type = 'info') {
+            const statusElement = document.getElementById('status');
+            statusElement.className = `status ${type}`;
+            statusElement.textContent = message;
+        }
+
+        // Инициализация
+        async function init() {
+            try {
+                log('Initializing test page...');
+                
+                // Получаем API конфигурацию
+                const apiResponse = await fetch('/api/get-api-key');
+                apiConfig = await apiResponse.json();
+                log(`API Config loaded: ${apiConfig.baseUrl}`);
+
+                // Проверяем авторизацию
+                const authData = localStorage.getItem('spice_auth');
+                if (authData) {
+                    const auth = JSON.parse(authData);
+                    sessionId = auth.sessionId;
+                    log(`Session ID found: ${sessionId}`);
+                    
+                    document.getElementById('apiEndpoint').textContent = `${apiConfig.baseUrl}/ajax_api/upload_photo`;
+                    document.getElementById('sessionId').textContent = sessionId || 'Not found';
+                    document.getElementById('currentUser').textContent = auth.username || 'Unknown';
+                } else {
+                    log('No auth data found', 'error');
+                    showStatus('❌ No authentication found. Please login first.', 'error');
+                    document.getElementById('sessionId').textContent = 'Not logged in';
+                    document.getElementById('currentUser').textContent = 'Not logged in';
+                }
+
+            } catch (error) {
+                log(`Initialization error: ${error.message}`, 'error');
+                showStatus(`❌ Initialization failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Загрузка файла
+        async function uploadFile() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                showStatus('❌ Please select a file first', 'error');
+                return;
+            }
+
+            if (!sessionId || !apiConfig) {
+                showStatus('❌ Not initialized or not logged in', 'error');
+                return;
+            }
+
+            try {
+                document.getElementById('uploadBtn').disabled = true;
+                showStatus('📤 Uploading...', 'info');
+                
+                log(`Starting upload: ${file.name} (${file.size} bytes, ${file.type})`);
+                
+                // Показываем информацию о файле
+                const fileInfo = document.getElementById('fileInfo');
+                fileInfo.innerHTML = `
+                    <strong>File Info:</strong><br>
+                    Name: ${file.name}<br>
+                    Size: ${file.size} bytes<br>
+                    Type: ${file.type}<br>
+                `;
+
+                // Если это изображение, показываем размеры
+                if (file.type.startsWith('image/')) {
+                    const img = new Image();
+                    img.onload = function() {
+                        fileInfo.innerHTML += `Dimensions: ${img.width}x${img.height}px<br>`;
+                        log(`Image dimensions: ${img.width}x${img.height}px`);
+                        
+                        if (img.width < 215 || img.height < 215) {
+                            log('⚠️ WARNING: Image is smaller than 215x215px, may be rejected', 'error');
+                        }
+                    };
+                    img.src = URL.createObjectURL(file);
+                }
+
+                // Создаем FormData
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('contenttype', 'photo');
+
+                // Прямой вызов API
+                const directUrl = `${apiConfig.baseUrl}/ajax_api/upload_photo?session_id=${sessionId}&api_key=${apiConfig.apiKey}&is_private=0`;
+                log(`Direct API call to: ${directUrl.replace(apiConfig.apiKey, 'HIDDEN_API_KEY')}`);
+
+                const response = await fetch(directUrl, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                log(`HTTP Response: ${response.status} ${response.statusText}`);
+
+                const responseText = await response.text();
+                log(`Raw response: ${responseText}`);
+
+                let result;
+                try {
+                    result = JSON.parse(responseText);
+                    log(`Parsed response: ${JSON.stringify(result, null, 2)}`);
+                } catch (e) {
+                    log(`JSON parse error: ${e.message}`, 'error');
+                    showStatus(`❌ Invalid JSON response: ${responseText}`, 'error');
+                    return;
+                }
+
+                // Анализируем результат
+                if (result.result && typeof result.result.id_photo !== 'undefined') {
+                    const photoId = result.result.id_photo;
+                    const errorCode = result.result.error;
+
+                    if (photoId > 0) {
+                        log(`✅ SUCCESS: Photo uploaded! ID: ${photoId}`, 'success');
+                        showStatus(`✅ Success! Photo ID: ${photoId}`, 'success');
+                    } else {
+                        let errorMessage = 'Unknown error';
+                        switch (photoId) {
+                            case -1: errorMessage = 'Upload error or incorrect format'; break;
+                            case -2: errorMessage = 'Too small (need > 215px x 215px)'; break;
+                            case -3: errorMessage = 'Video too long (> 15 seconds)'; break;
+                            default: errorMessage = `Error code: ${photoId}`;
+                        }
+                        
+                        log(`❌ UPLOAD FAILED: ${errorMessage} (id_photo: ${photoId}, error: ${errorCode})`, 'error');
+                        showStatus(`❌ Upload failed: ${errorMessage}`, 'error');
+                    }
+                } else {
+                    log('❌ Unexpected response structure', 'error');
+                    showStatus('❌ Unexpected API response structure', 'error');
+                }
+
+            } catch (error) {
+                log(`Upload error: ${error.message}`, 'error');
+                showStatus(`❌ Upload error: ${error.message}`, 'error');
+            } finally {
+                document.getElementById('uploadBtn').disabled = false;
+            }
+        }
+
+        // Генерация тестового изображения
+        function generateTestImage() {
+            const width = parseInt(document.getElementById('imageWidth').value) || 400;
+            const height = parseInt(document.getElementById('imageHeight').value) || 400;
+
+            log(`Generating test image: ${width}x${height}px`);
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+
+            // Создаем градиент
+            const gradient = ctx.createLinearGradient(0, 0, width, height);
+            gradient.addColorStop(0, '#FF6B6B');
+            gradient.addColorStop(0.5, '#4ECDC4');
+            gradient.addColorStop(1, '#45B7D1');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+
+            // Добавляем текст
+            ctx.fillStyle = 'white';
+            ctx.font = `bold ${Math.min(width, height) / 15}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.fillText('DIRECT API TEST', width / 2, height / 2 - 20);
+            ctx.fillText(`${width}x${height}px`, width / 2, height / 2 + 20);
+
+            // Конвертируем в blob и загружаем
+            canvas.toBlob(async (blob) => {
+                log(`Generated image: ${blob.size} bytes`);
+                
+                // Создаем файл
+                const file = new File([blob], `test-${width}x${height}.png`, { type: 'image/png' });
+                
+                // Имитируем выбор файла
+                const fileInput = document.getElementById('fileInput');
+                const dt = new DataTransfer();
+                dt.items.add(file);
+                fileInput.files = dt.files;
+
+                // Показываем информацию о файле
+                const fileInfo = document.getElementById('fileInfo');
+                fileInfo.innerHTML = `
+                    <strong>Generated File Info:</strong><br>
+                    Name: ${file.name}<br>
+                    Size: ${file.size} bytes<br>
+                    Type: ${file.type}<br>
+                    Dimensions: ${width}x${height}px<br>
+                `;
+
+                // Автоматически загружаем
+                await uploadFile();
+            }, 'image/png', 0.9);
+        }
+
+        // Обработчик изменения файла
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                log(`File selected: ${file.name} (${file.size} bytes)`);
+            }
+        });
+
+        // Инициализация при загрузке страницы
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
