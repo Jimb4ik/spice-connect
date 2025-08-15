@@ -34,6 +34,8 @@ async function saveMatchToDatabase(matchedProfile, currentUserId = null) {
         };
         
         console.log('[MATCH-UTILS] Match data to save:', matchData);
+        console.log('[MATCH-UTILS] Profile ID found:', matchedProfile.id || matchedProfile.id_membre);
+        console.log('[MATCH-UTILS] Current user ID:', userId);
         
         const response = await fetch('/api/database', {
             method: 'POST',

@@ -880,8 +880,23 @@
                     // Проверяем на матч (точно такой же формат как в matching-system.js)
                     if (data.result === 'match') {
                         console.log('🎉 IT\'S A MATCH!');
+                        console.log('[DISCOVER] Current profile for match:', currentProfile);
+                        
                         // Сохраняем матч в базу данных
-                        await window.MatchUtils.saveMatchToDatabase(currentProfile);
+                        try {
+                            const matchSaved = await window.MatchUtils.saveMatchToDatabase(currentProfile);
+                            console.log('[DISCOVER] Match save result:', matchSaved);
+                            
+                            if (!matchSaved) {
+                                console.error('[DISCOVER] ❌ Failed to save match to database');
+                                // Показываем модал даже если не удалось сохранить в БД
+                            } else {
+                                console.log('[DISCOVER] ✅ Match successfully saved to database');
+                            }
+                        } catch (saveError) {
+                            console.error('[DISCOVER] Error saving match:', saveError);
+                        }
+                        
                         showMatchModal(currentProfile);
                     }
                 }

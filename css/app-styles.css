@@ -48,48 +48,94 @@ body {
 
 /* Стили для иконок */
 .nav-icon {
-  width: 16px;
-  height: 16px;
-  margin-right: 4px;
+  width: 20px;
+  height: 20px;
+  margin-right: 6px;
   vertical-align: middle;
 }
 
 .dropdown-icon {
-  width: 18px;
-  height: 18px;
-  margin-right: 8px;
+  width: 22px;
+  height: 22px;
+  margin-right: 10px;
 }
 
 .page-title-icon {
-  width: 24px;
-  height: 24px;
-  margin-right: 8px;
+  width: 28px;
+  height: 28px;
+  margin-right: 10px;
   vertical-align: middle;
 }
 
 .inline-icon {
-  width: 16px;
-  height: 16px;
-  margin-right: 4px;
+  width: 20px;
+  height: 20px;
+  margin-right: 6px;
   vertical-align: middle;
 }
 
 .btn-icon {
-  width: 14px;
-  height: 14px;
+  width: 18px;
+  height: 18px;
   vertical-align: middle;
 }
 
 .btn-icon-new {
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
   vertical-align: middle;
 }
 
 .feature-icon-img,
 .action-icon-img {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
+}
+
+/* Анимированные сердечки для кнопки Start Matching */
+.start-matching-btn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 40px;
+  text-decoration: none;
+  overflow: hidden;
+}
+
+.floating-hearts {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 8px;
+  animation: pulse 2s infinite;
+}
+
+.floating-hearts .heart {
+  font-size: 18px;
+  animation: float 3s ease-in-out infinite;
+}
+
+.floating-hearts .heart:nth-child(1) { animation-delay: 0s; }
+.floating-hearts .heart:nth-child(2) { animation-delay: 0.5s; }
+.floating-hearts .heart:nth-child(3) { animation-delay: 1s; }
+.floating-hearts .heart:nth-child(4) { animation-delay: 1.5s; }
+.floating-hearts .heart:nth-child(5) { animation-delay: 2s; }
+
+@keyframes float {
+  0%, 100% { 
+    transform: translateY(0) scale(1);
+    opacity: 0.8;
+  }
+  50% { 
+    transform: translateY(-10px) scale(1.2);
+    opacity: 1;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
 }
 
 .header-container {
@@ -901,21 +947,20 @@ body {
 }
 
 .refresh-btn {
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: none;
+  border: none;
   font-size: 1.2rem;
   cursor: pointer;
-  padding: 0.75rem;
-  border-radius: 12px;
+  padding: 0.5rem;
+  border-radius: 8px;
   transition: var(--transition);
-  color: var(--text-primary);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  color: var(--text-secondary);
 }
 
 .refresh-btn:hover {
-  background: white;
+  background: none;
   transform: rotate(180deg) scale(1.1);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  color: var(--primary-color);
 }
 
 .filter-tabs {
@@ -2382,7 +2427,10 @@ body {
 .discover-card-container {
   position: relative;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2rem;
   margin-bottom: 2rem; /* Отступ от кнопок */
   min-height: 480px; /* чтобы лоадер центрировался ниже подзаголовка и не налезал */
 }
@@ -2574,12 +2622,24 @@ body {
 
 /* Age Filter Side Panel */
 .age-filter-side {
-  position: fixed;
-  right: 2rem;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 100;
-  display: none; /* Скрыто по умолчанию, показывается на десктопе */
+  position: relative;
+  display: block;
+  flex-shrink: 0;
+  min-width: 250px;
+}
+
+@media (max-width: 768px) {
+  .discover-card-container {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .age-filter-side {
+    margin-top: 1rem;
+    min-width: auto;
+    width: 100%;
+    max-width: 400px;
+  }
 }
 
 .age-filter-card {
