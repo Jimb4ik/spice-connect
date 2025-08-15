@@ -1,3 +1,10 @@
+// Конфигурация для отключения автоматического парсинга body для multipart запросов
+export const config = {
+    api: {
+        bodyParser: false, // Отключаем автоматический парсинг для всех запросов
+    },
+};
+
 export default async function handler(req, res) {
     // CORS headers
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -19,27 +26,14 @@ export default async function handler(req, res) {
     }
 
     try {
-        // Получаем основные параметры (endpoint, method) всегда из query string
-        // А остальные параметры - из body для POST или query для GET
+        // Получаем параметры из query string
         const { endpoint, method = 'GET' } = req.query;
-        let params = {};
-        
-        if (req.method === 'GET') {
-            params = { ...req.query };
-        } else {
-            params = { ...(req.body || {}), ...req.query };
-        }
-        
-        // Убираем служебные параметры
-        delete params.endpoint;
-        delete params.method;
         
         if (!endpoint) {
             return res.status(400).json({ error: 'Endpoint не указан' });
         }
 
         console.log(`🧪 Тестируем endpoint: ${method} ${endpoint}`);
-        console.log(`📋 Параметры:`, params);
         
         // Строим URL с query parameters
         let apiUrl = `${BASE_URL}${endpoint}`;
@@ -48,47 +42,61 @@ export default async function handler(req, res) {
         // Добавляем API ключ для всех запросов
         queryParams.append('api_key', API_KEY);
         
-        // Добавляем дополнительные параметры
-        Object.keys(params).forEach(key => {
-            if (params[key] !== undefined && params[key] !== null) {
-                queryParams.append(key, params[key]);
+        // Добавляем дополнительные параметры из query string
+        Object.keys(req.query).forEach(key => {
+            if (key !== 'endpoint' && key !== 'method' && req.query[key] !== undefined) {
+                queryParams.append(key, req.query[key]);
             }
         });
         
         const finalUrl = `${apiUrl}?${queryParams.toString()}`;
         console.log('📡 URL запроса:', finalUrl.replace(API_KEY, 'HIDDEN_KEY'));
         
-        // Используем РАБОЧИЙ метод авторизации: Query только api_key
-        // (Диагностика показала, что Basic auth НЕ работает)
-        // По умолчанию отправляем JSON, но если исходный запрос был multipart/form-data, заголовок ставить нельзя
-        let headers = { 'Accept': 'application/json' };
+        // Определяем тип контента
         const incomingType = req.headers['content-type'] || '';
-        if (!incomingType.startsWith('multipart/form-data')) {
-            headers['Content-Type'] = 'application/json';
-        }
+        const isMultipart = incomingType.startsWith('multipart/form-data');
         
         console.log('🔑 Используем рабочий метод: Query только api_key');
         console.log('🔑 API Key:', API_KEY.substring(0, 8) + '...' + API_KEY.slice(-4));
-        console.log('🔧 Headers:', headers);
-        console.log('📋 Авторизация через query параметры (работает для всех endpoints)');
+        console.log('📋 Content-Type:', incomingType);
+        console.log('📋 Is Multipart:', isMultipart);
         
-        // Передаем тело запроса если оно есть
+        // Настраиваем fetch options
         let fetchOptions = {
             method: method,
-            headers: headers
+            headers: { 'Accept': 'application/json' }
         };
         
-        // Для POST/PUT запросов передаем тело
-        if ((method === 'POST' || method === 'PUT') && req.body) {
-            // Если это multipart/form-data, передаем как есть
-            if (incomingType.startsWith('multipart/form-data')) {
-                // Для multipart нужно передать raw body
-                fetchOptions.body = req.rawBody || req.body;
+        // Для POST/PUT запросов обрабатываем тело
+        if ((method === 'POST' || method === 'PUT') && req.method === 'POST') {
+            if (isMultipart) {
+                // Для multipart/form-data передаем raw body и сохраняем Content-Type
+                console.log('📤 Передаем multipart/form-data как raw body');
+                fetchOptions.body = req; // Передаем весь request как stream
+                fetchOptions.headers['Content-Type'] = incomingType;
             } else {
-                // Для JSON
-                fetchOptions.body = JSON.stringify(req.body);
+                // Для других типов контента читаем body как JSON
+                console.log('📤 Передаем JSON body');
+                let bodyData = '';
+                req.on('data', chunk => {
+                    bodyData += chunk.toString();
+                });
+                
+                await new Promise((resolve) => {
+                    req.on('end', resolve);
+                });
+                
+                if (bodyData) {
+                    try {
+                        const jsonBody = JSON.parse(bodyData);
+                        fetchOptions.body = JSON.stringify(jsonBody);
+                        fetchOptions.headers['Content-Type'] = 'application/json';
+                    } catch (e) {
+                        fetchOptions.body = bodyData;
+                        fetchOptions.headers['Content-Type'] = 'text/plain';
+                    }
+                }
             }
-            console.log('📤 Передаем тело запроса');
         }
         
         // Выполняем запрос
@@ -105,7 +113,7 @@ export default async function handler(req, res) {
             console.error('  Headers:', Object.fromEntries(apiResponse.headers.entries()));
             console.error('  Response:', data);
             console.error('  Request URL:', finalUrl.replace(API_KEY, 'HIDDEN_KEY'));
-            console.error('  Request Headers:', { ...headers, 'Authorization': headers.Authorization ? '[HIDDEN]' : 'none' });
+            console.error('  Request Headers:', fetchOptions.headers);
             
             return res.status(apiResponse.status).json({
                 error: 'Ошибка Spice API',
@@ -118,13 +126,17 @@ export default async function handler(req, res) {
                     api_key_present: !!API_KEY,
                     api_key_length: API_KEY ? API_KEY.length : 0,
                     endpoint_type: endpoint.startsWith('/index_api/') ? 'index_api' : 'ajax_api',
-                    auth_method: 'Query only api_key (диагностика показала - это работает!)'
+                    auth_method: 'Query only api_key (диагностика показала - это работает!)',
+                    is_multipart: isMultipart,
+                    content_type: incomingType
                 }
             });
         }
 
         // Успешный ответ
         console.log('✅ Успешный ответ от API');
+        console.log('📊 Response data:', data);
+        
         res.status(200).json({
             success: true,
             endpoint: endpoint,
@@ -135,12 +147,12 @@ export default async function handler(req, res) {
 
     } catch (error) {
         console.error('❌ Ошибка proxy:', error);
-        const requestData = req.method === 'GET' ? req.query : req.body;
         res.status(500).json({ 
             error: 'Ошибка сервера при обращении к API',
             message: error.message,
-            endpoint: requestData?.endpoint,
-            method: requestData?.method
+            endpoint: req.query?.endpoint,
+            method: req.query?.method,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
         });
     }
 } 
