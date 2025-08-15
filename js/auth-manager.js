@@ -332,7 +332,7 @@ class AuthManager {
     // Small delay to ensure UI updates are complete
     setTimeout(() => {
       console.log('[AUTH] Executing redirect to dashboard.html NOW');
-      window.location.href = 'dashboard.html';
+      window.location.href = 'feed.html';
     }, 800);
   }
 
