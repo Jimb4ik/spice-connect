@@ -101,14 +101,12 @@ async function loadUserAvatar() {
     try {
         console.log('[HEADER-AVATAR] Starting loadUserAvatar');
         
-        // Wait for authManager if not available
         if (!window.authManager) {
             console.log('[HEADER-AVATAR] authManager not found, retrying in 1s');
             setTimeout(loadUserAvatar, 1000);
             return;
         }
         
-        // Ensure sessionId is available
         if (!window.authManager.sessionId) {
             console.log('[HEADER-AVATAR] No sessionId found');
             return;
@@ -116,7 +114,7 @@ async function loadUserAvatar() {
         
         const sessionId = window.authManager.sessionId;
         
-        // Get userId from localStorage consistently
+        // Получаем userId из localStorage как в profile.html
         const userDataString = localStorage.getItem('lavrilo_user');
         if (!userDataString) {
             console.log('[HEADER-AVATAR] No user data in localStorage');
@@ -124,45 +122,122 @@ async function loadUserAvatar() {
         }
         
         const userData = JSON.parse(userDataString);
-        const userId = userData?.id;
+        const userId = userData.id;
+        console.log('[HEADER-AVATAR] Using sessionId:', sessionId, 'userId:', userId);
         
         if (!userId) {
-            console.log('[HEADER-AVATAR] No userId found in localStorage');
+            console.log('[HEADER-AVATAR] No userId found');
             return;
         }
         
-        console.log(`[HEADER-AVATAR] Fetching profile for userId: ${userId}`);
+        // Используем endpoint user_edit_photos как в photo-manager.js
+        const apiUrl = `/api/spice-multi-test?endpoint=/index_api/user_edit_photos&method=POST&session_id=${sessionId}`;
         
-        const profile = await window.authManager.fetchUserProfile(userId, sessionId);
-        
-        if (!profile) {
-            console.log('[HEADER-AVATAR] No profile data received');
+        const response = await fetch(apiUrl);
+        if (!response.ok) {
+            console.warn('[HEADER-AVATAR] API request failed:', response.status, response.statusText);
+            showInitials();
             return;
         }
         
-        console.log('[HEADER-AVATAR] Profile data received:', profile);
+        const apiData = await response.json();
         
-        // Handle photos_v2 as array or object
-        let mainPhoto;
-        if (Array.isArray(profile.photos_v2)) {
-            mainPhoto = profile.photos_v2.find(photo => photo.main === 1);
-        } else if (typeof profile.photos_v2 === 'object') {
-            mainPhoto = Object.values(profile.photos_v2).find(photo => photo.main === 1);
-        }
+        console.log('[HEADER-AVATAR] API response:', apiData);
         
-        if (mainPhoto && mainPhoto.photo_url) {
-            const avatarImg = document.querySelector('.user-avatar img');
-            if (avatarImg) {
-                avatarImg.src = mainPhoto.photo_url;
-                avatarImg.alt = profile.pseudo || 'User';
-                console.log(`[HEADER-AVATAR] Avatar updated to: ${mainPhoto.photo_url}`);
+        if (apiData && apiData.success && apiData.data) {
+            const photos = apiData.data || [];
+            let photoUrl = null;
+            
+            console.log('[HEADER-AVATAR] user_edit_photos data:', photos);
+            
+            // Проверяем, есть ли фотографии в user_edit_photos
+            if (Array.isArray(photos) && photos.length > 0) {
+                const mainPhoto = photos.find(p => p.num === 0) || photos[0];
+                photoUrl = mainPhoto.sq_430 || mainPhoto.sq_middle || mainPhoto.normal || mainPhoto.sq_small;
+                console.log('[HEADER-AVATAR] Found photo in user_edit_photos:', photoUrl);
             }
-        } else {
-            console.log('[HEADER-AVATAR] No main photo found');
+            
+            // Если фотографий нет, пробуем fallback на /index_api/user
+            if (!photoUrl) {
+                console.log('[HEADER-AVATAR] No photos in user_edit_photos, trying fallback to /index_api/user');
+                try {
+                    const apiUrl2 = `/api/spice-multi-test?endpoint=/index_api/user&method=POST&session_id=${sessionId}&id=${userId}&get_picture_430=1`;
+                    const response2 = await fetch(apiUrl2);
+                    const apiData2 = await response2.json();
+                    
+                    console.log('[HEADER-AVATAR] Fallback API response:', apiData2);
+                    
+                    if (apiData2 && apiData2.success && apiData2.data?.result) {
+                        const user = apiData2.data.result;
+                        if (user.photos_v2) {
+                            if (user.photos_v2.public) {
+                                const publicPhotos = user.photos_v2.public;
+                                const firstPhotoKey = Object.keys(publicPhotos)[0];
+                                if (firstPhotoKey && publicPhotos[firstPhotoKey]) {
+                                    photoUrl = publicPhotos[firstPhotoKey].sq_430 || 
+                                               publicPhotos[firstPhotoKey].normal || 
+                                               publicPhotos[firstPhotoKey].sq_middle;
+                                }
+                            } else if (Array.isArray(user.photos_v2) && user.photos_v2.length > 0) {
+                                const mainPhoto = user.photos_v2.find(p => p.num === 0) || user.photos_v2[0];
+                                photoUrl = mainPhoto.sq_430 || mainPhoto.sq_middle || mainPhoto.normal || mainPhoto.sq_small;
+                            } else if (user.photos && user.photos.length > 0) {
+                                photoUrl = user.photos[0].url_big || user.photos[0].url_middle;
+                            } else if (user.picture_430) {
+                                photoUrl = user.picture_430;
+                            } else if (user.picture) {
+                                photoUrl = user.picture;
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.warn('[HEADER-AVATAR] Fallback API failed:', error);
+                }
+            }
+            
+            // Убеждаемся что URL корректный
+            if (photoUrl && !photoUrl.startsWith('http') && !photoUrl.startsWith('/')) {
+                photoUrl = 'https://dev2018.de5a7.com/' + photoUrl;
+            }
+            
+            const avatarImg = document.getElementById('userAvatarImg');
+            const avatarText = document.getElementById('userAvatarText');
+            
+            if (avatarImg && avatarText) {
+                if (photoUrl) {
+                    console.log('[HEADER-AVATAR] Found photo URL:', photoUrl);
+                    // Показываем фото
+                    avatarImg.src = photoUrl;
+                    avatarImg.style.display = 'block';
+                    avatarText.style.display = 'none';
+                    
+                    // Обработка ошибок загрузки фото
+                    avatarImg.onerror = function() {
+                        console.warn('[HEADER-AVATAR] Failed to load user photo, showing initials');
+                        avatarImg.style.display = 'none';
+                        avatarText.style.display = 'flex';
+                        const firstName = userData.nom_complet || userData.pseudo || userData.login || 'D';
+                        avatarText.textContent = firstName.charAt(0).toUpperCase();
+                    };
+                } else {
+                    // Показываем первую букву имени
+                    avatarImg.style.display = 'none';
+                    avatarText.style.display = 'flex';
+                    const firstName = userData.nom_complet || userData.pseudo || userData.login || 'D';
+                    avatarText.textContent = firstName.charAt(0).toUpperCase();
+                }
+            }
+            
+            // Обновляем дропдаун с информацией о пользователе (используем данные из localStorage)
+            updateDropdownUserInfo(userData);
         }
-        
     } catch (error) {
-        console.error('[HEADER-AVATAR] Error loading avatar:', error);
+        console.error('[HEADER-AVATAR] Error loading user avatar:', error);
+        // Fallback: показываем стандартную букву
+        const avatarText = document.getElementById('userAvatarText');
+        if (avatarText) {
+            avatarText.textContent = 'U';
+        }
     }
 }
 
@@ -180,28 +255,45 @@ function initHeaderAvatar() {
 }
 
 // Функция для проверки и повторного вызова
-function tryInitHeaderAvatar(attempt = 1, maxAttempts = 5) {
+function tryInitHeaderAvatar(attempt = 1, maxAttempts = 10) {
     console.log(`[HEADER-AVATAR] Attempt ${attempt}/${maxAttempts} to init header avatar`);
     
     if (window.authManager && window.authManager.sessionId) {
         console.log('[HEADER-AVATAR] AuthManager ready, initializing...');
         initHeaderAvatar();
     } else if (attempt < maxAttempts) {
-        console.log('[HEADER-AVATAR] AuthManager not ready, retrying in 1s...');
-        setTimeout(() => tryInitHeaderAvatar(attempt + 1, maxAttempts), 1000);
+        console.log('[HEADER-AVATAR] AuthManager not ready, retrying in 500ms...');
+        setTimeout(() => tryInitHeaderAvatar(attempt + 1, maxAttempts), 500);
     } else {
         console.error('[HEADER-AVATAR] Failed to initialize after', maxAttempts, 'attempts');
+        // Fallback: показываем инициалы
+        const userDataString = localStorage.getItem('lavrilo_user');
+        if (userDataString) {
+            const userData = JSON.parse(userDataString);
+            const firstName = userData.nom_complet || userData.pseudo || userData.login || 'U';
+            const avatarText = document.getElementById('userAvatarText');
+            if (avatarText) {
+                avatarText.textContent = firstName.charAt(0).toUpperCase();
+                avatarText.style.display = 'flex';
+            }
+            const avatarImg = document.getElementById('userAvatarImg');
+            if (avatarImg) {
+                avatarImg.style.display = 'none';
+            }
+        }
     }
 }
 
 // Автоматически инициализируем когда DOM готов
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-        setTimeout(() => tryInitHeaderAvatar(), 1000);
+        console.log('[HEADER-AVATAR] DOM loaded, starting initialization...');
+        setTimeout(() => tryInitHeaderAvatar(), 500);
     });
 } else {
     // DOM уже готов
-    setTimeout(() => tryInitHeaderAvatar(), 1000);
+    console.log('[HEADER-AVATAR] DOM already ready, starting initialization...');
+    setTimeout(() => tryInitHeaderAvatar(), 500);
 }
 
 // Экспортируем функции для использования в других файлах

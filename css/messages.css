@@ -6,25 +6,28 @@
   height: 100vh;
 }
 
+/* Убираем переопределения стилей dropdown чтобы использовать стандартные из app-styles.css */
+.messages-page .user-dropdown {
+  /* Наследуем стили из app-styles.css */
+}
+
+.messages-page .dropdown-item {
+  /* Наследуем стили из app-styles.css */
+}
+
+.messages-page .dropdown-header {
+  /* Наследуем стили из app-styles.css */
+}
+
 /* Увеличиваем ширину контента только на странице сообщений */
 .messages-page .app-main {
   max-width: 1200px;
   padding-bottom: 1rem;
 }
 
-/* Remove max-width overrides for header */
 .messages-page .header-container {
-    max-width: none;
-    margin: 0;
-    padding: 0;
-}
-
-/* Align dropdown styles with common */
-.messages-page .dropdown-menu {
-    background: white;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    border-radius: 0.5rem;
-    min-width: 200px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 /* Стили точно как у profile-hero-section */
@@ -32,7 +35,7 @@
   margin-bottom: 3rem;
   /* Расширяем рабочую область сообщений */
   width: 100%;
-  max-width: 1440px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 0 1.5rem;
 }
