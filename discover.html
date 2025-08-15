@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="css/discover-page.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
-<body>
+<body data-page="discover">
     <!-- Хедер -->
     <header class="app-header">
         <div class="header-container">
@@ -123,7 +123,13 @@
                     <!-- Информация под фото -->
                     <div class="profile-info-section">
                         <h2 class="profile-main-name" id="cardName">Name</h2>
-                        <p class="profile-location-text" id="cardLocation">Location</p>
+                        <div class="profile-details">
+                            <p class="profile-age-text" id="cardAge">Age</p>
+                            <p class="profile-location-text" id="cardLocation">Location</p>
+                        </div>
+                        <div class="profile-description" id="cardDescription">
+                            <p>Description will appear here...</p>
+                        </div>
                     </div>
                 </div>
 
@@ -514,6 +520,22 @@
         function displayCurrentProfile(profile) {
             console.log('[DISCOVER] Displaying profile:', profile);
             
+            // Логгируем доступные поля профиля для анализа API
+            console.log('[DISCOVER] Available profile fields:', Object.keys(profile));
+            console.log('[DISCOVER] Profile data sample:', {
+                id: profile.id,
+                nom_complet: profile.nom_complet,
+                pseudo: profile.pseudo,
+                age: profile.age,
+                date_naissance: profile.date_naissance,
+                ville: profile.ville,
+                region: profile.region,
+                a_propos: profile.a_propos,
+                description: profile.description,
+                presentation: profile.presentation,
+                bio: profile.bio
+            });
+            
             if (!profile) {
                 showNoProfilesState();
                 return;
@@ -528,6 +550,24 @@
             if (nameElement) {
                 const fullName = profile.nom_complet || profile.pseudo || 'Unknown';
                 nameElement.textContent = fullName;
+            }
+            
+            // Обновляем возраст
+            const ageElement = document.getElementById('cardAge');
+            if (ageElement) {
+                // Вычисляем возраст из даты рождения или используем готовое поле age
+                let age = 'Age unknown';
+                if (profile.age) {
+                    age = `${profile.age} years old`;
+                } else if (profile.date_naissance || profile.birth_date || profile.birthday) {
+                    const birthDate = new Date(profile.date_naissance || profile.birth_date || profile.birthday);
+                    const today = new Date();
+                    const calculatedAge = Math.floor((today - birthDate) / (365.25 * 24 * 60 * 60 * 1000));
+                    if (calculatedAge > 0 && calculatedAge < 150) {
+                        age = `${calculatedAge} years old`;
+                    }
+                }
+                ageElement.textContent = age;
             }
             
             // Обновляем локацию
@@ -985,8 +1025,54 @@
             }
         }
         
+        // Функция для анализа полей профиля (для отладки)
+        window.analyzeProfileFields = function() {
+            if (currentProfile) {
+                console.log('=== АНАЛИЗ ПОЛЕЙ ПРОФИЛЯ ===');
+                console.log('Текущий профиль:', currentProfile);
+                console.log('Доступные поля:', Object.keys(currentProfile));
+                console.log('Примеры значений:');
+                for (const [key, value] of Object.entries(currentProfile)) {
+                    if (value !== null && value !== undefined && value !== '') {
+                        console.log(`  ${key}:`, typeof value === 'string' && value.length > 50 
+                            ? value.substring(0, 50) + '...' 
+                            : value);
+                    }
+                }
+                console.log('=== КОНЕЦ АНАЛИЗА ===');
+                
+                // Предлагаем дополнительные поля для отображения
+                const suggestedFields = [];
+                if (currentProfile.profession || currentProfile.job || currentProfile.work) {
+                    suggestedFields.push('Профессия');
+                }
+                if (currentProfile.education || currentProfile.studies) {
+                    suggestedFields.push('Образование');
+                }
+                if (currentProfile.interests || currentProfile.hobbies) {
+                    suggestedFields.push('Интересы');
+                }
+                if (currentProfile.height || currentProfile.taille) {
+                    suggestedFields.push('Рост');
+                }
+                if (currentProfile.children || currentProfile.enfants) {
+                    suggestedFields.push('Дети');
+                }
+                if (currentProfile.relationship_status || currentProfile.statut) {
+                    suggestedFields.push('Семейное положение');
+                }
+                
+                console.log('Предлагаемые дополнительные поля для отображения:', suggestedFields);
+            } else {
+                console.log('Нет текущего профиля для анализа');
+            }
+        };
+        
         // Обработчики для модального окна фото
         document.addEventListener('DOMContentLoaded', () => {
+            // Добавляем класс для надежного центрирования модального окна
+            document.body.classList.add('discover-page');
+            
             const closeBtn = document.getElementById('photoModalClose');
             const overlay = document.querySelector('.photo-modal-overlay');
             
