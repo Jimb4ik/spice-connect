@@ -565,10 +565,10 @@
             
             if (discoverCard) discoverCard.style.display = 'grid';
             if (noProfilesState) noProfilesState.style.display = 'none';
-            // Показываем мобильные или десктопные кнопки
-            const isWide = window.innerWidth > window.innerHeight + 120; // широкие экраны
-            if (actionsFixed) actionsFixed.style.display = isWide ? 'none' : 'flex';
-            if (actionsSide) actionsSide.style.display = isWide ? 'block' : 'none';
+            // Показываем кнопки в зависимости от размера экрана
+            const isDesktop = window.innerWidth > 1024; // десктопные экраны
+            if (actionsFixed) actionsFixed.style.display = isDesktop ? 'none' : 'flex';
+            if (actionsSide) actionsSide.style.display = isDesktop ? 'block' : 'none';
         }
         
         function updateProfilePhoto(profile) {
@@ -622,9 +622,9 @@
             
             if (loadingElement) loadingElement.style.display = show ? 'block' : 'none';
             if (cardElement) cardElement.style.display = show ? 'none' : 'grid';
-            const isWide = window.innerWidth > window.innerHeight + 120;
-            if (actionsElement) actionsElement.style.display = show ? 'none' : (isWide ? 'none' : 'flex');
-            if (actionsSide) actionsSide.style.display = show ? 'none' : (isWide ? 'block' : 'none');
+            const isDesktop = window.innerWidth > 1024;
+            if (actionsElement) actionsElement.style.display = show ? 'none' : (isDesktop ? 'none' : 'flex');
+            if (actionsSide) actionsSide.style.display = show ? 'none' : (isDesktop ? 'block' : 'none');
             if (viewAllElement) viewAllElement.style.display = show ? 'none' : 'block';
         }
         

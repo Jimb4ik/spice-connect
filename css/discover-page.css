@@ -1,20 +1,63 @@
 /* Стили только для страницы discover.html */
 
-/* ВАЖНО: Всегда используем центральные кнопки, убираем боковые */
+/* Исправляем позиционирование боковых кнопок для десктопа */
 .actions-side {
-  display: none !important;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
 }
 
-.action-buttons-new {
-  display: flex !important;
+.actions-side .side-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 80px; /* Увеличиваем размер кнопок */
+  height: 80px;
+  border-radius: 50%;
+  border: none;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  font-size: 2rem; /* Увеличиваем иконки */
+  cursor: pointer;
+  pointer-events: auto;
+  transition: all 0.3s ease;
 }
 
-/* 1. Приближаем кнопки к карточке профиля и делаем их больше */
+.actions-side .side-btn.pass { 
+  left: -50px; /* Ближе к карточке - было -90px */
+  background: rgba(255, 255, 255, 0.95);
+  color: #ff4757;
+  border: 3px solid rgba(255, 71, 87, 0.3);
+}
+
+.actions-side .side-btn.like { 
+  right: -50px; /* Ближе к карточке - было -90px */
+  background: linear-gradient(135deg, #ff4458 0%, #ff6b7a 100%);
+  color: white;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+}
+
+.actions-side .side-btn:hover {
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.3);
+}
+
+/* На планшетах и мобильных используем центральные кнопки */
+@media (max-width: 1024px) {
+  .actions-side { 
+    display: none !important; 
+  }
+  
+  .action-buttons-new { 
+    display: flex !important; 
+  }
+}
+
+/* Центральные кнопки для мобильных устройств */
 .action-buttons-new {
-  display: flex;
+  display: none; /* По умолчанию скрыты на десктопе */
   justify-content: center;
-  gap: 1.5rem; /* Уменьшил с 2rem до 1.5rem */
-  margin: 1rem 0 1.5rem; /* Уменьшил отступ сверху с clamp(8px, 1vh, 16px) до 1rem */
+  gap: 2rem;
+  margin: 1.5rem 0 2rem;
   padding: 0 2rem;
 }
 
