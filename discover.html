@@ -133,6 +133,31 @@
                     </div>
                 </div>
 
+                <!-- Age Filter Slider - справа от карточки -->
+                <div class="age-filter-side" id="ageFilterSide">
+                    <div class="age-filter-card">
+                        <h3 class="age-filter-title">🎯 Age Range</h3>
+                        <div class="age-range-container">
+                            <div class="age-input-group">
+                                <label for="ageMinSide">Min:</label>
+                                <input type="range" id="ageMinSide" min="18" max="80" value="18" class="age-slider">
+                                <span id="ageMinDisplay">18</span>
+                            </div>
+                            <div class="age-input-group">
+                                <label for="ageMaxSide">Max:</label>
+                                <input type="range" id="ageMaxSide" min="18" max="80" value="80" class="age-slider">
+                                <span id="ageMaxDisplay">80</span>
+                            </div>
+                        </div>
+                        <div class="age-summary">
+                            <span id="ageSummary">18 - 80 years</span>
+                        </div>
+                        <button class="apply-filter-btn" id="applyAgeFilter">
+                            🔄 Apply Filter
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Side Actions for desktop/laptop -->
                 <div class="actions-side" id="discoverActionsSide" style="display: none;">
                     <button class="side-btn pass" id="dislikeBtnSide" title="Pass">✕</button>
@@ -385,6 +410,35 @@
         let isLoadingMoreProfiles = false;
         let userProgress = null; // Прогресс пользователя из БД
         
+        // Настройки фильтра возраста
+        let ageSettings = {
+            min: 18,
+            max: 80
+        };
+        
+        // Загружаем сохраненные настройки возраста
+        function loadAgeSettings() {
+            try {
+                const saved = localStorage.getItem('lavrilo_age_settings');
+                if (saved) {
+                    const parsedSettings = JSON.parse(saved);
+                    ageSettings.min = parsedSettings.min || 18;
+                    ageSettings.max = parsedSettings.max || 80;
+                }
+            } catch (error) {
+                console.warn('[AGE FILTER] Error loading saved settings:', error);
+            }
+        }
+        
+        // Сохраняем настройки возраста
+        function saveAgeSettings() {
+            try {
+                localStorage.setItem('lavrilo_age_settings', JSON.stringify(ageSettings));
+            } catch (error) {
+                console.warn('[AGE FILTER] Error saving settings:', error);
+            }
+        }
+        
         // Загружаем прогресс пользователя из БД
         async function loadUserProgress() {
             try {
@@ -473,7 +527,7 @@
                 if (profilesBuffer.length === 0 || currentProfileIndex >= profilesBuffer.length) {
                     console.log(`[DISCOVER] Loading profiles from page ${currentPage}`);
                     
-                    const apiUrl = `/api/spice-multi-test?endpoint=/index_api/search&method=POST&session_id=${sessionId}&page=${currentPage}&pas=30&searchAgeMin=18&searchAgeMax=80&searchSexe=all`;
+                    const apiUrl = `/api/spice-multi-test?endpoint=/index_api/search&method=POST&session_id=${sessionId}&page=${currentPage}&pas=30&searchAgeMin=${ageSettings.min}&searchAgeMax=${ageSettings.max}&searchSexe=all`;
                     
                     const response = await fetch(apiUrl);
                     const data = await response.json();
@@ -1075,10 +1129,102 @@
             }
         };
         
+        // Функции для управления фильтром возраста
+        function initializeAgeFilter() {
+            const ageMinSlider = document.getElementById('ageMinSide');
+            const ageMaxSlider = document.getElementById('ageMaxSide');
+            const ageMinDisplay = document.getElementById('ageMinDisplay');
+            const ageMaxDisplay = document.getElementById('ageMaxDisplay');
+            const ageSummary = document.getElementById('ageSummary');
+            const applyFilterBtn = document.getElementById('applyAgeFilter');
+            
+            if (!ageMinSlider || !ageMaxSlider) return;
+            
+            // Загружаем сохраненные настройки
+            loadAgeSettings();
+            
+            // Устанавливаем значения ползунков
+            ageMinSlider.value = ageSettings.min;
+            ageMaxSlider.value = ageSettings.max;
+            
+            // Обновление отображения значений
+            function updateDisplay() {
+                const minAge = parseInt(ageMinSlider.value);
+                const maxAge = parseInt(ageMaxSlider.value);
+                
+                // Проверяем, что минимальный возраст не больше максимального
+                if (minAge > maxAge) {
+                    ageMinSlider.value = maxAge;
+                    ageSettings.min = maxAge;
+                } else {
+                    ageSettings.min = minAge;
+                }
+                
+                if (maxAge < minAge) {
+                    ageMaxSlider.value = minAge;
+                    ageSettings.max = minAge;
+                } else {
+                    ageSettings.max = maxAge;
+                }
+                
+                // Обновляем отображение
+                ageMinDisplay.textContent = ageSettings.min;
+                ageMaxDisplay.textContent = ageSettings.max;
+                ageSummary.textContent = `${ageSettings.min} - ${ageSettings.max} years`;
+                
+                // Сохраняем настройки
+                saveAgeSettings();
+            }
+            
+            // Обработчики событий для ползунков
+            ageMinSlider.addEventListener('input', updateDisplay);
+            ageMaxSlider.addEventListener('input', updateDisplay);
+            
+            // Обработчик кнопки применения фильтра
+            if (applyFilterBtn) {
+                applyFilterBtn.addEventListener('click', async () => {
+                    console.log('[AGE FILTER] Applying age filter:', ageSettings);
+                    
+                    // Показываем индикатор загрузки на кнопке
+                    const originalText = applyFilterBtn.innerHTML;
+                    applyFilterBtn.innerHTML = '⏳ Applying...';
+                    applyFilterBtn.disabled = true;
+                    
+                    try {
+                        // Сбрасываем профили и загружаем новые с учетом фильтра
+                        currentProfileIndex = 0;
+                        profilesBuffer = [];
+                        currentPage = 0;
+                        
+                        await loadNextProfile();
+                        
+                        // Восстанавливаем кнопку
+                        applyFilterBtn.innerHTML = originalText;
+                        applyFilterBtn.disabled = false;
+                        
+                        console.log('[AGE FILTER] Filter applied successfully');
+                    } catch (error) {
+                        console.error('[AGE FILTER] Error applying filter:', error);
+                        applyFilterBtn.innerHTML = '❌ Error';
+                        setTimeout(() => {
+                            applyFilterBtn.innerHTML = originalText;
+                            applyFilterBtn.disabled = false;
+                        }, 2000);
+                    }
+                });
+            }
+            
+            // Инициализируем отображение
+            updateDisplay();
+        }
+        
         // Обработчики для модального окна фото
         document.addEventListener('DOMContentLoaded', () => {
             // Добавляем класс для надежного центрирования модального окна
             document.body.classList.add('discover-page');
+            
+            // Инициализируем фильтр возраста
+            initializeAgeFilter();
             
             const closeBtn = document.getElementById('photoModalClose');
             const overlay = document.querySelector('.photo-modal-overlay');

@@ -2473,6 +2473,139 @@ body {
   box-shadow: var(--shadow-hover);
 }
 
+/* Age Filter Side Panel */
+.age-filter-side {
+  position: fixed;
+  right: 2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 100;
+  display: none; /* Скрыто по умолчанию, показывается на десктопе */
+}
+
+.age-filter-card {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  min-width: 200px;
+  max-width: 250px;
+}
+
+.age-filter-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 1rem 0;
+  text-align: center;
+}
+
+.age-range-container {
+  margin-bottom: 1rem;
+}
+
+.age-input-group {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 0.8rem;
+}
+
+.age-input-group label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  min-width: 35px;
+}
+
+.age-slider {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: #ddd;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.age-slider::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  height: 18px;
+  width: 18px;
+  border-radius: 50%;
+  background: var(--gradient-primary);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(255, 68, 88, 0.3);
+}
+
+.age-slider::-moz-range-thumb {
+  height: 18px;
+  width: 18px;
+  border-radius: 50%;
+  background: var(--gradient-primary);
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 8px rgba(255, 68, 88, 0.3);
+}
+
+.age-input-group span {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--primary-color);
+  min-width: 25px;
+  text-align: center;
+}
+
+.age-summary {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.age-summary span {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: rgba(255, 68, 88, 0.1);
+  padding: 0.3rem 0.8rem;
+  border-radius: 12px;
+}
+
+.apply-filter-btn {
+  width: 100%;
+  background: var(--gradient-primary);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 0.8rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.apply-filter-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+.apply-filter-btn:active {
+  transform: translateY(0);
+}
+
+/* Показываем фильтр возраста на десктопе */
+@media (min-width: 1200px) {
+  .age-filter-side {
+    display: block;
+  }
+}
+
 /* Специальные стили для идеального центрирования модального окна на странице discover */
 body[data-page="discover"] .photo-modal,
 .discover-page .photo-modal {
