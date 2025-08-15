@@ -91,11 +91,12 @@ class PhotoManager {
     }
 
     try {
-      // Get full list of user photos - direct API call (no proxy)
-      const apiUrl = `${this.apiConfig.baseUrl}/index_api/user_edit_photos?session_id=${sessionId}&api_key=${this.apiConfig.apiKey}`;
+      // Get full list of user photos - use spice-multi-test proxy
+      const apiUrl = `/api/spice-multi-test?endpoint=/index_api/user_edit_photos&method=POST&session_id=${sessionId}`;
       console.log('[PHOTO MANAGER] API URL:', apiUrl);
-      const resp = await fetch(apiUrl, { method: 'POST' });
-      const data = await resp.json();
+      const resp = await fetch(apiUrl);
+      const result = await resp.json();
+      const data = result.success ? result.data : result;
       console.log('[PHOTO MANAGER] Full user_edit_photos response:', JSON.stringify(data, null, 2));
       
       let photosArr = [];
@@ -351,8 +352,8 @@ class PhotoManager {
     formData.append('file', file);
     formData.append('contenttype', 'photo'); // Добавляем как в документации
 
-    // Upload through proxy to normalize responses and avoid CORS/format issues
-    const apiUrl = `/api/upload-photo?session_id=${window.authManager.sessionId}&is_private=0`;
+    // Use spice-multi-test proxy for file uploads
+    const apiUrl = `/api/spice-multi-test?endpoint=/ajax_api/upload_photo&method=POST&session_id=${window.authManager.sessionId}&is_private=0`;
     console.log('[PHOTO MANAGER] Upload URL:', apiUrl);
     console.log('[PHOTO MANAGER] FormData contents:');
     for (let [key, value] of formData.entries()) {
@@ -788,8 +789,8 @@ class PhotoManager {
         console.log(`  ${key}: ${value}`);
       }
       
-      // Direct API call (no proxy) - all params in URL as per API docs
-      const apiUrl = `${this.apiConfig.baseUrl}/index_api/user_edit_photos/modify?${params.toString()}`;
+      // Use spice-multi-test proxy - all params in URL as per API docs
+      const apiUrl = `/api/spice-multi-test?endpoint=/index_api/user_edit_photos/modify&method=POST&${params.toString()}`;
       
       const response = await fetch(apiUrl, {
         method: 'POST'
@@ -832,8 +833,8 @@ class PhotoManager {
   }
 
   async setAsMainPhoto(photoId) {
-    // Direct API call (no proxy)
-    const apiUrl = `${this.apiConfig.baseUrl}/index_api/user_edit_photos/principale?session_id=${window.authManager.sessionId}&api_key=${this.apiConfig.apiKey}&photo_num=${photoId}`;
+    // Use spice-multi-test proxy
+    const apiUrl = `/api/spice-multi-test?endpoint=/index_api/user_edit_photos/principale&method=POST&session_id=${window.authManager.sessionId}&photo_num=${photoId}`;
     
     try {
       const response = await fetch(apiUrl, {
