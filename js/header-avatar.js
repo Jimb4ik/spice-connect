@@ -148,10 +148,13 @@ async function loadUserAvatar() {
             const photos = apiData.data || [];
             let photoUrl = null;
             
+            console.log('[HEADER-AVATAR] user_edit_photos data:', photos);
+            
             // Проверяем, есть ли фотографии в user_edit_photos
             if (Array.isArray(photos) && photos.length > 0) {
                 const mainPhoto = photos.find(p => p.num === 0) || photos[0];
                 photoUrl = mainPhoto.sq_430 || mainPhoto.sq_middle || mainPhoto.normal || mainPhoto.sq_small;
+                console.log('[HEADER-AVATAR] Found photo in user_edit_photos:', photoUrl);
             }
             
             // Если фотографий нет, пробуем fallback на /index_api/user
