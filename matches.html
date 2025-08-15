@@ -267,42 +267,20 @@
     <script src="js/matching-system-v2.js?v=1.0"></script>
     
     <script>
-        // API для загрузки матчей
+        // Загрузка матчей из нашей базы данных
         async function loadMatches() {
             try {
-                const sessionId = window.authManager?.sessionId;
-                if (!sessionId) {
-                    throw new Error('No session ID available');
-                }
-
-                // Получаем API ключ
-                const apiConfigResponse = await fetch('/api/get-api-key');
-                const apiConfig = await apiConfigResponse.json();
+                console.log('[MATCHES] Loading matches from database...');
                 
-                if (!apiConfig.apiKey) {
-                    throw new Error('No API key available');
-                }
-
-                // Параметры для API согласно документации
-                const matchParams = new URLSearchParams({
-                    api_key: apiConfig.apiKey,
-                    session_id: sessionId,
-                    action: 'get_matches'
-                });
+                // Используем MatchUtils для загрузки матчей из базы данных
+                const matches = await window.MatchUtils.loadUserMatches();
                 
-                const apiUrl = `/api/spice-multi-test?endpoint=/index_api/match&method=GET&${matchParams.toString()}`;
+                console.log('[MATCHES] Loaded matches from database:', matches);
                 
-                console.log('[MATCHES] Loading matches from API...');
-                const response = await fetch(apiUrl);
-                const result = await response.json();
-                
-                console.log('[MATCHES] API Response:', result);
-                
-                if (result.success && result.data) {
-                    displayMatches(result.data);
-                    updateMatchesStats(result.data);
+                if (matches && matches.length > 0) {
+                    displayMatches(matches);
+                    updateMatchesStats(matches);
                 } else {
-                    console.error('[MATCHES] Failed to load matches:', result.error);
                     showNoMatches();
                 }
                 
@@ -338,15 +316,26 @@
         }
 
         function createMatchCard(match) {
-            const photoUrl = match.photo || match.picture || '/images/default-avatar.png';
-            const name = match.pseudo || match.name || 'Unknown';
-            const age = match.age || '--';
-            const city = match.city || match.location || 'Unknown';
-            const isNew = match.is_new || false;
-            const hasMessages = match.has_messages || false;
+            // Получаем фотографии из JSON поля
+            let photos = [];
+            try {
+                photos = typeof match.matched_user_photos === 'string' 
+                    ? JSON.parse(match.matched_user_photos) 
+                    : match.matched_user_photos || [];
+            } catch (e) {
+                photos = [];
+            }
+            
+            const photoUrl = photos.length > 0 ? photos[0] : '/images/default-avatar.png';
+            const name = match.matched_user_name || 'Unknown';
+            const age = match.matched_user_age || '--';
+            const city = match.matched_user_city || 'Unknown';
+            const isNew = !match.is_read;
+            const matchDate = new Date(match.match_date);
+            const timeAgo = getTimeAgo(matchDate);
 
             return `
-                <div class="match-card ${isNew ? 'new-match' : ''} ${hasMessages ? 'has-messages' : ''}" data-match-id="${match.id || match.m_id}">
+                <div class="match-card ${isNew ? 'new-match' : ''}" data-match-id="${match.matched_user_id}">
                     <div class="match-photo">
                         <img src="${photoUrl}" alt="${name}" onerror="this.src='/images/default-avatar.png'">
                         ${isNew ? '<div class="new-badge">NEW</div>' : ''}
@@ -354,22 +343,41 @@
                     <div class="match-info">
                         <h3 class="match-name">${name}</h3>
                         <p class="match-details">${age} years • ${city}</p>
+                        <p class="match-time">Matched ${timeAgo}</p>
                         <div class="match-actions">
-                            <button class="app-btn app-btn-primary btn-sm" onclick="startChat('${match.id || match.m_id}')">
+                            <button class="app-btn app-btn-primary btn-sm" onclick="startChat('${match.matched_user_id}', '${name}')">
                                 💬 Message
                             </button>
-                            <button class="app-btn app-btn-secondary btn-sm" onclick="viewProfile('${match.id || match.m_id}')">
-                                👁️ View Profile
+                            <button class="app-btn app-btn-secondary btn-sm" onclick="viewMatchDetails('${match.matched_user_id}')">
+                                👁️ View Details
                             </button>
                         </div>
                     </div>
                 </div>
             `;
         }
+        
+        // Вспомогательная функция для отображения времени
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diffInMs = now - date;
+            const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+            const diffInDays = Math.floor(diffInHours / 24);
+            
+            if (diffInHours < 1) {
+                return 'just now';
+            } else if (diffInHours < 24) {
+                return `${diffInHours}h ago`;
+            } else if (diffInDays < 7) {
+                return `${diffInDays}d ago`;
+            } else {
+                return date.toLocaleDateString();
+            }
+        }
 
         function updateMatchesStats(matches) {
             const totalMatches = matches ? matches.length : 0;
-            const newMatches = matches ? matches.filter(m => m.is_new).length : 0;
+            const newMatches = matches ? matches.filter(m => !m.is_read).length : 0;
             
             const totalElement = document.getElementById('totalMatchesCount');
             const newElement = document.getElementById('newMatchesCount');
@@ -385,14 +393,60 @@
             }
         }
 
-        function startChat(matchId) {
-            console.log('[MATCHES] Starting chat with:', matchId);
-            window.location.href = `messages.html?contact=${matchId}`;
+        async function startChat(matchId, matchName) {
+            console.log('[MATCHES] Starting chat with:', matchId, matchName);
+            
+            // Отмечаем матч как прочитанный
+            await markMatchAsRead(matchId);
+            
+            // Переходим к чату
+            window.location.href = `messages.html?contact=${matchId}&name=${encodeURIComponent(matchName)}`;
         }
 
-        function viewProfile(matchId) {
-            console.log('[MATCHES] Viewing profile:', matchId);
-            alert(`View profile for user ${matchId} - coming soon!`);
+        function viewMatchDetails(matchId) {
+            console.log('[MATCHES] Viewing match details:', matchId);
+            // Здесь можно добавить функциональность показа деталей матча
+            alert(`View match details for user ${matchId} - coming soon!`);
+        }
+        
+        // Отметить матч как прочитанный
+        async function markMatchAsRead(matchId) {
+            try {
+                const userId = await window.MatchUtils.getCurrentUserId();
+                if (!userId) return;
+                
+                const response = await fetch('/api/database', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'update_match',
+                        user_id: userId,
+                        matched_user_id: matchId,
+                        is_read: true
+                    })
+                });
+                
+                const result = await response.json();
+                console.log('[MATCHES] Match marked as read:', result);
+                
+                // Обновляем UI - убираем "new" бейдж
+                const matchCard = document.querySelector(`[data-match-id="${matchId}"]`);
+                if (matchCard) {
+                    matchCard.classList.remove('new-match');
+                    const newBadge = matchCard.querySelector('.new-badge');
+                    if (newBadge) {
+                        newBadge.remove();
+                    }
+                }
+                
+                // Обновляем статистику
+                loadMatches();
+                
+            } catch (error) {
+                console.error('[MATCHES] Error marking match as read:', error);
+            }
         }
 
         // Проверка авторизации при загрузке страницы
@@ -437,7 +491,13 @@
                         show = card.classList.contains('has-messages');
                         break;
                     case 'recent':
-                        show = card.classList.contains('recent-activity');
+                        // Показываем матчи за последние 24 часа
+                        const timeElement = card.querySelector('.match-time');
+                        if (timeElement) {
+                            const timeText = timeElement.textContent;
+                            show = timeText.includes('just now') || timeText.includes('h ago') || 
+                                   (timeText.includes('d ago') && parseInt(timeText) <= 1);
+                        }
                         break;
                     case 'all':
                     default:

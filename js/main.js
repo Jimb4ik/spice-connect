@@ -105,50 +105,116 @@ class MainDashboard {
         console.log('[MAIN] Loading activity feed...');
         
         try {
-            const response = await fetch(`/api/spice-multi-test?endpoint=/index_api/wall&method=POST&session_id=${this.sessionId}`);
-            const data = await response.json();
+            // Загружаем как обычную активность, так и матчи
+            const [apiResponse, matches] = await Promise.all([
+                fetch(`/api/spice-multi-test?endpoint=/index_api/wall&method=POST&session_id=${this.sessionId}`),
+                window.MatchUtils ? window.MatchUtils.loadUserMatches() : Promise.resolve([])
+            ]);
             
+            const data = await apiResponse.json();
             console.log('[MAIN] Activity feed API response:', data);
+            console.log('[MAIN] Recent matches:', matches);
             
             const feedContainer = document.getElementById('activityFeed');
             
+            // Собираем все активности
+            let allActivities = [];
+            
+            // Добавляем API активности
             if (data.success && data.data?.result && Array.isArray(data.data.result)) {
-                const activities = data.data.result.slice(0, 10); // Show last 10 activities
-                
-                if (activities.length === 0) {
-                    feedContainer.innerHTML = '<div class="empty-state">No recent activities from your friends</div>';
-                    return;
-                }
-                
-                const feedHTML = activities.map(activity => {
-                    const photoUrl = this.getPhotoUrl(activity);
-                    const activityText = this.formatActivityText(activity);
-                    const timeAgo = this.formatTimeAgo(activity.date_action);
-                    
-                    return `
-                        <div class="activity-item">
-                            <div class="activity-avatar">
-                                ${photoUrl ? `<img src="${photoUrl}" alt="${activity.pseudo}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''}
-                                <div class="avatar-fallback" style="${photoUrl ? 'display: none;' : ''}">${(activity.pseudo || 'U').charAt(0).toUpperCase()}</div>
-                            </div>
-                            <div class="activity-content">
-                                <div class="activity-text">${activityText}</div>
-                                <div class="activity-time">${timeAgo}</div>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-                
-                feedContainer.innerHTML = feedHTML;
-                
-            } else {
-                feedContainer.innerHTML = '<div class="empty-state">No recent activities available</div>';
+                allActivities = [...data.data.result];
             }
+            
+            // Добавляем матчи как активность
+            if (matches && matches.length > 0) {
+                const recentMatches = matches.slice(0, 5); // Последние 5 матчей
+                const matchActivities = recentMatches.map(match => ({
+                    type: 'match',
+                    pseudo: match.matched_user_name,
+                    date_action: match.match_date,
+                    matched_user_id: match.matched_user_id,
+                    matched_user_photos: match.matched_user_photos,
+                    is_new: !match.is_read
+                }));
+                allActivities = [...matchActivities, ...allActivities];
+            }
+            
+            // Сортируем по дате
+            allActivities.sort((a, b) => new Date(b.date_action) - new Date(a.date_action));
+            
+            // Показываем последние 10 активностей
+            const displayActivities = allActivities.slice(0, 10);
+            
+            if (displayActivities.length === 0) {
+                feedContainer.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📰</div><p>Your activity will appear here</p></div>';
+                return;
+            }
+            
+            const feedHTML = displayActivities.map(activity => {
+                if (activity.type === 'match') {
+                    return this.createMatchActivityItem(activity);
+                } else {
+                    return this.createRegularActivityItem(activity);
+                }
+            }).join('');
+            
+            feedContainer.innerHTML = feedHTML;
             
         } catch (error) {
             console.error('[MAIN] Error loading activity feed:', error);
             document.getElementById('activityFeed').innerHTML = '<div class="error-state">Failed to load activities</div>';
         }
+    }
+    
+    createMatchActivityItem(match) {
+        let photos = [];
+        try {
+            photos = typeof match.matched_user_photos === 'string' 
+                ? JSON.parse(match.matched_user_photos) 
+                : match.matched_user_photos || [];
+        } catch (e) {
+            photos = [];
+        }
+        
+        const photoUrl = photos.length > 0 ? photos[0] : null;
+        const timeAgo = this.formatTimeAgo(match.date_action);
+        const isNew = match.is_new;
+        
+        return `
+            <div class="activity-item match-activity ${isNew ? 'new-match-activity' : ''}" onclick="window.location.href='matches.html'">
+                <div class="activity-avatar">
+                    ${photoUrl ? `<img src="${photoUrl}" alt="${match.pseudo}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''}
+                    <div class="avatar-fallback" style="${photoUrl ? 'display: none;' : ''}">${(match.pseudo || 'U').charAt(0).toUpperCase()}</div>
+                    <div class="match-badge">💖</div>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-text">
+                        <strong>It's a match!</strong> You and <strong>${match.pseudo}</strong> liked each other
+                        ${isNew ? '<span class="new-indicator">NEW</span>' : ''}
+                    </div>
+                    <div class="activity-time">${timeAgo}</div>
+                </div>
+            </div>
+        `;
+    }
+    
+    createRegularActivityItem(activity) {
+        const photoUrl = this.getPhotoUrl(activity);
+        const activityText = this.formatActivityText(activity);
+        const timeAgo = this.formatTimeAgo(activity.date_action);
+        
+        return `
+            <div class="activity-item">
+                <div class="activity-avatar">
+                    ${photoUrl ? `<img src="${photoUrl}" alt="${activity.pseudo}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''}
+                    <div class="avatar-fallback" style="${photoUrl ? 'display: none;' : ''}">${(activity.pseudo || 'U').charAt(0).toUpperCase()}</div>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-text">${activityText}</div>
+                    <div class="activity-time">${timeAgo}</div>
+                </div>
+            </div>
+        `;
     }
 
     async loadTopMembers(gender = 2) {
