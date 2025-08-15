@@ -400,8 +400,12 @@ class PhotoManager {
       // Check for different possible response formats
       let photoId = null;
       
-      // API returns {"result":{"id_photo":1}}
-      if (result.result && result.result.id_photo) {
+      // API returns {"result":{"id_photo":1}} or via proxy {"data":{"result":{"id_photo":1}}}
+      if (result.data && result.data.result && result.data.result.id_photo) {
+        // Via spice-multi-test proxy
+        photoId = result.data.result.id_photo;
+      } else if (result.result && result.result.id_photo) {
+        // Direct API call
         photoId = result.result.id_photo;
       } else if (result.data && typeof result.data === 'number') {
         // Direct number in data
@@ -417,11 +421,17 @@ class PhotoManager {
         photoId = result.data.id;
       }
       
-      if (photoId) {
+      if (photoId && photoId > 0) {
         console.log('[PHOTO MANAGER] Photo uploaded successfully, ID:', photoId);
         return {
           success: true,
           id_photo: photoId
+        };
+      } else if (photoId === -1) {
+        console.log('[PHOTO MANAGER] Photo upload returned -1 (temporary/error state)');
+        return {
+          success: false,
+          error: 'Photo upload failed - server returned error state (-1)'
         };
       }
       
