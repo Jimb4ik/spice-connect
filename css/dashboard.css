@@ -439,21 +439,22 @@
   align-items: center;
   padding: 25px 30px;
   border-bottom: 1px solid #e2e8f0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
 }
 
 .profile-edit-modal .modal-header h2 {
   margin: 0;
   font-size: 24px;
   font-weight: 600;
+  color: white !important;
 }
 
 .profile-edit-modal .modal-close {
   background: none;
   border: none;
   font-size: 28px;
-  color: white;
+  color: white !important;
   cursor: pointer;
   padding: 0;
   width: 32px;
@@ -1235,7 +1236,7 @@
   font-weight: 600;
   color: #1f2937;
   font-size: 14px;
-  truncate: ellipsis;
+  text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
 }
