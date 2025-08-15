@@ -6,18 +6,7 @@
   height: 100vh;
 }
 
-/* Убираем переопределения стилей dropdown чтобы использовать стандартные из app-styles.css */
-.messages-page .user-dropdown {
-  /* Наследуем стили из app-styles.css */
-}
-
-.messages-page .dropdown-item {
-  /* Наследуем стили из app-styles.css */
-}
-
-.messages-page .dropdown-header {
-  /* Наследуем стили из app-styles.css */
-}
+/* Dropdown стили полностью наследуются из app-styles.css */
 
 /* Увеличиваем ширину контента только на странице сообщений */
 .messages-page .app-main {
