@@ -583,7 +583,14 @@
                 if (descriptionP) {
                     // Проверяем различные поля для описания
                     const description = profile.a_propos || profile.description || profile.presentation || profile.bio;
-                    descriptionP.textContent = description || 'No description available.';
+                    
+                    if (description && description.trim() !== '') {
+                        descriptionP.textContent = description;
+                        descriptionElement.style.display = 'block';
+                    } else {
+                        // Если нет описания, скрываем весь блок
+                        descriptionElement.style.display = 'none';
+                    }
                 }
             }
             
