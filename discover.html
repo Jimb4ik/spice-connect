@@ -113,22 +113,16 @@
                     <p class="loading-caption">Finding someone just for you...</p>
                 </div>
 
+                <!-- Кнопка Dislike слева -->
+                <button class="action-btn-side pass-btn" id="dislikeBtn" title="Pass" style="display: none;">
+                    <img src="icons/pass-black.png" alt="Pass" class="btn-icon-new">
+                </button>
+
                 <!-- Profile Card в новом стиле -->
                 <div class="profile-card-new" id="discoverCard" style="display: none;">
                                     <!-- Большое фото профиля -->
                 <div class="profile-photo-wrapper">
                     <img id="cardMainPhoto" src="" alt="Profile photo" class="profile-main-photo">
-                    
-                    <!-- Action Buttons поверх фото -->
-                    <div class="action-buttons-new" id="discoverActionsFixed" style="display: none;">
-                        <button class="action-btn-new pass-btn" id="dislikeBtn" title="Pass">
-                            <img src="icons/pass-black.png" alt="Pass" class="btn-icon-new">
-                        </button>
-                        
-                        <button class="action-btn-new like-btn" id="likeBtn" title="Like">
-                            <img src="icons/like-red.png" alt="Like" class="btn-icon-new">
-                        </button>
-                    </div>
                     
                     <!-- Кнопка Age Filter в правом верхнем углу фото -->
                     <button class="age-filter-btn" id="ageFilterBtn" onclick="openAgeModal()" title="Age Filter">
@@ -148,6 +142,11 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Кнопка Like справа -->
+                <button class="action-btn-side like-btn" id="likeBtn" title="Like" style="display: none;">
+                    <img src="icons/like-red.png" alt="Like" class="btn-icon-new">
+                </button>
 
                 <!-- Age Filter Slider - справа от карточки -->
                 <div class="age-filter-side" id="ageFilterSide" style="display: none;">
@@ -700,15 +699,15 @@
             // Показываем карточку и кнопки
             const discoverCard = document.getElementById('discoverCard');
             const noProfilesState = document.getElementById('noProfilesState');
-            const actionsFixed = document.getElementById('discoverActionsFixed');
-            const actionsSide = document.getElementById('discoverActionsSide');
+            const dislikeBtn = document.getElementById('dislikeBtn');
+            const likeBtn = document.getElementById('likeBtn');
             
             if (discoverCard) discoverCard.style.display = 'grid';
             if (noProfilesState) noProfilesState.style.display = 'none';
-            // Показываем кнопки в зависимости от размера экрана
-            const isDesktop = window.innerWidth > 1024; // десктопные экраны
-            if (actionsFixed) actionsFixed.style.display = isDesktop ? 'none' : 'flex';
-            if (actionsSide) actionsSide.style.display = isDesktop ? 'block' : 'none';
+            
+            // Показываем боковые кнопки
+            if (dislikeBtn) dislikeBtn.style.display = 'flex';
+            if (likeBtn) likeBtn.style.display = 'flex';
         }
         
         function updateProfilePhoto(profile) {
@@ -756,22 +755,22 @@
         function showLoadingState(show) {
             const loadingElement = document.getElementById('discoverLoading');
             const cardElement = document.getElementById('discoverCard');
-            const actionsElement = document.getElementById('discoverActionsFixed');
-            const actionsSide = document.getElementById('discoverActionsSide');
+            const dislikeBtn = document.getElementById('dislikeBtn');
+            const likeBtn = document.getElementById('likeBtn');
             const viewAllElement = document.getElementById('viewAllMatches');
             
             if (loadingElement) loadingElement.style.display = show ? 'block' : 'none';
             if (cardElement) cardElement.style.display = show ? 'none' : 'grid';
-            const isDesktop = window.innerWidth > 1024;
-            if (actionsElement) actionsElement.style.display = show ? 'none' : (isDesktop ? 'none' : 'flex');
-            if (actionsSide) actionsSide.style.display = show ? 'none' : (isDesktop ? 'block' : 'none');
+            if (dislikeBtn) dislikeBtn.style.display = show ? 'none' : 'flex';
+            if (likeBtn) likeBtn.style.display = show ? 'none' : 'flex';
             if (viewAllElement) viewAllElement.style.display = show ? 'none' : 'block';
         }
         
         function showNoProfilesState() {
             const noProfilesElement = document.getElementById('noProfilesState');
             const cardElement = document.getElementById('discoverCard');
-            const actionsFixed = document.getElementById('discoverActionsFixed');
+            const dislikeBtn = document.getElementById('dislikeBtn');
+            const likeBtn = document.getElementById('likeBtn');
             const viewAllElement = document.getElementById('viewAllMatches');
             
             if (noProfilesElement) {
@@ -780,8 +779,11 @@
             if (cardElement) {
                 cardElement.style.display = 'none';
             }
-            if (actionsFixed) {
-                actionsFixed.style.display = 'none';
+            if (dislikeBtn) {
+                dislikeBtn.style.display = 'none';
+            }
+            if (likeBtn) {
+                likeBtn.style.display = 'none';
             }
             if (viewAllElement) {
                 viewAllElement.style.display = 'none';

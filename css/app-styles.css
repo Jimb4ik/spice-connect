@@ -3425,7 +3425,50 @@ body[data-page="discover"] .photo-modal-image,
   -webkit-box-orient: vertical;
 }
 
-/* Новые кнопки действий */
+/* Кнопки действий сбоку от карточки */
+.action-btn-side {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  transition: var(--transition);
+  box-shadow: var(--shadow);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+}
+
+.action-btn-side.pass-btn {
+  background: #f0f0f0;
+  color: #333;
+  border: 2px solid #ddd;
+  left: -40px; /* слева от карточки */
+}
+
+.action-btn-side.like-btn {
+  background: white;
+  color: #ff4757;
+  border: 2px solid #ff4757;
+  right: -40px; /* справа от карточки */
+}
+
+.action-btn-side:hover {
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: var(--shadow-hover);
+}
+
+.action-btn-side .btn-icon-new {
+  width: 32px;
+  height: 32px;
+}
+
+/* Старые стили для overlay кнопок (если нужны) */
 .action-buttons-new {
   position: absolute;
   top: 0;
@@ -3602,6 +3645,25 @@ body[data-page="discover"] .photo-modal-image,
   
   .action-btn-new.like-btn {
     right: 20px;
+  }
+  
+  /* Боковые кнопки на мобильных */
+  .action-btn-side {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .action-btn-side.pass-btn {
+    left: -30px;
+  }
+  
+  .action-btn-side.like-btn {
+    right: -30px;
+  }
+  
+  .action-btn-side .btn-icon-new {
+    width: 28px;
+    height: 28px;
   }
   
   .btn-view-all-matches {
