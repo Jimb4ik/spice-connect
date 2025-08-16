@@ -115,10 +115,21 @@
 
                 <!-- Profile Card в новом стиле -->
                 <div class="profile-card-new" id="discoverCard" style="display: none;">
-                    <!-- Большое фото профиля -->
-                    <div class="profile-photo-wrapper">
-                        <img id="cardMainPhoto" src="" alt="Profile photo" class="profile-main-photo">
+                                    <!-- Большое фото профиля -->
+                <div class="profile-photo-wrapper">
+                    <img id="cardMainPhoto" src="" alt="Profile photo" class="profile-main-photo">
+                    
+                    <!-- Action Buttons поверх фото -->
+                    <div class="action-buttons-new" id="discoverActionsFixed" style="display: none;">
+                        <button class="action-btn-new pass-btn" id="dislikeBtn" title="Pass">
+                            <img src="icons/pass-black.png" alt="Pass" class="btn-icon-new">
+                        </button>
+                        
+                        <button class="action-btn-new like-btn" id="likeBtn" title="Like">
+                            <img src="icons/like-red.png" alt="Like" class="btn-icon-new">
+                        </button>
                     </div>
+                </div>
                     
                     <!-- Информация под фото -->
                     <div class="profile-info-section">
@@ -175,16 +186,7 @@
                 </div>
             </div>
 
-            <!-- Action Buttons в новом стиле -->
-            <div class="action-buttons-new" id="discoverActionsFixed" style="display: none;">
-                <button class="action-btn-new pass-btn" id="dislikeBtn" title="Pass">
-                    <img src="icons/pass-black.png" alt="Pass" class="btn-icon-new">
-                </button>
-                
-                <button class="action-btn-new like-btn" id="likeBtn" title="Like">
-                    <img src="icons/like-red.png" alt="Like" class="btn-icon-new">
-                </button>
-            </div>
+
 
             <!-- Кнопка Age Filter справа от карточки -->
             <button class="age-filter-btn" id="ageFilterBtn" onclick="openAgeModal()" title="Age Filter">

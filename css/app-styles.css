@@ -2745,10 +2745,9 @@ body {
 
 /* Кнопка Age Filter справа от карточки */
 .age-filter-btn {
-  position: fixed;
-  right: 20px;
-  top: 50%;
-  transform: translateY(-50%);
+  position: absolute;
+  right: -30px;
+  top: 50px;
   width: 60px;
   height: 60px;
   border-radius: 50%;
@@ -2760,11 +2759,11 @@ body {
   justify-content: center;
   box-shadow: 0 4px 20px rgba(255, 107, 157, 0.3);
   transition: all 0.3s ease;
-  z-index: 100;
+  z-index: 10;
 }
 
 .age-filter-btn:hover {
-  transform: translateY(-50%) scale(1.1);
+  transform: scale(1.1);
   box-shadow: 0 8px 30px rgba(255, 107, 157, 0.4);
 }
 
@@ -2950,11 +2949,9 @@ body {
   }
   
   .age-filter-btn {
-    position: fixed;
-    right: 15px;
-    bottom: 120px;
-    top: auto;
-    transform: none;
+    position: absolute;
+    right: -25px;
+    top: 40px;
     width: 50px;
     height: 50px;
   }
@@ -3340,6 +3337,7 @@ body[data-page="discover"] .photo-modal-image,
   border-radius: var(--border-radius);
   overflow: hidden;
   box-shadow: var(--shadow);
+  position: relative;
   border: 1px solid rgba(255, 255, 255, 0.2);
   transition: var(--transition);
   display: grid; /* фиксируем тип отображения сразу */
@@ -3425,12 +3423,13 @@ body[data-page="discover"] .photo-modal-image,
 
 /* Новые кнопки действий */
 .action-buttons-new {
-  display: flex;
-  justify-content: center;
-  gap: 4rem;
-  margin: 40px 0; /* 40px отступ от фото */
-  padding: 0 2rem;
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none; /* кликаются только кнопки */
+  z-index: 5;
 }
 
 /* Side actions for desktop */
@@ -3460,6 +3459,7 @@ body[data-page="discover"] .photo-modal-image,
 }
 
 .action-btn-new {
+  position: absolute;
   width: 60px;
   height: 60px;
   border-radius: 50%;
@@ -3471,17 +3471,21 @@ body[data-page="discover"] .photo-modal-image,
   font-size: 1.5rem;
   transition: var(--transition);
   box-shadow: var(--shadow);
+  pointer-events: auto;
 }
 
 .action-btn-new.pass-btn {
   background: #f0f0f0;
   color: #333;
   border: 2px solid #ddd;
+  left: 30px;
+  bottom: 50%;
+  transform: translateY(50%);
 }
 
 .action-btn-new.pass-btn:hover {
   background: #e0e0e0;
-  transform: scale(1.1);
+  transform: translateY(50%) scale(1.1);
 }
 
 .action-btn-new.pass-btn .btn-icon-new {
@@ -3493,11 +3497,14 @@ body[data-page="discover"] .photo-modal-image,
   background: white;
   color: #ff4757;
   border: 2px solid #ff4757;
+  right: 30px;
+  bottom: 50%;
+  transform: translateY(50%);
 }
 
 .action-btn-new.like-btn:hover {
   background: #f8f8f8;
-  transform: scale(1.1);
+  transform: translateY(50%) scale(1.1);
   box-shadow: var(--shadow-hover);
 }
 
@@ -3576,14 +3583,21 @@ body[data-page="discover"] .photo-modal-image,
   }
   
   .action-buttons-new {
-    gap: 3rem;
-    margin: 30px 0; /* 30px отступ на мобильных */
+    /* absolute positioning на всех устройствах */
   }
   
   .action-btn-new {
     width: 50px;
     height: 50px;
     font-size: 1.2rem;
+  }
+  
+  .action-btn-new.pass-btn {
+    left: 20px;
+  }
+  
+  .action-btn-new.like-btn {
+    right: 20px;
   }
   
   .btn-view-all-matches {
