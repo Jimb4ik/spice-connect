@@ -2743,11 +2743,11 @@ body {
   min-width: 250px;
 }
 
-/* Кнопка Age Filter в правом верхнем углу фото */
+/* Кнопка Age Filter возле правого верхнего угла карточки */
 .age-filter-btn {
   position: absolute;
-  top: 15px;
-  right: 15px;
+  top: -25px;
+  right: -60px;
   width: 50px;
   height: 50px;
   border-radius: 50%;
@@ -2949,8 +2949,8 @@ body {
   }
   
   .age-filter-btn {
-    top: 10px;
-    right: 10px;
+    top: -20px;
+    right: -50px;
     width: 45px;
     height: 45px;
   }
@@ -3448,14 +3448,14 @@ body[data-page="discover"] .photo-modal-image,
   background: #f0f0f0;
   color: #333;
   border: 2px solid #ddd;
-  left: -40px; /* слева от карточки */
+  left: -60px; /* 60px слева от карточки */
 }
 
 .action-btn-side.like-btn {
   background: white;
   color: #ff4757;
   border: 2px solid #ff4757;
-  right: -40px; /* справа от карточки */
+  right: -60px; /* 60px справа от карточки */
 }
 
 .action-btn-side:hover {
@@ -3654,11 +3654,11 @@ body[data-page="discover"] .photo-modal-image,
   }
   
   .action-btn-side.pass-btn {
-    left: -30px;
+    left: -50px;
   }
   
   .action-btn-side.like-btn {
-    right: -30px;
+    right: -50px;
   }
   
   .action-btn-side .btn-icon-new {
