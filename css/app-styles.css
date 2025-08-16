@@ -2745,8 +2745,8 @@ body {
 
 /* Кнопка Age Filter справа от карточки */
 .age-filter-btn {
-  position: absolute;
-  right: -80px;
+  position: fixed;
+  right: 20px;
   top: 50%;
   transform: translateY(-50%);
   width: 60px;
@@ -2760,7 +2760,7 @@ body {
   justify-content: center;
   box-shadow: 0 4px 20px rgba(255, 107, 157, 0.3);
   transition: all 0.3s ease;
-  z-index: 10;
+  z-index: 100;
 }
 
 .age-filter-btn:hover {
@@ -2950,10 +2950,13 @@ body {
   }
   
   .age-filter-btn {
-    position: static;
+    position: fixed;
+    right: 15px;
+    bottom: 120px;
+    top: auto;
     transform: none;
-    margin: 1rem auto;
-    display: flex;
+    width: 50px;
+    height: 50px;
   }
   
   .age-modal-content {

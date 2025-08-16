@@ -1330,9 +1330,9 @@
         }
 
         function syncModalValues() {
-            // Получаем текущие значения из старых элементов или устанавливаем дефолтные
-            const currentMin = window.currentAgeMin || 18;
-            const currentMax = window.currentAgeMax || 80;
+            // Получаем текущие значения из глобальных настроек или устанавливаем дефолтные
+            const currentMin = window.ageSettings?.min || window.currentAgeMin || 18;
+            const currentMax = window.ageSettings?.max || window.currentAgeMax || 80;
             
             const minSlider = document.getElementById('ageMinModal');
             const maxSlider = document.getElementById('ageMaxModal');
@@ -1377,6 +1377,31 @@
             rangeDisplay.textContent = `${minVal} - ${maxVal} years`;
         }
 
+        // Основная функция применения фильтра возраста
+        async function applyAgeFilter() {
+            try {
+                console.log('[AGE FILTER] Applying age filter:', window.currentAgeMin, '-', window.currentAgeMax);
+                
+                // Обновляем глобальные настройки
+                if (window.ageSettings) {
+                    window.ageSettings.min = window.currentAgeMin || 18;
+                    window.ageSettings.max = window.currentAgeMax || 80;
+                }
+                
+                // Сбрасываем текущие профили и загружаем новые с учетом фильтра
+                currentProfileIndex = 0;
+                profilesBuffer = [];
+                currentPage = 0;
+                
+                // Загружаем новые профили
+                await loadNextProfile();
+                
+                console.log('[AGE FILTER] Filter applied successfully');
+            } catch (error) {
+                console.error('[AGE FILTER] Error applying filter:', error);
+            }
+        }
+
         function applyAgeFilterFromModal() {
             const minVal = parseInt(document.getElementById('ageMinModal').value);
             const maxVal = parseInt(document.getElementById('ageMaxModal').value);
@@ -1385,9 +1410,24 @@
             window.currentAgeMin = minVal;
             window.currentAgeMax = maxVal;
             
-            console.log('Age filter applied:', minVal, '-', maxVal);
+            // Обновляем глобальные настройки ageSettings
+            if (!window.ageSettings) {
+                window.ageSettings = { min: 18, max: 80 };
+            }
+            window.ageSettings.min = minVal;
+            window.ageSettings.max = maxVal;
             
-            // Применяем фильтр (используем существующую логику)
+            // Сохраняем в localStorage
+            try {
+                localStorage.setItem('lavrilo_age_settings', JSON.stringify(window.ageSettings));
+            } catch (error) {
+                console.warn('[AGE FILTER] Error saving settings:', error);
+            }
+            
+            console.log('Age filter applied from modal:', minVal, '-', maxVal);
+            console.log('Updated ageSettings:', window.ageSettings);
+            
+            // Применяем фильтр
             applyAgeFilter();
             
             // Закрываем модал
