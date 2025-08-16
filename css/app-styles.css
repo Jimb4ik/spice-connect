@@ -54,6 +54,16 @@ body {
   vertical-align: middle;
   border: none !important;
   outline: none !important;
+  transition: none !important;
+  transform: none !important;
+}
+
+/* Фиксированный размер иконок при hover/active */
+.nav-link:hover .nav-icon,
+.nav-link.active .nav-icon {
+  width: 36px !important;
+  height: 36px !important;
+  transform: none !important;
 }
 
 .dropdown-icon {
@@ -197,44 +207,44 @@ body {
 
 /* Смена иконок при активном состоянии */
 .nav-link.active .nav-icon[src*="home.png"] {
-  content: url("../icons/home-white.png");
+  content: url("../icons/home-dark.png");
 }
 
 .nav-link.active .nav-icon[src*="messages-new.png"] {
-  content: url("../icons/messages-white-new.png");
+  content: url("../icons/messages-dark.png");
 }
 
 .nav-link.active .nav-icon[src*="discover.png"] {
-  content: url("../icons/discover-white.png");
+  content: url("../icons/discover-dark.png");
 }
 
 .nav-link.active .nav-icon[src*="matches-new.png"] {
-  content: url("../icons/matches-white-new.png");
+  content: url("../icons/matches-dark.png");
 }
 
 .nav-link.active .nav-icon[src*="search.png"] {
-  content: url("../icons/search-white.png");
+  content: url("../icons/search-dark.png");
 }
 
 /* Hover состояние тоже меняет иконки */
 .nav-link:hover .nav-icon[src*="home.png"] {
-  content: url("../icons/home-white.png");
+  content: url("../icons/home-dark.png");
 }
 
 .nav-link:hover .nav-icon[src*="messages-new.png"] {
-  content: url("../icons/messages-white-new.png");
+  content: url("../icons/messages-dark.png");
 }
 
 .nav-link:hover .nav-icon[src*="discover.png"] {
-  content: url("../icons/discover-white.png");
+  content: url("../icons/discover-dark.png");
 }
 
 .nav-link:hover .nav-icon[src*="matches-new.png"] {
-  content: url("../icons/matches-white-new.png");
+  content: url("../icons/matches-dark.png");
 }
 
 .nav-link:hover .nav-icon[src*="search.png"] {
-  content: url("../icons/search-white.png");
+  content: url("../icons/search-dark.png");
 }
 
 .nav-badge {
@@ -2733,13 +2743,197 @@ body {
   min-width: 250px;
 }
 
-/* Age Filter под карточкой */
-.age-filter-bottom {
-  margin-top: 1.5rem;
+/* Кнопка Age Filter справа от карточки */
+.age-filter-btn {
+  position: absolute;
+  right: -80px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--gradient-primary);
+  border: none;
+  cursor: pointer;
   display: flex;
+  align-items: center;
   justify-content: center;
+  box-shadow: 0 4px 20px rgba(255, 107, 157, 0.3);
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.age-filter-btn:hover {
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 8px 30px rgba(255, 107, 157, 0.4);
+}
+
+.age-filter-icon {
+  width: 24px;
+  height: 24px;
+  filter: brightness(0) invert(1);
+}
+
+/* Age Modal */
+.age-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.age-modal.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.age-modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  max-width: 400px;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+}
+
+.age-modal-content {
+  position: relative;
+  background: white;
+  border-radius: 20px;
+  padding: 0;
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  transform: scale(0.8);
+  transition: transform 0.3s ease;
+}
+
+.age-modal.active .age-modal-content {
+  transform: scale(1);
+}
+
+.age-modal-header {
+  padding: 2rem 2rem 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.age-modal-header h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.age-modal-close {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #999;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.age-modal-close:hover {
+  background: #f0f0f0;
+  color: #333;
+}
+
+.age-modal-body {
+  padding: 2rem;
+}
+
+.age-modal-body .age-input-group {
+  margin-bottom: 2rem;
+}
+
+.age-modal-body .age-input-group label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 1rem;
+  color: #555;
+}
+
+.age-modal-body .age-slider {
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.age-modal-body span {
+  font-weight: 600;
+  color: var(--primary-color);
+  font-size: 1.1rem;
+}
+
+.age-display-large {
+  text-align: center;
+  padding: 1.5rem;
+  background: var(--gradient-primary);
+  border-radius: 15px;
+  margin-top: 1rem;
+}
+
+.age-display-large span {
+  color: white;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.age-modal-footer {
+  padding: 1rem 2rem 2rem 2rem;
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.btn-cancel,
+.btn-apply {
+  padding: 0.8rem 2rem;
+  border-radius: 12px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-cancel {
+  background: #f0f0f0;
+  color: #666;
+}
+
+.btn-cancel:hover {
+  background: #e0e0e0;
+}
+
+.btn-apply {
+  background: var(--gradient-primary);
+  color: white;
+}
+
+.btn-apply:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
 }
 
 @media (max-width: 768px) {
@@ -2753,6 +2947,30 @@ body {
     min-width: auto;
     width: 100%;
     max-width: 400px;
+  }
+  
+  .age-filter-btn {
+    position: static;
+    transform: none;
+    margin: 1rem auto;
+    display: flex;
+  }
+  
+  .age-modal-content {
+    width: 95%;
+    max-width: 400px;
+  }
+  
+  .age-modal-header {
+    padding: 1.5rem 1.5rem 1rem 1.5rem;
+  }
+  
+  .age-modal-body {
+    padding: 1.5rem;
+  }
+  
+  .age-modal-footer {
+    padding: 1rem 1.5rem 1.5rem 1.5rem;
   }
 }
 
@@ -3206,9 +3424,10 @@ body[data-page="discover"] .photo-modal-image,
 .action-buttons-new {
   display: flex;
   justify-content: center;
-  gap: 2rem;
-  margin: clamp(8px, 1vh, 16px) 0; /* поднимаем ближе и адаптируем по высоте экрана */
+  gap: 4rem;
+  margin: 40px 0; /* 40px отступ от фото */
   padding: 0 2rem;
+  position: relative;
 }
 
 /* Side actions for desktop */
@@ -3263,7 +3482,8 @@ body[data-page="discover"] .photo-modal-image,
 }
 
 .action-btn-new.pass-btn .btn-icon-new {
-  filter: brightness(0.2);
+  width: 32px;
+  height: 32px;
 }
 
 .action-btn-new.like-btn {
@@ -3273,15 +3493,14 @@ body[data-page="discover"] .photo-modal-image,
 }
 
 .action-btn-new.like-btn:hover {
-  background: #ff4757;
-  color: white;
+  background: #f8f8f8;
   transform: scale(1.1);
   box-shadow: var(--shadow-hover);
 }
 
 .action-btn-new.like-btn .btn-icon-new {
-  width: 48px;
-  height: 48px;
+  width: 32px;
+  height: 32px;
 }
 
 .btn-icon-new {
@@ -3354,8 +3573,8 @@ body[data-page="discover"] .photo-modal-image,
   }
   
   .action-buttons-new {
-    gap: 1.5rem;
-    margin: 1.5rem 0;
+    gap: 3rem;
+    margin: 30px 0; /* 30px отступ на мобильных */
   }
   
   .action-btn-new {

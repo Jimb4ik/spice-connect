@@ -147,11 +147,6 @@
   padding-bottom: 1rem;
 }
 
-.messages-page .header-container {
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
 /* Стили точно как у profile-hero-section */
 .messages-container {
   margin-bottom: 3rem;
