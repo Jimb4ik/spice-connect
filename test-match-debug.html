@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Match Debug</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .log { background: #f5f5f5; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .error { background: #ffe6e6; border-left: 4px solid #ff0000; }
+        .success { background: #e6ffe6; border-left: 4px solid #00ff00; }
+        .info { background: #e6f3ff; border-left: 4px solid #0066cc; }
+        button { padding: 10px 20px; margin: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Match System Debug</h1>
+    
+    <div>
+        <button onclick="testDatabaseConnection()">Test Database Connection</button>
+        <button onclick="testCurrentUser()">Test Current User</button>
+        <button onclick="testSaveMatch()">Test Save Match</button>
+        <button onclick="testLoadMatches()">Test Load Matches</button>
+        <button onclick="clearLogs()">Clear Logs</button>
+    </div>
+    
+    <div id="logs"></div>
+
+    <script src="js/auth-manager.js"></script>
+    <script src="js/match-utils.js"></script>
+    
+    <script>
+        function log(message, type = 'info') {
+            const logs = document.getElementById('logs');
+            const logDiv = document.createElement('div');
+            logDiv.className = `log ${type}`;
+            logDiv.innerHTML = `<strong>[${new Date().toLocaleTimeString()}]</strong> ${message}`;
+            logs.appendChild(logDiv);
+            logs.scrollTop = logs.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+        }
+
+        async function testDatabaseConnection() {
+            log('Testing database connection...', 'info');
+            
+            try {
+                const response = await fetch('/api/database', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'init_db'
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    log('✅ Database connection successful!', 'success');
+                    log(`Tables: ${result.tables.join(', ')}`, 'info');
+                } else {
+                    log(`❌ Database connection failed: ${result.error}`, 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Database connection error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testCurrentUser() {
+            log('Testing current user detection...', 'info');
+            
+            try {
+                if (!window.authManager) {
+                    log('❌ AuthManager not available', 'error');
+                    return;
+                }
+
+                const sessionId = window.authManager.sessionId;
+                log(`Session ID: ${sessionId}`, 'info');
+                
+                if (!sessionId) {
+                    log('❌ No session ID available', 'error');
+                    return;
+                }
+
+                const userId = await window.MatchUtils.getCurrentUserId();
+                log(`User ID: ${userId}`, 'info');
+                
+                if (userId) {
+                    log('✅ User detected successfully!', 'success');
+                } else {
+                    log('❌ Failed to get user ID', 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ User detection error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testSaveMatch() {
+            log('Testing match saving...', 'info');
+            
+            try {
+                const testProfile = {
+                    id: 'test_123',
+                    pseudo: 'Test User',
+                    age: 25,
+                    ville: 'Test City',
+                    photos_v2: [{ url: 'https://example.com/photo.jpg' }]
+                };
+
+                log(`Test profile: ${JSON.stringify(testProfile)}`, 'info');
+
+                const result = await window.MatchUtils.saveMatchToDatabase(testProfile);
+                
+                if (result) {
+                    log('✅ Match saved successfully!', 'success');
+                } else {
+                    log('❌ Failed to save match', 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Match saving error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testLoadMatches() {
+            log('Testing match loading...', 'info');
+            
+            try {
+                const matches = await window.MatchUtils.loadUserMatches();
+                
+                log(`Loaded ${matches.length} matches`, 'info');
+                
+                if (matches.length > 0) {
+                    log('✅ Matches loaded successfully!', 'success');
+                    matches.forEach((match, index) => {
+                        log(`Match ${index + 1}: ${match.matched_user_name} (ID: ${match.matched_user_id})`, 'info');
+                    });
+                } else {
+                    log('ℹ️ No matches found in database', 'info');
+                }
+                
+            } catch (error) {
+                log(`❌ Match loading error: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-test when page loads
+        document.addEventListener('DOMContentLoaded', async () => {
+            log('🚀 Starting debug session...', 'info');
+            
+            // Wait for auth manager to initialize
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await testDatabaseConnection();
+        });
+    </script>
+</body>
+</html>

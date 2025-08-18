@@ -23,19 +23,27 @@ async function saveMatchToDatabase(matchedProfile, currentUserId = null) {
         }
         
         // Подготавливаем данные матча
+        const photos = getProfilePhotos(matchedProfile);
         const matchData = {
             action: 'save_match',
             user_id: userId,
             matched_user_id: matchedProfile.id || matchedProfile.id_membre,
             matched_user_name: matchedProfile.pseudo || matchedProfile.nom_complet || 'Unknown',
-            matched_user_age: matchedProfile.age || null,
+            matched_user_age: parseInt(matchedProfile.age) || null,
             matched_user_city: matchedProfile.ville || matchedProfile.region || null,
-            matched_user_photos: getProfilePhotos(matchedProfile)
+            matched_user_photos: photos
         };
         
+        // Валидация обязательных полей
+        if (!matchData.matched_user_id) {
+            console.error('[MATCH-UTILS] No matched user ID found in profile:', matchedProfile);
+            return false;
+        }
+
         console.log('[MATCH-UTILS] Match data to save:', matchData);
         console.log('[MATCH-UTILS] Profile ID found:', matchedProfile.id || matchedProfile.id_membre);
         console.log('[MATCH-UTILS] Current user ID:', userId);
+        console.log('[MATCH-UTILS] Photos found:', photos);
         
         const response = await fetch('/api/database', {
             method: 'POST',
@@ -44,6 +52,11 @@ async function saveMatchToDatabase(matchedProfile, currentUserId = null) {
             },
             body: JSON.stringify(matchData)
         });
+        
+        if (!response.ok) {
+            console.error('[MATCH-UTILS] HTTP error:', response.status, response.statusText);
+            return false;
+        }
         
         const result = await response.json();
         console.log('[MATCH-UTILS] Match saved result:', result);
@@ -69,22 +82,46 @@ async function saveMatchToDatabase(matchedProfile, currentUserId = null) {
 async function getCurrentUserId() {
     try {
         const sessionId = window.authManager?.sessionId;
-        if (!sessionId) return null;
+        if (!sessionId) {
+            console.error('[MATCH-UTILS] No session ID available');
+            return null;
+        }
+        
+        console.log('[MATCH-UTILS] Session ID:', sessionId);
+        
+        // Проверяем есть ли сохраненный user ID в localStorage
+        const userData = localStorage.getItem('lavrilo_user');
+        if (userData) {
+            try {
+                const user = JSON.parse(userData);
+                if (user.id) {
+                    console.log('[MATCH-UTILS] Using cached user ID:', user.id);
+                    return user.id;
+                }
+            } catch (e) {
+                console.warn('[MATCH-UTILS] Failed to parse cached user data');
+            }
+        }
         
         const apiConfigResponse = await fetch('/api/get-api-key');
         const apiConfig = await apiConfigResponse.json();
         
         const response = await fetch(`${apiConfig.baseUrl}/index_api/user?api_key=${apiConfig.apiKey}&session_id=${sessionId}`);
-        const userData = await response.json();
+        const userApiData = await response.json();
         
-        if (userData && userData.result) {
-            return userData.result.id || userData.result.id_membre || sessionId;
+        console.log('[MATCH-UTILS] API user data:', userApiData);
+        
+        if (userApiData && userApiData.result) {
+            const userId = userApiData.result.id || userApiData.result.id_membre || sessionId;
+            console.log('[MATCH-UTILS] Extracted user ID:', userId);
+            return userId;
         }
         
+        console.log('[MATCH-UTILS] Using session ID as fallback user ID');
         return sessionId; // fallback
     } catch (error) {
         console.error('[MATCH-UTILS] Error getting user ID:', error);
-        return null;
+        return window.authManager?.sessionId || null;
     }
 }
 
