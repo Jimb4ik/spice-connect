@@ -25,17 +25,10 @@ async function saveMatchToDatabase(matchedProfile, currentUserId = null) {
         // Подготавливаем данные матча
         const photos = getProfilePhotos(matchedProfile);
         
-        // КРИТИЧЕСКИ ВАЖНО: Убедимся что photos это JSON строка, а не массив
-        let photosForDB;
-        if (Array.isArray(photos)) {
-            photosForDB = JSON.stringify(photos);
-        } else if (typeof photos === 'string') {
-            photosForDB = photos;
-        } else {
-            photosForDB = JSON.stringify([]);
-        }
+        // УПРОЩАЕМ: Всегда используем пустой массив для совместимости
+        let photosForDB = "[]";  // Простая JSON строка пустого массива
         
-        console.log('[MATCH-UTILS] Photos for DB (type:', typeof photosForDB, '):', photosForDB);
+        console.log('[MATCH-UTILS] Using simplified photos for DB:', photosForDB);
         
         const matchData = {
             action: 'save_match',
@@ -58,27 +51,43 @@ async function saveMatchToDatabase(matchedProfile, currentUserId = null) {
         console.log('[MATCH-UTILS] Current user ID:', userId);
         console.log('[MATCH-UTILS] Photos found:', photos);
         
-        const response = await fetch('/api/database', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(matchData)
-        });
-        
-        if (!response.ok) {
-            console.error('[MATCH-UTILS] HTTP error:', response.status, response.statusText);
-            return false;
-        }
-        
-        const result = await response.json();
-        console.log('[MATCH-UTILS] Match saved result:', result);
-        
-        if (result.success) {
-            console.log('✅ Match successfully saved to database!');
-            return true;
-        } else {
-            console.error('❌ Failed to save match:', result.error);
+        try {
+            console.log('[MATCH-UTILS] 🚀 Attempting to save match with data:', matchData);
+            
+            const response = await fetch('/api/database', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(matchData)
+            });
+            
+            console.log('[MATCH-UTILS] Database response status:', response.status);
+            
+            if (!response.ok) {
+                console.error('[MATCH-UTILS] HTTP error:', response.status, response.statusText);
+                // Пытаемся получить детали ошибки
+                try {
+                    const errorText = await response.text();
+                    console.error('[MATCH-UTILS] Error response body:', errorText);
+                } catch (e) {
+                    console.error('[MATCH-UTILS] Could not read error response');
+                }
+                return false;
+            }
+            
+            const result = await response.json();
+            console.log('[MATCH-UTILS] Match saved result:', result);
+            
+            if (result.success) {
+                console.log('✅ Match successfully saved to database!');
+                return true;
+            } else {
+                console.error('❌ Failed to save match:', result.error, result.details);
+                return false;
+            }
+        } catch (fetchError) {
+            console.error('[MATCH-UTILS] ❌ Critical fetch error:', fetchError.message, fetchError);
             return false;
         }
         

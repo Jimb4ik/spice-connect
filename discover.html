@@ -987,20 +987,25 @@
                 // ПРОСТОЕ РЕШЕНИЕ: Попробуем прямо установить фото из основных полей
                 let photoUrl = null;
                 
-                // Пробуем разные поля фото из профиля
-                if (matchedProfile.photo) {
+                // ИСПРАВЛЯЕМ: Пробуем разные поля фото из профиля 
+                console.log('[MATCH] 🔍 Profile structure:', JSON.stringify(matchedProfile, null, 2));
+                
+                // Сначала пробуем взять фото из отображаемого профиля на странице (наиболее надежно)
+                const currentPhotoImg = document.getElementById('cardMainPhoto');
+                if (currentPhotoImg && currentPhotoImg.src && currentPhotoImg.src.startsWith('http')) {
+                    photoUrl = currentPhotoImg.src;
+                    console.log('[MATCH] 📸 Using current displayed photo:', photoUrl);
+                } else if (matchedProfile.photo && typeof matchedProfile.photo === 'string' && matchedProfile.photo.startsWith('http')) {
                     photoUrl = matchedProfile.photo;
-                } else if (matchedProfile.picture_430) {
+                    console.log('[MATCH] 📸 Using profile.photo:', photoUrl);
+                } else if (matchedProfile.picture_430 && typeof matchedProfile.picture_430 === 'string' && matchedProfile.picture_430.startsWith('http')) {
                     photoUrl = matchedProfile.picture_430;
-                } else if (matchedProfile.picture) {
+                    console.log('[MATCH] 📸 Using profile.picture_430:', photoUrl);
+                } else if (matchedProfile.picture && typeof matchedProfile.picture === 'string' && matchedProfile.picture.startsWith('http')) {
                     photoUrl = matchedProfile.picture;
+                    console.log('[MATCH] 📸 Using profile.picture:', photoUrl);
                 } else {
-                    // Попробуем взять фото из отображаемого профиля на странице
-                    const currentPhotoImg = document.getElementById('cardMainPhoto');
-                    if (currentPhotoImg && currentPhotoImg.src) {
-                        photoUrl = currentPhotoImg.src;
-                        console.log('[MATCH] 📸 Using current displayed photo:', photoUrl);
-                    }
+                    console.log('[MATCH] ❌ No valid photo URL found in any field');
                 }
                 
                 console.log('[MATCH] 🎯 Direct photo URL found:', photoUrl);
