@@ -149,18 +149,98 @@ function getProfilePhotos(profile) {
 }
 
 /**
- * Загрузить все матчи пользователя из базы данных
+ * Загрузить все матчи пользователя из API и локальной базы данных
  * @param {String} userId - ID пользователя (опционально)
  * @returns {Promise<Array>} - Массив матчей
  */
 async function loadUserMatches(userId = null) {
+    try {
+        console.log('[MATCH-UTILS] Loading matches from API and database...');
+        
+        // Загружаем матчи из официального API
+        const apiMatches = await loadMatchesFromAPI();
+        console.log('[MATCH-UTILS] API matches:', apiMatches);
+        
+        // Загружаем матчи из локальной базы данных
+        const dbMatches = await loadMatchesFromDatabase(userId);
+        console.log('[MATCH-UTILS] Database matches:', dbMatches);
+        
+        // Объединяем матчи, убираем дубликаты
+        const allMatches = mergeMatches(apiMatches, dbMatches);
+        console.log('[MATCH-UTILS] Merged matches:', allMatches);
+        
+        return allMatches;
+        
+    } catch (error) {
+        console.error('[MATCH-UTILS] Error loading matches:', error);
+        return [];
+    }
+}
+
+/**
+ * Загрузить матчи из официального API
+ * @returns {Promise<Array>} - Массив матчей из API
+ */
+async function loadMatchesFromAPI() {
+    try {
+        const sessionId = window.authManager?.sessionId;
+        if (!sessionId) {
+            console.warn('[MATCH-UTILS] No session ID for API matches');
+            return [];
+        }
+        
+        const apiConfigResponse = await fetch('/api/get-api-key');
+        const apiConfig = await apiConfigResponse.json();
+        
+        const matchQuery = new URLSearchParams({
+            session_id: sessionId,
+            api_key: apiConfig.apiKey,
+            action: 'get_matches'
+        });
+        
+        const apiUrl = `${apiConfig.baseUrl}/index_api/match?${matchQuery.toString()}`;
+        console.log('[MATCH-UTILS] Loading matches from API:', apiUrl);
+        
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+        
+        console.log('[MATCH-UTILS] API response:', data);
+        
+        if (data && data.result && Array.isArray(data.result)) {
+            return data.result.map(match => ({
+                id: match.id || match.id_membre,
+                matched_user_id: match.id || match.id_membre,
+                matched_user_name: match.pseudo || match.nom_complet || 'Unknown',
+                matched_user_age: match.age,
+                matched_user_city: match.ville || match.region,
+                matched_user_photos: getProfilePhotos(match),
+                match_date: new Date().toISOString(),
+                is_read: false,
+                source: 'api'
+            }));
+        }
+        
+        return [];
+        
+    } catch (error) {
+        console.error('[MATCH-UTILS] Error loading API matches:', error);
+        return [];
+    }
+}
+
+/**
+ * Загрузить матчи из локальной базы данных
+ * @param {String} userId - ID пользователя
+ * @returns {Promise<Array>} - Массив матчей из БД
+ */
+async function loadMatchesFromDatabase(userId = null) {
     try {
         if (!userId) {
             userId = await getCurrentUserId();
         }
         
         if (!userId) {
-            console.error('[MATCH-UTILS] No user ID for loading matches');
+            console.warn('[MATCH-UTILS] No user ID for database matches');
             return [];
         }
         
@@ -178,17 +258,47 @@ async function loadUserMatches(userId = null) {
         const result = await response.json();
         
         if (result.success) {
-            console.log('[MATCH-UTILS] Matches loaded:', result.data);
-            return result.data || [];
+            return (result.data || []).map(match => ({
+                ...match,
+                source: 'database'
+            }));
         } else {
-            console.error('[MATCH-UTILS] Failed to load matches:', result.error);
+            console.error('[MATCH-UTILS] Failed to load database matches:', result.error);
             return [];
         }
         
     } catch (error) {
-        console.error('[MATCH-UTILS] Error loading matches:', error);
+        console.error('[MATCH-UTILS] Error loading database matches:', error);
         return [];
     }
+}
+
+/**
+ * Объединить матчи из API и базы данных, убрать дубликаты
+ * @param {Array} apiMatches - Матчи из API
+ * @param {Array} dbMatches - Матчи из БД
+ * @returns {Array} - Объединенный массив матчей
+ */
+function mergeMatches(apiMatches, dbMatches) {
+    const matchesMap = new Map();
+    
+    // Добавляем матчи из API
+    apiMatches.forEach(match => {
+        const key = match.matched_user_id;
+        matchesMap.set(key, match);
+    });
+    
+    // Добавляем матчи из БД (только если их нет в API)
+    dbMatches.forEach(match => {
+        const key = match.matched_user_id;
+        if (!matchesMap.has(key)) {
+            matchesMap.set(key, match);
+        }
+    });
+    
+    return Array.from(matchesMap.values()).sort((a, b) => 
+        new Date(b.match_date) - new Date(a.match_date)
+    );
 }
 
 // Экспортируем функции для использования в других файлах
@@ -197,6 +307,9 @@ if (typeof window !== 'undefined') {
         saveMatchToDatabase,
         getCurrentUserId,
         getProfilePhotos,
-        loadUserMatches
+        loadUserMatches,
+        loadMatchesFromAPI,
+        loadMatchesFromDatabase,
+        mergeMatches
     };
 }

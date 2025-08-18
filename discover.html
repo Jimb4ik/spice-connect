@@ -922,8 +922,9 @@
                     if (data.result === 'match') {
                         console.log('🎉 IT\'S A MATCH!');
                         console.log('[DISCOVER] Current profile for match:', currentProfile);
+                        console.log('[DISCOVER] API match response:', data);
                         
-                        // Сохраняем матч в базу данных
+                        // ОБЯЗАТЕЛЬНО сохраняем каждый матч в локальную базу данных
                         try {
                             console.log('[DISCOVER] 🔍 Starting match save process...');
                             console.log('[DISCOVER] Current session data:', {
@@ -940,19 +941,21 @@
                             
                             console.log('[DISCOVER] MatchUtils available:', Object.keys(window.MatchUtils));
                             
+                            // КРИТИЧЕСКИ ВАЖНО: Сохраняем каждый матч в нашу БД для гарантированного отображения
                             const matchSaved = await window.MatchUtils.saveMatchToDatabase(currentProfile);
                             console.log('[DISCOVER] Match save result:', matchSaved);
                             
                             if (!matchSaved) {
-                                console.error('[DISCOVER] ❌ Failed to save match to database');
-                                console.error('[DISCOVER] 🚨 This is a critical issue - matches are not being saved!');
-                                // Показываем модал даже если не удалось сохранить в БД
+                                console.error('[DISCOVER] ❌ CRITICAL: Failed to save match to database!');
+                                console.error('[DISCOVER] 🚨 Match will be lost if not saved to local database!');
+                                console.error('[DISCOVER] Profile data for failed save:', currentProfile);
                             } else {
-                                console.log('[DISCOVER] ✅ Match successfully saved to database');
+                                console.log('[DISCOVER] ✅ Match successfully saved to local database');
                             }
                         } catch (saveError) {
-                            console.error('[DISCOVER] Error saving match:', saveError);
+                            console.error('[DISCOVER] 🚨 CRITICAL ERROR saving match:', saveError);
                             console.error('[DISCOVER] Stack trace:', saveError.stack);
+                            console.error('[DISCOVER] Profile data:', currentProfile);
                         }
                         
                         showMatchModal(currentProfile);
@@ -979,7 +982,8 @@
             
             // Заполняем данные матча
             if (theirPhoto && matchedProfile) {
-                updateProfilePhoto(theirPhoto, matchedProfile);
+                console.log('[MATCH] Setting their photo...', matchedProfile);
+                setModalProfilePhoto(theirPhoto, matchedProfile);
             }
             
             if (theirName) {
@@ -1055,10 +1059,62 @@
             }
         }
         
+        function setModalProfilePhoto(imgElement, profile) {
+            if (!imgElement || !profile) {
+                console.warn('[MATCH] Missing imgElement or profile for photo setting');
+                return;
+            }
+            
+            let photoUrl = null;
+            
+            // Пробуем разные источники фотографий
+            if (profile.photos_v2) {
+                if (profile.photos_v2.public) {
+                    const publicPhotos = profile.photos_v2.public;
+                    const firstPhotoKey = Object.keys(publicPhotos)[0];
+                    if (firstPhotoKey && publicPhotos[firstPhotoKey]) {
+                        photoUrl = publicPhotos[firstPhotoKey].sq_430 || 
+                                  publicPhotos[firstPhotoKey].normal || 
+                                  publicPhotos[firstPhotoKey].sq_middle;
+                    }
+                } else if (Array.isArray(profile.photos_v2) && profile.photos_v2.length > 0) {
+                    const mainPhoto = profile.photos_v2.find(p => p.main_photo === '1') || profile.photos_v2[0];
+                    photoUrl = mainPhoto.sq_430 || mainPhoto.normal || mainPhoto.sq_middle;
+                }
+            } else if (profile.photos && profile.photos.length > 0) {
+                const mainPhoto = profile.photos.find(p => p.main_photo === '1') || profile.photos[0];
+                photoUrl = mainPhoto.sq_430 || mainPhoto.normal || mainPhoto.sq_middle;
+            } else if (profile.picture_430) {
+                photoUrl = profile.picture_430;
+            } else if (profile.picture) {
+                photoUrl = profile.picture;
+            }
+            
+            console.log('[MATCH] Found photo URL:', photoUrl);
+            
+            if (photoUrl) {
+                imgElement.src = photoUrl;
+                imgElement.style.display = 'block';
+                imgElement.onload = function() {
+                    console.log('[MATCH] Photo loaded successfully');
+                };
+                imgElement.onerror = function() {
+                    console.warn('[MATCH] Failed to load photo, using placeholder');
+                    imgElement.style.display = 'none';
+                };
+            } else {
+                console.warn('[MATCH] No photo URL found, hiding image');
+                imgElement.style.display = 'none';
+            }
+        }
+
         async function loadCurrentUserPhoto(imgElement) {
             try {
                 const sessionId = window.authManager?.sessionId;
-                if (!sessionId) return;
+                if (!sessionId) {
+                    console.warn('[MATCH] No session ID for loading user photo');
+                    return;
+                }
                 
                 const apiConfigResponse = await fetch('/api/get-api-key');
                 const apiConfig = await apiConfigResponse.json();
@@ -1066,8 +1122,12 @@
                 const response = await fetch(`${apiConfig.baseUrl}/index_api/user?api_key=${apiConfig.apiKey}&session_id=${sessionId}`);
                 const userData = await response.json();
                 
+                console.log('[MATCH] Current user data:', userData);
+                
                 if (userData && userData.result) {
-                    updateProfilePhoto(imgElement, userData.result);
+                    setModalProfilePhoto(imgElement, userData.result);
+                } else {
+                    console.warn('[MATCH] No user data received');
                 }
             } catch (error) {
                 console.error('[DISCOVER] Error loading user photo:', error);
