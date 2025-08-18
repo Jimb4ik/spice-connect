@@ -322,6 +322,18 @@
         function createMatchCard(match) {
             console.log('[MATCHES] Creating card for match:', match);
             
+            // Получаем базовую информацию
+            const name = match.matched_user_name || 'Unknown';
+            const age = match.matched_user_age || '--';
+            const city = match.matched_user_city || 'Unknown';
+            const isNew = !match.is_read;
+            const matchDate = new Date(match.match_date);
+            const timeAgo = getTimeAgo(matchDate);
+            const firstLetter = name.charAt(0).toUpperCase();
+            
+            // Попытаемся загрузить фото из API асинхронно после создания карточки
+            let photoUrl = null;
+            
             // Получаем фотографии из JSON поля с улучшенной обработкой
             let photos = [];
             try {
@@ -337,38 +349,21 @@
                 photos = [];
             }
             
-            console.log('[MATCHES] Photos for match:', photos);
-            
             // Пытаемся получить фото из разных источников
-            let photoUrl = null;
             if (photos && photos.length > 0) {
-                // Берем первое фото, которое не пустое
                 photoUrl = photos.find(photo => photo && photo.trim() !== '') || null;
             }
             
+            console.log('[MATCHES] Photos for match:', photos);
             console.log('[MATCHES] Final photo URL:', photoUrl);
-            
-            // Если фото нет, создаем placeholder с первой буквой имени
-            const name = match.matched_user_name || 'Unknown';
-            const age = match.matched_user_age || '--';
-            const city = match.matched_user_city || 'Unknown';
-            const isNew = !match.is_read;
-            const matchDate = new Date(match.match_date);
-            const timeAgo = getTimeAgo(matchDate);
-            const firstLetter = name.charAt(0).toUpperCase();
 
-            return `
+                        const cardHtml = `
                 <div class="match-card ${isNew ? 'new-match' : ''}" data-match-id="${match.matched_user_id}">
                     <div class="match-card-photo">
-                        ${photoUrl ? 
-                            `<img src="${photoUrl}" alt="${name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                             <div class="photo-placeholder" style="display: none;">
-                                <span>${firstLetter}</span>
-                             </div>` :
-                            `<div class="photo-placeholder">
-                                <span>${firstLetter}</span>
-                             </div>`
-                        }
+                        <img id="photo-${match.matched_user_id}" src="${photoUrl || ''}" alt="${name}" style="display: ${photoUrl ? 'block' : 'none'};" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="photo-placeholder" style="display: ${photoUrl ? 'none' : 'flex'};">
+                            <span>${firstLetter}</span>
+                        </div>
                         ${isNew ? '<div class="match-badge">NEW</div>' : ''}
                     </div>
                     <div class="match-card-info">
@@ -386,6 +381,18 @@
                     </div>
                 </div>
             `;
+            
+            // Пытаемся загрузить фото асинхронно после создания карточки
+            if (!photoUrl) {
+                setTimeout(() => {
+                    const imgElement = document.getElementById(`photo-${match.matched_user_id}`);
+                    if (imgElement) {
+                        tryLoadUserPhoto(match.matched_user_id, imgElement);
+                    }
+                }, 100);
+            }
+            
+            return cardHtml;
         }
         
         // Вспомогательная функция для отображения времени
@@ -494,23 +501,20 @@
             try {
                 console.log('[CONTACT] Creating contact for match profile via PROXY:', profile);
                 
-                // Используем наш прокси endpoint для избежания CORS проблем
-                const contactData = {
+                // Строим URL с query параметрами для совместимости с spice-multi-test.js
+                const params = new URLSearchParams({
                     endpoint: '/ajax_api/add_contact',
                     method: 'POST',
                     session_id: sessionId,
                     user_id: profile.id,
                     name: profile.pseudo || profile.nom_complet || 'Unknown'
-                };
+                });
                 
-                console.log('[CONTACT] Contact data for proxy:', contactData);
+                const apiUrl = `/api/spice-multi-test?${params.toString()}`;
+                console.log('[CONTACT] API URL:', apiUrl);
                 
-                const response = await fetch('/api/spice-multi-test', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(contactData)
+                const response = await fetch(apiUrl, {
+                    method: 'GET' // Используем GET так как параметры в URL
                 });
                 
                 if (!response.ok) {
@@ -529,6 +533,69 @@
             } catch (error) {
                 console.error('[CONTACT] Error creating contact via proxy:', error);
                 return { success: false, error: error.message };
+            }
+        }
+
+        // Функция для попытки загрузить фото профиля через API
+        async function tryLoadUserPhoto(userId, imgElement) {
+            try {
+                console.log('[MATCHES] Trying to load photo for user ID:', userId);
+                
+                const sessionId = window.authManager?.sessionId;
+                if (!sessionId) {
+                    console.warn('[MATCHES] No session ID for photo loading');
+                    return false;
+                }
+                
+                // Пробуем получить фото через API
+                const apiUrl = `/api/spice-multi-test?endpoint=/index_api/user&method=POST&session_id=${sessionId}&id=${userId}&get_picture_430=1`;
+                const response = await fetch(apiUrl);
+                
+                if (!response.ok) {
+                    console.warn('[MATCHES] API request failed:', response.status);
+                    return false;
+                }
+                
+                const result = await response.json();
+                console.log('[MATCHES] Photo API response:', result);
+                
+                if (result.success && result.data?.result) {
+                    const user = result.data.result;
+                    let photoUrl = null;
+                    
+                    // Ищем фото в различных полях
+                    if (user.picture_430) {
+                        photoUrl = user.picture_430;
+                    } else if (user.picture) {
+                        photoUrl = user.picture;
+                    } else if (user.photos && user.photos.length > 0) {
+                        photoUrl = user.photos[0].url_big || user.photos[0].url_middle;
+                    }
+                    
+                    if (photoUrl) {
+                        // Убеждаемся что URL полный
+                        if (!photoUrl.startsWith('http') && !photoUrl.startsWith('/')) {
+                            photoUrl = 'https://dev2018.de5a7.com/' + photoUrl;
+                        }
+                        
+                        console.log('[MATCHES] Found photo URL:', photoUrl);
+                        imgElement.src = photoUrl;
+                        imgElement.style.display = 'block';
+                        imgElement.onerror = function() {
+                            console.warn('[MATCHES] Photo failed to load, keeping placeholder');
+                            this.style.display = 'none';
+                            this.nextElementSibling.style.display = 'flex';
+                        };
+                        return true;
+                    }
+                }
+                
+                console.warn('[MATCHES] No photo found in API response');
+                return false;
+                
+            } catch (error) {
+                console.error('[MATCHES] Error loading photo:', error);
+                return false;
             }
         }
 
