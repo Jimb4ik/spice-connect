@@ -983,16 +983,75 @@
             // Заполняем данные матча
             if (theirPhoto && matchedProfile) {
                 console.log('[MATCH] Setting their photo...', matchedProfile);
-                setModalProfilePhoto(theirPhoto, matchedProfile);
+                
+                // ПРОСТОЕ РЕШЕНИЕ: Попробуем прямо установить фото из основных полей
+                let photoUrl = null;
+                
+                // Пробуем разные поля фото из профиля
+                if (matchedProfile.photo) {
+                    photoUrl = matchedProfile.photo;
+                } else if (matchedProfile.picture_430) {
+                    photoUrl = matchedProfile.picture_430;
+                } else if (matchedProfile.picture) {
+                    photoUrl = matchedProfile.picture;
+                } else {
+                    // Попробуем взять фото из отображаемого профиля на странице
+                    const currentPhotoImg = document.getElementById('cardMainPhoto');
+                    if (currentPhotoImg && currentPhotoImg.src) {
+                        photoUrl = currentPhotoImg.src;
+                        console.log('[MATCH] 📸 Using current displayed photo:', photoUrl);
+                    }
+                }
+                
+                console.log('[MATCH] 🎯 Direct photo URL found:', photoUrl);
+                
+                if (photoUrl) {
+                    theirPhoto.src = photoUrl;
+                    theirPhoto.style.display = 'block';
+                    console.log('[MATCH] ✅ Their photo set successfully');
+                } else {
+                    console.log('[MATCH] ❌ No photo found, trying advanced method...');
+                    setModalProfilePhoto(theirPhoto, matchedProfile);
+                }
             }
             
             if (theirName) {
                 theirName.textContent = matchedProfile.pseudo || matchedProfile.nom_complet || 'User';
             }
             
-            // Загружаем фото текущего пользователя
+            // Загружаем фото текущего пользователя ПРОСТЫМ СПОСОБОМ
             if (yourPhoto && window.authManager) {
-                loadCurrentUserPhoto(yourPhoto);
+                console.log('[MATCH] Loading current user photo...');
+                
+                // Попробуем получить фото из localStorage
+                const userData = localStorage.getItem('lavrilo_user');
+                if (userData) {
+                    try {
+                        const user = JSON.parse(userData);
+                        if (user.photo) {
+                            yourPhoto.src = user.photo;
+                            yourPhoto.style.display = 'block';
+                            console.log('[MATCH] ✅ Your photo set from localStorage');
+                        } else {
+                            console.log('[MATCH] No photo in localStorage, trying header avatar...');
+                            // Попробуем получить фото из аватара в хедере
+                            const headerAvatar = document.querySelector('.user-avatar img, #userAvatar, .header-avatar img');
+                            if (headerAvatar && headerAvatar.src) {
+                                yourPhoto.src = headerAvatar.src;
+                                yourPhoto.style.display = 'block';
+                                console.log('[MATCH] ✅ Your photo set from header avatar');
+                            } else {
+                                console.log('[MATCH] No header avatar, trying API...');
+                                loadCurrentUserPhoto(yourPhoto);
+                            }
+                        }
+                    } catch (e) {
+                        console.log('[MATCH] Failed to parse localStorage, trying API...');
+                        loadCurrentUserPhoto(yourPhoto);
+                    }
+                } else {
+                    loadCurrentUserPhoto(yourPhoto);
+                }
             }
             
             // Показываем модальное окно
