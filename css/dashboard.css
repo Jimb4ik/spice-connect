@@ -2537,6 +2537,37 @@
   font-size: 16px;
 }
 
+/* Новый layout для matches согласно макету */
+.matches-content-container {
+  display: flex;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 40px;
+  align-items: flex-start;
+  padding: 0 20px;
+}
+
+.matches-stats-sidebar {
+  flex: 0 0 200px;
+  position: sticky;
+  top: 120px;
+}
+
+.stats-grid-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.matches-grid-centered {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  justify-items: center;
+}
+
+/* Старый стиль для обратной совместимости */
 .matches-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -3727,9 +3758,25 @@
     height: 100px;
   }
   
-  .matches-grid, .flash-cards, .results-grid {
+  .matches-grid, .matches-grid-centered, .flash-cards, .results-grid {
     grid-template-columns: 1fr;
     gap: 16px;
+  }
+  
+  .matches-content-container {
+    flex-direction: column;
+    gap: 24px;
+  }
+  
+  .matches-stats-sidebar {
+    flex: none;
+    position: static;
+  }
+  
+  .stats-grid-vertical {
+    flex-direction: row;
+    gap: 12px;
+    overflow-x: auto;
   }
   
   .match-content, .garden-match-content {

@@ -98,23 +98,6 @@
             <p class="page-subtitle">People who liked you back - start a conversation!</p>
         </div>
 
-        <div class="matches-stats fade-in-up">
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-number" id="totalMatchesCount">-</div>
-                    <div class="stat-label">Total Matches</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="newMatchesCount">-</div>
-                    <div class="stat-label">New Matches</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="activeChatsCount">3</div>
-                    <div class="stat-label">Active Chats</div>
-                </div>
-            </div>
-        </div>
-
         <!-- Фильтры матчей -->
         <div class="matches-filters fade-in-up">
             <div class="filter-tabs">
@@ -125,12 +108,33 @@
             </div>
         </div>
 
-        <!-- Сетка матчей -->
-        <div class="matches-grid fade-in-up" id="matchesGrid">
-            <!-- Матчи будут загружены динамически -->
-            <div class="loading-matches">
-                <div class="loading-spinner"></div>
-                <p>Loading your matches...</p>
+        <!-- Контейнер для центрирования контента -->
+        <div class="matches-content-container">
+            <!-- Статистика слева -->
+            <div class="matches-stats-sidebar fade-in-up">
+                <div class="stats-grid-vertical">
+                    <div class="stat-card">
+                        <div class="stat-number" id="totalMatchesCount">-</div>
+                        <div class="stat-label">Total Matches</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="newMatchesCount">-</div>
+                        <div class="stat-label">New Matches</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="activeChatsCount">3</div>
+                        <div class="stat-label">Active Chats</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Сетка матчей в центре -->
+            <div class="matches-grid-centered fade-in-up" id="matchesGrid">
+                <!-- Матчи будут загружены динамически -->
+                <div class="loading-matches">
+                    <div class="loading-spinner"></div>
+                    <p>Loading your matches...</p>
+                </div>
             </div>
         </div>
 
@@ -316,21 +320,33 @@
         }
 
         function createMatchCard(match) {
-            // Получаем фотографии из JSON поля
+            console.log('[MATCHES] Creating card for match:', match);
+            
+            // Получаем фотографии из JSON поля с улучшенной обработкой
             let photos = [];
             try {
-                photos = typeof match.matched_user_photos === 'string' 
-                    ? JSON.parse(match.matched_user_photos) 
-                    : match.matched_user_photos || [];
+                if (match.matched_user_photos) {
+                    if (typeof match.matched_user_photos === 'string') {
+                        photos = JSON.parse(match.matched_user_photos);
+                    } else if (Array.isArray(match.matched_user_photos)) {
+                        photos = match.matched_user_photos;
+                    }
+                }
             } catch (e) {
+                console.warn('[MATCHES] Error parsing photos:', e);
                 photos = [];
             }
             
+            console.log('[MATCHES] Photos for match:', photos);
+            
             // Пытаемся получить фото из разных источников
             let photoUrl = null;
-            if (photos.length > 0) {
-                photoUrl = photos[0];
+            if (photos && photos.length > 0) {
+                // Берем первое фото, которое не пустое
+                photoUrl = photos.find(photo => photo && photo.trim() !== '') || null;
             }
+            
+            console.log('[MATCHES] Final photo URL:', photoUrl);
             
             // Если фото нет, создаем placeholder с первой буквой имени
             const name = match.matched_user_name || 'Unknown';
@@ -473,45 +489,45 @@
             }
         }
 
-        // Функция создания контакта (копия из discover.html)
+        // Функция создания контакта через PROXY (исправляет CORS проблемы)
         async function createContactForMatch(sessionId, profile) {
             try {
-                console.log('[CONTACT] Creating contact for match profile:', profile);
+                console.log('[CONTACT] Creating contact for match profile via PROXY:', profile);
                 
-                // Получаем API конфигурацию
-                const apiConfigResponse = await fetch('/api/get-api-key');
-                const apiConfig = await apiConfigResponse.json();
-                
-                // Создаем контакт через API
+                // Используем наш прокси endpoint для избежания CORS проблем
                 const contactData = {
+                    endpoint: '/ajax_api/add_contact',
+                    method: 'POST',
                     session_id: sessionId,
                     user_id: profile.id,
                     name: profile.pseudo || profile.nom_complet || 'Unknown'
                 };
                 
-                const apiUrl = `${apiConfig.baseUrl}/ajax_api/add_contact?api_key=${apiConfig.apiKey}`;
-                console.log('[CONTACT] API URL:', apiUrl);
-                console.log('[CONTACT] Contact data:', contactData);
+                console.log('[CONTACT] Contact data for proxy:', contactData);
                 
-                const response = await fetch(apiUrl, {
+                const response = await fetch('/api/spice-multi-test', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Content-Type': 'application/json',
                     },
-                    body: new URLSearchParams(contactData)
+                    body: JSON.stringify(contactData)
                 });
                 
-                const result = await response.json();
-                console.log('[CONTACT] API Response:', result);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
                 
-                if (result.connected === 1 && result.result === 'success') {
-                    return { success: true, data: result };
+                const result = await response.json();
+                console.log('[CONTACT] Proxy API Response:', result);
+                
+                if (result.success && result.data?.connected === 1 && result.data?.result === 'success') {
+                    return { success: true, data: result.data };
                 } else {
-                    return { success: false, error: result.error || 'Unknown API error', data: result };
+                    return { success: false, error: result.error || result.data?.error || 'Unknown API error', data: result.data };
                 }
                 
             } catch (error) {
-                console.error('[CONTACT] Error creating contact:', error);
+                console.error('[CONTACT] Error creating contact via proxy:', error);
                 return { success: false, error: error.message };
             }
         }
