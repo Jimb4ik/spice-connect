@@ -4,6 +4,9 @@
 // Extend Dashboard prototype with message methods
 Object.assign(Dashboard.prototype, {
   
+  // Инициализируем кэш сообщений для быстрого доступа к превью
+  messagesCache: {},
+  
   async loadContacts() {
     const contactsList = document.getElementById('contactsList');
     const contactsLoading = document.getElementById('contactsLoading');
@@ -101,7 +104,26 @@ Object.assign(Dashboard.prototype, {
       return;
     }
 
-    const contactsHTML = contacts.map(contact => this.createContactItem(contact)).join('');
+    // ИСПРАВЛЕНИЕ 1: Сортируем контакты - новые сверху (по времени создания или активности)
+    const sortedContacts = [...contacts].sort((a, b) => {
+      // Проверяем если контакт новый (создан недавно)
+      const aTime = new Date(a.last_time || a.created_at || 0).getTime();
+      const bTime = new Date(b.last_time || b.created_at || 0).getTime();
+      
+      // Новые контакты (без сообщений) ставим сверху
+      const aIsNew = !a.last_message || a.last_message === 'No messages yet';
+      const bIsNew = !b.last_message || b.last_message === 'No messages yet';
+      
+      if (aIsNew && !bIsNew) return -1; // a сверху
+      if (!aIsNew && bIsNew) return 1;  // b сверху
+      
+      // Если оба новые или оба со сообщениями - сортируем по времени (новые сверху)
+      return bTime - aTime;
+    });
+
+    console.log('[MESSAGES] Sorted contacts:', sortedContacts.map(c => ({name: c.pseudo, lastTime: c.last_time, lastMessage: c.last_message})));
+
+    const contactsHTML = sortedContacts.map(contact => this.createContactItem(contact)).join('');
     contactsList.innerHTML = contactsHTML;
 
     // Add click handlers
@@ -113,10 +135,49 @@ Object.assign(Dashboard.prototype, {
       });
     });
 
+    // ИСПРАВЛЕНИЕ 2: Проверяем URL параметры для автоматического выбора чата
+    this.checkAutoSelectFromURL(sortedContacts);
+
     // Префетчим превью последнего сообщения для первых контактов
-    this.prefetchLastPreviews(contacts).catch(err => {
+    this.prefetchLastPreviews(sortedContacts).catch(err => {
       console.warn('[MESSAGES] Prefetch previews error:', err);
     });
+  },
+
+  // ИСПРАВЛЕНИЕ 2: Функция для автоматического выбора чата из URL параметров
+  checkAutoSelectFromURL(contacts) {
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const contactParam = urlParams.get('contact');
+      
+      if (contactParam) {
+        console.log('[MESSAGES] Auto-selecting contact from URL:', contactParam);
+        
+        // Ищем контакт по ID
+        const targetContact = contacts.find(contact => {
+          const contactId = contact.m_id || contact.id || contact.user_id;
+          return contactId == contactParam;
+        });
+        
+        if (targetContact) {
+          const contactId = targetContact.m_id || targetContact.id || targetContact.user_id;
+          console.log('[MESSAGES] Found target contact:', targetContact.pseudo);
+          
+          // Автоматически выбираем чат через небольшую задержку
+          setTimeout(() => {
+            this.selectChat(contactId);
+          }, 500);
+        } else {
+          console.warn('[MESSAGES] Contact not found in list:', contactParam);
+        }
+        
+        // Очищаем URL от параметров чтобы не мешались при дальнейшей навигации
+        const cleanUrl = window.location.pathname;
+        window.history.replaceState({}, document.title, cleanUrl);
+      }
+    } catch (error) {
+      console.error('[MESSAGES] Error in checkAutoSelectFromURL:', error);
+    }
   },
 
   async prefetchLastPreviews(contacts) {
@@ -173,7 +234,21 @@ Object.assign(Dashboard.prototype, {
     // Согласно документации API load_contacts контакт содержит: m_id, pseudo, photo, etc.
     const userId = contact.m_id || contact.id || contact.user_id || 'unknown';
     const username = contact.pseudo || contact.username || contact.name || 'Unknown User';
-    const lastMessage = contact.last_message || contact.lastMessage || 'No messages yet';
+    
+    // ИСПРАВЛЕНИЕ 3: Улучшенная логика получения последнего сообщения
+    let lastMessage = contact.last_message || contact.lastMessage || '';
+    
+    // Если у нас есть кэшированные сообщения для этого контакта, берем последнее
+    if (this.messagesCache && this.messagesCache[userId] && this.messagesCache[userId].length > 0) {
+      const lastCachedMessage = this.messagesCache[userId][this.messagesCache[userId].length - 1];
+      lastMessage = lastCachedMessage.text || lastCachedMessage.message || lastMessage;
+    }
+    
+    // Fallback если сообщений нет
+    if (!lastMessage || lastMessage.trim() === '') {
+      lastMessage = 'No messages yet';
+    }
+    
     const lastTime = contact.last_time || contact.lastTime || '';
     const photoUrl = contact.photo || contact.picture || null;
     const hasPhoto = contact.photo_url || contact.avatar || contact.picture;
@@ -184,7 +259,7 @@ Object.assign(Dashboard.prototype, {
     const timeDisplay = this.formatMessageTime(lastTime);
     
     return `
-      <div class="contact-item ${hasUnread ? 'contact-unread' : ''}" data-user-id="${userId}">
+      <div class="contact-item ${hasUnread ? 'contact-unread' : ''}" data-user-id="${userId}" id="contact-${userId}">
         <div class="contact-avatar">
           ${photoUrl ? `<img src="${photoUrl}" alt="${username}" onerror="this.style.display='none'">` : '👤'}
         </div>
@@ -193,7 +268,7 @@ Object.assign(Dashboard.prototype, {
             <div class="contact-name">${username}</div>
             <div class="contact-time">${timeDisplay}</div>
           </div>
-          <div class="contact-last-message">${lastMessage}</div>
+          <div class="contact-last-message" id="last-message-${userId}">${lastMessage}</div>
         </div>
       </div>
     `;
@@ -221,8 +296,43 @@ Object.assign(Dashboard.prototype, {
     this.currentChatUserId = userId;
     await this.loadChatMessages(userId);
     
+    // ИСПРАВЛЕНИЕ 3: Обновляем превью сообщения после загрузки чата
+    this.updateContactPreview(userId);
+    
     // Show chat interface
     this.showChatInterface();
+  },
+
+  // ИСПРАВЛЕНИЕ 3: Функция для обновления превью последнего сообщения в списке контактов
+  updateContactPreview(userId, lastText = null, lastTime = null) {
+    try {
+      const lastMessageElement = document.getElementById(`last-message-${userId}`);
+      if (!lastMessageElement) return;
+
+      // Используем переданный текст или берем из кэша
+      let messageText = lastText;
+      
+      if (!messageText && this.messagesCache && this.messagesCache[userId] && this.messagesCache[userId].length > 0) {
+        const messages = this.messagesCache[userId];
+        const lastMessage = messages[messages.length - 1];
+        messageText = lastMessage.text;
+      }
+      
+      if (messageText && messageText.trim() !== '') {
+        console.log('[MESSAGES] Updating contact preview for:', userId, 'with message:', messageText);
+        lastMessageElement.textContent = messageText;
+        
+        // Также обновляем время если передано
+        if (lastTime) {
+          const timeElement = lastMessageElement.parentElement.querySelector('.contact-time');
+          if (timeElement) {
+            timeElement.textContent = this.formatMessageTime(lastTime);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('[MESSAGES] Error updating contact preview:', error);
+    }
   },
 
   updateChatHeader(contact) {
@@ -308,6 +418,16 @@ Object.assign(Dashboard.prototype, {
         const timeB = new Date(b.timestamp || b.created_at || 0);
         return timeA - timeB;
       });
+      
+      // ИСПРАВЛЕНИЕ 3: Сохраняем сообщения в кэш для обновления превью
+      if (!this.messagesCache) this.messagesCache = {};
+      this.messagesCache[userId] = allMessages.map(msg => ({
+        text: msg.text || msg.message || msg.content || '',
+        timestamp: msg.timestamp || msg.created_at || new Date().toISOString(),
+        isOwn: msg.from_me || msg.is_own || false
+      }));
+      
+      console.log('[MESSAGES] Cached messages for user:', userId, this.messagesCache[userId]);
       
       this.displayChatMessages(allMessages);
       console.log(`[MESSAGES] Total displayed: ${allMessages.length} messages`);
