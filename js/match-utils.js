@@ -24,6 +24,19 @@ async function saveMatchToDatabase(matchedProfile, currentUserId = null) {
         
         // Подготавливаем данные матча
         const photos = getProfilePhotos(matchedProfile);
+        
+        // КРИТИЧЕСКИ ВАЖНО: Убедимся что photos это JSON строка, а не массив
+        let photosForDB;
+        if (Array.isArray(photos)) {
+            photosForDB = JSON.stringify(photos);
+        } else if (typeof photos === 'string') {
+            photosForDB = photos;
+        } else {
+            photosForDB = JSON.stringify([]);
+        }
+        
+        console.log('[MATCH-UTILS] Photos for DB (type:', typeof photosForDB, '):', photosForDB);
+        
         const matchData = {
             action: 'save_match',
             user_id: userId,
@@ -31,7 +44,7 @@ async function saveMatchToDatabase(matchedProfile, currentUserId = null) {
             matched_user_name: matchedProfile.pseudo || matchedProfile.nom_complet || 'Unknown',
             matched_user_age: parseInt(matchedProfile.age) || null,
             matched_user_city: matchedProfile.ville || matchedProfile.region || null,
-            matched_user_photos: photos
+            matched_user_photos: photosForDB  // Отправляем JSON строку
         };
         
         // Валидация обязательных полей
@@ -133,19 +146,50 @@ async function getCurrentUserId() {
 function getProfilePhotos(profile) {
     const photos = [];
     
+    console.log('[MATCH-UTILS] Getting photos from profile:', profile);
+    
     // Собираем фотографии из разных полей
-    if (profile.photos_v2 && Array.isArray(profile.photos_v2)) {
-        photos.push(...profile.photos_v2.map(p => p.url || p.src || p.normal || p));
+    if (profile.photos_v2) {
+        if (Array.isArray(profile.photos_v2)) {
+            console.log('[MATCH-UTILS] Found photos_v2 array:', profile.photos_v2);
+            photos.push(...profile.photos_v2.map(p => p.url || p.src || p.normal || p.sq_430 || p));
+        } else if (typeof profile.photos_v2 === 'object') {
+            console.log('[MATCH-UTILS] Found photos_v2 object:', profile.photos_v2);
+            Object.values(profile.photos_v2).forEach(photoObj => {
+                if (typeof photoObj === 'object') {
+                    photos.push(photoObj.url || photoObj.src || photoObj.normal || photoObj.sq_430);
+                } else {
+                    photos.push(photoObj);
+                }
+            });
+        }
     }
     
-    if (profile.photos && Array.isArray(profile.photos)) {
-        photos.push(...profile.photos.map(p => p.url || p.src || p.normal || p));
+    if (profile.photos) {
+        if (Array.isArray(profile.photos)) {
+            console.log('[MATCH-UTILS] Found photos array:', profile.photos);
+            photos.push(...profile.photos.map(p => p.url || p.src || p.normal || p.sq_430 || p));
+        } else if (typeof profile.photos === 'object') {
+            console.log('[MATCH-UTILS] Found photos object:', profile.photos);
+            Object.values(profile.photos).forEach(photoObj => {
+                if (typeof photoObj === 'object') {
+                    photos.push(photoObj.url || photoObj.src || photoObj.normal || photoObj.sq_430);
+                } else {
+                    photos.push(photoObj);
+                }
+            });
+        }
     }
     
+    // Добавляем прямые ссылки на фото
     if (profile.picture_430) photos.push(profile.picture_430);
     if (profile.picture) photos.push(profile.picture);
+    if (profile.photo) photos.push(profile.photo);
     
-    return photos.filter(photo => photo && typeof photo === 'string');
+    const validPhotos = photos.filter(photo => photo && typeof photo === 'string');
+    console.log('[MATCH-UTILS] Final photos array:', validPhotos);
+    
+    return validPhotos;
 }
 
 /**

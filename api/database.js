@@ -349,24 +349,18 @@ async function saveMatch(pool, req) {
     }
 
     try {
-        // Обработка фотографий - убираем двойное JSON.stringify
-        let photosToSave;
+        // Упрощенная обработка фотографий - ожидаем готовую JSON строку с клиента
+        let photosToSave = matched_user_photos;
+        
+        // Если по какой-то причине получили массив, конвертируем
         if (Array.isArray(matched_user_photos)) {
             photosToSave = JSON.stringify(matched_user_photos);
-        } else if (typeof matched_user_photos === 'string') {
-            // Если уже строка, проверяем валидный ли это JSON
-            try {
-                JSON.parse(matched_user_photos);
-                photosToSave = matched_user_photos;
-            } catch {
-                // Если не валидный JSON, трактуем как обычную строку и оборачиваем в массив
-                photosToSave = JSON.stringify([matched_user_photos]);
-            }
-        } else {
+        } else if (typeof matched_user_photos !== 'string') {
             photosToSave = JSON.stringify([]);
         }
 
         console.log('[DB] Saving match:', { user_id, matched_user_id, matched_user_name, photosToSave });
+        console.log('[DB] Photos type:', typeof photosToSave, 'value:', photosToSave);
 
         const result = await pool.query(
             `INSERT INTO matches (
