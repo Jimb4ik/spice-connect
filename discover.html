@@ -1010,8 +1010,35 @@
                     theirPhoto.style.display = 'block';
                     console.log('[MATCH] ✅ Their photo set successfully');
                 } else {
-                    console.log('[MATCH] ❌ No photo found, trying advanced method...');
-                    setModalProfilePhoto(theirPhoto, matchedProfile);
+                    console.log('[MATCH] ❌ No photo found, using placeholder...');
+                    // Используем placeholder с первой буквой имени
+                    const name = matchedProfile.pseudo || matchedProfile.nom_complet || 'User';
+                    const firstLetter = name.charAt(0).toUpperCase();
+                    
+                    // Создаем canvas с первой буквой
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 100;
+                    canvas.height = 100;
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Фон градиент
+                    const gradient = ctx.createLinearGradient(0, 0, 100, 100);
+                    gradient.addColorStop(0, '#ff6b9d');
+                    gradient.addColorStop(1, '#ff8a9b');
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(0, 0, 100, 100);
+                    
+                    // Буква
+                    ctx.fillStyle = 'white';
+                    ctx.font = 'bold 50px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(firstLetter, 50, 50);
+                    
+                    theirPhoto.src = canvas.toDataURL();
+                    theirPhoto.style.display = 'block';
+                    theirPhoto.style.borderRadius = '50%';
+                    console.log('[MATCH] ✅ Placeholder photo created with letter:', firstLetter);
                 }
             }
             
@@ -1040,10 +1067,33 @@
                                 yourPhoto.src = headerAvatar.src;
                                 yourPhoto.style.display = 'block';
                                 console.log('[MATCH] ✅ Your photo set from header avatar');
-                            } else {
-                                console.log('[MATCH] No header avatar, trying API...');
-                                loadCurrentUserPhoto(yourPhoto);
-                            }
+                                                    } else {
+                            console.log('[MATCH] No header avatar, creating placeholder...');
+                            // Создаем placeholder для текущего пользователя
+                            const canvas = document.createElement('canvas');
+                            canvas.width = 100;
+                            canvas.height = 100;
+                            const ctx = canvas.getContext('2d');
+                            
+                            // Фон градиент для пользователя
+                            const gradient = ctx.createLinearGradient(0, 0, 100, 100);
+                            gradient.addColorStop(0, '#667eea');
+                            gradient.addColorStop(1, '#764ba2');
+                            ctx.fillStyle = gradient;
+                            ctx.fillRect(0, 0, 100, 100);
+                            
+                            // Буква U для User
+                            ctx.fillStyle = 'white';
+                            ctx.font = 'bold 50px Arial';
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            ctx.fillText('U', 50, 50);
+                            
+                            yourPhoto.src = canvas.toDataURL();
+                            yourPhoto.style.display = 'block';
+                            yourPhoto.style.borderRadius = '50%';
+                            console.log('[MATCH] ✅ User placeholder photo created');
+                        }
                         }
                     } catch (e) {
                         console.log('[MATCH] Failed to parse localStorage, trying API...');
