@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Match Flow Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Match Flow Debugging</h1>
+        <p>Инструмент для диагностики проблем с сохранением матчей</p>
+
+        <div class="test-section">
+            <h3>1. 🔑 AuthManager Status</h3>
+            <button class="test-button" onclick="checkAuthManager()">Check AuthManager</button>
+            <div id="authResult" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>2. 🗄️ Database Connection</h3>
+            <button class="test-button" onclick="testDatabase()">Test Database</button>
+            <div id="dbResult" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>3. 👤 Current User ID</h3>
+            <button class="test-button" onclick="getCurrentUserId()">Get User ID</button>
+            <div id="userIdResult" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>4. 💾 Match Saving Test</h3>
+            <button class="test-button" onclick="testMatchSaving()">Test Save Match</button>
+            <div id="matchSaveResult" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>5. 📋 Load Matches</h3>
+            <button class="test-button" onclick="testLoadMatches()">Load Matches</button>
+            <div id="loadMatchesResult" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>6. 🔗 API Match Test</h3>
+            <button class="test-button" onclick="testAPIMatches()">Test API Matches</button>
+            <div id="apiMatchesResult" class="result"></div>
+        </div>
+    </div>
+
+    <!-- Include required scripts -->
+    <script src="js/auth-manager.js"></script>
+    <script src="js/match-utils.js"></script>
+
+    <script>
+        // Initialize AuthManager
+        if (!window.authManager) {
+            window.authManager = new AuthManager();
+        }
+
+        function showResult(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `result ${type}`;
+        }
+
+        function checkAuthManager() {
+            try {
+                console.log('[TEST] Checking AuthManager...');
+                
+                const result = {
+                    exists: !!window.authManager,
+                    sessionId: window.authManager?.sessionId,
+                    isLoggedIn: window.authManager?.isLoggedIn,
+                    currentUser: window.authManager?.currentUser,
+                    userId: window.authManager?.userId
+                };
+                
+                console.log('[TEST] AuthManager result:', result);
+                
+                if (result.exists && result.sessionId && result.isLoggedIn) {
+                    showResult('authResult', 
+                        `✅ AuthManager OK\nSession ID: ${result.sessionId}\nUser ID: ${result.userId}\nLogged In: ${result.isLoggedIn}`, 
+                        'success'
+                    );
+                } else {
+                    showResult('authResult', 
+                        `❌ AuthManager Issue\nExists: ${result.exists}\nSession ID: ${result.sessionId}\nLogged In: ${result.isLoggedIn}`, 
+                        'error'
+                    );
+                }
+            } catch (error) {
+                console.error('[TEST] AuthManager error:', error);
+                showResult('authResult', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testDatabase() {
+            try {
+                console.log('[TEST] Testing database connection...');
+                
+                const response = await fetch('/api/database', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'test_connection' })
+                });
+                
+                const result = await response.json();
+                console.log('[TEST] Database result:', result);
+                
+                if (result.success) {
+                    showResult('dbResult', `✅ Database Connected\n${JSON.stringify(result, null, 2)}`, 'success');
+                } else {
+                    showResult('dbResult', `❌ Database Error\n${JSON.stringify(result, null, 2)}`, 'error');
+                }
+            } catch (error) {
+                console.error('[TEST] Database error:', error);
+                showResult('dbResult', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function getCurrentUserId() {
+            try {
+                console.log('[TEST] Getting current user ID...');
+                
+                if (!window.MatchUtils) {
+                    throw new Error('MatchUtils not loaded');
+                }
+                
+                const userId = await window.MatchUtils.getCurrentUserId();
+                console.log('[TEST] User ID result:', userId);
+                
+                if (userId) {
+                    showResult('userIdResult', `✅ User ID: ${userId}`, 'success');
+                } else {
+                    showResult('userIdResult', `❌ No User ID found`, 'error');
+                }
+            } catch (error) {
+                console.error('[TEST] User ID error:', error);
+                showResult('userIdResult', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testMatchSaving() {
+            try {
+                console.log('[TEST] Testing match saving...');
+                
+                if (!window.MatchUtils) {
+                    throw new Error('MatchUtils not loaded');
+                }
+                
+                // Создаем тестовый профиль
+                const testProfile = {
+                    id: '999999',
+                    id_membre: '999999',
+                    pseudo: 'TestUser',
+                    nom_complet: 'Test User',
+                    age: 25,
+                    ville: 'Test City',
+                    photos: [{
+                        sq_430: 'https://via.placeholder.com/430x430',
+                        normal: 'https://via.placeholder.com/300x300'
+                    }]
+                };
+                
+                const result = await window.MatchUtils.saveMatchToDatabase(testProfile);
+                console.log('[TEST] Save match result:', result);
+                
+                if (result) {
+                    showResult('matchSaveResult', `✅ Match saved successfully`, 'success');
+                } else {
+                    showResult('matchSaveResult', `❌ Failed to save match`, 'error');
+                }
+            } catch (error) {
+                console.error('[TEST] Match saving error:', error);
+                showResult('matchSaveResult', `❌ Error: ${error.message}\n${error.stack}`, 'error');
+            }
+        }
+
+        async function testLoadMatches() {
+            try {
+                console.log('[TEST] Testing load matches...');
+                
+                if (!window.MatchUtils) {
+                    throw new Error('MatchUtils not loaded');
+                }
+                
+                const matches = await window.MatchUtils.loadUserMatches();
+                console.log('[TEST] Loaded matches:', matches);
+                
+                showResult('loadMatchesResult', 
+                    `✅ Loaded ${matches.length} matches\n${JSON.stringify(matches, null, 2)}`, 
+                    'success'
+                );
+            } catch (error) {
+                console.error('[TEST] Load matches error:', error);
+                showResult('loadMatchesResult', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAPIMatches() {
+            try {
+                console.log('[TEST] Testing API matches...');
+                
+                if (!window.MatchUtils) {
+                    throw new Error('MatchUtils not loaded');
+                }
+                
+                const apiMatches = await window.MatchUtils.loadMatchesFromAPI();
+                console.log('[TEST] API matches:', apiMatches);
+                
+                showResult('apiMatchesResult', 
+                    `✅ Loaded ${apiMatches.length} API matches\n${JSON.stringify(apiMatches, null, 2)}`, 
+                    'success'
+                );
+            } catch (error) {
+                console.error('[TEST] API matches error:', error);
+                showResult('apiMatchesResult', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-run basic checks on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                checkAuthManager();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

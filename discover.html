@@ -930,7 +930,7 @@
                             console.log('[DISCOVER] Current session data:', {
                                 authManager: !!window.authManager,
                                 sessionId: window.authManager?.sessionId,
-                                isLoggedIn: window.authManager?.isLoggedIn()
+                                isLoggedIn: window.authManager?.isLoggedIn
                             });
                             
                             // Проверяем доступность MatchUtils
@@ -1062,75 +1062,117 @@
         function setModalProfilePhoto(imgElement, profile) {
             if (!imgElement || !profile) {
                 console.warn('[MATCH] Missing imgElement or profile for photo setting');
+                console.log('[MATCH] imgElement:', imgElement);
+                console.log('[MATCH] profile:', profile);
                 return;
             }
             
+            console.log('[MATCH] 🔍 Analyzing profile for photos:', profile);
+            
             let photoUrl = null;
             
-            // Пробуем разные источники фотографий
+            // Детальная диагностика всех возможных источников фото
+            console.log('[MATCH] Profile photo sources:');
+            console.log('- photos_v2:', profile.photos_v2);
+            console.log('- photos:', profile.photos);
+            console.log('- picture_430:', profile.picture_430);
+            console.log('- picture:', profile.picture);
+            console.log('- main_photo:', profile.main_photo);
+            
+            // Пробуем разные источники фотографий с расширенной диагностикой
             if (profile.photos_v2) {
+                console.log('[MATCH] 📸 Found photos_v2, analyzing...');
+                
                 if (profile.photos_v2.public) {
+                    console.log('[MATCH] 📸 Found public photos:', profile.photos_v2.public);
                     const publicPhotos = profile.photos_v2.public;
                     const firstPhotoKey = Object.keys(publicPhotos)[0];
                     if (firstPhotoKey && publicPhotos[firstPhotoKey]) {
-                        photoUrl = publicPhotos[firstPhotoKey].sq_430 || 
-                                  publicPhotos[firstPhotoKey].normal || 
-                                  publicPhotos[firstPhotoKey].sq_middle;
+                        const photo = publicPhotos[firstPhotoKey];
+                        console.log('[MATCH] 📸 Photo object:', photo);
+                        photoUrl = photo.sq_430 || photo.normal || photo.sq_middle;
                     }
                 } else if (Array.isArray(profile.photos_v2) && profile.photos_v2.length > 0) {
+                    console.log('[MATCH] 📸 Found photos_v2 array:', profile.photos_v2);
                     const mainPhoto = profile.photos_v2.find(p => p.main_photo === '1') || profile.photos_v2[0];
+                    console.log('[MATCH] 📸 Selected photo:', mainPhoto);
                     photoUrl = mainPhoto.sq_430 || mainPhoto.normal || mainPhoto.sq_middle;
                 }
             } else if (profile.photos && profile.photos.length > 0) {
+                console.log('[MATCH] 📸 Found photos array:', profile.photos);
                 const mainPhoto = profile.photos.find(p => p.main_photo === '1') || profile.photos[0];
+                console.log('[MATCH] 📸 Selected photo:', mainPhoto);
                 photoUrl = mainPhoto.sq_430 || mainPhoto.normal || mainPhoto.sq_middle;
             } else if (profile.picture_430) {
+                console.log('[MATCH] 📸 Found picture_430');
                 photoUrl = profile.picture_430;
             } else if (profile.picture) {
+                console.log('[MATCH] 📸 Found picture');
                 photoUrl = profile.picture;
+            } else if (profile.main_photo) {
+                console.log('[MATCH] 📸 Found main_photo:', profile.main_photo);
+                // Если main_photo это объект с URL'ами
+                if (typeof profile.main_photo === 'object') {
+                    photoUrl = profile.main_photo.sq_430 || profile.main_photo.normal || profile.main_photo.sq_middle;
+                } else if (typeof profile.main_photo === 'string') {
+                    photoUrl = profile.main_photo;
+                }
             }
             
-            console.log('[MATCH] Found photo URL:', photoUrl);
+            console.log('[MATCH] 🎯 Final photo URL:', photoUrl);
             
             if (photoUrl) {
+                console.log('[MATCH] ✅ Setting photo src:', photoUrl);
                 imgElement.src = photoUrl;
                 imgElement.style.display = 'block';
                 imgElement.onload = function() {
-                    console.log('[MATCH] Photo loaded successfully');
+                    console.log('[MATCH] ✅ Photo loaded successfully:', photoUrl);
                 };
                 imgElement.onerror = function() {
-                    console.warn('[MATCH] Failed to load photo, using placeholder');
+                    console.error('[MATCH] ❌ Failed to load photo:', photoUrl);
                     imgElement.style.display = 'none';
                 };
             } else {
-                console.warn('[MATCH] No photo URL found, hiding image');
+                console.warn('[MATCH] ❌ No photo URL found, hiding image');
+                console.log('[MATCH] Full profile object for debugging:', JSON.stringify(profile, null, 2));
                 imgElement.style.display = 'none';
             }
         }
 
         async function loadCurrentUserPhoto(imgElement) {
             try {
+                console.log('[MATCH] 🔍 Loading current user photo...');
+                
                 const sessionId = window.authManager?.sessionId;
                 if (!sessionId) {
-                    console.warn('[MATCH] No session ID for loading user photo');
+                    console.warn('[MATCH] ❌ No session ID for loading user photo');
+                    console.log('[MATCH] AuthManager state:', window.authManager);
                     return;
                 }
+                
+                console.log('[MATCH] ✅ Session ID found:', sessionId);
                 
                 const apiConfigResponse = await fetch('/api/get-api-key');
                 const apiConfig = await apiConfigResponse.json();
                 
-                const response = await fetch(`${apiConfig.baseUrl}/index_api/user?api_key=${apiConfig.apiKey}&session_id=${sessionId}`);
+                const apiUrl = `${apiConfig.baseUrl}/index_api/user?api_key=${apiConfig.apiKey}&session_id=${sessionId}`;
+                console.log('[MATCH] 🌐 Loading user data from:', apiUrl);
+                
+                const response = await fetch(apiUrl);
                 const userData = await response.json();
                 
-                console.log('[MATCH] Current user data:', userData);
+                console.log('[MATCH] 📋 Current user API response:', userData);
                 
                 if (userData && userData.result) {
+                    console.log('[MATCH] ✅ User data received, setting photo...');
                     setModalProfilePhoto(imgElement, userData.result);
                 } else {
-                    console.warn('[MATCH] No user data received');
+                    console.warn('[MATCH] ❌ No user data received');
+                    console.log('[MATCH] Full response:', userData);
                 }
             } catch (error) {
-                console.error('[DISCOVER] Error loading user photo:', error);
+                console.error('[MATCH] ❌ Error loading user photo:', error);
+                console.error('[MATCH] Stack trace:', error.stack);
             }
         }
         
