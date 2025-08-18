@@ -348,27 +348,57 @@ async function saveMatch(pool, req) {
         };
     }
 
-    const result = await pool.query(
-        `INSERT INTO matches (
-            user_id, matched_user_id, matched_user_name, 
-            matched_user_age, matched_user_city, matched_user_photos
-        )
-         VALUES ($1, $2, $3, $4, $5, $6)
-         ON CONFLICT (user_id, matched_user_id)
-         DO UPDATE SET 
-            matched_user_name = EXCLUDED.matched_user_name,
-            matched_user_age = EXCLUDED.matched_user_age,
-            matched_user_city = EXCLUDED.matched_user_city,
-            matched_user_photos = EXCLUDED.matched_user_photos,
-            match_date = CURRENT_TIMESTAMP
-         RETURNING *`,
-        [user_id, matched_user_id, matched_user_name, matched_user_age, matched_user_city, Array.isArray(matched_user_photos) ? JSON.stringify(matched_user_photos) : matched_user_photos]
-    );
+    try {
+        // Обработка фотографий - убираем двойное JSON.stringify
+        let photosToSave;
+        if (Array.isArray(matched_user_photos)) {
+            photosToSave = JSON.stringify(matched_user_photos);
+        } else if (typeof matched_user_photos === 'string') {
+            // Если уже строка, проверяем валидный ли это JSON
+            try {
+                JSON.parse(matched_user_photos);
+                photosToSave = matched_user_photos;
+            } catch {
+                // Если не валидный JSON, трактуем как обычную строку и оборачиваем в массив
+                photosToSave = JSON.stringify([matched_user_photos]);
+            }
+        } else {
+            photosToSave = JSON.stringify([]);
+        }
 
-    return {
-        success: true,
-        data: result.rows[0]
-    };
+        console.log('[DB] Saving match:', { user_id, matched_user_id, matched_user_name, photosToSave });
+
+        const result = await pool.query(
+            `INSERT INTO matches (
+                user_id, matched_user_id, matched_user_name, 
+                matched_user_age, matched_user_city, matched_user_photos
+            )
+             VALUES ($1, $2, $3, $4, $5, $6)
+             ON CONFLICT (user_id, matched_user_id)
+             DO UPDATE SET 
+                matched_user_name = EXCLUDED.matched_user_name,
+                matched_user_age = EXCLUDED.matched_user_age,
+                matched_user_city = EXCLUDED.matched_user_city,
+                matched_user_photos = EXCLUDED.matched_user_photos,
+                match_date = CURRENT_TIMESTAMP
+             RETURNING *`,
+            [user_id, matched_user_id, matched_user_name, matched_user_age, matched_user_city, photosToSave]
+        );
+
+        console.log('[DB] Match saved successfully:', result.rows[0]);
+
+        return {
+            success: true,
+            data: result.rows[0]
+        };
+    } catch (error) {
+        console.error('[DB] Error saving match:', error);
+        return {
+            success: false,
+            error: 'Database operation failed',
+            details: error.message
+        };
+    }
 }
 
 // Обновить матч
