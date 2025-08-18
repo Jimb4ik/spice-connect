@@ -1074,15 +1074,31 @@
                                 console.log('[MATCH] ✅ Your photo set from header avatar');
                                                     } else {
                             console.log('[MATCH] No header avatar, trying API...');
-                            loadCurrentUserPhoto(yourPhoto);
+                            // Попробуем API, но с fallback на placeholder
+                            loadCurrentUserPhoto(yourPhoto).then(success => {
+                                if (!success) {
+                                    console.log('[MATCH] API failed, creating user placeholder...');
+                                    createUserPlaceholder(yourPhoto);
+                                }
+                            });
                         }
                         }
                     } catch (e) {
                         console.log('[MATCH] Failed to parse localStorage, trying API...');
-                        loadCurrentUserPhoto(yourPhoto);
+                        loadCurrentUserPhoto(yourPhoto).then(success => {
+                            if (!success) {
+                                console.log('[MATCH] API failed after localStorage error, creating placeholder...');
+                                createUserPlaceholder(yourPhoto);
+                            }
+                        });
                     }
                 } else {
-                    loadCurrentUserPhoto(yourPhoto);
+                    loadCurrentUserPhoto(yourPhoto).then(success => {
+                        if (!success) {
+                            console.log('[MATCH] API failed as final fallback, creating placeholder...');
+                            createUserPlaceholder(yourPhoto);
+                        }
+                    });
                 }
             }
             
@@ -1241,7 +1257,7 @@
                 if (!sessionId) {
                     console.warn('[MATCH] ❌ No session ID for loading user photo');
                     console.log('[MATCH] AuthManager state:', window.authManager);
-                    return;
+                    return false;
                 }
                 
                 console.log('[MATCH] ✅ Session ID found:', sessionId);
@@ -1260,14 +1276,46 @@
                 if (userData && userData.result) {
                     console.log('[MATCH] ✅ User data received, setting photo...');
                     setModalProfilePhoto(imgElement, userData.result);
+                    return true;
                 } else {
                     console.warn('[MATCH] ❌ No user data received');
                     console.log('[MATCH] Full response:', userData);
+                    return false;
                 }
             } catch (error) {
                 console.error('[MATCH] ❌ Error loading user photo:', error);
                 console.error('[MATCH] Stack trace:', error.stack);
+                return false;
             }
+        }
+        
+        // Создание placeholder для пользователя
+        function createUserPlaceholder(imgElement) {
+            console.log('[MATCH] Creating user placeholder...');
+            
+            const canvas = document.createElement('canvas');
+            canvas.width = 100;
+            canvas.height = 100;
+            const ctx = canvas.getContext('2d');
+            
+            // Фон градиент для пользователя
+            const gradient = ctx.createLinearGradient(0, 0, 100, 100);
+            gradient.addColorStop(0, '#667eea');
+            gradient.addColorStop(1, '#764ba2');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 100, 100);
+            
+            // Буква U для User
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 50px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('U', 50, 50);
+            
+            imgElement.src = canvas.toDataURL();
+            imgElement.style.display = 'block';
+            imgElement.style.borderRadius = '50%';
+            console.log('[MATCH] ✅ User placeholder photo created');
         }
         
         // Функции для работы с матчами перенесены в js/match-utils.js
