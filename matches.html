@@ -496,48 +496,60 @@
             }
         }
 
-        // Функция создания контакта через специализированный contacts API
+        // Функция создания контакта (копия РАБОЧЕЙ логики из discover.html)
         async function createContactForMatch(sessionId, profile) {
             try {
-                console.log('[CONTACT] Creating contact for match profile via contacts API:', profile);
+                console.log('[CONTACT] Creating contact for profile (using working method):', profile);
                 
-                const contactData = {
-                    action: 'add_contact',
-                    session_id: sessionId,
-                    user_id: profile.id,
-                    name: profile.pseudo || profile.nom_complet || 'Unknown'
-                };
-                
-                console.log('[CONTACT] Contact data:', contactData);
-                
-                const response = await fetch('/api/contacts', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(contactData)
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                const profileId = profile.id || profile.id_membre;
+                if (!profileId) {
+                    console.error('[CONTACT] No profile ID found');
+                    return { success: false, error: 'No profile ID' };
                 }
                 
-                const result = await response.json();
-                console.log('[CONTACT] Contacts API Response:', result);
+                // Получаем API ключ
+                const apiConfigResponse = await fetch('/api/get-api-key');
+                const apiConfig = await apiConfigResponse.json();
                 
-                if (result.success && result.data?.connected === 1 && result.data?.result === 'success') {
+                if (!apiConfig.apiKey) {
+                    console.error('[CONTACT] No API key available');
+                    return { success: false, error: 'No API key' };
+                }
+                
+                // Параметры для создания контакта согласно официальной документации (как в discover.html)
+                const contactParams = new URLSearchParams({
+                    api_key: apiConfig.apiKey,
+                    session_id: sessionId,
+                    action: 'add',
+                    target_id: profileId
+                });
+                
+                console.log('[CONTACT] Contact params:', contactParams.toString());
+                
+                // Пробуем через spice-multi-test proxy с GET методом (РАБОЧИЙ СПОСОБ)
+                const apiUrl = `/api/spice-multi-test?endpoint=/ajax_api/setContact&method=GET&${contactParams.toString()}`;
+                
+                const response = await fetch(apiUrl);
+                const result = await response.json();
+                
+                console.log('[CONTACT] API Response:', result);
+                
+                // Проверяем успех согласно документации API: result.data.result должно быть 1
+                if (result.success && result.data && result.data.result === 1) {
+                    console.log('[CONTACT] ✅ Contact created successfully!');
                     return { success: true, data: result.data };
                 } else {
-                    return { success: false, error: result.error || result.data?.error || 'Contact creation via API failed', data: result.data };
+                    console.error('[CONTACT] ❌ API returned error or result !== 1:', result);
+                    return { success: false, error: result.error || 'Failed to create contact' };
                 }
                 
             } catch (error) {
-                console.error('[CONTACT] Error creating contact via contacts API:', error);
+                console.error('[CONTACT] Error creating contact:', error);
                 return { success: false, error: error.message };
             }
         }
 
-        // Функция для попытки загрузить фото профиля через API
+        // Функция для загрузки фото профиля через search API (получает больше данных)
         async function tryLoadUserPhoto(userId, imgElement) {
             try {
                 console.log('[MATCHES] Trying to load photo for user ID:', userId);
@@ -548,37 +560,31 @@
                     return false;
                 }
                 
-                // Пробуем получить фото через API
-                const apiUrl = `/api/spice-multi-test?endpoint=/index_api/user&method=POST&session_id=${sessionId}&id=${userId}&get_picture_430=1`;
+                // Используем search API для получения полных данных профиля (как в discover.html)
+                const searchParams = new URLSearchParams({
+                    api_key: await getApiKey(),
+                    session_id: sessionId,
+                    id_user: userId,
+                    search_type: 'profile',
+                    limit: 1
+                });
+                
+                const apiUrl = `/api/spice-multi-test?endpoint=/index_api/search&method=POST&${searchParams.toString()}`;
                 const response = await fetch(apiUrl);
                 
                 if (!response.ok) {
-                    console.warn('[MATCHES] API request failed:', response.status);
+                    console.warn('[MATCHES] Search API request failed:', response.status);
                     return false;
                 }
                 
                 const result = await response.json();
-                console.log('[MATCHES] Photo API response:', result);
+                console.log('[MATCHES] Search API response:', result);
                 
-                if (result.success && result.data?.result) {
-                    const user = result.data.result;
-                    let photoUrl = null;
-                    
-                    // Ищем фото в различных полях
-                    if (user.picture_430) {
-                        photoUrl = user.picture_430;
-                    } else if (user.picture) {
-                        photoUrl = user.picture;
-                    } else if (user.photos && user.photos.length > 0) {
-                        photoUrl = user.photos[0].url_big || user.photos[0].url_middle;
-                    }
+                if (result.success && result.data?.profiles && result.data.profiles.length > 0) {
+                    const profile = result.data.profiles[0];
+                    const photoUrl = extractPhotoUrl(profile);
                     
                     if (photoUrl) {
-                        // Убеждаемся что URL полный
-                        if (!photoUrl.startsWith('http') && !photoUrl.startsWith('/')) {
-                            photoUrl = 'https://dev2018.de5a7.com/' + photoUrl;
-                        }
-                        
                         console.log('[MATCHES] Found photo URL:', photoUrl);
                         imgElement.src = photoUrl;
                         imgElement.style.display = 'block';
@@ -591,12 +597,61 @@
                     }
                 }
                 
-                console.warn('[MATCHES] No photo found in API response');
+                console.warn('[MATCHES] No photo found in search API response');
                 return false;
                 
             } catch (error) {
                 console.error('[MATCHES] Error loading photo:', error);
                 return false;
+            }
+        }
+        
+        // Функция для извлечения URL фото из профиля (копия логики из discover.html)
+        function extractPhotoUrl(profile) {
+            let photoUrl = null;
+            
+            console.log('[MATCHES] Extracting photo from profile:', profile);
+            
+            // Пробуем разные источники фотографий (как в discover.html)
+            if (profile.photos_v2) {
+                if (profile.photos_v2.public) {
+                    const publicPhotos = profile.photos_v2.public;
+                    const firstPhotoKey = Object.keys(publicPhotos)[0];
+                    if (firstPhotoKey && publicPhotos[firstPhotoKey]) {
+                        photoUrl = publicPhotos[firstPhotoKey].sq_430 || 
+                                  publicPhotos[firstPhotoKey].normal || 
+                                  publicPhotos[firstPhotoKey].sq_middle;
+                    }
+                } else if (Array.isArray(profile.photos_v2) && profile.photos_v2.length > 0) {
+                    const mainPhoto = profile.photos_v2.find(p => p.main_photo === '1') || profile.photos_v2[0];
+                    photoUrl = mainPhoto.sq_430 || mainPhoto.normal || mainPhoto.sq_middle;
+                }
+            } else if (profile.photos && profile.photos.length > 0) {
+                photoUrl = profile.photos[0].url_big || profile.photos[0].url_middle;
+            } else if (profile.picture_430) {
+                photoUrl = profile.picture_430;
+            } else if (profile.picture) {
+                photoUrl = profile.picture;
+            }
+            
+            // Исправляем URL если нужно
+            if (photoUrl && !photoUrl.startsWith('http') && !photoUrl.startsWith('/')) {
+                photoUrl = 'https://dev2018.de5a7.com/' + photoUrl;
+            }
+            
+            console.log('[MATCHES] Extracted photo URL:', photoUrl);
+            return photoUrl;
+        }
+        
+        // Получение API ключа
+        async function getApiKey() {
+            try {
+                const response = await fetch('/api/get-api-key');
+                const config = await response.json();
+                return config.apiKey;
+            } catch (error) {
+                console.error('[MATCHES] Error getting API key:', error);
+                return '';
             }
         }
 
