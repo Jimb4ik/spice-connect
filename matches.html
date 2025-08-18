@@ -326,32 +326,47 @@
                 photos = [];
             }
             
-            const photoUrl = photos.length > 0 ? photos[0] : '/images/default-avatar.png';
+            // Пытаемся получить фото из разных источников
+            let photoUrl = null;
+            if (photos.length > 0) {
+                photoUrl = photos[0];
+            }
+            
+            // Если фото нет, создаем placeholder с первой буквой имени
             const name = match.matched_user_name || 'Unknown';
             const age = match.matched_user_age || '--';
             const city = match.matched_user_city || 'Unknown';
             const isNew = !match.is_read;
             const matchDate = new Date(match.match_date);
             const timeAgo = getTimeAgo(matchDate);
+            const firstLetter = name.charAt(0).toUpperCase();
 
             return `
                 <div class="match-card ${isNew ? 'new-match' : ''}" data-match-id="${match.matched_user_id}">
-                    <div class="match-photo">
-                        <img src="${photoUrl}" alt="${name}" onerror="this.src='/images/default-avatar.png'">
-                        ${isNew ? '<div class="new-badge">NEW</div>' : ''}
+                    <div class="match-card-photo">
+                        ${photoUrl ? 
+                            `<img src="${photoUrl}" alt="${name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                             <div class="photo-placeholder" style="display: none;">
+                                <span>${firstLetter}</span>
+                             </div>` :
+                            `<div class="photo-placeholder">
+                                <span>${firstLetter}</span>
+                             </div>`
+                        }
+                        ${isNew ? '<div class="match-badge">NEW</div>' : ''}
                     </div>
-                    <div class="match-info">
-                        <h3 class="match-name">${name}</h3>
-                        <p class="match-details">${age} years • ${city}</p>
+                    <div class="match-card-info">
+                        <h4>${name}</h4>
+                        <p class="match-age-location">${age} years • ${city}</p>
                         <p class="match-time">Matched ${timeAgo}</p>
-                        <div class="match-actions">
-                            <button class="app-btn app-btn-primary btn-sm" onclick="startChat('${match.matched_user_id}', '${name}')">
-                                💬 Message
-                            </button>
-                            <button class="app-btn app-btn-secondary btn-sm" onclick="viewMatchDetails('${match.matched_user_id}')">
-                                👁️ View Details
-                            </button>
-                        </div>
+                    </div>
+                    <div class="match-card-actions">
+                        <button class="match-action-btn primary" onclick="startChatWithContact('${match.matched_user_id}', '${name}')">
+                            💬 Message
+                        </button>
+                        <button class="match-action-btn secondary" onclick="viewMatchDetails('${match.matched_user_id}')">
+                            👁️ View Details
+                        </button>
                     </div>
                 </div>
             `;
@@ -401,6 +416,104 @@
             
             // Переходим к чату
             window.location.href = `messages.html?contact=${matchId}&name=${encodeURIComponent(matchName)}`;
+        }
+
+        // Новая функция для создания контакта через API и начала чата
+        async function startChatWithContact(matchId, matchName) {
+            console.log('[MATCHES] Starting chat with contact creation for:', matchId, matchName);
+            
+            try {
+                // Получаем sessionId
+                const sessionId = window.authManager?.sessionId;
+                if (!sessionId) {
+                    console.error('[MATCHES] No session ID available');
+                    alert('Authentication error. Please login again.');
+                    return;
+                }
+                
+                // Получаем данные матча из базы
+                const userId = await window.MatchUtils.getCurrentUserId();
+                if (!userId) {
+                    console.error('[MATCHES] No user ID available');
+                    return;
+                }
+                
+                // Создаем объект профиля для API контактов
+                const matchProfile = {
+                    id: matchId,
+                    pseudo: matchName,
+                    nom_complet: matchName
+                };
+                
+                console.log('[MATCHES] Creating contact through API...', matchProfile);
+                
+                // Создаем контакт через API (используем функцию из discover.html)
+                const contactResult = await createContactForMatch(sessionId, matchProfile);
+                
+                if (contactResult.success) {
+                    console.log('[MATCHES] ✅ Contact created successfully:', contactResult);
+                    
+                    // Отмечаем матч как прочитанный
+                    await markMatchAsRead(matchId);
+                    
+                    // Переходим к чату
+                    window.location.href = `messages.html?contact=${matchId}&name=${encodeURIComponent(matchName)}`;
+                } else {
+                    console.warn('[MATCHES] Contact creation failed, but continuing to chat:', contactResult);
+                    // Все равно переходим к чату - возможно контакт уже существует
+                    await markMatchAsRead(matchId);
+                    window.location.href = `messages.html?contact=${matchId}&name=${encodeURIComponent(matchName)}`;
+                }
+                
+            } catch (error) {
+                console.error('[MATCHES] Error creating contact:', error);
+                // Fallback - переходим к чату без создания контакта
+                await markMatchAsRead(matchId);
+                window.location.href = `messages.html?contact=${matchId}&name=${encodeURIComponent(matchName)}`;
+            }
+        }
+
+        // Функция создания контакта (копия из discover.html)
+        async function createContactForMatch(sessionId, profile) {
+            try {
+                console.log('[CONTACT] Creating contact for match profile:', profile);
+                
+                // Получаем API конфигурацию
+                const apiConfigResponse = await fetch('/api/get-api-key');
+                const apiConfig = await apiConfigResponse.json();
+                
+                // Создаем контакт через API
+                const contactData = {
+                    session_id: sessionId,
+                    user_id: profile.id,
+                    name: profile.pseudo || profile.nom_complet || 'Unknown'
+                };
+                
+                const apiUrl = `${apiConfig.baseUrl}/ajax_api/add_contact?api_key=${apiConfig.apiKey}`;
+                console.log('[CONTACT] API URL:', apiUrl);
+                console.log('[CONTACT] Contact data:', contactData);
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams(contactData)
+                });
+                
+                const result = await response.json();
+                console.log('[CONTACT] API Response:', result);
+                
+                if (result.connected === 1 && result.result === 'success') {
+                    return { success: true, data: result };
+                } else {
+                    return { success: false, error: result.error || 'Unknown API error', data: result };
+                }
+                
+            } catch (error) {
+                console.error('[CONTACT] Error creating contact:', error);
+                return { success: false, error: error.message };
+            }
         }
 
         function viewMatchDetails(matchId) {

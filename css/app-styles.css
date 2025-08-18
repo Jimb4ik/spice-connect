@@ -3700,7 +3700,7 @@ body[data-page="discover"] .photo-modal-image,
   background: var(--gradient-primary);
   border-radius: 25px;
   padding: 3rem 2rem 2rem;
-  max-width: 500px;
+  max-width: 600px;
   width: 100%;
   text-align: center;
   position: relative;
