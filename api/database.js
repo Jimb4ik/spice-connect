@@ -337,8 +337,7 @@ async function saveMatch(pool, req) {
         matched_user_id, 
         matched_user_name,
         matched_user_age,
-        matched_user_city,
-        matched_user_photos = []
+        matched_user_city
     } = req.body;
 
     if (!user_id || !matched_user_id) {
@@ -349,18 +348,7 @@ async function saveMatch(pool, req) {
     }
 
     try {
-        // Упрощенная обработка фотографий - ожидаем готовую JSON строку с клиента
-        let photosToSave = matched_user_photos;
-        
-        // Если по какой-то причине получили массив, конвертируем
-        if (Array.isArray(matched_user_photos)) {
-            photosToSave = JSON.stringify(matched_user_photos);
-        } else if (typeof matched_user_photos !== 'string') {
-            photosToSave = JSON.stringify([]);
-        }
-
-        console.log('[DB] Saving match:', { user_id, matched_user_id, matched_user_name, photosToSave });
-        console.log('[DB] Photos type:', typeof photosToSave, 'value:', photosToSave);
+        console.log('[DB] Saving match (WITHOUT PHOTOS):', { user_id, matched_user_id, matched_user_name, matched_user_age, matched_user_city });
 
         const result = await pool.query(
             `INSERT INTO matches (
@@ -373,10 +361,9 @@ async function saveMatch(pool, req) {
                 matched_user_name = EXCLUDED.matched_user_name,
                 matched_user_age = EXCLUDED.matched_user_age,
                 matched_user_city = EXCLUDED.matched_user_city,
-                matched_user_photos = EXCLUDED.matched_user_photos,
                 match_date = CURRENT_TIMESTAMP
              RETURNING *`,
-            [user_id, matched_user_id, matched_user_name, matched_user_age, matched_user_city, photosToSave]
+            [user_id, matched_user_id, matched_user_name, matched_user_age, matched_user_city, null]
         );
 
         console.log('[DB] Match saved successfully:', result.rows[0]);

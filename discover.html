@@ -1073,31 +1073,8 @@
                                 yourPhoto.style.display = 'block';
                                 console.log('[MATCH] ✅ Your photo set from header avatar');
                                                     } else {
-                            console.log('[MATCH] No header avatar, creating placeholder...');
-                            // Создаем placeholder для текущего пользователя
-                            const canvas = document.createElement('canvas');
-                            canvas.width = 100;
-                            canvas.height = 100;
-                            const ctx = canvas.getContext('2d');
-                            
-                            // Фон градиент для пользователя
-                            const gradient = ctx.createLinearGradient(0, 0, 100, 100);
-                            gradient.addColorStop(0, '#667eea');
-                            gradient.addColorStop(1, '#764ba2');
-                            ctx.fillStyle = gradient;
-                            ctx.fillRect(0, 0, 100, 100);
-                            
-                            // Буква U для User
-                            ctx.fillStyle = 'white';
-                            ctx.font = 'bold 50px Arial';
-                            ctx.textAlign = 'center';
-                            ctx.textBaseline = 'middle';
-                            ctx.fillText('U', 50, 50);
-                            
-                            yourPhoto.src = canvas.toDataURL();
-                            yourPhoto.style.display = 'block';
-                            yourPhoto.style.borderRadius = '50%';
-                            console.log('[MATCH] ✅ User placeholder photo created');
+                            console.log('[MATCH] No header avatar, trying API...');
+                            loadCurrentUserPhoto(yourPhoto);
                         }
                         }
                     } catch (e) {
@@ -1119,15 +1096,18 @@
                     console.log('[MATCH] Creating contact and sending message...');
                     
                     const sessionId = window.authManager?.sessionId;
-                    if (!sessionId || !currentProfile) {
-                        console.error('[MATCH] No session ID or profile for contact creation');
+                    if (!sessionId || !matchedProfile) {
+                        console.error('[MATCH] No session ID or matched profile for contact creation');
+                        console.log('[MATCH] sessionId:', sessionId, 'matchedProfile:', matchedProfile);
                         closeMatchModalFunc();
                         return;
                     }
                     
+                    console.log('[MATCH] 🎯 Creating contact with CORRECT matched profile:', matchedProfile.pseudo || matchedProfile.nom_complet);
+                    
                     try {
-                        // Создаем контакт через API
-                        const contactResult = await createContact(sessionId, currentProfile);
+                        // Создаем контакт через API с ПРАВИЛЬНЫМ профилем
+                        const contactResult = await createContact(sessionId, matchedProfile);
                         
                         if (contactResult.success) {
                             console.log('[MATCH] ✅ Contact created successfully:', contactResult);
