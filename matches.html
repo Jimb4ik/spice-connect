@@ -496,25 +496,26 @@
             }
         }
 
-        // Функция создания контакта через PROXY (исправляет CORS проблемы)
+        // Функция создания контакта через специализированный contacts API
         async function createContactForMatch(sessionId, profile) {
             try {
-                console.log('[CONTACT] Creating contact for match profile via PROXY:', profile);
+                console.log('[CONTACT] Creating contact for match profile via contacts API:', profile);
                 
-                // Строим URL с query параметрами для совместимости с spice-multi-test.js
-                const params = new URLSearchParams({
-                    endpoint: '/ajax_api/add_contact',
-                    method: 'POST',
+                const contactData = {
+                    action: 'add_contact',
                     session_id: sessionId,
                     user_id: profile.id,
                     name: profile.pseudo || profile.nom_complet || 'Unknown'
-                });
+                };
                 
-                const apiUrl = `/api/spice-multi-test?${params.toString()}`;
-                console.log('[CONTACT] API URL:', apiUrl);
+                console.log('[CONTACT] Contact data:', contactData);
                 
-                const response = await fetch(apiUrl, {
-                    method: 'GET' // Используем GET так как параметры в URL
+                const response = await fetch('/api/contacts', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(contactData)
                 });
                 
                 if (!response.ok) {
@@ -522,16 +523,16 @@
                 }
                 
                 const result = await response.json();
-                console.log('[CONTACT] Proxy API Response:', result);
+                console.log('[CONTACT] Contacts API Response:', result);
                 
                 if (result.success && result.data?.connected === 1 && result.data?.result === 'success') {
                     return { success: true, data: result.data };
                 } else {
-                    return { success: false, error: result.error || result.data?.error || 'Unknown API error', data: result.data };
+                    return { success: false, error: result.error || result.data?.error || 'Contact creation via API failed', data: result.data };
                 }
                 
             } catch (error) {
-                console.error('[CONTACT] Error creating contact via proxy:', error);
+                console.error('[CONTACT] Error creating contact via contacts API:', error);
                 return { success: false, error: error.message };
             }
         }
