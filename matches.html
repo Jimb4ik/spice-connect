@@ -549,10 +549,10 @@
             }
         }
 
-        // Функция для загрузки фото профиля через load_contacts API (рекомендованный метод)
+        // Функция для загрузки высокого качества фото через search API
         async function tryLoadUserPhoto(userId, imgElement) {
             try {
-                console.log('[MATCHES] Trying to load photo for user ID:', userId);
+                console.log('[MATCHES] Trying to load high-quality photo for user ID:', userId);
                 
                 const sessionId = window.authManager?.sessionId;
                 if (!sessionId) {
@@ -560,55 +560,48 @@
                     return false;
                 }
                 
-                // ИСПРАВЛЕНИЕ: Используем load_contacts API для получения фото (согласно документации)
-                const contactsParams = new URLSearchParams({
+                // УЛУЧШЕНИЕ: Используем search API для получения фото высокого качества
+                const searchParams = new URLSearchParams({
                     api_key: await getApiKey(),
                     session_id: sessionId,
-                    filter: 1  // Тип контактов: 1 => список контактов
+                    id_user: userId,
+                    search_type: 'profile',
+                    limit: 1
                 });
                 
-                const apiUrl = `/api/spice-multi-test?endpoint=/ajax_api/load_contacts&method=GET&${contactsParams.toString()}`;
+                const apiUrl = `/api/spice-multi-test?endpoint=/index_api/search&method=POST&${searchParams.toString()}`;
                 const response = await fetch(apiUrl);
                 
                 if (!response.ok) {
-                    console.warn('[MATCHES] Load contacts API request failed:', response.status);
+                    console.warn('[MATCHES] Search API request failed:', response.status);
                     return false;
                 }
                 
                 const result = await response.json();
-                console.log('[MATCHES] Load contacts API response:', result);
+                console.log('[MATCHES] Search API response:', result);
                 
-                if (result.success && result.data?.contacts) {
-                    // Ищем контакт с нужным ID
-                    const contact = result.data.contacts.find(c => c.m_id == userId);
+                if (result.success && result.data?.profiles && result.data.profiles.length > 0) {
+                    const profile = result.data.profiles[0];
+                    const photoUrl = extractPhotoUrl(profile);
                     
-                    if (contact && contact.photo) {
-                        let photoUrl = contact.photo;
-                        
-                        // Исправляем URL если нужно
-                        if (photoUrl && !photoUrl.startsWith('http') && !photoUrl.startsWith('/')) {
-                            photoUrl = 'https://dev2018.de5a7.com/' + photoUrl;
-                        }
-                        
-                        console.log('[MATCHES] Found photo URL from contacts:', photoUrl);
+                    if (photoUrl) {
+                        console.log('[MATCHES] Found high-quality photo URL:', photoUrl);
                         imgElement.src = photoUrl;
                         imgElement.style.display = 'block';
                         imgElement.onerror = function() {
-                            console.warn('[MATCHES] Photo failed to load, keeping placeholder');
+                            console.warn('[MATCHES] High-quality photo failed to load, keeping placeholder');
                             this.style.display = 'none';
                             this.nextElementSibling.style.display = 'flex';
                         };
                         return true;
-                    } else {
-                        console.warn('[MATCHES] Contact not found in contacts list or no photo:', userId);
                     }
                 }
                 
-                console.warn('[MATCHES] No photo found in load_contacts API response');
+                console.warn('[MATCHES] No high-quality photo found in search API response');
                 return false;
                 
             } catch (error) {
-                console.error('[MATCHES] Error loading photo:', error);
+                console.error('[MATCHES] Error loading high-quality photo:', error);
                 return false;
             }
         }
