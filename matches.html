@@ -327,7 +327,7 @@
             }
         }
         
-        // Функция для получения новых матчей за сегодня
+        // Функция для получения новых матчей за сегодня (с начала сессии пользователя)
         async function getNewMatchesToday(sessionId) {
             try {
                 const response = await fetch('/api/database', {
@@ -341,12 +341,19 @@
                 
                 const result = await response.json();
                 if (result.success && result.data) {
-                    const today = new Date().toDateString();
+                    // Получаем сегодняшнюю дату в начале дня (00:00:00)
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    
                     const todayMatches = result.data.filter(match => {
-                        const matchDate = new Date(match.created_at).toDateString();
-                        return matchDate === today;
+                        const matchDate = new Date(match.created_at);
+                        // Сравниваем только дату (без времени)
+                        return matchDate >= today;
                     });
-                    console.log('[MATCHES] New matches today:', todayMatches.length);
+                    
+                    console.log('[MATCHES] New matches since today 00:00:', todayMatches.length);
+                    console.log('[MATCHES] Today date filter:', today.toISOString());
+                    
                     return todayMatches.length;
                 }
                 return 0;
@@ -356,14 +363,16 @@
             }
         }
         
-        // Функция для получения количества активных чатов через load_contacts
+        // Функция для получения количества активных чатов через load_contacts API
         async function getActiveChatsCount(sessionId) {
             try {
+                console.log('[MATCHES] Loading active chats count via load_contacts API...');
+                
                 const apiConfigResponse = await fetch('/api/get-api-key');
                 const apiConfig = await apiConfigResponse.json();
                 
                 if (!apiConfig.apiKey) {
-                    console.error('[MATCHES] No API key available');
+                    console.error('[MATCHES] No API key available for load_contacts');
                     return 0;
                 }
                 
@@ -373,15 +382,27 @@
                 });
                 
                 const apiUrl = `/api/spice-multi-test?endpoint=/ajax_api/load_contacts&method=GET&${contactsParams.toString()}`;
+                console.log('[MATCHES] Requesting contacts from:', apiUrl);
+                
                 const response = await fetch(apiUrl);
                 const result = await response.json();
                 
-                if (result.success && result.data && result.data.list) {
-                    const activeChats = result.data.list.length;
-                    console.log('[MATCHES] Active chats from API:', activeChats);
-                    return activeChats;
+                console.log('[MATCHES] Load contacts API response:', result);
+                
+                if (result.success && result.data) {
+                    if (result.data.list && Array.isArray(result.data.list)) {
+                        const activeChats = result.data.list.length;
+                        console.log('[MATCHES] Active chats count:', activeChats);
+                        console.log('[MATCHES] Contacts list:', result.data.list);
+                        return activeChats;
+                    } else {
+                        console.log('[MATCHES] No contacts list in response or list is not array');
+                        return 0;
+                    }
+                } else {
+                    console.log('[MATCHES] API request failed or no data:', result);
+                    return 0;
                 }
-                return 0;
             } catch (error) {
                 console.error('[MATCHES] Error getting active chats:', error);
                 return 0;
