@@ -549,7 +549,7 @@
             }
         }
 
-        // Функция для загрузки фото профиля через search API (получает больше данных)
+        // Функция для загрузки фото профиля через load_contacts API (рекомендованный метод)
         async function tryLoadUserPhoto(userId, imgElement) {
             try {
                 console.log('[MATCHES] Trying to load photo for user ID:', userId);
@@ -560,32 +560,37 @@
                     return false;
                 }
                 
-                // Используем search API для получения полных данных профиля (как в discover.html)
-                const searchParams = new URLSearchParams({
+                // ИСПРАВЛЕНИЕ: Используем load_contacts API для получения фото (согласно документации)
+                const contactsParams = new URLSearchParams({
                     api_key: await getApiKey(),
                     session_id: sessionId,
-                    id_user: userId,
-                    search_type: 'profile',
-                    limit: 1
+                    filter: 1  // Тип контактов: 1 => список контактов
                 });
                 
-                const apiUrl = `/api/spice-multi-test?endpoint=/index_api/search&method=POST&${searchParams.toString()}`;
+                const apiUrl = `/api/spice-multi-test?endpoint=/ajax_api/load_contacts&method=GET&${contactsParams.toString()}`;
                 const response = await fetch(apiUrl);
                 
                 if (!response.ok) {
-                    console.warn('[MATCHES] Search API request failed:', response.status);
+                    console.warn('[MATCHES] Load contacts API request failed:', response.status);
                     return false;
                 }
                 
                 const result = await response.json();
-                console.log('[MATCHES] Search API response:', result);
+                console.log('[MATCHES] Load contacts API response:', result);
                 
-                if (result.success && result.data?.profiles && result.data.profiles.length > 0) {
-                    const profile = result.data.profiles[0];
-                    const photoUrl = extractPhotoUrl(profile);
+                if (result.success && result.data?.contacts) {
+                    // Ищем контакт с нужным ID
+                    const contact = result.data.contacts.find(c => c.m_id == userId);
                     
-                    if (photoUrl) {
-                        console.log('[MATCHES] Found photo URL:', photoUrl);
+                    if (contact && contact.photo) {
+                        let photoUrl = contact.photo;
+                        
+                        // Исправляем URL если нужно
+                        if (photoUrl && !photoUrl.startsWith('http') && !photoUrl.startsWith('/')) {
+                            photoUrl = 'https://dev2018.de5a7.com/' + photoUrl;
+                        }
+                        
+                        console.log('[MATCHES] Found photo URL from contacts:', photoUrl);
                         imgElement.src = photoUrl;
                         imgElement.style.display = 'block';
                         imgElement.onerror = function() {
@@ -594,10 +599,12 @@
                             this.nextElementSibling.style.display = 'flex';
                         };
                         return true;
+                    } else {
+                        console.warn('[MATCHES] Contact not found in contacts list or no photo:', userId);
                     }
                 }
                 
-                console.warn('[MATCHES] No photo found in search API response');
+                console.warn('[MATCHES] No photo found in load_contacts API response');
                 return false;
                 
             } catch (error) {

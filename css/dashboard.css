@@ -2544,27 +2544,29 @@
   margin: 0 auto;
   gap: 40px;
   align-items: flex-start;
-  padding: 0 20px;
+  padding: 20px;
+  margin-top: 20px; /* Отступ сверху от фильтров */
 }
 
 .matches-stats-sidebar {
   flex: 0 0 200px;
-  position: sticky;
-  top: 120px;
+  /* Убрали position: sticky - карточки не должны двигаться при скролле */
 }
 
 .stats-grid-vertical {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px; /* Увеличили отступы между карточками статистики */
+  padding: 0 10px; /* Добавили боковые отступы */
 }
 
 .matches-grid-centered {
   flex: 1;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
+  gap: 30px; /* Увеличили отступы между карточками */
   justify-items: center;
+  padding: 10px; /* Дополнительный внутренний отступ */
 }
 
 /* Старый стиль для обратной совместимости */
