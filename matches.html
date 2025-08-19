@@ -98,7 +98,7 @@
             <p class="page-subtitle">People who liked you back - start a conversation!</p>
         </div>
 
-        <!-- Фильтры матчей -->
+        <!-- ВРЕМЕННО СКРЫТО: Фильтры матчей 
         <div class="matches-filters fade-in-up">
             <div class="filter-tabs">
                 <button class="filter-tab active" data-filter="all">All Matches</button>
@@ -107,6 +107,7 @@
                 <button class="filter-tab" data-filter="recent">Recent Activity</button>
             </div>
         </div>
+        -->
 
         <!-- Контейнер для центрирования контента -->
         <div class="matches-content-container">
@@ -272,6 +273,119 @@
     
     <script>
         // Загрузка матчей из нашей базы данных
+        // Функция для загрузки статистики матчей
+        async function loadMatchesStatistics(sessionId) {
+            try {
+                console.log('[MATCHES] Loading matches statistics...');
+                
+                // 1. Total Matches - из нашей БД
+                const totalMatches = await getTotalMatchesFromDB(sessionId);
+                document.getElementById('totalMatchesCount').textContent = totalMatches;
+                
+                // 2. New Matches - матчи за сегодня
+                const newMatches = await getNewMatchesToday(sessionId);
+                document.getElementById('newMatchesCount').textContent = newMatches;
+                
+                // 3. Active Chats - через load_contacts API
+                const activeChats = await getActiveChatsCount(sessionId);
+                document.getElementById('activeChatsCount').textContent = activeChats;
+                
+                console.log('[MATCHES] Statistics loaded:', {
+                    total: totalMatches,
+                    new: newMatches,
+                    active: activeChats
+                });
+                
+            } catch (error) {
+                console.error('[MATCHES] Error loading statistics:', error);
+            }
+        }
+        
+        // Функция для получения общего количества матчей из БД
+        async function getTotalMatchesFromDB(sessionId) {
+            try {
+                const response = await fetch('/api/database', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'getMatches',
+                        sessionId: sessionId
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.success && result.data) {
+                    console.log('[MATCHES] Total matches from DB:', result.data.length);
+                    return result.data.length;
+                }
+                return 0;
+            } catch (error) {
+                console.error('[MATCHES] Error getting total matches:', error);
+                return 0;
+            }
+        }
+        
+        // Функция для получения новых матчей за сегодня
+        async function getNewMatchesToday(sessionId) {
+            try {
+                const response = await fetch('/api/database', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'getMatches',
+                        sessionId: sessionId
+                    })
+                });
+                
+                const result = await response.json();
+                if (result.success && result.data) {
+                    const today = new Date().toDateString();
+                    const todayMatches = result.data.filter(match => {
+                        const matchDate = new Date(match.created_at).toDateString();
+                        return matchDate === today;
+                    });
+                    console.log('[MATCHES] New matches today:', todayMatches.length);
+                    return todayMatches.length;
+                }
+                return 0;
+            } catch (error) {
+                console.error('[MATCHES] Error getting new matches:', error);
+                return 0;
+            }
+        }
+        
+        // Функция для получения количества активных чатов через load_contacts
+        async function getActiveChatsCount(sessionId) {
+            try {
+                const apiConfigResponse = await fetch('/api/get-api-key');
+                const apiConfig = await apiConfigResponse.json();
+                
+                if (!apiConfig.apiKey) {
+                    console.error('[MATCHES] No API key available');
+                    return 0;
+                }
+                
+                const contactsParams = new URLSearchParams({
+                    api_key: apiConfig.apiKey,
+                    session_id: sessionId
+                });
+                
+                const apiUrl = `/api/spice-multi-test?endpoint=/ajax_api/load_contacts&method=GET&${contactsParams.toString()}`;
+                const response = await fetch(apiUrl);
+                const result = await response.json();
+                
+                if (result.success && result.data && result.data.list) {
+                    const activeChats = result.data.list.length;
+                    console.log('[MATCHES] Active chats from API:', activeChats);
+                    return activeChats;
+                }
+                return 0;
+            } catch (error) {
+                console.error('[MATCHES] Error getting active chats:', error);
+                return 0;
+            }
+        }
+
         async function loadMatches() {
             try {
                 console.log('[MATCHES] Loading matches from database...');
@@ -739,7 +853,9 @@
             //     userAvatar.textContent = window.authManager.currentUser.pseudo.charAt(0).toUpperCase();
             // }
             
-            // Загружаем матчи через API
+            // Загружаем статистику и матчи
+            const sessionId = window.authManager.sessionId;
+            loadMatchesStatistics(sessionId);
             loadMatches();
             
             // Обработчики фильтров
