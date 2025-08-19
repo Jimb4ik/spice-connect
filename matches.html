@@ -379,8 +379,8 @@
                         <button class="match-action-btn primary" onclick="startChatWithContact('${match.matched_user_id}', '${name}')">
                             💬 Message
                         </button>
-                        <button class="match-action-btn secondary" onclick="viewMatchDetails('${match.matched_user_id}')">
-                            👁️ View Details
+                        <button class="match-action-btn secondary" onclick="viewUserProfile('${match.matched_user_id}', '${name}')">
+                            👁️ View Profile
                         </button>
                     </div>
                 </div>
@@ -614,32 +614,31 @@
             }
         }
         
-        // Функция для извлечения URL фото из профиля (копия логики из discover.html)
+        // Функция для извлечения URL фото из профиля User API (high quality)
         function extractPhotoUrl(profile) {
             let photoUrl = null;
             
-            console.log('[MATCHES] Extracting photo from profile:', profile);
+            console.log('[MATCHES] Extracting photo from user profile:', profile);
             
-            // Пробуем разные источники фотографий (как в discover.html)
-            if (profile.photos_v2) {
-                if (profile.photos_v2.public) {
-                    const publicPhotos = profile.photos_v2.public;
-                    const firstPhotoKey = Object.keys(publicPhotos)[0];
-                    if (firstPhotoKey && publicPhotos[firstPhotoKey]) {
-                        photoUrl = publicPhotos[firstPhotoKey].sq_430 || 
-                                  publicPhotos[firstPhotoKey].normal || 
-                                  publicPhotos[firstPhotoKey].sq_middle;
-                    }
-                } else if (Array.isArray(profile.photos_v2) && profile.photos_v2.length > 0) {
-                    const mainPhoto = profile.photos_v2.find(p => p.main_photo === '1') || profile.photos_v2[0];
-                    photoUrl = mainPhoto.sq_430 || mainPhoto.normal || mainPhoto.sq_middle;
-                }
-            } else if (profile.photos && profile.photos.length > 0) {
-                photoUrl = profile.photos[0].url_big || profile.photos[0].url_middle;
-            } else if (profile.picture_430) {
+            // ПРИОРИТЕТ 1: main_photo с real_size (самое высокое качество)
+            if (profile.main_photo && profile.main_photo.real_size) {
+                photoUrl = profile.main_photo.real_size;
+                console.log('[MATCHES] Found main_photo real_size:', photoUrl);
+            }
+            // ПРИОРИТЕТ 2: main_photo с другими размерами
+            else if (profile.main_photo) {
+                photoUrl = profile.main_photo.sqmiddle || 
+                           profile.main_photo.real_size || 
+                           profile.main_photo.sqsmall;
+                console.log('[MATCHES] Found main_photo alternative:', photoUrl);
+            }
+            // ПРИОРИТЕТ 3: legacy поля для совместимости
+            else if (profile.picture_430) {
                 photoUrl = profile.picture_430;
+                console.log('[MATCHES] Found picture_430:', photoUrl);
             } else if (profile.picture) {
                 photoUrl = profile.picture;
+                console.log('[MATCHES] Found picture:', photoUrl);
             }
             
             // Исправляем URL если нужно
@@ -647,7 +646,7 @@
                 photoUrl = 'https://dev2018.de5a7.com/' + photoUrl;
             }
             
-            console.log('[MATCHES] Extracted photo URL:', photoUrl);
+            console.log('[MATCHES] Final extracted photo URL:', photoUrl);
             return photoUrl;
         }
         
@@ -707,6 +706,13 @@
             } catch (error) {
                 console.error('[MATCHES] Error marking match as read:', error);
             }
+        }
+
+        // Функция для открытия страницы профиля пользователя
+        function viewUserProfile(userId, userName) {
+            console.log('[MATCHES] Opening profile for user:', userId, userName);
+            // Переход на страницу профиля с параметрами
+            window.location.href = `user-profile.html?id=${userId}&name=${encodeURIComponent(userName)}`;
         }
 
         // Проверка авторизации при загрузке страницы
