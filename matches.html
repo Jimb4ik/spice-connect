@@ -588,7 +588,8 @@
                 console.log('[MATCHES] ==============================');
                 
                 if (result.success && result.data) {
-                    const profile = result.data; // API возвращает профиль напрямую в data
+                    // ИСПРАВЛЕНИЕ: профиль находится в result.result, не в result напрямую
+                    const profile = result.data.result || result.data; 
                     console.log('[MATCHES] Extracting photo from user profile:', profile);
                     const photoUrl = extractPhotoUrl(profile);
                     
@@ -618,12 +619,7 @@
         function extractPhotoUrl(profile) {
             let photoUrl = null;
             
-            console.log('[MATCHES] ===== PHOTO EXTRACTION DEBUG =====');
-            console.log('[MATCHES] Full profile object:', profile);
-            console.log('[MATCHES] profile.main_photo:', profile.main_photo);
-            console.log('[MATCHES] profile.picture:', profile.picture);
-            console.log('[MATCHES] profile.picture_430:', profile.picture_430);
-            console.log('[MATCHES] profile.photo:', profile.photo);
+            console.log('[MATCHES] Extracting photo from profile:', profile);
             
             // ПРИОРИТЕТ 1: main_photo с real_size (самое высокое качество)
             if (profile.main_photo && profile.main_photo.real_size) {
@@ -632,7 +628,6 @@
             }
             // ПРИОРИТЕТ 2: main_photo с другими размерами
             else if (profile.main_photo) {
-                console.log('[MATCHES] main_photo structure:', profile.main_photo);
                 photoUrl = profile.main_photo.sqmiddle || 
                            profile.main_photo.real_size || 
                            profile.main_photo.sqsmall;
@@ -658,14 +653,11 @@
             
             // Исправляем URL если нужно
             if (photoUrl && !photoUrl.startsWith('http') && !photoUrl.startsWith('/')) {
-                const fixedUrl = 'https://dev2018.de5a7.com/' + photoUrl;
-                console.log('[MATCHES] Fixed URL from:', photoUrl, 'to:', fixedUrl);
-                photoUrl = fixedUrl;
+                photoUrl = 'https://dev2018.de5a7.com/' + photoUrl;
+                console.log('[MATCHES] Fixed URL to:', photoUrl);
             }
             
-            console.log('[MATCHES] ===== FINAL RESULT =====');
             console.log('[MATCHES] Final extracted photo URL:', photoUrl);
-            console.log('[MATCHES] ========================');
             return photoUrl;
         }
         
