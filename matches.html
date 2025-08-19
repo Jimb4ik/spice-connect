@@ -354,8 +354,12 @@
                 photoUrl = photos.find(photo => photo && photo.trim() !== '') || null;
             }
             
-            console.log('[MATCHES] Photos for match:', photos);
-            console.log('[MATCHES] Final photo URL:', photoUrl);
+            console.log('[MATCHES] ===== MATCH DEBUG =====');
+            console.log('[MATCHES] Match object:', match);
+            console.log('[MATCHES] User ID for photo loading:', match.matched_user_id);
+            console.log('[MATCHES] Photos from database:', photos);
+            console.log('[MATCHES] Final photo URL from DB:', photoUrl);
+            console.log('[MATCHES] ========================');
 
                         const cardHtml = `
                 <div class="match-card ${isNew ? 'new-match' : ''}" data-match-id="${match.matched_user_id}">
@@ -549,7 +553,7 @@
             }
         }
 
-        // Функция для загрузки высокого качества фото через search API
+        // Функция для загрузки высокого качества фото через user API
         async function tryLoadUserPhoto(userId, imgElement) {
             try {
                 console.log('[MATCHES] Trying to load high-quality photo for user ID:', userId);
@@ -560,16 +564,14 @@
                     return false;
                 }
                 
-                // УЛУЧШЕНИЕ: Используем search API для получения фото высокого качества
-                const searchParams = new URLSearchParams({
+                // ИСПРАВЛЕНИЕ: Используем /index_api/user API для получения профиля пользователя по ID
+                const userParams = new URLSearchParams({
                     api_key: await getApiKey(),
                     session_id: sessionId,
-                    id_user: userId,
-                    search_type: 'profile',
-                    limit: 1
+                    id: userId  // Правильный параметр для получения профиля по ID
                 });
                 
-                const apiUrl = `/api/spice-multi-test?endpoint=/index_api/search&method=POST&${searchParams.toString()}`;
+                const apiUrl = `/api/spice-multi-test?endpoint=/index_api/user&method=POST&${userParams.toString()}`;
                 const response = await fetch(apiUrl);
                 
                 if (!response.ok) {
@@ -578,10 +580,16 @@
                 }
                 
                 const result = await response.json();
-                console.log('[MATCHES] Search API response:', result);
+                console.log('[MATCHES] ===== USER API DEBUG =====');
+                console.log('[MATCHES] Request URL:', apiUrl);
+                console.log('[MATCHES] User API response:', result);
+                console.log('[MATCHES] Response success:', result.success);
+                console.log('[MATCHES] Response data:', result.data);
+                console.log('[MATCHES] ==============================');
                 
-                if (result.success && result.data?.profiles && result.data.profiles.length > 0) {
-                    const profile = result.data.profiles[0];
+                if (result.success && result.data) {
+                    const profile = result.data; // API возвращает профиль напрямую в data
+                    console.log('[MATCHES] Extracting photo from user profile:', profile);
                     const photoUrl = extractPhotoUrl(profile);
                     
                     if (photoUrl) {
@@ -597,7 +605,7 @@
                     }
                 }
                 
-                console.warn('[MATCHES] No high-quality photo found in search API response');
+                console.warn('[MATCHES] No high-quality photo found in user API response');
                 return false;
                 
             } catch (error) {
