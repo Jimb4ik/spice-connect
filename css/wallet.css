@@ -6,10 +6,10 @@
 }
 
 .balance-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: white;
     border-radius: 20px;
     padding: 40px;
-    color: white;
+    color: #333;
     text-align: center;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     position: relative;
@@ -38,20 +38,11 @@
     margin: 0;
     font-size: 24px;
     font-weight: 600;
-    opacity: 0.9;
+    color: #333;
 }
 
 .refresh-btn {
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    border-radius: 10px;
-    padding: 10px;
-    cursor: pointer;
-    transition: background 0.3s ease;
-}
-
-.refresh-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
+    display: none;
 }
 
 .refresh-icon {
@@ -102,25 +93,25 @@
 }
 
 .wallet-btn.primary {
-    background: rgba(255, 255, 255, 0.9);
-    color: #667eea;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    background: #667eea;
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
 .wallet-btn.primary:hover {
-    background: white;
+    background: #5a6fd8;
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
 .wallet-btn.secondary {
-    background: rgba(255, 255, 255, 0.2);
+    background: #667eea;
     color: white;
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid #667eea;
 }
 
 .wallet-btn.secondary:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: #5a6fd8;
     transform: translateY(-2px);
 }
 
@@ -130,7 +121,7 @@
 }
 
 .wallet-btn.primary .btn-icon {
-    filter: hue-rotate(220deg);
+    filter: brightness(0) invert(1);
 }
 
 .wallet-btn.secondary .btn-icon {
@@ -143,7 +134,7 @@
 }
 
 .quick-topup-section h3 {
-    color: #333;
+    color: white;
     font-size: 24px;
     font-weight: 600;
     margin-bottom: 20px;
@@ -182,9 +173,9 @@
 }
 
 .amount-btn.custom {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #667eea;
     color: white;
-    border-color: transparent;
+    border-color: #667eea;
 }
 
 .amount-btn.custom:hover {
@@ -205,7 +196,7 @@
 }
 
 .section-header h3 {
-    color: #333;
+    color: white;
     font-size: 24px;
     font-weight: 600;
     margin: 0;
@@ -214,7 +205,7 @@
 .view-all-btn {
     background: none;
     border: none;
-    color: #667eea;
+    color: white;
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
@@ -223,7 +214,7 @@
 }
 
 .view-all-btn:hover {
-    color: #5a6fd8;
+    color: rgba(255, 255, 255, 0.8);
 }
 
 .transactions-list {

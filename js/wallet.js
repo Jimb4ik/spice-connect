@@ -439,8 +439,14 @@ async function processPayment() {
 
 // Transaction history
 function viewTransactionHistory() {
-    // TODO: Implement full transaction history page
-    alert('Full transaction history coming soon!');
+    // Scroll to Recent Transactions section
+    const transactionsSection = document.querySelector('.transactions-section');
+    if (transactionsSection) {
+        transactionsSection.scrollIntoView({ 
+            behavior: 'smooth',
+            block: 'start'
+        });
+    }
 }
 
 function viewAllTransactions() {
