@@ -109,6 +109,7 @@
                 Your Wallet
             </h1>
             <p class="page-subtitle">Manage your credits and payment methods</p>
+            <p class="page-description">Credits are used to unlock premium features, send messages, and boost your profile visibility. Purchase credits securely and start connecting with more people today.</p>
         </div>
 
         <!-- Баланс кошелька -->
@@ -121,8 +122,8 @@
                     </button>
                 </div>
                 <div class="balance-amount">
-                    <span class="currency-symbol">$</span>
-                    <span id="walletBalance" class="balance-value">0.00</span>
+                    <span id="walletBalance" class="balance-value">0</span>
+                    <span class="currency-symbol">Credits</span>
                 </div>
                 <div class="balance-actions">
                     <button class="wallet-btn primary" onclick="openTopUpModal()">
@@ -137,14 +138,18 @@
 
         <!-- Быстрые пополнения -->
         <div class="quick-topup-section fade-in-up">
-            <h3>Quick Top-up</h3>
+            <h3>Quick Purchase</h3>
+            <p class="topup-description">Choose a credit package or enter a custom amount. All transactions are secure and processed instantly.</p>
             <div class="topup-amounts">
-                <button class="amount-btn" onclick="selectAmount(5)">$5</button>
-                <button class="amount-btn" onclick="selectAmount(10)">$10</button>
-                <button class="amount-btn" onclick="selectAmount(25)">$25</button>
-                <button class="amount-btn" onclick="selectAmount(50)">$50</button>
-                <button class="amount-btn" onclick="selectAmount(100)">$100</button>
+                <button class="amount-btn" onclick="selectAmount(5)">50 Credits<br><small>$5.00</small></button>
+                <button class="amount-btn" onclick="selectAmount(10)">100 Credits<br><small>$10.00</small></button>
+                <button class="amount-btn" onclick="selectAmount(25)">250 Credits<br><small>$25.00</small></button>
+                <button class="amount-btn" onclick="selectAmount(50)">500 Credits<br><small>$50.00</small></button>
+                <button class="amount-btn" onclick="selectAmount(100)">1000 Credits<br><small>$100.00</small></button>
                 <button class="amount-btn custom" onclick="selectCustomAmount()">Custom</button>
+            </div>
+            <div class="purchase-disclaimer">
+                <p><strong>Note:</strong> Credits are non-refundable and non-transferable. They expire 12 months after purchase if unused. By purchasing credits, you agree to our Terms of Service and understand that credits have no cash value.</p>
             </div>
         </div>
 
@@ -168,18 +173,33 @@
     <div id="topupModal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Add Funds to Wallet</h2>
+                <h2>Purchase Credits</h2>
                 <button class="modal-close" onclick="closeTopUpModal()">&times;</button>
             </div>
             
             <div class="modal-body">
                 <!-- Выбор суммы -->
                 <div class="amount-selection">
-                    <label for="topupAmount">Amount to add:</label>
+                    <label for="topupAmount">Amount (USD):</label>
                     <div class="amount-input-container">
                         <span class="currency-prefix">$</span>
                         <input type="number" id="topupAmount" min="1" max="1000" step="0.01" placeholder="0.00">
                     </div>
+                    <div class="credits-conversion">
+                        <span id="creditsAmount">0 Credits</span>
+                    </div>
+                </div>
+
+                <!-- Выбор валюты -->
+                <div class="currency-selection">
+                    <label for="currency">Currency:</label>
+                    <select id="currency" class="currency-select">
+                        <option value="USD">USD - US Dollar</option>
+                        <option value="EUR">EUR - Euro</option>
+                        <option value="GBP">GBP - British Pound</option>
+                        <option value="CAD">CAD - Canadian Dollar</option>
+                        <option value="AUD">AUD - Australian Dollar</option>
+                    </select>
                 </div>
 
                 <!-- Метод оплаты -->
@@ -189,32 +209,95 @@
                         <div class="payment-option">
                             <input type="radio" id="cardPayment" name="paymentMethod" value="card" checked>
                             <label for="cardPayment" class="payment-label">
-                                <img src="icons/credit-card.png" alt="Card" class="payment-icon">
                                 Credit/Debit Card
                             </label>
                         </div>
                         <div class="payment-option">
                             <input type="radio" id="paypalPayment" name="paymentMethod" value="paypal">
                             <label for="paypalPayment" class="payment-label">
-                                <img src="icons/paypal.png" alt="PayPal" class="payment-icon">
                                 PayPal
                             </label>
                         </div>
                     </div>
                 </div>
 
+                <!-- Billing Address -->
+                <div class="billing-section">
+                    <h4>Billing Address</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="firstName">First Name</label>
+                            <input type="text" id="firstName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName">Last Name</label>
+                            <input type="text" id="lastName" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Address</label>
+                        <input type="text" id="address" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="city">City</label>
+                            <input type="text" id="city" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="state">State/Province</label>
+                            <input type="text" id="state" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="zipCode">ZIP/Postal Code</label>
+                            <input type="text" id="zipCode" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="country">Country</label>
+                        <select id="country" required>
+                            <option value="">Select Country</option>
+                            <option value="US">United States</option>
+                            <option value="CA">Canada</option>
+                            <option value="GB">United Kingdom</option>
+                            <option value="AU">Australia</option>
+                            <option value="DE">Germany</option>
+                            <option value="FR">France</option>
+                            <option value="IT">Italy</option>
+                            <option value="ES">Spain</option>
+                            <option value="NL">Netherlands</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Согласие -->
+                <div class="agreement-section">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="termsAgreement" required>
+                        <label for="termsAgreement">
+                            I agree to the <a href="/terms" target="_blank">Terms of Service</a>, 
+                            <a href="/privacy" target="_blank">Privacy Policy</a>, and 
+                            <a href="/returns" target="_blank">Return Policy</a>
+                        </label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="ageConfirmation" required>
+                        <label for="ageConfirmation">
+                            I confirm that I am at least 18 years old and legally able to make this purchase
+                        </label>
+                    </div>
+                </div>
+
                 <!-- Информация о безопасности -->
                 <div class="security-info">
                     <div class="security-badge">
-                        <img src="icons/shield.png" alt="Secure" class="security-icon">
-                        <span>Your payment is secured with 256-bit SSL encryption</span>
+                        <span>🔒 Your payment is secured with 256-bit SSL encryption</span>
                     </div>
                 </div>
             </div>
 
             <div class="modal-footer">
                 <button class="wallet-btn secondary" onclick="closeTopUpModal()">Cancel</button>
-                <button class="wallet-btn primary" onclick="proceedToPayment()" id="proceedBtn">
+                <button class="wallet-btn primary" onclick="proceedToPayment()" id="proceedBtn" disabled>
                     Continue to Payment
                 </button>
             </div>

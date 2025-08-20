@@ -103,7 +103,7 @@ class WalletManager {
     displayBalance(balance) {
         const balanceElement = document.getElementById('walletBalance');
         if (balanceElement) {
-            balanceElement.textContent = parseFloat(balance || 0).toFixed(2);
+            balanceElement.textContent = Math.floor(balance || 0);
         }
     }
     
@@ -206,6 +206,12 @@ class WalletManager {
         
         // Form input formatting
         this.setupFormFormatting();
+        
+        // Agreement validation
+        this.setupAgreementValidation();
+        
+        // Credits conversion
+        this.setupCreditsConversion();
     }
     
     setupFormFormatting() {
@@ -237,6 +243,37 @@ class WalletManager {
             cvvInput.addEventListener('input', (e) => {
                 e.target.value = e.target.value.replace(/\D/g, '');
             });
+        }
+    }
+    
+    setupAgreementValidation() {
+        const termsCheckbox = document.getElementById('termsAgreement');
+        const ageCheckbox = document.getElementById('ageConfirmation');
+        const proceedBtn = document.getElementById('proceedBtn');
+        
+        if (termsCheckbox && ageCheckbox && proceedBtn) {
+            const validateAgreements = () => {
+                const isValid = termsCheckbox.checked && ageCheckbox.checked;
+                proceedBtn.disabled = !isValid;
+            };
+            
+            termsCheckbox.addEventListener('change', validateAgreements);
+            ageCheckbox.addEventListener('change', validateAgreements);
+        }
+    }
+    
+    setupCreditsConversion() {
+        const amountInput = document.getElementById('topupAmount');
+        const creditsDisplay = document.getElementById('creditsAmount');
+        
+        if (amountInput && creditsDisplay) {
+            const updateCredits = () => {
+                const amount = parseFloat(amountInput.value) || 0;
+                const credits = Math.floor(amount * 10); // 1 USD = 10 Credits
+                creditsDisplay.textContent = `${credits} Credits`;
+            };
+            
+            amountInput.addEventListener('input', updateCredits);
         }
     }
     
