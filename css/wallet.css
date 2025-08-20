@@ -93,25 +93,25 @@
 }
 
 .wallet-btn.primary {
-    background: #667eea;
+    background: var(--primary-color);
     color: white;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 4px 15px rgba(255, 68, 88, 0.3);
 }
 
 .wallet-btn.primary:hover {
-    background: #5a6fd8;
+    background: var(--primary-dark);
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 6px 20px rgba(255, 68, 88, 0.4);
 }
 
 .wallet-btn.secondary {
-    background: #667eea;
+    background: var(--primary-color);
     color: white;
-    border: 1px solid #667eea;
+    border: 1px solid var(--primary-color);
 }
 
 .wallet-btn.secondary:hover {
-    background: #5a6fd8;
+    background: var(--primary-dark);
     transform: translateY(-2px);
 }
 
@@ -154,33 +154,33 @@
     border-radius: 12px;
     font-size: 18px;
     font-weight: 600;
-    color: #667eea;
+    color: var(--primary-color);
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
 .amount-btn:hover {
-    border-color: #667eea;
-    background: #f8f9ff;
+    border-color: var(--primary-color);
+    background: #fff8f9;
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.15);
+    box-shadow: 0 4px 15px rgba(255, 68, 88, 0.15);
 }
 
 .amount-btn.selected {
-    background: #667eea;
+    background: var(--primary-color);
     color: white;
-    border-color: #667eea;
+    border-color: var(--primary-color);
 }
 
 .amount-btn.custom {
-    background: #667eea;
+    background: var(--primary-color);
     color: white;
-    border-color: #667eea;
+    border-color: var(--primary-color);
 }
 
 .amount-btn.custom:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 6px 20px rgba(255, 68, 88, 0.3);
 }
 
 /* ============ TRANSACTIONS SECTION ============ */
