@@ -341,18 +341,23 @@
                 
                 const result = await response.json();
                 if (result.success && result.data) {
+                    console.log('[MATCHES] All matches from DB:', result.data.length);
+                    
                     // Получаем сегодняшнюю дату в начале дня (00:00:00)
                     const today = new Date();
                     today.setHours(0, 0, 0, 0);
                     
+                    console.log('[MATCHES] Today filter (00:00):', today.toISOString());
+                    
                     const todayMatches = result.data.filter(match => {
                         const matchDate = new Date(match.created_at);
+                        console.log('[MATCHES] Match date:', match.created_at, '-> parsed:', matchDate.toISOString(), 'is today?', matchDate >= today);
                         // Сравниваем только дату (без времени)
                         return matchDate >= today;
                     });
                     
                     console.log('[MATCHES] New matches since today 00:00:', todayMatches.length);
-                    console.log('[MATCHES] Today date filter:', today.toISOString());
+                    console.log('[MATCHES] Today matches details:', todayMatches.map(m => ({ id: m.matched_user_id, created: m.created_at })));
                     
                     return todayMatches.length;
                 }
@@ -390,13 +395,25 @@
                 console.log('[MATCHES] Load contacts API response:', result);
                 
                 if (result.success && result.data) {
-                    if (result.data.list && Array.isArray(result.data.list)) {
-                        const activeChats = result.data.list.length;
+                    // Проверяем разные возможные структуры ответа
+                    let contactsList = null;
+                    
+                    if (result.data.contacts && Array.isArray(result.data.contacts)) {
+                        contactsList = result.data.contacts;
+                    } else if (result.data.list && Array.isArray(result.data.list)) {
+                        contactsList = result.data.list;
+                    } else if (Array.isArray(result.data)) {
+                        contactsList = result.data;
+                    }
+                    
+                    if (contactsList) {
+                        const activeChats = contactsList.length;
                         console.log('[MATCHES] Active chats count:', activeChats);
-                        console.log('[MATCHES] Contacts list:', result.data.list);
+                        console.log('[MATCHES] Contacts list sample:', contactsList.slice(0, 3));
                         return activeChats;
                     } else {
-                        console.log('[MATCHES] No contacts list in response or list is not array');
+                        console.log('[MATCHES] No contacts array found in response structure');
+                        console.log('[MATCHES] Available keys in result.data:', Object.keys(result.data));
                         return 0;
                     }
                 } else {
