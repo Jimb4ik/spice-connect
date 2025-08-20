@@ -146,7 +146,6 @@ class WalletManager {
             transactionsList.innerHTML = `
                 <div class="no-transactions">
                     <div style="text-align: center; padding: 40px; color: #666;">
-                        <img src="icons/wallet-empty.png" alt="No transactions" style="width: 64px; height: 64px; opacity: 0.5; margin-bottom: 16px;">
                         <h3 style="margin: 0 0 8px; font-size: 18px;">No transactions yet</h3>
                         <p style="margin: 0; font-size: 14px;">Your transaction history will appear here</p>
                     </div>
