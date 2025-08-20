@@ -117,7 +117,7 @@
         -->
 
         <!-- Контейнер для центрирования контента -->
-        <div class="matches-content-container" id="matchesContainer" style="display: none;">
+        <div class="matches-content-container">
             <!-- Статистика слева -->
             <div class="matches-stats-sidebar fade-in-up">
                 <div class="stats-grid-vertical">
@@ -137,7 +137,7 @@
             </div>
 
             <!-- Сетка матчей в центре -->
-            <div class="matches-grid-centered fade-in-up" id="matchesGrid">
+            <div class="matches-grid-centered fade-in-up" id="matchesGrid" style="display: none;">
                 <!-- Матчи будут загружены динамически -->
             </div>
         </div>
@@ -465,15 +465,15 @@
                 console.error('[MATCHES] Error loading matches:', error);
                 showNoMatches();
             } finally {
-                // Скрываем loading спиннер и показываем контейнер
+                // Скрываем loading спиннер и показываем грид
                 const loadingElement = document.querySelector('.loading-matches');
-                const matchesContainer = document.getElementById('matchesContainer');
+                const matchesGrid = document.getElementById('matchesGrid');
                 
                 if (loadingElement) {
                     loadingElement.style.display = 'none';
                 }
-                if (matchesContainer) {
-                    matchesContainer.style.display = 'block';
+                if (matchesGrid) {
+                    matchesGrid.style.display = 'grid';
                 }
             }
         }
@@ -608,14 +608,14 @@
 
         function showNoMatches() {
             const noMatchesElement = document.getElementById('noMatches');
-            const matchesContainer = document.getElementById('matchesContainer');
+            const matchesGrid = document.getElementById('matchesGrid');
             
             if (noMatchesElement) {
                 noMatchesElement.style.display = 'block';
             }
-            // Также показываем контейнер матчей (даже если он пустой, но для статистики)
-            if (matchesContainer) {
-                matchesContainer.style.display = 'block';
+            // Показываем грид (даже если он пустой, чтобы не было белой полосы)
+            if (matchesGrid) {
+                matchesGrid.style.display = 'grid';
             }
         }
 
