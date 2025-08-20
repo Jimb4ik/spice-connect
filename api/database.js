@@ -62,6 +62,18 @@ export default async function handler(req, res) {
             case 'delete_match':
                 result = await deleteMatch(pool, req);
                 break;
+            case 'get_wallet':
+                result = await getWallet(pool, req);
+                break;
+            case 'create_wallet':
+                result = await createWallet(pool, req);
+                break;
+            case 'add_transaction':
+                result = await addWalletTransaction(pool, req);
+                break;
+            case 'get_transactions':
+                result = await getWalletTransactions(pool, req);
+                break;
             default:
                 await pool.end();
                 return res.status(400).json({
@@ -123,12 +135,42 @@ async function initDatabase(pool) {
             UNIQUE(user_id, matched_user_id)
         );
 
+        -- Таблица для виртуального кошелька пользователей
+        CREATE TABLE IF NOT EXISTS user_wallets (
+            id SERIAL PRIMARY KEY,
+            user_id VARCHAR(255) NOT NULL UNIQUE,
+            session_id VARCHAR(255) NOT NULL,
+            balance DECIMAL(10,2) DEFAULT 0.00,
+            currency VARCHAR(3) DEFAULT 'USD',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        -- Таблица для транзакций кошелька
+        CREATE TABLE IF NOT EXISTS wallet_transactions (
+            id SERIAL PRIMARY KEY,
+            wallet_id INTEGER REFERENCES user_wallets(id),
+            user_id VARCHAR(255) NOT NULL,
+            transaction_type VARCHAR(50) NOT NULL, -- 'deposit', 'withdrawal', 'purchase', 'refund'
+            amount DECIMAL(10,2) NOT NULL,
+            currency VARCHAR(3) DEFAULT 'USD',
+            description TEXT,
+            payment_method VARCHAR(100), -- 'card', 'paypal', etc.
+            payment_reference VARCHAR(255), -- external payment ID
+            status VARCHAR(50) DEFAULT 'completed', -- 'pending', 'completed', 'failed', 'cancelled'
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
         -- Индексы
         CREATE INDEX IF NOT EXISTS idx_user_progress_user_id ON user_progress(user_id);
         CREATE INDEX IF NOT EXISTS idx_viewed_profiles_user_id ON viewed_profiles(user_id);
         CREATE INDEX IF NOT EXISTS idx_viewed_profiles_profile_id ON viewed_profiles(profile_id);
         CREATE INDEX IF NOT EXISTS idx_matches_user_id ON matches(user_id);
         CREATE INDEX IF NOT EXISTS idx_matches_date ON matches(match_date DESC);
+        CREATE INDEX IF NOT EXISTS idx_user_wallets_user_id ON user_wallets(user_id);
+        CREATE INDEX IF NOT EXISTS idx_wallet_transactions_user_id ON wallet_transactions(user_id);
+        CREATE INDEX IF NOT EXISTS idx_wallet_transactions_wallet_id ON wallet_transactions(wallet_id);
+        CREATE INDEX IF NOT EXISTS idx_wallet_transactions_date ON wallet_transactions(created_at DESC);
     `;
 
     await pool.query(createTablesSQL);
@@ -425,4 +467,200 @@ async function deleteMatch(pool, req) {
         success: true,
         deleted: result.rowCount > 0
     };
+}
+
+// ============ WALLET FUNCTIONS ============
+
+// Получить кошелек пользователя
+async function getWallet(pool, req) {
+    const { user_id, session_id } = req.method === 'GET' ? req.query : req.body;
+
+    if (!user_id) {
+        return {
+            success: false,
+            error: 'user_id is required'
+        };
+    }
+
+    try {
+        // Сначала проверяем, есть ли кошелек
+        let result = await pool.query(
+            'SELECT * FROM user_wallets WHERE user_id = $1',
+            [user_id]
+        );
+
+        if (result.rows.length === 0) {
+            // Если кошелька нет, создаем его
+            result = await pool.query(
+                `INSERT INTO user_wallets (user_id, session_id, balance, currency)
+                 VALUES ($1, $2, $3, $4)
+                 RETURNING *`,
+                [user_id, session_id || 'unknown', 0.00, 'USD']
+            );
+        }
+
+        return {
+            success: true,
+            data: result.rows[0]
+        };
+    } catch (error) {
+        console.error('[DB] Error getting wallet:', error);
+        return {
+            success: false,
+            error: 'Database operation failed',
+            details: error.message
+        };
+    }
+}
+
+// Создать кошелек
+async function createWallet(pool, req) {
+    const { user_id, session_id, initial_balance = 0.00 } = req.body;
+
+    if (!user_id) {
+        return {
+            success: false,
+            error: 'user_id is required'
+        };
+    }
+
+    try {
+        const result = await pool.query(
+            `INSERT INTO user_wallets (user_id, session_id, balance, currency)
+             VALUES ($1, $2, $3, $4)
+             ON CONFLICT (user_id) DO UPDATE SET
+                session_id = EXCLUDED.session_id,
+                updated_at = CURRENT_TIMESTAMP
+             RETURNING *`,
+            [user_id, session_id, parseFloat(initial_balance), 'USD']
+        );
+
+        return {
+            success: true,
+            data: result.rows[0]
+        };
+    } catch (error) {
+        console.error('[DB] Error creating wallet:', error);
+        return {
+            success: false,
+            error: 'Database operation failed',
+            details: error.message
+        };
+    }
+}
+
+// Добавить транзакцию
+async function addWalletTransaction(pool, req) {
+    const { 
+        user_id, 
+        transaction_type, 
+        amount, 
+        description, 
+        payment_method, 
+        payment_reference 
+    } = req.body;
+
+    if (!user_id || !transaction_type || !amount) {
+        return {
+            success: false,
+            error: 'user_id, transaction_type and amount are required'
+        };
+    }
+
+    try {
+        // Получаем кошелек пользователя
+        const walletResult = await pool.query(
+            'SELECT * FROM user_wallets WHERE user_id = $1',
+            [user_id]
+        );
+
+        if (walletResult.rows.length === 0) {
+            return {
+                success: false,
+                error: 'Wallet not found'
+            };
+        }
+
+        const wallet = walletResult.rows[0];
+        const transactionAmount = parseFloat(amount);
+
+        // Добавляем транзакцию
+        const transactionResult = await pool.query(
+            `INSERT INTO wallet_transactions 
+             (wallet_id, user_id, transaction_type, amount, description, payment_method, payment_reference)
+             VALUES ($1, $2, $3, $4, $5, $6, $7)
+             RETURNING *`,
+            [wallet.id, user_id, transaction_type, transactionAmount, description, payment_method, payment_reference]
+        );
+
+        // Обновляем баланс кошелька
+        let newBalance = parseFloat(wallet.balance);
+        if (transaction_type === 'deposit' || transaction_type === 'refund') {
+            newBalance += transactionAmount;
+        } else if (transaction_type === 'withdrawal' || transaction_type === 'purchase') {
+            newBalance -= transactionAmount;
+        }
+
+        await pool.query(
+            'UPDATE user_wallets SET balance = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+            [newBalance, wallet.id]
+        );
+
+        return {
+            success: true,
+            data: {
+                transaction: transactionResult.rows[0],
+                new_balance: newBalance
+            }
+        };
+    } catch (error) {
+        console.error('[DB] Error adding transaction:', error);
+        return {
+            success: false,
+            error: 'Database operation failed',
+            details: error.message
+        };
+    }
+}
+
+// Получить транзакции кошелька
+async function getWalletTransactions(pool, req) {
+    const { user_id, limit = 50, offset = 0 } = req.method === 'GET' ? req.query : req.body;
+
+    if (!user_id) {
+        return {
+            success: false,
+            error: 'user_id is required'
+        };
+    }
+
+    try {
+        const result = await pool.query(
+            `SELECT * FROM wallet_transactions 
+             WHERE user_id = $1 
+             ORDER BY created_at DESC 
+             LIMIT $2 OFFSET $3`,
+            [user_id, parseInt(limit), parseInt(offset)]
+        );
+
+        const countResult = await pool.query(
+            'SELECT COUNT(*) FROM wallet_transactions WHERE user_id = $1',
+            [user_id]
+        );
+
+        return {
+            success: true,
+            data: result.rows,
+            total: parseInt(countResult.rows[0].count),
+            limit: parseInt(limit),
+            offset: parseInt(offset)
+        };
+    } catch (error) {
+        console.error('[DB] Error getting transactions:', error);
+        return {
+            success: false,
+            error: 'Database operation failed',
+            details: error.message
+        };
+    }
 }

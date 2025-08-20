@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wallet - Lavrilo</title>
+    
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="css/app-styles.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/wallet.css">
+</head>
+<body>
+    <!-- Хедер -->
+    <header class="header">
+        <div class="header-container">
+            <div class="header-left">
+                <div class="logo-brand">
+                    <img src="icons/heart-logo.png" alt="Lavrilo" class="logo-icon">
+                    <span class="brand-name">Lavrilo</span>
+                </div>
+            </div>
+            
+            <div class="header-right">
+                <div class="user-profile">
+                    <div class="user-avatar-container">
+                        <img id="headerAvatar" src="images/default-avatar.png" alt="User Avatar" class="user-avatar">
+                    </div>
+                    <div class="user-info">
+                        <span id="headerUserName" class="user-name">Loading...</span>
+                    </div>
+                </div>
+                <button class="logout-btn" onclick="logout()">
+                    <img src="icons/logout.png" alt="Logout" class="logout-icon">
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Навигация -->
+    <nav class="nav-bar">
+        <div class="nav-container">
+            <a href="main.html" class="nav-link">
+                <img src="icons/home.png" alt="Home" class="nav-icon">
+                <span class="nav-text">Main</span>
+            </a>
+            <a href="messages.html" class="nav-link">
+                <img src="icons/messages.png" alt="Messages" class="nav-icon">
+                <span class="nav-text">Messages</span>
+                <span class="message-counter" id="messageCounter" style="display: none;">0</span>
+            </a>
+            <a href="discover.html" class="nav-link">
+                <img src="icons/discover.png" alt="Discover" class="nav-icon">
+                <span class="nav-text">Discover</span>
+            </a>
+            <a href="matches.html" class="nav-link">
+                <img src="icons/matches.png" alt="Matches" class="nav-icon">
+                <span class="nav-text">Matches</span>
+            </a>
+            <a href="search.html" class="nav-link">
+                <img src="icons/search.png" alt="Search" class="nav-icon">
+                <span class="nav-text">Search</span>
+            </a>
+            <a href="wallet.html" class="nav-link active">
+                <img src="icons/wallet.png" alt="Wallet" class="nav-icon">
+                <span class="nav-text">Wallet</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Основной контент -->
+    <main class="app-main">
+        <div class="page-header fade-in-up">
+            <h1 class="page-title">
+                <img src="icons/wallet-white.png" alt="Wallet" class="page-title-icon"> 
+                Your Wallet
+            </h1>
+            <p class="page-subtitle">Manage your credits and payment methods</p>
+        </div>
+
+        <!-- Баланс кошелька -->
+        <div class="wallet-balance-section fade-in-up">
+            <div class="balance-card">
+                <div class="balance-header">
+                    <h2>Current Balance</h2>
+                    <button class="refresh-btn" onclick="loadWalletData()" title="Refresh">
+                        <img src="icons/refresh.png" alt="Refresh" class="refresh-icon">
+                    </button>
+                </div>
+                <div class="balance-amount">
+                    <span class="currency-symbol">$</span>
+                    <span id="walletBalance" class="balance-value">0.00</span>
+                </div>
+                <div class="balance-actions">
+                    <button class="wallet-btn primary" onclick="openTopUpModal()">
+                        <img src="icons/plus.png" alt="Add" class="btn-icon">
+                        Add Funds
+                    </button>
+                    <button class="wallet-btn secondary" onclick="viewTransactionHistory()">
+                        <img src="icons/history.png" alt="History" class="btn-icon">
+                        History
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Быстрые пополнения -->
+        <div class="quick-topup-section fade-in-up">
+            <h3>Quick Top-up</h3>
+            <div class="topup-amounts">
+                <button class="amount-btn" onclick="selectAmount(5)">$5</button>
+                <button class="amount-btn" onclick="selectAmount(10)">$10</button>
+                <button class="amount-btn" onclick="selectAmount(25)">$25</button>
+                <button class="amount-btn" onclick="selectAmount(50)">$50</button>
+                <button class="amount-btn" onclick="selectAmount(100)">$100</button>
+                <button class="amount-btn custom" onclick="selectCustomAmount()">Custom</button>
+            </div>
+        </div>
+
+        <!-- История транзакций -->
+        <div class="transactions-section fade-in-up">
+            <div class="section-header">
+                <h3>Recent Transactions</h3>
+                <button class="view-all-btn" onclick="viewAllTransactions()">View All</button>
+            </div>
+            <div id="transactionsList" class="transactions-list">
+                <!-- Транзакции будут загружены динамически -->
+                <div class="loading-transactions">
+                    <div class="loading-spinner"></div>
+                    <p>Loading transactions...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Модальное окно пополнения -->
+    <div id="topupModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Funds to Wallet</h2>
+                <button class="modal-close" onclick="closeTopUpModal()">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <!-- Выбор суммы -->
+                <div class="amount-selection">
+                    <label for="topupAmount">Amount to add:</label>
+                    <div class="amount-input-container">
+                        <span class="currency-prefix">$</span>
+                        <input type="number" id="topupAmount" min="1" max="1000" step="0.01" placeholder="0.00">
+                    </div>
+                </div>
+
+                <!-- Метод оплаты -->
+                <div class="payment-method-selection">
+                    <label>Payment Method:</label>
+                    <div class="payment-methods">
+                        <div class="payment-option">
+                            <input type="radio" id="cardPayment" name="paymentMethod" value="card" checked>
+                            <label for="cardPayment" class="payment-label">
+                                <img src="icons/credit-card.png" alt="Card" class="payment-icon">
+                                Credit/Debit Card
+                            </label>
+                        </div>
+                        <div class="payment-option">
+                            <input type="radio" id="paypalPayment" name="paymentMethod" value="paypal">
+                            <label for="paypalPayment" class="payment-label">
+                                <img src="icons/paypal.png" alt="PayPal" class="payment-icon">
+                                PayPal
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Информация о безопасности -->
+                <div class="security-info">
+                    <div class="security-badge">
+                        <img src="icons/shield.png" alt="Secure" class="security-icon">
+                        <span>Your payment is secured with 256-bit SSL encryption</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="wallet-btn secondary" onclick="closeTopUpModal()">Cancel</button>
+                <button class="wallet-btn primary" onclick="proceedToPayment()" id="proceedBtn">
+                    Continue to Payment
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно платежных данных -->
+    <div id="paymentModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Payment Details</h2>
+                <button class="modal-close" onclick="closePaymentModal()">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <div class="payment-summary">
+                    <h3>Order Summary</h3>
+                    <div class="summary-item">
+                        <span>Amount:</span>
+                        <span id="paymentAmount">$0.00</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Processing Fee:</span>
+                        <span>$0.00</span>
+                    </div>
+                    <div class="summary-total">
+                        <span>Total:</span>
+                        <span id="paymentTotal">$0.00</span>
+                    </div>
+                </div>
+
+                <form id="paymentForm" class="payment-form">
+                    <div class="form-group">
+                        <label for="cardNumber">Card Number</label>
+                        <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="expiryDate">Expiry Date</label>
+                            <input type="text" id="expiryDate" placeholder="MM/YY" maxlength="5">
+                        </div>
+                        <div class="form-group">
+                            <label for="cvv">CVV</label>
+                            <input type="text" id="cvv" placeholder="123" maxlength="4">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="cardName">Cardholder Name</label>
+                        <input type="text" id="cardName" placeholder="John Doe">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="billingAddress">Billing Address</label>
+                        <input type="text" id="billingAddress" placeholder="123 Main St">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="billingCity">City</label>
+                            <input type="text" id="billingCity" placeholder="New York">
+                        </div>
+                        <div class="form-group">
+                            <label for="billingZip">ZIP Code</label>
+                            <input type="text" id="billingZip" placeholder="10001">
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button class="wallet-btn secondary" onclick="closePaymentModal()">Cancel</button>
+                <button class="wallet-btn primary" onclick="processPayment()" id="payBtn">
+                    <img src="icons/lock.png" alt="Secure" class="btn-icon">
+                    Pay Securely
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/auth-manager.js"></script>
+    <script src="js/header-avatar.js"></script>
+    <script src="js/wallet.js"></script>
+</body>
+</html>

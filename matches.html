@@ -42,6 +42,11 @@
                             <img src="icons/search.png" alt="Search" class="nav-icon"> Search
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a href="wallet.html" class="nav-link">
+                            <img src="icons/wallet.png" alt="Wallet" class="nav-icon"> Wallet
+                        </a>
+                    </li>
                 </ul>
             </nav>
             
@@ -352,13 +357,14 @@
                     console.log('[MATCHES] Today date string:', todayDateString);
                     
                     const todayMatches = result.data.filter(match => {
-                        const matchDate = new Date(match.created_at);
+                        // Используем правильное поле match_date из базы данных
+                        const matchDate = new Date(match.match_date);
                         const matchDateString = matchDate.getFullYear() + '-' + 
                             String(matchDate.getMonth() + 1).padStart(2, '0') + '-' + 
                             String(matchDate.getDate()).padStart(2, '0');
                         
                         const isToday = matchDateString === todayDateString;
-                        console.log('[MATCHES] Match:', match.created_at, '-> date:', matchDateString, 'is today?', isToday);
+                        console.log('[MATCHES] Match:', match.match_date, '-> date:', matchDateString, 'is today?', isToday);
                         
                         return isToday;
                     });
@@ -366,8 +372,8 @@
                     console.log('[MATCHES] New matches today:', todayMatches.length);
                     console.log('[MATCHES] Today matches details:', todayMatches.map(m => ({ 
                         id: m.matched_user_id, 
-                        created: m.created_at,
-                        user: m.matched_user_pseudo 
+                        match_date: m.match_date,
+                        user: m.matched_user_name 
                     })));
                     
                     return todayMatches.length;
