@@ -9,64 +9,97 @@
     <link rel="stylesheet" href="css/app-styles.css">
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/wallet.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
-<body>
+<body data-page="wallet">
     <!-- Хедер -->
-    <header class="header">
+    <header class="app-header">
         <div class="header-container">
-            <div class="header-left">
-                <div class="logo-brand">
-                    <img src="icons/heart-logo.png" alt="Lavrilo" class="logo-icon">
-                    <span class="brand-name">Lavrilo</span>
-                </div>
-            </div>
+            <a href="main.html" class="logo">Lavrilo</a>
             
-            <div class="header-right">
-                <div class="user-profile">
-                    <div class="user-avatar-container">
-                        <img id="headerAvatar" src="images/default-avatar.png" alt="User Avatar" class="user-avatar">
-                    </div>
-                    <div class="user-info">
-                        <span id="headerUserName" class="user-name">Loading...</span>
-                    </div>
+            <nav>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="main.html" class="nav-link">
+                            <img src="icons/home.png" alt="Main" class="nav-icon"> Main
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="messages.html" class="nav-link">
+                            <img src="icons/messages-new.png" alt="Messages" class="nav-icon"> Messages
+                            <span class="nav-badge" id="messagesBadge">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="discover.html" class="nav-link">
+                            <img src="icons/discover.png" alt="Discover" class="nav-icon"> Discover
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="matches.html" class="nav-link">
+                            <img src="icons/matches-new.png" alt="Matches" class="nav-icon"> Matches
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="search.html" class="nav-link">
+                            <img src="icons/search.png" alt="Search" class="nav-icon"> Search
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="user-menu">
+                <div class="app-user-avatar" id="userAvatar">
+                    <img id="userAvatarImg" alt="User Avatar" style="display: none;">
+                    <span id="userAvatarText">U</span>
                 </div>
-                <button class="logout-btn" onclick="logout()">
-                    <img src="icons/logout.png" alt="Logout" class="logout-icon">
-                </button>
+                <div class="user-dropdown">
+                    <div class="dropdown-header">
+                        <div class="dropdown-user-info">
+                            <div class="dropdown-avatar">
+                                <img id="dropdownAvatarImg" alt="User Avatar" style="display: none;">
+                                <span id="dropdownAvatarText">U</span>
+                            </div>
+                            <div class="dropdown-user-details">
+                                <div class="dropdown-username" id="dropdownUsername">Username</div>
+                                <div class="dropdown-status">Online</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <a href="profile.html" class="dropdown-item">
+                        <img src="icons/profile.png" alt="Profile" class="dropdown-icon">
+                        <div class="dropdown-item-content">
+                            <span class="dropdown-item-title">My Profile</span>
+                            <span class="dropdown-item-subtitle">View and edit profile</span>
+                        </div>
+                    </a>
+                    <a href="wallet.html" class="dropdown-item">
+                        <img src="icons/wallet.png" alt="Wallet" class="dropdown-icon">
+                        <div class="dropdown-item-content">
+                            <span class="dropdown-item-title">Wallet</span>
+                            <span class="dropdown-item-subtitle">Manage your credits</span>
+                        </div>
+                    </a>
+                    <a href="settings.html" class="dropdown-item">
+                        <img src="icons/settings.png" alt="Settings" class="dropdown-icon">
+                        <div class="dropdown-item-content">
+                            <span class="dropdown-item-title">Settings</span>
+                            <span class="dropdown-item-subtitle">Manage your account</span>
+                        </div>
+                    </a>
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-item logout" id="logoutBtn">
+                        <img src="icons/logout.png" alt="Logout" class="dropdown-icon">
+                        <div class="dropdown-item-content">
+                            <span class="dropdown-item-title">Logout</span>
+                            <span class="dropdown-item-subtitle">Sign out of your account</span>
+                        </div>
+                    </button>
+                </div>
             </div>
         </div>
     </header>
-
-    <!-- Навигация -->
-    <nav class="nav-bar">
-        <div class="nav-container">
-            <a href="main.html" class="nav-link">
-                <img src="icons/home.png" alt="Home" class="nav-icon">
-                <span class="nav-text">Main</span>
-            </a>
-            <a href="messages.html" class="nav-link">
-                <img src="icons/messages.png" alt="Messages" class="nav-icon">
-                <span class="nav-text">Messages</span>
-                <span class="message-counter" id="messageCounter" style="display: none;">0</span>
-            </a>
-            <a href="discover.html" class="nav-link">
-                <img src="icons/discover.png" alt="Discover" class="nav-icon">
-                <span class="nav-text">Discover</span>
-            </a>
-            <a href="matches.html" class="nav-link">
-                <img src="icons/matches.png" alt="Matches" class="nav-icon">
-                <span class="nav-text">Matches</span>
-            </a>
-            <a href="search.html" class="nav-link">
-                <img src="icons/search.png" alt="Search" class="nav-icon">
-                <span class="nav-text">Search</span>
-            </a>
-            <a href="wallet.html" class="nav-link active">
-                <img src="icons/wallet.png" alt="Wallet" class="nav-icon">
-                <span class="nav-text">Wallet</span>
-            </a>
-        </div>
-    </nav>
 
     <!-- Основной контент -->
     <main class="app-main">
@@ -268,6 +301,7 @@
     <!-- Scripts -->
     <script src="js/auth-manager.js"></script>
     <script src="js/header-avatar.js"></script>
+    <script src="js/app-navigation.js"></script>
     <script src="js/wallet.js"></script>
 </body>
 </html>
