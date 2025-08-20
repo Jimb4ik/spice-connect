@@ -117,7 +117,7 @@
         -->
 
         <!-- Контейнер для центрирования контента -->
-        <div class="matches-content-container">
+        <div class="matches-content-container" id="matchesContainer" style="display: none;">
             <!-- Статистика слева -->
             <div class="matches-stats-sidebar fade-in-up">
                 <div class="stats-grid-vertical">
@@ -465,10 +465,15 @@
                 console.error('[MATCHES] Error loading matches:', error);
                 showNoMatches();
             } finally {
-                // Скрываем loading спиннер
+                // Скрываем loading спиннер и показываем контейнер
                 const loadingElement = document.querySelector('.loading-matches');
+                const matchesContainer = document.getElementById('matchesContainer');
+                
                 if (loadingElement) {
                     loadingElement.style.display = 'none';
+                }
+                if (matchesContainer) {
+                    matchesContainer.style.display = 'block';
                 }
             }
         }
@@ -603,8 +608,14 @@
 
         function showNoMatches() {
             const noMatchesElement = document.getElementById('noMatches');
+            const matchesContainer = document.getElementById('matchesContainer');
+            
             if (noMatchesElement) {
                 noMatchesElement.style.display = 'block';
+            }
+            // Также показываем контейнер матчей (даже если он пустой, но для статистики)
+            if (matchesContainer) {
+                matchesContainer.style.display = 'block';
             }
         }
 
