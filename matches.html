@@ -343,21 +343,32 @@
                 if (result.success && result.data) {
                     console.log('[MATCHES] All matches from DB:', result.data.length);
                     
-                    // Получаем сегодняшнюю дату в начале дня (00:00:00)
+                    // Получаем сегодняшнюю дату в формате YYYY-MM-DD
                     const today = new Date();
-                    today.setHours(0, 0, 0, 0);
+                    const todayDateString = today.getFullYear() + '-' + 
+                        String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+                        String(today.getDate()).padStart(2, '0');
                     
-                    console.log('[MATCHES] Today filter (00:00):', today.toISOString());
+                    console.log('[MATCHES] Today date string:', todayDateString);
                     
                     const todayMatches = result.data.filter(match => {
                         const matchDate = new Date(match.created_at);
-                        console.log('[MATCHES] Match date:', match.created_at, '-> parsed:', matchDate.toISOString(), 'is today?', matchDate >= today);
-                        // Сравниваем только дату (без времени)
-                        return matchDate >= today;
+                        const matchDateString = matchDate.getFullYear() + '-' + 
+                            String(matchDate.getMonth() + 1).padStart(2, '0') + '-' + 
+                            String(matchDate.getDate()).padStart(2, '0');
+                        
+                        const isToday = matchDateString === todayDateString;
+                        console.log('[MATCHES] Match:', match.created_at, '-> date:', matchDateString, 'is today?', isToday);
+                        
+                        return isToday;
                     });
                     
-                    console.log('[MATCHES] New matches since today 00:00:', todayMatches.length);
-                    console.log('[MATCHES] Today matches details:', todayMatches.map(m => ({ id: m.matched_user_id, created: m.created_at })));
+                    console.log('[MATCHES] New matches today:', todayMatches.length);
+                    console.log('[MATCHES] Today matches details:', todayMatches.map(m => ({ 
+                        id: m.matched_user_id, 
+                        created: m.created_at,
+                        user: m.matched_user_pseudo 
+                    })));
                     
                     return todayMatches.length;
                 }
