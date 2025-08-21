@@ -6,6 +6,7 @@
     <title>Messages - Lavrilo</title>
     <link rel="stylesheet" href="css/app-styles.css">
     <link rel="stylesheet" href="css/messages.css?v=1.4">
+    <link rel="stylesheet" href="css/gifts-modal.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body class="messages-page">
@@ -76,6 +77,13 @@
                         <div class="dropdown-item-content">
                             <span class="dropdown-item-title">Wallet</span>
                             <span class="dropdown-item-subtitle">Manage your credits</span>
+                        </div>
+                    </a>
+                    <a href="gifts.html" class="dropdown-item">
+                        <span class="dropdown-icon">🎁</span>
+                        <div class="dropdown-item-content">
+                            <span class="dropdown-item-title">Gifts</span>
+                            <span class="dropdown-item-subtitle">Your gift inventory</span>
                         </div>
                     </a>
                     <a href="settings.html" class="dropdown-item">
@@ -162,6 +170,7 @@
                     <div class="chat-input-area">
                         <div class="chat-input-container">
                             <button class="app-btn app-btn-outline btn-sm" id="attachBtn">📎</button>
+                            <button class="app-btn app-btn-outline btn-sm" id="giftBtn">🎁</button>
                             <input type="text" placeholder="Type a message..." class="form-input" id="messageInput">
                             <button class="app-btn app-btn-primary btn-sm" id="sendBtn">Send</button>
                         </div>
@@ -224,6 +233,76 @@
                 <div class="people-list" id="peopleList">
                     <!-- Список людей для начала чата -->
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gift Selection Modal -->
+    <div id="giftModal" class="modal" style="display: none;">
+        <div class="modal-content gift-modal">
+            <div class="modal-header">
+                <h2>🎁 Send a Gift</h2>
+                <button class="modal-close" onclick="closeGiftModal()">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <!-- Wallet Balance -->
+                <div class="wallet-balance-info">
+                    <div class="balance-display">
+                        <span class="balance-label">Your Balance:</span>
+                        <span class="balance-amount" id="userCreditsBalance">0 Credits</span>
+                    </div>
+                </div>
+
+                <!-- Gift Categories Filter -->
+                <div class="gift-categories">
+                    <button class="category-btn active" data-category="all">All</button>
+                    <button class="category-btn" data-category="budget">Budget</button>
+                    <button class="category-btn" data-category="medium">Medium</button>
+                    <button class="category-btn" data-category="premium">Premium</button>
+                    <button class="category-btn" data-category="vip">VIP</button>
+                </div>
+
+                <!-- Gifts Grid -->
+                <div class="gifts-grid" id="giftsGrid">
+                    <!-- Подарки будут загружены динамически -->
+                </div>
+
+                <!-- Loading State -->
+                <div class="gifts-loading" id="giftsLoading">
+                    <div class="loading-spinner"></div>
+                    <p>Loading gifts...</p>
+                </div>
+
+                <!-- Selected Gift Details -->
+                <div class="selected-gift-details" id="selectedGiftDetails" style="display: none;">
+                    <h3>Selected Gift</h3>
+                    <div class="gift-selection-info">
+                        <div class="selected-gift-preview">
+                            <div class="gift-icon" id="selectedGiftIcon">🎁</div>
+                            <div class="gift-details">
+                                <div class="gift-name" id="selectedGiftName">Gift Name</div>
+                                <div class="gift-price" id="selectedGiftPrice">0 Credits</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Personal Message -->
+                        <div class="personal-message-section">
+                            <label for="personalMessage">Personal Message (Optional):</label>
+                            <textarea id="personalMessage" placeholder="Add a personal message with your gift..." maxlength="200"></textarea>
+                            <div class="message-counter">
+                                <span id="messageCharCount">0</span>/200
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn secondary" onclick="closeGiftModal()">Cancel</button>
+                <button class="btn primary" id="sendGiftBtn" onclick="sendSelectedGift()" disabled>
+                    Send Gift
+                </button>
             </div>
         </div>
     </div>
@@ -404,5 +483,6 @@
             }
         });
     </script>
+    <script src="js/gifts-modal.js"></script>
 </body>
 </html>

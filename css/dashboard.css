@@ -4508,6 +4508,130 @@
   color: #f59e0b !important;
 }
 
+/* ============ GIFT NOTIFICATIONS STYLES ============ */
+
+/* Gift Activity Items */
+.gift-activity {
+  background: linear-gradient(135deg, #fff8f9, #fff0f2) !important;
+  border: 2px solid var(--primary-color);
+  position: relative;
+  overflow: hidden;
+}
+
+.gift-activity::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--primary-color), #ff6b7a);
+}
+
+.gift-activity:hover {
+  background: linear-gradient(135deg, #fff0f2, #ffe8eb) !important;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(255, 68, 88, 0.2);
+}
+
+.new-gift-activity {
+  animation: giftPulse 2s ease-in-out infinite;
+}
+
+@keyframes giftPulse {
+  0%, 100% { 
+    box-shadow: 0 0 0 0 rgba(255, 68, 88, 0.4);
+  }
+  50% { 
+    box-shadow: 0 0 0 10px rgba(255, 68, 88, 0);
+  }
+}
+
+/* Gift Avatar */
+.gift-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-color), #ff6b7a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: white;
+  position: relative;
+  border: 3px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 4px 12px rgba(255, 68, 88, 0.3);
+}
+
+.gift-badge {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  background: white;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  border: 2px solid var(--primary-color);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* New Gift Indicator */
+.new-indicator {
+  background: #ff4458;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: 8px;
+  animation: newIndicatorBlink 1.5s ease-in-out infinite;
+}
+
+@keyframes newIndicatorBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+/* Gift Activity Text Styling */
+.gift-activity .activity-text {
+  font-weight: 500;
+  color: #333;
+  line-height: 1.4;
+}
+
+.gift-activity .activity-time {
+  color: var(--primary-color);
+  font-weight: 500;
+}
+
+/* Responsive Design for Gift Activities */
+@media (max-width: 768px) {
+  .gift-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+  }
+  
+  .gift-badge {
+    width: 16px;
+    height: 16px;
+    font-size: 0.7rem;
+  }
+  
+  .gift-activity {
+    padding: 0.8rem;
+  }
+  
+  .new-indicator {
+    font-size: 0.6rem;
+    padding: 2px 4px;
+  }
+}
+
 .btn-photo-action.delete {
   color: #dc2626 !important;
 }

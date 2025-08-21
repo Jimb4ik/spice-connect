@@ -54,7 +54,8 @@ class MainDashboard {
             this.loadTopMembers(2), // Default to women
             this.loadOnlineFriends(),
             this.loadRecentVisitors(),
-            this.loadPhotoVotes()
+            this.loadPhotoVotes(),
+            this.loadGiftNotifications()
         ];
 
         try {
@@ -105,10 +106,11 @@ class MainDashboard {
         console.log('[MAIN] Loading activity feed...');
         
         try {
-            // Загружаем как обычную активность, так и матчи
-            const [apiResponse, matches] = await Promise.all([
+            // Загружаем как обычную активность, матчи и уведомления о подарках
+            const [apiResponse, matches, giftNotifications] = await Promise.all([
                 fetch(`/api/spice-multi-test?endpoint=/index_api/wall&method=POST&session_id=${this.sessionId}`),
-                window.MatchUtils ? window.MatchUtils.loadUserMatches() : Promise.resolve([])
+                window.MatchUtils ? window.MatchUtils.loadUserMatches() : Promise.resolve([]),
+                this.loadGiftNotificationsData()
             ]);
             
             const data = await apiResponse.json();
@@ -139,6 +141,22 @@ class MainDashboard {
                 allActivities = [...matchActivities, ...allActivities];
             }
             
+            // Добавляем уведомления о подарках
+            if (giftNotifications && giftNotifications.length > 0) {
+                const recentGifts = giftNotifications.slice(0, 10); // Последние 10 подарков
+                const giftActivities = recentGifts.map(notification => ({
+                    type: 'gift_received',
+                    title: notification.title,
+                    message: notification.message,
+                    date_action: notification.created_at,
+                    related_user_id: notification.related_user_id,
+                    related_gift_id: notification.related_gift_id,
+                    is_new: !notification.is_read,
+                    notification_id: notification.id
+                }));
+                allActivities = [...giftActivities, ...allActivities];
+            }
+            
             // Сортируем по дате
             allActivities.sort((a, b) => new Date(b.date_action) - new Date(a.date_action));
             
@@ -153,6 +171,8 @@ class MainDashboard {
             const feedHTML = displayActivities.map(activity => {
                 if (activity.type === 'match') {
                     return this.createMatchActivityItem(activity);
+                } else if (activity.type === 'gift_received') {
+                    return this.createGiftActivityItem(activity);
                 } else {
                     return this.createRegularActivityItem(activity);
                 }
@@ -606,6 +626,115 @@ class MainDashboard {
     getRandomTimeAgo() {
         const times = ['2m ago', '15m ago', '1h ago', '3h ago', '1d ago', '2d ago'];
         return times[Math.floor(Math.random() * times.length)];
+    }
+
+    // ============ GIFTS NOTIFICATIONS METHODS ============
+    
+    async loadGiftNotifications() {
+        console.log('[MAIN] Loading gift notifications...');
+        // This method is called from loadAllSections but doesn't need separate UI rendering
+        // Notifications are integrated into activity feed via loadActivityFeed
+    }
+
+    async loadGiftNotificationsData() {
+        try {
+            console.log('[MAIN] Loading gift notifications data...');
+            
+            const response = await fetch('/api/database', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'get_notifications',
+                    session_id: this.sessionId,
+                    limit: 20
+                })
+            });
+            
+            const result = await response.json();
+            if (result.success) {
+                console.log('[MAIN] Loaded gift notifications:', result.data.length);
+                return result.data || [];
+            } else {
+                console.error('[MAIN] Error loading gift notifications:', result.error);
+                return [];
+            }
+        } catch (error) {
+            console.error('[MAIN] Error loading gift notifications:', error);
+            return [];
+        }
+    }
+
+    createGiftActivityItem(notification) {
+        const timeAgo = this.formatTimeAgo(notification.date_action);
+        const isNew = notification.is_new;
+        const giftEmoji = this.getGiftEmojiFromMessage(notification.message);
+        
+        return `
+            <div class="activity-item gift-activity ${isNew ? 'new-gift-activity' : ''}" 
+                 onclick="this.markAsRead(${notification.notification_id}); window.location.href='gifts.html';">
+                <div class="activity-avatar">
+                    <div class="gift-avatar">${giftEmoji}</div>
+                    <div class="gift-badge">🎁</div>
+                </div>
+                <div class="activity-content">
+                    <div class="activity-text">
+                        ${notification.message}
+                        ${isNew ? '<span class="new-indicator">NEW</span>' : ''}
+                    </div>
+                    <div class="activity-time">${timeAgo}</div>
+                </div>
+            </div>
+        `;
+    }
+
+    getGiftEmojiFromMessage(message) {
+        // Извлекаем название подарка из сообщения и возвращаем соответствующий эмодзи
+        const giftEmojiMap = {
+            'Red Rose': '🌹',
+            'Tulip Bouquet': '🌷',
+            'Heart Chocolate': '🍫',
+            'Coffee & Cookies': '☕',
+            'Teddy Bear': '🧸',
+            'Balloons': '🎈',
+            'Rose Bouquet': '💐',
+            'Perfume': '🌸',
+            'Silver Earrings': '💎',
+            'Bracelet': '📿',
+            'Watch': '⌚',
+            'Gold Chain': '📿',
+            'Diamond Earrings': '💍',
+            'Gold Ring': '💍',
+            'Pearl Necklace': '📿',
+            'Diamond Bracelet': '💎',
+            'Platinum Ring': '💍',
+            'Luxury Watch': '⌚',
+            'Diamond Necklace': '💎',
+            'Royal Crown': '👑'
+        };
+        
+        for (const [giftName, emoji] of Object.entries(giftEmojiMap)) {
+            if (message.includes(giftName)) {
+                return emoji;
+            }
+        }
+        
+        return '🎁'; // Default gift emoji
+    }
+
+    async markNotificationAsRead(notificationId) {
+        try {
+            await fetch('/api/database', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'mark_notification_read',
+                    session_id: this.sessionId,
+                    notification_id: notificationId
+                })
+            });
+        } catch (error) {
+            console.error('[MAIN] Error marking notification as read:', error);
+        }
     }
 }
 
