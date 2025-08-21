@@ -548,6 +548,53 @@
     text-decoration: underline;
 }
 
+.agreement-error {
+    margin: 20px 0;
+    padding: 16px;
+    background: #f8d7da;
+    border: 1px solid #f1aeb5;
+    border-radius: 8px;
+    border-left: 4px solid #dc3545;
+    animation: errorFadeIn 0.3s ease-in;
+}
+
+.error-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.error-icon {
+    font-size: 18px;
+    margin-top: 2px;
+}
+
+.error-text strong {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #721c24;
+}
+
+.error-text p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #721c24;
+}
+
+@keyframes errorFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .amount-input-container {
     position: relative;
     margin-top: 10px;

@@ -387,5 +387,43 @@
     <script src="js/header-avatar.js"></script>
     <script src="js/app-navigation.js"></script>
     <script src="js/wallet.js"></script>
+    
+    <script>
+        // Глобальные функции для модального окна
+        function proceedToPayment() {
+            console.log('[WALLET] Proceeding to payment...');
+            
+            // Валидация согласий
+            if (!walletManager.validateAgreements()) {
+                return;
+            }
+            
+            // Сохраняем согласие в базе
+            const sessionId = window.authManager?.sessionId;
+            if (sessionId) {
+                walletManager.saveUserConsent(sessionId);
+            }
+            
+            // Переходим к следующему шагу
+            closeTopUpModal();
+            openPaymentModal();
+        }
+        
+        function openPaymentModal() {
+            document.getElementById('paymentModal').style.display = 'flex';
+        }
+        
+        function closeTopUpModal() {
+            document.getElementById('topupModal').style.display = 'none';
+        }
+        
+        function closePaymentModal() {
+            document.getElementById('paymentModal').style.display = 'none';
+        }
+        
+        function processPayment() {
+            alert('Payment processing would happen here...');
+        }
+    </script>
 </body>
 </html>

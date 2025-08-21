@@ -74,6 +74,9 @@ export default async function handler(req, res) {
             case 'get_transactions':
                 result = await getWalletTransactions(pool, req);
                 break;
+            case 'save_consent':
+                result = await saveUserConsent(pool, req);
+                break;
             default:
                 await pool.end();
                 return res.status(400).json({
@@ -161,6 +164,19 @@ async function initDatabase(pool) {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
+        -- Таблица для согласий пользователей
+        CREATE TABLE IF NOT EXISTS user_consents (
+            id SERIAL PRIMARY KEY,
+            user_id VARCHAR(255),
+            session_id VARCHAR(255) NOT NULL,
+            terms_agreed BOOLEAN DEFAULT false,
+            age_confirmed BOOLEAN DEFAULT false,
+            consent_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            ip_address VARCHAR(45),
+            user_agent TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
         -- Индексы
         CREATE INDEX IF NOT EXISTS idx_user_progress_user_id ON user_progress(user_id);
         CREATE INDEX IF NOT EXISTS idx_viewed_profiles_user_id ON viewed_profiles(user_id);
@@ -171,6 +187,8 @@ async function initDatabase(pool) {
         CREATE INDEX IF NOT EXISTS idx_wallet_transactions_user_id ON wallet_transactions(user_id);
         CREATE INDEX IF NOT EXISTS idx_wallet_transactions_wallet_id ON wallet_transactions(wallet_id);
         CREATE INDEX IF NOT EXISTS idx_wallet_transactions_date ON wallet_transactions(created_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_user_consents_session_id ON user_consents(session_id);
+        CREATE INDEX IF NOT EXISTS idx_user_consents_user_id ON user_consents(user_id);
     `;
 
     await pool.query(createTablesSQL);
@@ -661,6 +679,58 @@ async function getWalletTransactions(pool, req) {
             success: false,
             error: 'Database operation failed',
             details: error.message
+        };
+    }
+}
+
+// Сохранить согласие пользователя
+async function saveUserConsent(pool, req) {
+    const { 
+        session_id, 
+        user_id, 
+        terms_agreed, 
+        age_confirmed, 
+        consent_timestamp, 
+        ip_address, 
+        user_agent 
+    } = req.body;
+
+    if (!session_id) {
+        return {
+            success: false,
+            error: 'session_id is required'
+        };
+    }
+
+    try {
+        const result = await pool.query(
+            `INSERT INTO user_consents 
+             (user_id, session_id, terms_agreed, age_confirmed, consent_timestamp, ip_address, user_agent)
+             VALUES ($1, $2, $3, $4, $5, $6, $7)
+             RETURNING *`,
+            [
+                user_id || null,
+                session_id,
+                terms_agreed || false,
+                age_confirmed || false,
+                consent_timestamp || new Date().toISOString(),
+                ip_address || null,
+                user_agent || null
+            ]
+        );
+
+        console.log('[DB] User consent saved:', result.rows[0]);
+
+        return {
+            success: true,
+            data: result.rows[0],
+            message: 'User consent saved successfully'
+        };
+    } catch (error) {
+        console.error('[DB] Error saving consent:', error);
+        return {
+            success: false,
+            error: 'Failed to save user consent'
         };
     }
 }

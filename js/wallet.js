@@ -283,6 +283,87 @@ class WalletManager {
         });
     }
     
+    validateAgreements() {
+        const termsCheckbox = document.getElementById('termsAgreement');
+        const ageCheckbox = document.getElementById('ageConfirmation');
+        
+        if (!termsCheckbox.checked || !ageCheckbox.checked) {
+            this.showAgreementError();
+            return false;
+        }
+        
+        return true;
+    }
+    
+    showAgreementError() {
+        // Удаляем предыдущее уведомление если есть
+        const existingError = document.querySelector('.agreement-error');
+        if (existingError) {
+            existingError.remove();
+        }
+        
+        // Создаем уведомление об ошибке
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'agreement-error';
+        errorDiv.innerHTML = `
+            <div class="error-content">
+                <span class="error-icon">❌</span>
+                <div class="error-text">
+                    <strong>Action Required</strong>
+                    <p>You must agree to both the Terms of Service and confirm your age (18+) before proceeding with payment.</p>
+                </div>
+            </div>
+        `;
+        
+        // Вставляем перед кнопками
+        const modalFooter = document.querySelector('#topupModal .modal-footer');
+        modalFooter.parentNode.insertBefore(errorDiv, modalFooter);
+        
+        // Автоматически убираем через 5 секунд
+        setTimeout(() => {
+            if (errorDiv.parentNode) {
+                errorDiv.remove();
+            }
+        }, 5000);
+    }
+    
+    async saveUserConsent(sessionId) {
+        try {
+            const consentData = {
+                action: 'save_consent',
+                session_id: sessionId,
+                terms_agreed: true,
+                age_confirmed: true,
+                consent_timestamp: new Date().toISOString(),
+                ip_address: 'unknown', // В реальном приложении получаем IP
+                user_agent: navigator.userAgent
+            };
+            
+            console.log('[WALLET] Saving user consent:', consentData);
+            
+            const response = await fetch('/api/database', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(consentData)
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                console.log('[WALLET] User consent saved successfully');
+                return true;
+            } else {
+                console.error('[WALLET] Error saving consent:', result.error);
+                return false;
+            }
+        } catch (error) {
+            console.error('[WALLET] Error saving consent:', error);
+            return false;
+        }
+    }
+    
     async addTransaction(type, amount, description, paymentMethod = null, paymentReference = null) {
         try {
             console.log('[WALLET] Adding transaction:', { type, amount, description });
