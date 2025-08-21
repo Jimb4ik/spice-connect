@@ -490,6 +490,29 @@
     border: 1px solid #e1e5e9;
 }
 
+.agreement-notice {
+    margin-bottom: 20px;
+    padding: 16px;
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 8px;
+    border-left: 4px solid #fdcb6e;
+}
+
+.agreement-notice h4 {
+    margin: 0 0 8px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #856404;
+}
+
+.agreement-notice p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #856404;
+}
+
 .checkbox-group {
     margin-bottom: 16px;
     display: flex;
