@@ -279,11 +279,10 @@ class AuthManager {
     try {
       console.log('[AUTH] Fetching user email from API...');
       
-      const response = await fetch('/api/spice-multi-test', {
+      const response = await fetch('/api/user-profile', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          endpoint: '/index_api/user',
           session_id: this.sessionId,
           id: this.currentUser.id
         })
@@ -291,8 +290,8 @@ class AuthManager {
       
       const result = await response.json();
       
-      if (result.success && result.data && result.data.result) {
-        const email = result.data.result.email;
+      if (result.success && result.result) {
+        const email = result.result.email;
         if (email) {
           console.log('[AUTH] User email retrieved successfully');
           return email;
