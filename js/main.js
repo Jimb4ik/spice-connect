@@ -315,12 +315,18 @@ class MainDashboard {
                     `;
                     
                     // Update the badge count to match actual friends count
-                    document.getElementById('onlineCountBadge').textContent = '0';
+                    const onlineCountBadge = document.getElementById('onlineCountBadge');
+                    if (onlineCountBadge) {
+                        onlineCountBadge.textContent = '0';
+                    }
                     return;
                 }
                 
                 // Update the badge count to match actual friends count
-                document.getElementById('onlineCountBadge').textContent = friends.length;
+                const onlineCountBadge = document.getElementById('onlineCountBadge');
+                if (onlineCountBadge) {
+                    onlineCountBadge.textContent = friends.length;
+                }
                 
                 // Show up to 8 friends
                 const displayFriends = friends.slice(0, 8);
@@ -354,7 +360,10 @@ class MainDashboard {
                         <p>Unable to load friends</p>
                     </div>
                 `;
-                document.getElementById('onlineCountBadge').textContent = '0';
+                const onlineCountBadge = document.getElementById('onlineCountBadge');
+                if (onlineCountBadge) {
+                    onlineCountBadge.textContent = '0';
+                }
             }
             
         } catch (error) {
@@ -399,11 +408,6 @@ class MainDashboard {
                 
                 const visitorsHTML = visitors.map((visitor) => {
                     const photoUrl = this.getPhotoUrl(visitor);
-                    console.log('[MAIN] Visitor photo debug:', {
-                        pseudo: visitor.pseudo,
-                        photoUrl: photoUrl,
-                        visitor: visitor
-                    });
                     const age = visitor.age || '--';
                     const visitTime = visitor.date_visite || visitor.date_action;
                     const timeAgo = visitTime ? this.getTimeAgo(visitTime) : 'Recently';
@@ -453,11 +457,6 @@ class MainDashboard {
                 
                 const visitorsHTML = visitors.map((visitor, index) => {
                     const photoUrl = this.getPhotoUrl(visitor);
-                    console.log('[MAIN] Fallback visitor photo debug:', {
-                        pseudo: visitor.pseudo,
-                        photoUrl: photoUrl,
-                        visitor: visitor
-                    });
                     const age = visitor.age || '--';
                     // Generate realistic time progression: most recent first
                     const timeAgo = this.getProgressiveTimeAgo(index);
@@ -613,7 +612,8 @@ class MainDashboard {
                 photoUrl = mainPhoto.sq_430 || mainPhoto.sq_middle || mainPhoto.normal;
             }
         } else if (user.photos && user.photos.length > 0) {
-            photoUrl = user.photos[0].url_big || user.photos[0].url_middle;
+            const firstPhoto = user.photos[0];
+            photoUrl = firstPhoto.url_big || firstPhoto.url_middle || firstPhoto.normal || firstPhoto.sq_430 || firstPhoto.sq_middle;
         } else if (user.picture_430) {
             photoUrl = user.picture_430;
         } else if (user.picture) {
