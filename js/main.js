@@ -48,17 +48,15 @@ class MainDashboard {
         console.log('[MAIN] Loading all sections...');
         
         // Load sections in parallel for better performance
-        const promises = [
-            this.loadQuickStats(),
-            this.loadActivityFeed(),
-            this.loadTopMembers(2), // Default to women
-            this.loadOnlineFriends(),
-            this.loadRecentVisitors(),
-            this.loadPhotoVotes(),
-            this.loadGiftNotifications(),
-            this.loadBirthdayToday(),
-            this.loadNewPhotosAdded()
-        ];
+                    const promises = [
+                this.loadQuickStats(),
+                this.loadActivityFeed(),
+                this.loadTopMembers(2), // Default to women
+                this.loadOnlineFriends(),
+                this.loadRecentVisitors(),
+                this.loadPhotoVotes(),
+                this.loadGiftNotifications()
+            ];
 
         try {
             await Promise.allSettled(promises);
@@ -112,20 +110,20 @@ class MainDashboard {
     }
 
     async loadActivityFeed() {
-        console.log('[MAIN] Loading activity feed...');
+        console.log('[MAIN] Loading enhanced activity feed...');
         
         try {
-            // Загружаем как обычную активность, матчи, уведомления о подарках и новые активности
-            const [apiResponse, activitiesResponse, matches, giftNotifications] = await Promise.all([
+            // Загружаем все источники данных
+            const [wallResponse, activitiesResponse, matches, giftNotifications] = await Promise.all([
                 fetch(`/api/spice-multi-test?endpoint=/index_api/wall&method=POST&session_id=${this.sessionId}`),
                 fetch(`/api/spice-multi-test?endpoint=/ajax_api/getActivities&method=GET&session_id=${this.sessionId}`),
                 window.MatchUtils ? window.MatchUtils.loadUserMatches() : Promise.resolve([]),
                 this.loadGiftNotificationsData()
             ]);
             
-            const data = await apiResponse.json();
+            const wallData = await wallResponse.json();
             const activitiesData = await activitiesResponse.json();
-            console.log('[MAIN] Activity feed API response:', data);
+            console.log('[MAIN] Wall API response:', wallData);
             console.log('[MAIN] Activities API response:', activitiesData);
             console.log('[MAIN] Recent matches:', matches);
             
@@ -134,12 +132,17 @@ class MainDashboard {
             // Собираем все активности
             let allActivities = [];
             
-            // Добавляем API активности
-            if (data.success && data.data?.result && Array.isArray(data.data.result)) {
-                allActivities = [...data.data.result];
+            // Обрабатываем Wall API данные (основной источник активности)
+            if (wallData.success && wallData.data?.result) {
+                const wallActivities = Object.values(wallData.data.result);
+                allActivities = wallActivities.map(activity => ({
+                    ...activity,
+                    type: this.getActivityType(activity.action),
+                    photos: activity.all_photos || activity.tab_photo
+                }));
             }
             
-            // Добавляем новые типы активности из getActivities API
+            // Добавляем данные из Activities API
             if (activitiesData.success && activitiesData.data) {
                 const activities = activitiesData.data;
                 
@@ -149,7 +152,8 @@ class MainDashboard {
                         type: 'new_member',
                         pseudo: activities.wall_online.pseudo,
                         date_action: activities.wall_online.date_cnx,
-                        user_id: activities.wall_online.id
+                        user_id: activities.wall_online.id,
+                        photos: activities.wall_online.photos
                     });
                 }
                 
@@ -159,7 +163,8 @@ class MainDashboard {
                         type: 'profile_update',
                         pseudo: activities.wall_change.pseudo,
                         date_action: activities.wall_change.date_modification,
-                        user_id: activities.wall_change.id
+                        user_id: activities.wall_change.id,
+                        photos: activities.wall_change.photos
                     });
                 }
                 
@@ -171,7 +176,8 @@ class MainDashboard {
                         pseudo2: activities.wall_friends.pseudo2,
                         date_action: activities.wall_friends.date,
                         user_id1: activities.wall_friends.id1,
-                        user_id2: activities.wall_friends.id2
+                        user_id2: activities.wall_friends.id2,
+                        photos: activities.wall_friends.photos
                     });
                 }
             }
@@ -209,36 +215,178 @@ class MainDashboard {
             // Сортируем по дате
             allActivities.sort((a, b) => new Date(b.date_action) - new Date(a.date_action));
             
-            // Показываем последние 10 активностей
-            const displayActivities = allActivities.slice(0, 10);
+            // Показываем последние 15 активностей для расширенной ленты
+            const displayActivities = allActivities.slice(0, 15);
             
             if (displayActivities.length === 0) {
-                feedContainer.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📰</div><p>Your activity will appear here</p></div>';
+                feedContainer.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📰</div><p>Community activity will appear here</p></div>';
                 return;
             }
-            
+
+            // Создаем HTML для всех активностей
             const feedHTML = displayActivities.map(activity => {
-                if (activity.type === 'match') {
-                    return this.createMatchActivityItem(activity);
-                } else if (activity.type === 'gift_received') {
-                    return this.createGiftActivityItem(activity);
-                } else if (activity.type === 'new_member') {
-                    return this.createNewMemberActivityItem(activity);
-                } else if (activity.type === 'profile_update') {
-                    return this.createProfileUpdateActivityItem(activity);
-                } else if (activity.type === 'new_friendship') {
-                    return this.createNewFriendshipActivityItem(activity);
-                } else {
-                    return this.createRegularActivityItem(activity);
-                }
+                return this.createEnhancedActivityItem(activity);
             }).join('');
-            
+
             feedContainer.innerHTML = feedHTML;
             
         } catch (error) {
             console.error('[MAIN] Error loading activity feed:', error);
             document.getElementById('activityFeed').innerHTML = '<div class="error-state">Failed to load activities</div>';
         }
+    }
+
+    // Определяем тип активности на основе action
+    getActivityType(action) {
+        switch (action) {
+            case 'birthday': return 'birthday';
+            case 'visite': return 'visit';
+            case 'con': return 'connection';
+            default: return 'general';
+        }
+    }
+
+    // Получаем URL фотографии из различных источников
+    getPhotoUrl(photos) {
+        if (!photos) return null;
+        
+        // Если это массив фотографий из Activities API
+        if (Array.isArray(photos) && photos.length > 0) {
+            const photo = photos[0];
+            return photo.url_middle || photo.url_big || photo.url_small || photo.normal || photo.sq_middle;
+        }
+        
+        // Если это объект фотографий из Wall API
+        if (typeof photos === 'object' && photos !== null) {
+            // Ищем главную фотографию
+            const mainPhoto = Object.values(photos).find(photo => photo.is_main === '1' || photo.is_main === 1);
+            if (mainPhoto) {
+                return mainPhoto.sq_middle || mainPhoto.normal || mainPhoto.sq_small;
+            }
+            
+            // Берем первую доступную фотографию
+            const firstPhoto = Object.values(photos)[0];
+            if (firstPhoto) {
+                return firstPhoto.sq_middle || firstPhoto.normal || firstPhoto.sq_small;
+            }
+        }
+        
+        return null;
+    }
+
+    // Создаем расширенный элемент активности
+    createEnhancedActivityItem(activity) {
+        const timeAgo = this.formatTimeAgo(activity.date_action);
+        const photoUrl = this.getPhotoUrl(activity.photos);
+        const activityClass = `activity-item ${activity.type}-activity`;
+        
+        let content = '';
+        let avatarContent = '';
+        
+        // Создаем аватар
+        if (photoUrl) {
+            avatarContent = `<img src="${photoUrl}" alt="${activity.pseudo}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">`;
+        }
+        avatarContent += `<div class="avatar-fallback" style="${photoUrl ? 'display: none;' : ''}">${(activity.pseudo || 'U').charAt(0).toUpperCase()}</div>`;
+        
+        // Создаем контент в зависимости от типа активности
+        switch (activity.type) {
+            case 'birthday':
+                content = `
+                    <div class="activity-text">
+                        🎂 <strong>${activity.pseudo}</strong> is celebrating their birthday today!
+                    </div>
+                    <div class="activity-time">${timeAgo}</div>
+                    ${activity.zone_name ? `<div class="activity-location">📍 ${activity.zone_name}</div>` : ''}
+                `;
+                break;
+                
+            case 'visit':
+                content = `
+                    <div class="activity-text">
+                        👀 <strong>${activity.pseudo}</strong> visited your profile
+                    </div>
+                    <div class="activity-time">${timeAgo}</div>
+                    ${activity.zone_name ? `<div class="activity-location">📍 ${activity.zone_name}</div>` : ''}
+                `;
+                break;
+                
+            case 'connection':
+                content = `
+                    <div class="activity-text">
+                        🟢 <strong>${activity.pseudo}</strong> came online
+                    </div>
+                    <div class="activity-time">${timeAgo}</div>
+                    ${activity.zone_name ? `<div class="activity-location">📍 ${activity.zone_name}</div>` : ''}
+                `;
+                break;
+                
+            case 'new_member':
+                content = `
+                    <div class="activity-text">
+                        ✨ <strong>${activity.pseudo}</strong> joined the community
+                    </div>
+                    <div class="activity-time">${timeAgo}</div>
+                `;
+                break;
+                
+            case 'profile_update':
+                content = `
+                    <div class="activity-text">
+                        📝 <strong>${activity.pseudo}</strong> updated their profile
+                    </div>
+                    <div class="activity-time">${timeAgo}</div>
+                `;
+                break;
+                
+            case 'new_friendship':
+                content = `
+                    <div class="activity-text">
+                        🤝 <strong>${activity.pseudo1}</strong> and <strong>${activity.pseudo2}</strong> became friends
+                    </div>
+                    <div class="activity-time">${timeAgo}</div>
+                `;
+                break;
+                
+            case 'match':
+                content = `
+                    <div class="activity-text">
+                        💖 <strong>It's a match!</strong> You and <strong>${activity.pseudo}</strong> liked each other
+                        ${activity.is_new ? '<span class="new-indicator">NEW</span>' : ''}
+                    </div>
+                    <div class="activity-time">${timeAgo}</div>
+                `;
+                break;
+                
+            case 'gift_received':
+                content = `
+                    <div class="activity-text">
+                        🎁 ${activity.title || 'You received a gift!'}
+                        ${activity.is_new ? '<span class="new-indicator">NEW</span>' : ''}
+                    </div>
+                    <div class="activity-time">${timeAgo}</div>
+                `;
+                break;
+                
+            default:
+                content = `
+                    <div class="activity-text">
+                        <strong>${activity.pseudo}</strong> was active
+                    </div>
+                    <div class="activity-time">${timeAgo}</div>
+                `;
+        }
+        
+        return `
+            <div class="${activityClass}">
+                <div class="activity-avatar">
+                    ${avatarContent}
+                </div>
+                <div class="activity-content">
+                    ${content}
+                </div>
+            </div>
+        `;
     }
     
     createMatchActivityItem(match) {
@@ -869,86 +1017,7 @@ class MainDashboard {
         }
     }
 
-    async loadBirthdayToday() {
-        console.log('[MAIN] Loading birthday today...');
-        
-        try {
-            const response = await fetch(`/api/spice-multi-test?endpoint=/ajax_api/getActivities&method=GET&session_id=${this.sessionId}`);
-            const data = await response.json();
-            
-            console.log('[MAIN] Birthday API response:', data);
-            
-            const listContainer = document.getElementById('birthdayList');
-            
-            if (data.success && data.data?.wall_birthday) {
-                const birthday = data.data.wall_birthday;
-                
-                const photoUrl = birthday.photos && birthday.photos.length > 0 ? birthday.photos[0].url_middle : null;
-                
-                const birthdayHTML = `
-                    <div class="birthday-item">
-                        <div class="birthday-avatar">
-                            ${photoUrl ? `<img src="${photoUrl}" alt="${birthday.pseudo}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''}
-                            <div class="avatar-fallback" style="${photoUrl ? 'display: none;' : ''}">${(birthday.pseudo || 'U').charAt(0).toUpperCase()}</div>
-                        </div>
-                        <div class="birthday-info">
-                            <div class="birthday-name">${birthday.pseudo || 'Anonymous'}</div>
-                            <div class="birthday-message">🎂 Happy Birthday!</div>
-                        </div>
-                    </div>
-                `;
-                
-                listContainer.innerHTML = birthdayHTML;
-            } else {
-                listContainer.innerHTML = '<div class="empty-state"><p>No birthdays today</p></div>';
-            }
-            
-        } catch (error) {
-            console.error('[MAIN] Error loading birthday today:', error);
-            document.getElementById('birthdayList').innerHTML = '<div class="error-state">Failed to load birthdays</div>';
-        }
-    }
 
-    async loadNewPhotosAdded() {
-        console.log('[MAIN] Loading new photos added...');
-        
-        try {
-            const response = await fetch(`/api/spice-multi-test?endpoint=/ajax_api/getActivities&method=GET&session_id=${this.sessionId}`);
-            const data = await response.json();
-            
-            console.log('[MAIN] New photos API response:', data);
-            
-            const listContainer = document.getElementById('newPhotosList');
-            
-            if (data.success && data.data?.wall_addPhoto) {
-                const photoActivity = data.data.wall_addPhoto;
-                
-                const photoUrl = photoActivity.photos && photoActivity.photos.length > 0 ? photoActivity.photos[0].url_middle : null;
-                
-                const photosHTML = `
-                    <div class="photo-activity-item">
-                        <div class="photo-activity-avatar">
-                            ${photoUrl ? `<img src="${photoUrl}" alt="${photoActivity.pseudo}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''}
-                            <div class="avatar-fallback" style="${photoUrl ? 'display: none;' : ''}">${(photoActivity.pseudo || 'U').charAt(0).toUpperCase()}</div>
-                        </div>
-                        <div class="photo-activity-info">
-                            <div class="photo-activity-name">${photoActivity.pseudo || 'Anonymous'}</div>
-                            <div class="photo-activity-message">📸 Added ${photoActivity.nb || 1} new photo${photoActivity.nb > 1 ? 's' : ''}</div>
-                            <div class="photo-activity-date">${photoActivity.jour || 'Recently'}</div>
-                        </div>
-                    </div>
-                `;
-                
-                listContainer.innerHTML = photosHTML;
-            } else {
-                listContainer.innerHTML = '<div class="empty-state"><p>No new photos yet</p></div>';
-            }
-            
-        } catch (error) {
-            console.error('[MAIN] Error loading new photos:', error);
-            document.getElementById('newPhotosList').innerHTML = '<div class="error-state">Failed to load new photos</div>';
-        }
-    }
 
     createNewMemberActivityItem(activity) {
         const timeAgo = this.formatTimeAgo(activity.date_action);
