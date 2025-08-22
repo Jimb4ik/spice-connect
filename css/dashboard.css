@@ -4663,7 +4663,20 @@
 .main-activity-card {
     background: white;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    min-height: 500px;
+    height: 500px;
+}
+
+.main-top-row .section-card {
+    height: 500px;
+}
+
+/* Top Members spacing fix */
+.main-top-row .section-header {
+    margin-bottom: 20px;
+}
+
+.main-top-row .section-header h3 {
+    margin-bottom: 15px;
 }
 
 /* Responsive design for smaller screens */
