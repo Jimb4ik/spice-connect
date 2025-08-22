@@ -806,3 +806,81 @@
         transform: translateY(0);
     }
 }
+
+
+/* ============ PAYMENT NOTIFICATIONS ============ */
+
+.payment-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    z-index: 10000;
+    min-width: 300px;
+    max-width: 400px;
+    animation: slideInRight 0.3s ease;
+}
+
+.payment-notification.success {
+    border-left: 4px solid #28a745;
+}
+
+.payment-notification.error {
+    border-left: 4px solid #dc3545;
+}
+
+.notification-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.notification-icon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.notification-text {
+    flex: 1;
+    line-height: 1.4;
+}
+
+.notification-text strong {
+    color: #333;
+    font-weight: 600;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .payment-notification {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        min-width: auto;
+        max-width: none;
+    }
+}

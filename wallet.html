@@ -405,15 +405,24 @@
                 return;
             }
             
+            // Получаем данные для платежа
+            const amount = parseFloat(document.getElementById('topupAmount').value);
+            const currency = document.querySelector('.currency-select').value;
+            const credits = Math.floor(amount / (walletManager.creditRates[currency] || walletManager.creditRates['EUR']));
+            
+            console.log('[WALLET] Payment details:', { amount, currency, credits });
+            
             // Сохраняем согласие в базе
             const sessionId = window.authManager?.sessionId;
             if (sessionId) {
                 walletManager.saveUserConsent(sessionId);
             }
             
-            // Переходим к следующему шагу
+            // Закрываем текущее модальное окно
             closeTopUpModal();
-            openPaymentModal();
+            
+            // Переходим к Networx Payment вместо нашего модального окна
+            walletManager.initializeNetworxPayment(amount, currency, credits);
         }
         
         function openPaymentModal() {
@@ -431,6 +440,80 @@
         function processPayment() {
             alert('Payment processing would happen here...');
         }
+
+        // ============ PAYMENT RETURN HANDLING ============
+        
+        // Обработка возврата с платежной страницы
+        function handlePaymentReturn() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const paymentStatus = urlParams.get('payment');
+            
+            if (paymentStatus === 'success') {
+                showPaymentSuccess();
+                // Обновляем данные кошелька
+                if (walletManager) {
+                    walletManager.loadWalletData();
+                    walletManager.loadRecentTransactions();
+                }
+                // Очищаем URL параметры
+                window.history.replaceState({}, document.title, window.location.pathname);
+            } else if (paymentStatus === 'declined') {
+                showPaymentDeclined();
+                // Очищаем URL параметры
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        }
+
+        function showPaymentSuccess() {
+            const notification = document.createElement('div');
+            notification.className = 'payment-notification success';
+            notification.innerHTML = `
+                <div class="notification-content">
+                    <div class="notification-icon">✅</div>
+                    <div class="notification-text">
+                        <strong>Payment Successful!</strong><br>
+                        Your credits have been added to your wallet.
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        function showPaymentDeclined() {
+            const notification = document.createElement('div');
+            notification.className = 'payment-notification error';
+            notification.innerHTML = `
+                <div class="notification-content">
+                    <div class="notification-icon">❌</div>
+                    <div class="notification-text">
+                        <strong>Payment Declined</strong><br>
+                        Your payment was not processed. Please try again.
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        // Проверяем статус платежа при загрузке страницы
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(handlePaymentReturn, 1000); // Даем время walletManager инициализироваться
+        });
     </script>
 </body>
 </html>

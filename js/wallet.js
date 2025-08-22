@@ -265,15 +265,31 @@ class WalletManager {
     setupCreditsConversion() {
         const amountInput = document.getElementById('topupAmount');
         const creditsDisplay = document.getElementById('creditsAmount');
+        const currencySelect = document.querySelector('.currency-select');
+        
+        // Неровные курсы валют (цена 1 кредита)
+        this.creditRates = {
+            'EUR': 0.21,  // 1 кредит = €0.21
+            'USD': 0.23,  // 1 кредит = $0.23
+            'GBP': 0.18,  // 1 кредит = £0.18
+            'CAD': 0.31,  // 1 кредит = C$0.31
+            'AUD': 0.35   // 1 кредит = A$0.35
+        };
         
         if (amountInput && creditsDisplay) {
             const updateCredits = () => {
                 const amount = parseFloat(amountInput.value) || 0;
-                const credits = Math.floor(amount * 10); // 1 USD = 10 Credits
+                const currency = currencySelect ? currencySelect.value : 'EUR';
+                const rate = this.creditRates[currency] || this.creditRates['EUR'];
+                const credits = Math.floor(amount / rate);
                 creditsDisplay.textContent = `${credits} Credits`;
             };
             
             amountInput.addEventListener('input', updateCredits);
+            
+            if (currencySelect) {
+                currencySelect.addEventListener('change', updateCredits);
+            }
         }
     }
     
@@ -307,10 +323,10 @@ class WalletManager {
         errorDiv.className = 'agreement-error';
         errorDiv.innerHTML = `
             <div class="error-content">
-                <span class="error-icon">❌</span>
+                <span class="error-icon">⚠️</span>
                 <div class="error-text">
-                    <strong>Action Required</strong>
-                    <p>You must agree to both the Terms of Service and confirm your age (18+) before proceeding with payment.</p>
+                    <strong>Agreement Required</strong>
+                    <p>To proceed with payment, please confirm that you are 18+ years old and agree to our Terms of Service and Privacy Policy by checking the boxes above.</p>
                 </div>
             </div>
         `;
@@ -401,6 +417,72 @@ class WalletManager {
             console.error('[WALLET] Error adding transaction:', error);
             return false;
         }
+    }
+
+    // ============ NETWORX PAYMENT INTEGRATION ============
+    
+    async initializeNetworxPayment(amount, currency, credits) {
+        try {
+            console.log('[WALLET] Initializing Networx payment...', { amount, currency, credits });
+            
+            // Получаем billing данные из формы
+            const billingData = this.getBillingData();
+            
+            // Создаем платежный токен
+            const response = await fetch('/api/networx-payment', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    action: 'create_payment_token',
+                    amount: amount,
+                    currency: currency,
+                    credits: credits,
+                    session_id: window.authManager?.sessionId,
+                    user_id: window.authManager?.userId,
+                    billing_data: billingData
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                console.log('[WALLET] Payment token created:', result.data.token);
+                
+                // Перенаправляем на платежную страницу Networx
+                window.location.href = result.data.payment_url;
+                
+            } else {
+                console.error('[WALLET] Error creating payment token:', result.error);
+                this.showErrorMessage('Failed to initialize payment: ' + result.error);
+            }
+            
+        } catch (error) {
+            console.error('[WALLET] Error initializing Networx payment:', error);
+            this.showErrorMessage('Failed to initialize payment. Please try again.');
+        }
+    }
+
+    getBillingData() {
+        // Собираем данные из формы billing
+        return {
+            full_name: document.getElementById('fullName')?.value || '',
+            email: document.getElementById('email')?.value || '',
+            phone: document.getElementById('phone')?.value || '',
+            address: document.getElementById('address')?.value || '',
+            city: document.getElementById('city')?.value || '',
+            country: document.getElementById('country')?.value || '',
+            postal_code: document.getElementById('postalCode')?.value || ''
+        };
+    }
+
+    showErrorMessage(message) {
+        // Показываем ошибку пользователю
+        alert('❌ ' + message);
+        
+        // Возвращаем пользователя к модальному окну пополнения
+        document.getElementById('topupModal').style.display = 'flex';
     }
 }
 
