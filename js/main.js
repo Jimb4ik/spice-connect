@@ -132,15 +132,17 @@ class MainDashboard {
             // Собираем все активности
             let allActivities = [];
             
-            // Обрабатываем Wall API данные (основной источник активности)
-            if (wallData.success && wallData.data?.result) {
-                const wallActivities = Object.values(wallData.data.result);
-                allActivities = wallActivities.map(activity => ({
-                    ...activity,
-                    type: this.getActivityType(activity.action),
-                    photos: activity.all_photos || activity.tab_photo
-                }));
-            }
+                    // Обрабатываем Wall API данные (основной источник активности)
+        if (wallData.success && wallData.data?.result) {
+            const wallActivities = Object.values(wallData.data.result);
+            allActivities = wallActivities.map(activity => ({
+                ...activity,
+                type: this.getActivityType(activity.action)
+            }));
+            
+            // Загружаем фотографии для каждого пользователя из wall активностей
+            await this.loadPhotosForWallActivities(allActivities);
+        }
             
             // Добавляем данные из Activities API
             if (activitiesData.success && activitiesData.data) {
@@ -246,6 +248,49 @@ class MainDashboard {
         }
     }
 
+    // Загружаем фотографии для пользователей из wall активностей
+    async loadPhotosForWallActivities(activities) {
+        console.log('[MAIN] Loading photos for wall activities...');
+        
+        // Группируем активности по user ID чтобы не загружать фото одного пользователя несколько раз
+        const userIds = [...new Set(activities.map(activity => activity.id).filter(id => id))];
+        const photoCache = {};
+        
+        // Загружаем фотографии пользователей параллельно (максимум 5 одновременно)
+        const batchSize = 5;
+        for (let i = 0; i < userIds.length; i += batchSize) {
+            const batch = userIds.slice(i, i + batchSize);
+            const promises = batch.map(async (userId) => {
+                try {
+                    const response = await fetch(`/api/spice-multi-test?endpoint=/index_api/search&method=POST&session_id=${this.sessionId}&user_id=${userId}`);
+                    const data = await response.json();
+                    
+                    if (data.success && data.data?.result && data.data.result.length > 0) {
+                        const user = data.data.result[0];
+                        const photoUrl = this.getPhotoUrl(user);
+                        if (photoUrl) {
+                            photoCache[userId] = photoUrl;
+                            console.log(`[MAIN] Loaded photo for user ${userId}:`, photoUrl);
+                        }
+                    }
+                } catch (error) {
+                    console.warn(`[MAIN] Failed to load photo for user ${userId}:`, error);
+                }
+            });
+            
+            await Promise.allSettled(promises);
+        }
+        
+        // Применяем загруженные фотографии к активностям
+        activities.forEach(activity => {
+            if (activity.id && photoCache[activity.id]) {
+                activity.photoUrl = photoCache[activity.id];
+            }
+        });
+        
+        console.log('[MAIN] Photo loading completed. Cache:', photoCache);
+    }
+
     // Получаем URL фотографии из различных источников
     getPhotoUrl(photos, activity = null) {
         if (!photos) return null;
@@ -300,8 +345,13 @@ class MainDashboard {
         // Улучшенная логика получения фотографии
         let photoUrl = null;
         
-        // Для wall_ активностей проверяем разные источники фотографий
-        if (activity.all_photos) {
+        // Приоритет: загруженная фотография из API > другие источники
+        if (activity.photoUrl) {
+            photoUrl = activity.photoUrl;
+        } else if (activity.matched_user_photos) {
+            // Для матчей используем matched_user_photos
+            photoUrl = this.getPhotoUrl(activity.matched_user_photos);
+        } else if (activity.all_photos) {
             photoUrl = this.getPhotoUrl(activity.all_photos);
         } else if (activity.tab_photo) {
             photoUrl = this.getPhotoUrl(activity.tab_photo);
@@ -322,40 +372,40 @@ class MainDashboard {
         
         // Создаем контент в зависимости от типа активности
         switch (activity.type) {
-            case 'birthday':
-                content = `
-                    <div class="activity-text">
-                        🎂 <strong>${activity.pseudo}</strong> is celebrating their birthday today!
-                    </div>
-                    <div class="activity-time">${timeAgo}</div>
-                    ${activity.zone_name ? `<div class="activity-location">📍 ${activity.zone_name}</div>` : ''}
-                `;
+                    case 'birthday':
+            content = `
+                <div class="activity-text">
+                    <strong>${activity.pseudo}</strong> is celebrating their birthday today!
+                </div>
+                <div class="activity-time">${timeAgo}</div>
+                ${activity.zone_name ? `<div class="activity-location">${activity.zone_name}</div>` : ''}
+            `;
                 break;
                 
             case 'visit':
                 content = `
                     <div class="activity-text">
-                        👀 <strong>${activity.pseudo}</strong> visited your profile
+                        <strong>${activity.pseudo}</strong> visited your profile
                     </div>
                     <div class="activity-time">${timeAgo}</div>
-                    ${activity.zone_name ? `<div class="activity-location">📍 ${activity.zone_name}</div>` : ''}
+                    ${activity.zone_name ? `<div class="activity-location">${activity.zone_name}</div>` : ''}
                 `;
                 break;
                 
             case 'connection':
                 content = `
                     <div class="activity-text">
-                        🟢 <strong>${activity.pseudo}</strong> came online
+                        <strong>${activity.pseudo}</strong> came online
                     </div>
                     <div class="activity-time">${timeAgo}</div>
-                    ${activity.zone_name ? `<div class="activity-location">📍 ${activity.zone_name}</div>` : ''}
+                    ${activity.zone_name ? `<div class="activity-location">${activity.zone_name}</div>` : ''}
                 `;
                 break;
                 
             case 'new_member':
                 content = `
                     <div class="activity-text">
-                        ✨ <strong>${activity.pseudo}</strong> joined the community
+                        <strong>${activity.pseudo}</strong> joined the community
                     </div>
                     <div class="activity-time">${timeAgo}</div>
                 `;
@@ -364,7 +414,7 @@ class MainDashboard {
             case 'profile_update':
                 content = `
                     <div class="activity-text">
-                        📝 <strong>${activity.pseudo}</strong> updated their profile
+                        <strong>${activity.pseudo}</strong> updated their profile
                     </div>
                     <div class="activity-time">${timeAgo}</div>
                 `;
@@ -373,7 +423,7 @@ class MainDashboard {
             case 'new_friendship':
                 content = `
                     <div class="activity-text">
-                        🤝 <strong>${activity.pseudo1}</strong> and <strong>${activity.pseudo2}</strong> became friends
+                        <strong>${activity.pseudo1}</strong> and <strong>${activity.pseudo2}</strong> became friends
                     </div>
                     <div class="activity-time">${timeAgo}</div>
                 `;
@@ -382,7 +432,7 @@ class MainDashboard {
             case 'match':
                 content = `
                     <div class="activity-text">
-                        💖 <strong>It's a match!</strong> You and <strong>${activity.pseudo}</strong> liked each other
+                        <strong>It's a match!</strong> You and <strong>${activity.pseudo}</strong> liked each other
                         ${activity.is_new ? '<span class="new-indicator">NEW</span>' : ''}
                     </div>
                     <div class="activity-time">${timeAgo}</div>
@@ -392,7 +442,7 @@ class MainDashboard {
             case 'gift_received':
                 content = `
                     <div class="activity-text">
-                        🎁 ${activity.title || 'You received a gift!'}
+                        ${activity.title || 'You received a gift!'}
                         ${activity.is_new ? '<span class="new-indicator">NEW</span>' : ''}
                     </div>
                     <div class="activity-time">${timeAgo}</div>
