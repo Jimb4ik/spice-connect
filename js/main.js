@@ -586,8 +586,7 @@ class MainDashboard {
                 if (!Array.isArray(friends) || friends.length === 0) {
                     listContainer.innerHTML = `
                         <div class="empty-state">
-                            <div class="empty-state-icon">👥</div>
-                            <p>No friends yet. Start making connections!</p>
+                            <p>No friend online</p>
                         </div>
                     `;
                     
@@ -633,8 +632,7 @@ class MainDashboard {
             } else {
                 listContainer.innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-state-icon">👥</div>
-                        <p>Unable to load friends</p>
+                        <p>No friend online</p>
                     </div>
                 `;
                 const onlineCountBadge = document.getElementById('onlineCountBadge');
@@ -647,8 +645,7 @@ class MainDashboard {
             console.error('[MAIN] Error loading friends:', error);
             document.getElementById('onlineFriendsList').innerHTML = `
                 <div class="empty-state">
-                    <div class="empty-state-icon">❌</div>
-                    <p>Failed to load friends</p>
+                    <p>No friend online</p>
                 </div>
             `;
             document.getElementById('onlineCountBadge').textContent = '0';
