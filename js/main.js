@@ -247,26 +247,45 @@ class MainDashboard {
     }
 
     // Получаем URL фотографии из различных источников
-    getPhotoUrl(photos) {
+    getPhotoUrl(photos, activity = null) {
         if (!photos) return null;
         
-        // Если это массив фотографий из Activities API
+        // Если это массив фотографий из Activities API (wall_ методы)
         if (Array.isArray(photos) && photos.length > 0) {
             const photo = photos[0];
             return photo.url_middle || photo.url_big || photo.url_small || photo.normal || photo.sq_middle;
         }
         
-        // Если это объект фотографий из Wall API
+        // Если это объект фотографий из Wall API (all_photos или tab_photo)
         if (typeof photos === 'object' && photos !== null) {
-            // Ищем главную фотографию
-            const mainPhoto = Object.values(photos).find(photo => photo.is_main === '1' || photo.is_main === 1);
+            // Сначала проверяем all_photos
+            if (photos.all_photos) {
+                const mainPhoto = Object.values(photos.all_photos).find(photo => photo.is_main === '1' || photo.is_main === 1);
+                if (mainPhoto) {
+                    return mainPhoto.sq_middle || mainPhoto.normal || mainPhoto.sq_small;
+                }
+                
+                const firstPhoto = Object.values(photos.all_photos)[0];
+                if (firstPhoto) {
+                    return firstPhoto.sq_middle || firstPhoto.normal || firstPhoto.sq_small;
+                }
+            }
+            
+            // Затем проверяем tab_photo
+            if (photos.tab_photo && Array.isArray(photos.tab_photo) && photos.tab_photo.length > 0) {
+                const photo = photos.tab_photo[0];
+                return photo.sq_middle || photo.normal || photo.sq_small;
+            }
+            
+            // Ищем главную фотографию в корневом объекте
+            const mainPhoto = Object.values(photos).find(photo => photo && (photo.is_main === '1' || photo.is_main === 1));
             if (mainPhoto) {
                 return mainPhoto.sq_middle || mainPhoto.normal || mainPhoto.sq_small;
             }
             
             // Берем первую доступную фотографию
             const firstPhoto = Object.values(photos)[0];
-            if (firstPhoto) {
+            if (firstPhoto && typeof firstPhoto === 'object') {
                 return firstPhoto.sq_middle || firstPhoto.normal || firstPhoto.sq_small;
             }
         }
@@ -277,17 +296,29 @@ class MainDashboard {
     // Создаем расширенный элемент активности
     createEnhancedActivityItem(activity) {
         const timeAgo = this.formatTimeAgo(activity.date_action);
-        const photoUrl = this.getPhotoUrl(activity.photos);
+        
+        // Улучшенная логика получения фотографии
+        let photoUrl = null;
+        
+        // Для wall_ активностей проверяем разные источники фотографий
+        if (activity.all_photos) {
+            photoUrl = this.getPhotoUrl(activity.all_photos);
+        } else if (activity.tab_photo) {
+            photoUrl = this.getPhotoUrl(activity.tab_photo);
+        } else if (activity.photos) {
+            photoUrl = this.getPhotoUrl(activity.photos);
+        }
+        
         const activityClass = `activity-item ${activity.type}-activity`;
         
         let content = '';
         let avatarContent = '';
         
-        // Создаем аватар
+        // Создаем аватар с улучшенной обработкой ошибок
         if (photoUrl) {
-            avatarContent = `<img src="${photoUrl}" alt="${activity.pseudo}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">`;
+            avatarContent = `<img src="${photoUrl}" alt="${activity.pseudo || 'User'}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">`;
         }
-        avatarContent += `<div class="avatar-fallback" style="${photoUrl ? 'display: none;' : ''}">${(activity.pseudo || 'U').charAt(0).toUpperCase()}</div>`;
+        avatarContent += `<div class="avatar-fallback" style="${photoUrl ? 'display: none;' : ''}">${(activity.pseudo || activity.pseudo1 || 'U').charAt(0).toUpperCase()}</div>`;
         
         // Создаем контент в зависимости от типа активности
         switch (activity.type) {
