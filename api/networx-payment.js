@@ -122,9 +122,9 @@ async function createPaymentToken(req, res) {
             customer_city: billing_data?.city || '',
             customer_country: billing_data?.country || '',
             customer_zip: billing_data?.postal_code || '',
-            success_url: `${req.headers.origin || 'https://spiceconnect.vercel.app'}/wallet.html?payment=success`,
-            decline_url: `${req.headers.origin || 'https://spiceconnect.vercel.app'}/wallet.html?payment=declined`,
-            callback_url: `${req.headers.origin || 'https://spiceconnect.vercel.app'}/api/networx-payment`,
+            success_url: `${req.headers.origin || 'https://lavrilo.com'}/wallet.html?payment=success`,
+            decline_url: `${req.headers.origin || 'https://lavrilo.com'}/wallet.html?payment=declined`,
+            callback_url: `${req.headers.origin || 'https://lavrilo.com'}/api/networx-payment`,
             language: 'en'
         };
 
