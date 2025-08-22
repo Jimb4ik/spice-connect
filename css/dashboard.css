@@ -232,6 +232,7 @@
 }
 
 .settings-card {
+  background: white;
   border: 2px solid #e2e8f0;
   border-radius: 15px;
   padding: 25px;

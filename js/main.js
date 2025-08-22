@@ -205,7 +205,7 @@ class MainDashboard {
                 <div class="activity-avatar">
                     ${photoUrl ? `<img src="${photoUrl}" alt="${match.pseudo}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''}
                     <div class="avatar-fallback" style="${photoUrl ? 'display: none;' : ''}">${(match.pseudo || 'U').charAt(0).toUpperCase()}</div>
-                    <div class="match-badge">💖</div>
+
                 </div>
                 <div class="activity-content">
                     <div class="activity-text">
@@ -586,6 +586,7 @@ class MainDashboard {
     getPhotoUrl(user) {
         let photoUrl = null;
         
+        // Try various photo field formats from different API endpoints
         if (user.photos_v2) {
             if (user.photos_v2.public) {
                 const publicPhotos = user.photos_v2.public;
@@ -605,11 +606,23 @@ class MainDashboard {
             photoUrl = user.picture_430;
         } else if (user.picture) {
             photoUrl = user.picture;
+        } else if (user.photo_profil_url) {
+            photoUrl = user.photo_profil_url;
+        } else if (user.photo_profil) {
+            photoUrl = user.photo_profil;
+        } else if (user.photo) {
+            photoUrl = user.photo;
+        } else if (user.avatar) {
+            photoUrl = user.avatar;
         }
         
         // Fix URL if relative
-        if (photoUrl && !photoUrl.startsWith('http') && !photoUrl.startsWith('/')) {
-            photoUrl = 'https://dev2018.de5a7.com/' + photoUrl;
+        if (photoUrl && !photoUrl.startsWith('http') && !photoUrl.startsWith('//')) {
+            if (photoUrl.startsWith('/')) {
+                photoUrl = 'https://dev2018.de5a7.com' + photoUrl;
+            } else {
+                photoUrl = 'https://dev2018.de5a7.com/' + photoUrl;
+            }
         }
         
         return photoUrl;
@@ -730,8 +743,7 @@ class MainDashboard {
             <div class="activity-item gift-activity ${isNew ? 'new-gift-activity' : ''}" 
                  onclick="this.markAsRead(${notification.notification_id}); window.location.href='gifts.html';">
                 <div class="activity-avatar">
-                    <div class="gift-avatar">${giftEmoji}</div>
-                    <div class="gift-badge">🎁</div>
+                    <div class="avatar-fallback">G</div>
                 </div>
                 <div class="activity-content">
                     <div class="activity-text">
