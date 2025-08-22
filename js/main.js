@@ -202,11 +202,6 @@ class MainDashboard {
         
         return `
             <div class="activity-item match-activity ${isNew ? 'new-match-activity' : ''}" onclick="window.location.href='matches.html'">
-                <div class="activity-avatar">
-                    ${photoUrl ? `<img src="${photoUrl}" alt="${match.pseudo}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''}
-                    <div class="avatar-fallback" style="${photoUrl ? 'display: none;' : ''}">${(match.pseudo || 'U').charAt(0).toUpperCase()}</div>
-
-                </div>
                 <div class="activity-content">
                     <div class="activity-text">
                         <strong>It's a match!</strong> You and <strong>${match.pseudo}</strong> liked each other
@@ -225,10 +220,6 @@ class MainDashboard {
         
         return `
             <div class="activity-item">
-                <div class="activity-avatar">
-                    ${photoUrl ? `<img src="${photoUrl}" alt="${activity.pseudo}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''}
-                    <div class="avatar-fallback" style="${photoUrl ? 'display: none;' : ''}">${(activity.pseudo || 'U').charAt(0).toUpperCase()}</div>
-                </div>
                 <div class="activity-content">
                     <div class="activity-text">${activityText}</div>
                     <div class="activity-time">${timeAgo}</div>
@@ -249,7 +240,11 @@ class MainDashboard {
             const listContainer = document.getElementById('topMembersList');
             
             if (data.success && data.data?.result && Array.isArray(data.data.result)) {
-                const members = data.data.result.slice(0, 5); // Show top 5
+                // Filter out test users and get top 5
+                const filteredMembers = data.data.result.filter(member => 
+                    member.pseudo && member.pseudo.toLowerCase() !== 'test'
+                );
+                const members = filteredMembers.slice(0, 5); // Show top 5
                 
                 if (members.length === 0) {
                     listContainer.innerHTML = '<div class="empty-state">No top members found</div>';
@@ -614,6 +609,12 @@ class MainDashboard {
             photoUrl = user.photo;
         } else if (user.avatar) {
             photoUrl = user.avatar;
+        } else if (user.pic) {
+            photoUrl = user.pic;
+        } else if (user.image) {
+            photoUrl = user.image;
+        } else if (user.main_photo) {
+            photoUrl = user.main_photo;
         }
         
         // Fix URL if relative
@@ -742,9 +743,6 @@ class MainDashboard {
         return `
             <div class="activity-item gift-activity ${isNew ? 'new-gift-activity' : ''}" 
                  onclick="this.markAsRead(${notification.notification_id}); window.location.href='gifts.html';">
-                <div class="activity-avatar">
-                    <div class="avatar-fallback">G</div>
-                </div>
                 <div class="activity-content">
                     <div class="activity-text">
                         ${notification.message}
