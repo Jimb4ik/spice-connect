@@ -55,7 +55,9 @@ class MainDashboard {
             this.loadOnlineFriends(),
             this.loadRecentVisitors(),
             this.loadPhotoVotes(),
-            this.loadGiftNotifications()
+            this.loadGiftNotifications(),
+            this.loadBirthdayToday(),
+            this.loadNewPhotosAdded()
         ];
 
         try {
@@ -113,15 +115,18 @@ class MainDashboard {
         console.log('[MAIN] Loading activity feed...');
         
         try {
-            // Загружаем как обычную активность, матчи и уведомления о подарках
-            const [apiResponse, matches, giftNotifications] = await Promise.all([
+            // Загружаем как обычную активность, матчи, уведомления о подарках и новые активности
+            const [apiResponse, activitiesResponse, matches, giftNotifications] = await Promise.all([
                 fetch(`/api/spice-multi-test?endpoint=/index_api/wall&method=POST&session_id=${this.sessionId}`),
+                fetch(`/api/spice-multi-test?endpoint=/ajax_api/getActivities&method=GET&session_id=${this.sessionId}`),
                 window.MatchUtils ? window.MatchUtils.loadUserMatches() : Promise.resolve([]),
                 this.loadGiftNotificationsData()
             ]);
             
             const data = await apiResponse.json();
+            const activitiesData = await activitiesResponse.json();
             console.log('[MAIN] Activity feed API response:', data);
+            console.log('[MAIN] Activities API response:', activitiesData);
             console.log('[MAIN] Recent matches:', matches);
             
             const feedContainer = document.getElementById('activityFeed');
@@ -132,6 +137,43 @@ class MainDashboard {
             // Добавляем API активности
             if (data.success && data.data?.result && Array.isArray(data.data.result)) {
                 allActivities = [...data.data.result];
+            }
+            
+            // Добавляем новые типы активности из getActivities API
+            if (activitiesData.success && activitiesData.data?.result) {
+                const activities = activitiesData.data.result;
+                
+                // Новые участники (wall_online)
+                if (activities.wall_online) {
+                    allActivities.push({
+                        type: 'new_member',
+                        pseudo: activities.wall_online.pseudo,
+                        date_action: activities.wall_online.date,
+                        user_id: activities.wall_online.id
+                    });
+                }
+                
+                // Обновления профиля (wall_change)
+                if (activities.wall_change) {
+                    allActivities.push({
+                        type: 'profile_update',
+                        pseudo: activities.wall_change.pseudo,
+                        date_action: activities.wall_change.date_modification,
+                        user_id: activities.wall_change.id
+                    });
+                }
+                
+                // Новые дружбы (wall_friends)
+                if (activities.wall_friends) {
+                    allActivities.push({
+                        type: 'new_friendship',
+                        pseudo1: activities.wall_friends.pseudo1,
+                        pseudo2: activities.wall_friends.pseudo2,
+                        date_action: activities.wall_friends.date,
+                        user_id1: activities.wall_friends.id1,
+                        user_id2: activities.wall_friends.id2
+                    });
+                }
             }
             
             // Добавляем матчи как активность
@@ -180,6 +222,12 @@ class MainDashboard {
                     return this.createMatchActivityItem(activity);
                 } else if (activity.type === 'gift_received') {
                     return this.createGiftActivityItem(activity);
+                } else if (activity.type === 'new_member') {
+                    return this.createNewMemberActivityItem(activity);
+                } else if (activity.type === 'profile_update') {
+                    return this.createProfileUpdateActivityItem(activity);
+                } else if (activity.type === 'new_friendship') {
+                    return this.createNewFriendshipActivityItem(activity);
                 } else {
                     return this.createRegularActivityItem(activity);
                 }
@@ -819,6 +867,126 @@ class MainDashboard {
         } catch (error) {
             console.error('[MAIN] Error marking notification as read:', error);
         }
+    }
+
+    async loadBirthdayToday() {
+        console.log('[MAIN] Loading birthday today...');
+        
+        try {
+            const response = await fetch(`/api/spice-multi-test?endpoint=/ajax_api/getActivities&method=GET&session_id=${this.sessionId}`);
+            const data = await response.json();
+            
+            console.log('[MAIN] Birthday API response:', data);
+            
+            const listContainer = document.getElementById('birthdayList');
+            
+            if (data.success && data.data?.result?.wall_birthday) {
+                const birthday = data.data.result.wall_birthday;
+                
+                const birthdayHTML = `
+                    <div class="birthday-item">
+                        <div class="birthday-avatar">
+                            <div class="avatar-fallback">${(birthday.pseudo || 'U').charAt(0).toUpperCase()}</div>
+                        </div>
+                        <div class="birthday-info">
+                            <div class="birthday-name">${birthday.pseudo || 'Anonymous'}</div>
+                            <div class="birthday-message">🎂 Happy Birthday!</div>
+                        </div>
+                    </div>
+                `;
+                
+                listContainer.innerHTML = birthdayHTML;
+            } else {
+                listContainer.innerHTML = '<div class="empty-state"><p>No birthdays today</p></div>';
+            }
+            
+        } catch (error) {
+            console.error('[MAIN] Error loading birthday today:', error);
+            document.getElementById('birthdayList').innerHTML = '<div class="error-state">Failed to load birthdays</div>';
+        }
+    }
+
+    async loadNewPhotosAdded() {
+        console.log('[MAIN] Loading new photos added...');
+        
+        try {
+            const response = await fetch(`/api/spice-multi-test?endpoint=/ajax_api/getActivities&method=GET&session_id=${this.sessionId}`);
+            const data = await response.json();
+            
+            console.log('[MAIN] New photos API response:', data);
+            
+            const listContainer = document.getElementById('newPhotosList');
+            
+            if (data.success && data.data?.result?.wall_addPhoto) {
+                const photoActivity = data.data.result.wall_addPhoto;
+                
+                const photosHTML = `
+                    <div class="photo-activity-item">
+                        <div class="photo-activity-avatar">
+                            <div class="avatar-fallback">${(photoActivity.pseudo || 'U').charAt(0).toUpperCase()}</div>
+                        </div>
+                        <div class="photo-activity-info">
+                            <div class="photo-activity-name">${photoActivity.pseudo || 'Anonymous'}</div>
+                            <div class="photo-activity-message">📸 Added ${photoActivity.nb || 1} new photo${photoActivity.nb > 1 ? 's' : ''}</div>
+                            <div class="photo-activity-date">${photoActivity.jour || 'Recently'}</div>
+                        </div>
+                    </div>
+                `;
+                
+                listContainer.innerHTML = photosHTML;
+            } else {
+                listContainer.innerHTML = '<div class="empty-state"><p>No new photos yet</p></div>';
+            }
+            
+        } catch (error) {
+            console.error('[MAIN] Error loading new photos:', error);
+            document.getElementById('newPhotosList').innerHTML = '<div class="error-state">Failed to load new photos</div>';
+        }
+    }
+
+    createNewMemberActivityItem(activity) {
+        const timeAgo = this.formatTimeAgo(activity.date_action);
+        
+        return `
+            <div class="activity-item new-member-activity">
+                <div class="activity-content">
+                    <div class="activity-text">
+                        <strong>${activity.pseudo}</strong> joined the community
+                    </div>
+                    <div class="activity-time">${timeAgo}</div>
+                </div>
+            </div>
+        `;
+    }
+
+    createProfileUpdateActivityItem(activity) {
+        const timeAgo = this.formatTimeAgo(activity.date_action);
+        
+        return `
+            <div class="activity-item profile-update-activity">
+                <div class="activity-content">
+                    <div class="activity-text">
+                        <strong>${activity.pseudo}</strong> updated their profile
+                    </div>
+                    <div class="activity-time">${timeAgo}</div>
+                </div>
+            </div>
+        `;
+    }
+
+    createNewFriendshipActivityItem(activity) {
+        const timeAgo = this.formatTimeAgo(activity.date_action);
+        
+        return `
+            <div class="activity-item friendship-activity">
+                <div class="activity-content">
+                    <div class="activity-text">
+                        <strong>${activity.pseudo1}</strong> and <strong>${activity.pseudo2}</strong> became friends
+                    </div>
+                    <div class="activity-time">${timeAgo}</div>
+                </div>
+            </div>
+        `;
     }
 }
 
