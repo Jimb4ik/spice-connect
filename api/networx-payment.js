@@ -108,59 +108,88 @@ async function createPaymentToken(req, res) {
         // Генерируем уникальный order ID
         const orderId = `credits_${session_id}_${Date.now()}`;
         
-        // Подготавливаем данные для создания токена
-        const tokenData = {
-            shop_id: shopId,
-            order_id: orderId,
-            amount: Math.round(amount * 100), // Amount in cents
-            currency: currency,
-            description: `Purchase ${credits} credits`,
-            customer_name: billing_data?.full_name || 'Customer',
-            customer_email: billing_data?.email || 'customer@example.com',
-            customer_phone: billing_data?.phone || '',
-            customer_address: billing_data?.address || '',
-            customer_city: billing_data?.city || '',
-            customer_country: billing_data?.country || '',
-            customer_zip: billing_data?.postal_code || '',
-            success_url: `${req.headers.origin || 'https://lavrilo.com'}/wallet.html?payment=success`,
-            decline_url: `${req.headers.origin || 'https://lavrilo.com'}/wallet.html?payment=declined`,
-            callback_url: `${req.headers.origin || 'https://lavrilo.com'}/api/networx-payment`,
-            language: 'en'
+        // Формируем данные для создания токена согласно официальной документации Networx
+        const checkoutData = {
+            checkout: {
+                test: false, // Для продакшена false, для тестов true
+                transaction_type: "payment",
+                attempts: 3,
+                settings: {
+                    return_url: `${req.headers.origin || 'https://lavrilo.com'}/wallet.html`,
+                    success_url: `${req.headers.origin || 'https://lavrilo.com'}/wallet.html?payment=success`,
+                    decline_url: `${req.headers.origin || 'https://lavrilo.com'}/wallet.html?payment=declined`,
+                    fail_url: `${req.headers.origin || 'https://lavrilo.com'}/wallet.html?payment=declined`,
+                    cancel_url: `${req.headers.origin || 'https://lavrilo.com'}/wallet.html`,
+                    notification_url: `${req.headers.origin || 'https://lavrilo.com'}/api/networx-payment`,
+                    language: "en",
+                    customer_fields: {
+                        visible: ["first_name", "last_name", "email"],
+                        read_only: ["email"]
+                    }
+                },
+                order: {
+                    currency: currency.toUpperCase(),
+                    amount: Math.round(amount * 100), // Сумма в минимальных единицах валюты (центы)
+                    description: `Top up ${credits} credits`,
+                    tracking_id: orderId,
+                    additional_data: {
+                        custom_parameters: {
+                            credits: credits,
+                            amount: amount,
+                            currency: currency,
+                            session_id: session_id,
+                            user_id: user_id
+                        }
+                    }
+                },
+                customer: {
+                    first_name: billing_data?.firstName || '',
+                    last_name: billing_data?.lastName || '',
+                    email: billing_data?.email || '',
+                    address: billing_data?.address || '',
+                    city: billing_data?.city || '',
+                    country: billing_data?.country || '',
+                    zip: billing_data?.postalCode || ''
+                }
+            }
         };
-
-        // Генерируем подпись
-        const signature = generateSignature(tokenData, secretKey);
-        tokenData.signature = signature;
 
         console.log('[NETWORX] Creating payment token:', {
             orderId,
-            amount: tokenData.amount,
+            amount: checkoutData.checkout.order.amount,
             currency,
             credits
         });
 
-        // Отправляем запрос в Networx API
-        const networxResponse = await fetch('https://pay.networx-pay.com/api/v3/create_token', {
+        // Создаем HTTP Basic Auth заголовок согласно документации
+        const basicAuth = Buffer.from(`${shopId}:${secretKey}`).toString('base64');
+
+        // Отправляем запрос в Networx API согласно официальной документации
+        const networxResponse = await fetch('https://checkout.networxpay.com/ctp/api/checkouts', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-API-Version': '2',
+                'Authorization': `Basic ${basicAuth}`
             },
-            body: JSON.stringify(tokenData)
+            body: JSON.stringify(checkoutData)
         });
 
         const networxResult = await networxResponse.json();
 
-        if (!networxResponse.ok || networxResult.status !== 'success') {
-            throw new Error(`Networx API error: ${networxResult.message || 'Unknown error'}`);
+        if (!networxResponse.ok) {
+            console.error('[NETWORX] API Error Response:', networxResult);
+            throw new Error(`Networx API error: ${networxResult.message || JSON.stringify(networxResult.errors || {})}`);
         }
 
-        console.log('[NETWORX] Payment token created successfully:', networxResult.data.token);
+        console.log('[NETWORX] Payment token created successfully:', networxResult.checkout.token);
 
         return res.status(200).json({
             success: true,
             data: {
-                token: networxResult.data.token,
-                payment_url: networxResult.data.payment_url,
+                token: networxResult.checkout.token,
+                payment_url: networxResult.checkout.redirect_url,
                 order_id: orderId,
                 amount: amount,
                 currency: currency,
@@ -225,34 +254,45 @@ async function verifyPayment(req, res) {
 // Обработка успешного платежа
 async function processSuccessfulPayment(webhookData) {
     try {
-        // Extract session_id from order_id
-        const orderIdParts = webhookData.order_id.split('_');
-        const sessionId = orderIdParts[1];
+        // Extract data from custom_parameters if available, otherwise fallback to order_id parsing
+        let sessionId, credits, amount, currency;
+        
+        if (webhookData.custom_parameters) {
+            sessionId = webhookData.custom_parameters.session_id;
+            credits = webhookData.custom_parameters.credits;
+            amount = webhookData.custom_parameters.amount;
+            currency = webhookData.custom_parameters.currency;
+        } else {
+            // Fallback to old method - extract from order_id
+            const orderIdParts = webhookData.order_id.split('_');
+            sessionId = orderIdParts[1];
+            
+            // Calculate credits from amount (reverse conversion)
+            const amountInCurrency = webhookData.amount / 100; // Convert from cents
+            currency = webhookData.currency;
+            
+            // Use the same rates as frontend
+            const creditRates = {
+                'EUR': 0.21,
+                'USD': 0.23,
+                'GBP': 0.18,
+                'CAD': 0.31,
+                'AUD': 0.35
+            };
+            
+            const rate = creditRates[currency] || creditRates['EUR'];
+            credits = Math.floor(amountInCurrency / rate);
+            amount = amountInCurrency;
+        }
         
         if (!sessionId) {
-            throw new Error('Cannot extract session_id from order_id');
+            throw new Error('Cannot extract session_id from webhook data');
         }
-
-        // Calculate credits from amount (reverse conversion)
-        const amountInCurrency = webhookData.amount / 100; // Convert from cents
-        const currency = webhookData.currency;
-        
-        // Use the same rates as frontend
-        const creditRates = {
-            'EUR': 0.21,
-            'USD': 0.23,
-            'GBP': 0.18,
-            'CAD': 0.31,
-            'AUD': 0.35
-        };
-        
-        const rate = creditRates[currency] || creditRates['EUR'];
-        const credits = Math.floor(amountInCurrency / rate);
 
         console.log('[NETWORX] Processing successful payment:', {
             sessionId,
             credits,
-            amount: amountInCurrency,
+            amount,
             currency
         });
 
