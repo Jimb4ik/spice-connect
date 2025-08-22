@@ -4663,11 +4663,15 @@
 .main-activity-card {
     background: white;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    height: 500px;
+    height: 600px;
+    display: flex;
+    flex-direction: column;
 }
 
 .main-top-row .section-card {
-    height: 500px;
+    height: 600px;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Top Members spacing fix */
@@ -4700,15 +4704,23 @@
 
 /* Enhanced Activity Feed Styles */
 .enhanced-feed {
-    max-height: 450px;
+    flex: 1;
     overflow-y: auto;
-    padding: 10px 0;
+    padding: 10px 0 20px 0;
+    margin-bottom: 10px;
 }
 
 /* Friends List Styles - Make it shorter */
 .online-friends-list {
     max-height: 300px;
     overflow-y: auto;
+}
+
+/* Top Members List Styles */
+.main-top-row .top-members-list {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 10px;
 }
 
 .enhanced-feed .activity-item {
@@ -4731,6 +4743,7 @@
 
 .enhanced-feed .activity-item:last-child {
     border-bottom: none;
+    margin-bottom: 10px;
 }
 
 .enhanced-feed .activity-avatar {
