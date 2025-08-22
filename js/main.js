@@ -94,8 +94,15 @@ class MainDashboard {
             // Note: Friends count is now loaded in loadOnlineFriends() function
             
             // Mock data for profile views and photo votes (these would need specific API endpoints)
-            document.getElementById('profileViewsCount').textContent = Math.floor(Math.random() * 50) + 10;
-            document.getElementById('photoVotesCount').textContent = Math.floor(Math.random() * 20) + 5;
+            const profileViewsElement = document.getElementById('profileViewsCount');
+            if (profileViewsElement) {
+                profileViewsElement.textContent = Math.floor(Math.random() * 50) + 10;
+            }
+            
+            const photoVotesElement = document.getElementById('photoVotesCount');
+            if (photoVotesElement) {
+                photoVotesElement.textContent = Math.floor(Math.random() * 20) + 5;
+            }
             
         } catch (error) {
             console.error('[MAIN] Error loading quick stats:', error);
@@ -392,6 +399,11 @@ class MainDashboard {
                 
                 const visitorsHTML = visitors.map((visitor) => {
                     const photoUrl = this.getPhotoUrl(visitor);
+                    console.log('[MAIN] Visitor photo debug:', {
+                        pseudo: visitor.pseudo,
+                        photoUrl: photoUrl,
+                        visitor: visitor
+                    });
                     const age = visitor.age || '--';
                     const visitTime = visitor.date_visite || visitor.date_action;
                     const timeAgo = visitTime ? this.getTimeAgo(visitTime) : 'Recently';
@@ -441,6 +453,11 @@ class MainDashboard {
                 
                 const visitorsHTML = visitors.map((visitor, index) => {
                     const photoUrl = this.getPhotoUrl(visitor);
+                    console.log('[MAIN] Fallback visitor photo debug:', {
+                        pseudo: visitor.pseudo,
+                        photoUrl: photoUrl,
+                        visitor: visitor
+                    });
                     const age = visitor.age || '--';
                     // Generate realistic time progression: most recent first
                     const timeAgo = this.getProgressiveTimeAgo(index);
