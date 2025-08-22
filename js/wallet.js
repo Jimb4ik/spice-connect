@@ -9,6 +9,7 @@ class WalletManager {
         this.sessionId = null;
         this.currentWallet = null;
         this.selectedAmount = null;
+        this.userEmail = null; // Cache for user email
         
         this.init();
     }
@@ -39,6 +40,55 @@ class WalletManager {
         
         // Setup event listeners
         this.setupEventListeners();
+        
+        // Pre-fill email when modal opens
+        this.preloadUserEmail();
+    }
+    
+    async preloadUserEmail() {
+        try {
+            const email = await this.getCurrentUserEmail();
+            if (email) {
+                // Set email field when it's available
+                const emailInput = document.getElementById('email');
+                if (emailInput) {
+                    emailInput.value = email;
+                }
+            }
+        } catch (error) {
+            console.warn('[WALLET] Could not preload email:', error);
+        }
+    }
+    
+    /**
+     * Get current user email from API (via AuthManager)
+     * @returns {Promise<string|null>} User email or null if failed
+     */
+    async getCurrentUserEmail() {
+        // Return cached email if available
+        if (this.userEmail) {
+            console.log('[WALLET] Using cached email:', this.userEmail);
+            return this.userEmail;
+        }
+        
+        try {
+            console.log('[WALLET] Fetching user email via AuthManager...');
+            
+            // Use AuthManager to get email
+            const email = await window.authManager.getCurrentUserEmail();
+            
+            if (email) {
+                this.userEmail = email; // Cache the email
+                console.log('[WALLET] User email retrieved and cached:', email);
+                return email;
+            } else {
+                console.warn('[WALLET] No email found in user profile');
+                return null;
+            }
+        } catch (error) {
+            console.error('[WALLET] Error fetching user email:', error);
+            return null;
+        }
     }
     
     async loadWalletData() {
@@ -425,8 +475,18 @@ class WalletManager {
         try {
             console.log('[WALLET] Initializing Networx payment...', { amount, currency, credits });
             
+            // Получаем email пользователя из API
+            const userEmail = await this.getCurrentUserEmail();
+            if (!userEmail) {
+                this.showErrorMessage('Unable to retrieve your email address. Please try again or contact support.');
+                return;
+            }
+            
             // Получаем billing данные из формы
             const billingData = this.getBillingData();
+            
+            // Добавляем email в billing данные
+            billingData.email = userEmail;
             
             // Создаем платежный токен
             const response = await fetch('/api/networx-payment', {
@@ -466,14 +526,19 @@ class WalletManager {
 
     getBillingData() {
         // Собираем данные из формы billing
+        const firstName = document.getElementById('firstName')?.value || '';
+        const lastName = document.getElementById('lastName')?.value || '';
+        
         return {
-            full_name: document.getElementById('fullName')?.value || '',
+            firstName: firstName,
+            lastName: lastName,
+            fullName: `${firstName} ${lastName}`.trim(),
             email: document.getElementById('email')?.value || '',
-            phone: document.getElementById('phone')?.value || '',
             address: document.getElementById('address')?.value || '',
             city: document.getElementById('city')?.value || '',
+            state: document.getElementById('state')?.value || '',
             country: document.getElementById('country')?.value || '',
-            postal_code: document.getElementById('postalCode')?.value || ''
+            postalCode: document.getElementById('zipCode')?.value || ''
         };
     }
 
@@ -521,7 +586,7 @@ function selectCustomAmount() {
 }
 
 // Top-up modal functions
-function openTopUpModal(amount = null) {
+async function openTopUpModal(amount = null) {
     const modal = document.getElementById('topupModal');
     const amountInput = document.getElementById('topupAmount');
     
@@ -530,6 +595,21 @@ function openTopUpModal(amount = null) {
         
         if (amount && amountInput) {
             amountInput.value = amount.toFixed(2);
+        }
+        
+        // Pre-fill email when modal opens
+        if (walletManager) {
+            try {
+                const email = await walletManager.getCurrentUserEmail();
+                if (email) {
+                    const emailInput = document.getElementById('email');
+                    if (emailInput) {
+                        emailInput.value = email;
+                    }
+                }
+            } catch (error) {
+                console.warn('[WALLET] Could not preload email in modal:', error);
+            }
         }
     }
 }

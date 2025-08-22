@@ -267,6 +267,50 @@ class AuthManager {
   }
 
   /**
+   * Get current user email from API
+   * @returns {Promise<string|null>} User email or null if failed
+   */
+  async getCurrentUserEmail() {
+    if (!this.isLoggedIn || !this.sessionId || !this.currentUser?.id) {
+      console.warn('[AUTH] Cannot get email: user not logged in');
+      return null;
+    }
+
+    try {
+      console.log('[AUTH] Fetching user email from API...');
+      
+      const response = await fetch('/api/spice-multi-test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          endpoint: '/index_api/user',
+          session_id: this.sessionId,
+          id: this.currentUser.id
+        })
+      });
+      
+      const result = await response.json();
+      
+      if (result.success && result.data && result.data.result) {
+        const email = result.data.result.email;
+        if (email) {
+          console.log('[AUTH] User email retrieved successfully');
+          return email;
+        } else {
+          console.warn('[AUTH] No email found in user profile');
+          return null;
+        }
+      } else {
+        console.error('[AUTH] Failed to get user profile:', result.error);
+        return null;
+      }
+    } catch (error) {
+      console.error('[AUTH] Error fetching user email:', error);
+      return null;
+    }
+  }
+
+  /**
    * Verify current session is still valid
    */
   async verifySession() {
