@@ -140,15 +140,15 @@ class MainDashboard {
             }
             
             // Добавляем новые типы активности из getActivities API
-            if (activitiesData.success && activitiesData.data?.result) {
-                const activities = activitiesData.data.result;
+            if (activitiesData.success && activitiesData.data) {
+                const activities = activitiesData.data;
                 
                 // Новые участники (wall_online)
                 if (activities.wall_online) {
                     allActivities.push({
                         type: 'new_member',
                         pseudo: activities.wall_online.pseudo,
-                        date_action: activities.wall_online.date,
+                        date_action: activities.wall_online.date_cnx,
                         user_id: activities.wall_online.id
                     });
                 }
@@ -687,7 +687,7 @@ class MainDashboard {
             if (photoUrl.startsWith('/')) {
                 photoUrl = 'https://dev2018.de5a7.com' + photoUrl;
             } else {
-                photoUrl = 'https://dev2018.de5a7.com/' + photoUrl;
+            photoUrl = 'https://dev2018.de5a7.com/' + photoUrl;
             }
         }
         
@@ -880,13 +880,16 @@ class MainDashboard {
             
             const listContainer = document.getElementById('birthdayList');
             
-            if (data.success && data.data?.result?.wall_birthday) {
-                const birthday = data.data.result.wall_birthday;
+            if (data.success && data.data?.wall_birthday) {
+                const birthday = data.data.wall_birthday;
+                
+                const photoUrl = birthday.photos && birthday.photos.length > 0 ? birthday.photos[0].url_middle : null;
                 
                 const birthdayHTML = `
                     <div class="birthday-item">
                         <div class="birthday-avatar">
-                            <div class="avatar-fallback">${(birthday.pseudo || 'U').charAt(0).toUpperCase()}</div>
+                            ${photoUrl ? `<img src="${photoUrl}" alt="${birthday.pseudo}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''}
+                            <div class="avatar-fallback" style="${photoUrl ? 'display: none;' : ''}">${(birthday.pseudo || 'U').charAt(0).toUpperCase()}</div>
                         </div>
                         <div class="birthday-info">
                             <div class="birthday-name">${birthday.pseudo || 'Anonymous'}</div>
@@ -917,13 +920,16 @@ class MainDashboard {
             
             const listContainer = document.getElementById('newPhotosList');
             
-            if (data.success && data.data?.result?.wall_addPhoto) {
-                const photoActivity = data.data.result.wall_addPhoto;
+            if (data.success && data.data?.wall_addPhoto) {
+                const photoActivity = data.data.wall_addPhoto;
+                
+                const photoUrl = photoActivity.photos && photoActivity.photos.length > 0 ? photoActivity.photos[0].url_middle : null;
                 
                 const photosHTML = `
                     <div class="photo-activity-item">
                         <div class="photo-activity-avatar">
-                            <div class="avatar-fallback">${(photoActivity.pseudo || 'U').charAt(0).toUpperCase()}</div>
+                            ${photoUrl ? `<img src="${photoUrl}" alt="${photoActivity.pseudo}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''}
+                            <div class="avatar-fallback" style="${photoUrl ? 'display: none;' : ''}">${(photoActivity.pseudo || 'U').charAt(0).toUpperCase()}</div>
                         </div>
                         <div class="photo-activity-info">
                             <div class="photo-activity-name">${photoActivity.pseudo || 'Anonymous'}</div>
