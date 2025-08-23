@@ -1,6 +1,5 @@
 class SearchManager {
     constructor() {
-        this.authManager = new AuthManager();
         this.currentPage = 1;
         this.isLoading = false;
         this.init();
@@ -9,10 +8,8 @@ class SearchManager {
     async init() {
         console.log('[SEARCH] Initializing search manager');
         
-        // Wait for auth to be ready
-        await this.authManager.waitForAuth();
-        
-        if (!this.authManager.isLoggedIn) {
+        // Check authentication
+        if (!window.authManager || !window.authManager.isLoggedIn) {
             console.log('[SEARCH] User not logged in, redirecting');
             window.location.href = 'index.html';
             return;
@@ -60,21 +57,13 @@ class SearchManager {
             const searchParams = this.getSearchParams();
             console.log('[SEARCH] Search params:', searchParams);
             
-            const response = await fetch('/api/spice-multi-test', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    endpoint: '/index_api/search',
-                    method: 'POST',
-                    data: {
-                        session_id: this.authManager.sessionId,
-                        id: this.authManager.currentUser.id,
-                        ...searchParams
-                    }
-                })
+            // Build query string for search API
+            const queryParams = new URLSearchParams({
+                session_id: window.authManager.sessionId,
+                ...searchParams
             });
+            
+            const response = await fetch(`/api/spice-multi-test?endpoint=/index_api/search&method=POST&${queryParams.toString()}`);
 
             const result = await response.json();
             console.log('[SEARCH] Search result:', result);
@@ -319,5 +308,20 @@ class SearchManager {
 // Initialize when page loads
 let searchManager;
 document.addEventListener('DOMContentLoaded', () => {
-    searchManager = new SearchManager();
+    // Wait for auth manager to be ready
+    function initSearchManager(attempt = 1, maxAttempts = 10) {
+        if (window.authManager && window.authManager.isLoggedIn) {
+            console.log('[SEARCH] AuthManager ready, creating SearchManager instance');
+            searchManager = new SearchManager();
+        } else if (attempt < maxAttempts) {
+            console.log(`[SEARCH] AuthManager not ready, retrying... (${attempt}/${maxAttempts})`);
+            setTimeout(() => initSearchManager(attempt + 1, maxAttempts), 500);
+        } else {
+            console.error('[SEARCH] Failed to initialize SearchManager - AuthManager not ready');
+            window.location.href = 'index.html';
+        }
+    }
+    
+    // Start initialization
+    setTimeout(() => initSearchManager(), 100);
 });
