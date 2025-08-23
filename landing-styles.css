@@ -246,8 +246,8 @@ body {
   opacity: 0.3;
 }
 
-/* Floating Hearts Animation */
-.floating-hearts {
+/* Modern Floating Elements Animation */
+.floating-elements {
   position: absolute;
   top: 0;
   left: 0;
@@ -257,56 +257,91 @@ body {
   overflow: hidden;
 }
 
-.heart {
+.float-element {
   position: absolute;
-  font-size: 24px;
-  opacity: 0.6;
-  animation: floatUp 8s infinite linear;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255, 68, 88, 0.3), rgba(108, 92, 231, 0.3));
+  animation: modernFloat 12s infinite linear;
 }
 
-.heart-1 {
-  left: 10%;
+.element-1 {
+  width: 20px;
+  height: 20px;
+  left: 15%;
   animation-delay: 0s;
-  animation-duration: 8s;
+  animation-duration: 15s;
 }
 
-.heart-2 {
-  left: 25%;
-  animation-delay: 2s;
-  animation-duration: 10s;
+.element-2 {
+  width: 30px;
+  height: 30px;
+  left: 30%;
+  animation-delay: 3s;
+  animation-duration: 18s;
+  background: linear-gradient(135deg, rgba(108, 92, 231, 0.4), rgba(162, 155, 254, 0.4));
 }
 
-.heart-3 {
-  left: 50%;
-  animation-delay: 4s;
-  animation-duration: 9s;
-}
-
-.heart-4 {
-  left: 75%;
+.element-3 {
+  width: 15px;
+  height: 15px;
+  left: 55%;
   animation-delay: 6s;
-  animation-duration: 11s;
+  animation-duration: 12s;
+  border-radius: 20%;
+  background: linear-gradient(135deg, rgba(255, 68, 88, 0.5), rgba(255, 107, 122, 0.5));
 }
 
-.heart-5 {
-  left: 90%;
-  animation-delay: 1s;
-  animation-duration: 7s;
+.element-4 {
+  width: 25px;
+  height: 25px;
+  left: 75%;
+  animation-delay: 9s;
+  animation-duration: 20s;
+  background: linear-gradient(135deg, rgba(162, 155, 254, 0.3), rgba(255, 107, 157, 0.3));
 }
 
-@keyframes floatUp {
+.element-5 {
+  width: 18px;
+  height: 18px;
+  left: 85%;
+  animation-delay: 2s;
+  animation-duration: 14s;
+  border-radius: 30%;
+}
+
+.element-6 {
+  width: 22px;
+  height: 22px;
+  left: 8%;
+  animation-delay: 5s;
+  animation-duration: 16s;
+  background: linear-gradient(135deg, rgba(255, 107, 157, 0.4), rgba(108, 92, 231, 0.4));
+}
+
+@keyframes modernFloat {
   0% {
-    transform: translateY(100vh) rotate(0deg);
+    transform: translateY(100vh) translateX(0px) rotate(0deg) scale(0);
     opacity: 0;
   }
-  10% {
-    opacity: 0.6;
+  5% {
+    opacity: 1;
+    transform: translateY(90vh) translateX(10px) rotate(45deg) scale(1);
   }
-  90% {
-    opacity: 0.6;
+  25% {
+    transform: translateY(70vh) translateX(-20px) rotate(180deg) scale(1.2);
+  }
+  50% {
+    transform: translateY(40vh) translateX(30px) rotate(270deg) scale(0.8);
+  }
+  75% {
+    transform: translateY(20vh) translateX(-10px) rotate(360deg) scale(1.1);
+  }
+  95% {
+    opacity: 1;
+    transform: translateY(5vh) translateX(15px) rotate(405deg) scale(0.9);
   }
   100% {
-    transform: translateY(-100px) rotate(360deg);
+    transform: translateY(-10vh) translateX(0px) rotate(450deg) scale(0);
     opacity: 0;
   }
 }
@@ -466,6 +501,184 @@ body {
 .feature-card p {
   color: var(--text-secondary);
   line-height: 1.6;
+}
+
+/* How It Works Section */
+.how-it-works {
+  padding: 100px 0;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 40px;
+  margin-top: 60px;
+}
+
+.step-card {
+  background: white;
+  padding: 40px 30px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.step-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--gradient-primary);
+}
+
+.step-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.step-number {
+  position: absolute;
+  top: -15px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  background: var(--gradient-primary);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.step-icon {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+.step-card h3 {
+  color: var(--text-primary);
+  margin-bottom: 15px;
+  font-size: 1.4rem;
+}
+
+.step-card p {
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* Download App Section */
+.download-app {
+  padding: 100px 0;
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+  color: white;
+}
+
+.download-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+
+.download-text h2 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  color: white;
+}
+
+.download-text p {
+  font-size: 1.2rem;
+  margin-bottom: 30px;
+  opacity: 0.9;
+}
+
+.app-features {
+  margin-bottom: 40px;
+}
+
+.feature-item {
+  padding: 8px 0;
+  font-size: 1.1rem;
+  opacity: 0.9;
+}
+
+.download-buttons {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.btn-download {
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 15px 30px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
+}
+
+.btn-download:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+}
+
+.phone-mockup {
+  width: 250px;
+  height: 500px;
+  background: #1a1a1a;
+  border-radius: 30px;
+  padding: 20px;
+  margin: 0 auto;
+  position: relative;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.phone-screen {
+  width: 100%;
+  height: 100%;
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+}
+
+.app-preview {
+  padding: 20px;
+  height: 100%;
+  background: linear-gradient(135deg, #ff4458 0%, #6c5ce7 100%);
+}
+
+.preview-header {
+  color: white;
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.preview-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.preview-card {
+  height: 80px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
 }
 
 /* Live Profiles Section */
