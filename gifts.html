@@ -106,7 +106,7 @@
             <h1 class="page-title">
                 Your Gifts
             </h1>
-            <p class="page-subtitle">Manage your gift inventory and monetization</p>
+            <p class="page-subtitle" style="text-align: center;">Manage your gift inventory and monetization</p>
         </div>
 
         <!-- Статистика подарков -->
@@ -127,16 +127,16 @@
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon">💰</div>
+                    <div class="stat-icon"></div>
                     <div class="stat-info">
-                        <div class="stat-number" id="totalEarnings">$0</div>
+                        <div class="stat-number" id="totalEarnings">€0</div>
                         <div class="stat-label">Total Earnings</div>
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon">🎯</div>
+                    <div class="stat-icon"></div>
                     <div class="stat-info">
-                        <div class="stat-number" id="availableValue">$0</div>
+                        <div class="stat-number" id="availableValue">€0</div>
                         <div class="stat-label">Available Value</div>
                     </div>
                 </div>
@@ -146,7 +146,7 @@
         <!-- Inventory Section -->
         <div class="gifts-inventory-section fade-in-up">
             <div class="section-header">
-                <h2>💎 Gift Inventory</h2>
+                <h2>Gift Inventory</h2>
                 <p>Your received gifts available for monetization</p>
             </div>
             
@@ -161,7 +161,7 @@
             </div>
 
             <div class="inventory-empty" id="inventoryEmpty" style="display: none;">
-                <div class="empty-icon">🎁</div>
+                <div class="empty-icon"></div>
                 <h3>No gifts in inventory</h3>
                 <p>Received gifts will appear here for monetization</p>
             </div>
@@ -181,7 +181,7 @@
                         <span class="summary-count" id="readyToMonetizeCount">0 gifts</span>
                     </div>
                     <div class="summary-value">
-                        <span class="currency-symbol">$</span>
+                        <span class="currency-symbol">€</span>
                         <span class="value-amount" id="monetizationValue">0.00</span>
                         <select class="currency-select" id="monetizationCurrency">
                             <option value="USD">USD</option>
@@ -203,7 +203,7 @@
         <!-- History Section -->
         <div class="history-section fade-in-up">
             <div class="section-header">
-                <h2>📊 Transaction History</h2>
+                <h2>Transaction History</h2>
                 <p>View all your gift-related activities</p>
             </div>
 
@@ -264,7 +264,7 @@
     <div id="monetizationModal" class="modal" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>💰 Monetize Gifts</h2>
+                <h2>Monetize Gifts</h2>
                 <button class="modal-close" onclick="closeMonetizationModal()">&times;</button>
             </div>
             
@@ -274,7 +274,7 @@
                     <p>You are about to monetize <span id="monetizeGiftsCount">0</span> gifts for:</p>
                     
                     <div class="monetization-amount">
-                        <span class="amount-value" id="monetizeAmount">$0.00</span>
+                        <span class="amount-value" id="monetizeAmount">€0.00</span>
                         <span class="amount-currency" id="monetizeCurrency">USD</span>
                     </div>
                     

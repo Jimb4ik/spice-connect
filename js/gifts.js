@@ -8,11 +8,11 @@ class GiftsManager {
         this.sentGifts = [];
         this.transactions = [];
         this.currencies = {
-            'USD': { symbol: '$', rate: 1 },
-            'EUR': { symbol: '€', rate: 0.85 },
-            'GBP': { symbol: '£', rate: 0.73 },
-            'CAD': { symbol: 'C$', rate: 1.25 },
-            'AUD': { symbol: 'A$', rate: 1.35 }
+            'EUR': { symbol: '€', rate: 1 },
+            'USD': { symbol: '$', rate: 1.18 },
+            'GBP': { symbol: '£', rate: 0.86 },
+            'CAD': { symbol: 'C$', rate: 1.47 },
+            'AUD': { symbol: 'A$', rate: 1.59 }
         };
     }
 
@@ -212,7 +212,7 @@ class GiftsManager {
                 <div class="gift-info">
                     <h4>${gift.gift_name}</h4>
                     <div class="gift-meta">
-                        <span class="gift-value">$${value.toFixed(2)}</span>
+                        <span class="gift-value">€${value.toFixed(2)}</span>
                         <span class="gift-credits">${gift.purchase_price_credits} credits</span>
                     </div>
                     <div class="gift-date">${this.formatDate(gift.sent_at)}</div>
@@ -330,7 +330,7 @@ class GiftsManager {
         const config = typeConfig[transaction.transaction_type];
         const amount = transaction.credits_spent || transaction.usd_earned || 0;
         const currency = transaction.transaction_type === 'monetize' ? 
-            `$${amount.toFixed(2)}` : `${amount} credits`;
+            `€${amount.toFixed(2)}` : `${amount} credits`;
         
         return `
             <div class="history-item">
@@ -361,8 +361,8 @@ class GiftsManager {
         // Обновляем статистику
         document.getElementById('receivedGiftsCount').textContent = receivedCount;
         document.getElementById('sentGiftsCount').textContent = sentCount;
-        document.getElementById('totalEarnings').textContent = `$${totalEarnings.toFixed(2)}`;
-        document.getElementById('availableValue').textContent = `$${availableValue.toFixed(2)}`;
+        document.getElementById('totalEarnings').textContent = `€${totalEarnings.toFixed(2)}`;
+        document.getElementById('availableValue').textContent = `€${availableValue.toFixed(2)}`;
     }
 
     openMonetizationModal() {

@@ -172,6 +172,36 @@ body {
   padding: 16px 32px;
   font-size: 1.1rem;
   box-shadow: var(--shadow-medium);
+  position: relative;
+  overflow: hidden;
+  animation: pulse 2s infinite;
+}
+
+.btn-hero-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.5s;
+}
+
+.btn-hero-primary:hover::before {
+  left: 100%;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 68, 88, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(255, 68, 88, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 68, 88, 0);
+  }
 }
 
 .btn-hero-secondary {
@@ -214,6 +244,71 @@ body {
   height: 100%;
   object-fit: cover;
   opacity: 0.3;
+}
+
+/* Floating Hearts Animation */
+.floating-hearts {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.heart {
+  position: absolute;
+  font-size: 24px;
+  opacity: 0.6;
+  animation: floatUp 8s infinite linear;
+}
+
+.heart-1 {
+  left: 10%;
+  animation-delay: 0s;
+  animation-duration: 8s;
+}
+
+.heart-2 {
+  left: 25%;
+  animation-delay: 2s;
+  animation-duration: 10s;
+}
+
+.heart-3 {
+  left: 50%;
+  animation-delay: 4s;
+  animation-duration: 9s;
+}
+
+.heart-4 {
+  left: 75%;
+  animation-delay: 6s;
+  animation-duration: 11s;
+}
+
+.heart-5 {
+  left: 90%;
+  animation-delay: 1s;
+  animation-duration: 7s;
+}
+
+@keyframes floatUp {
+  0% {
+    transform: translateY(100vh) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.6;
+  }
+  90% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(-100px) rotate(360deg);
+    opacity: 0;
+  }
 }
 
 .hero-container {
@@ -334,6 +429,25 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.feature-icon-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ff4458, #ff6b9d);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  color: white;
+  box-shadow: 0 8px 25px rgba(255, 68, 88, 0.3);
+  transition: all 0.3s ease;
+}
+
+.feature-card:hover .feature-icon-circle {
+  transform: scale(1.1);
+  box-shadow: 0 12px 35px rgba(255, 68, 88, 0.4);
 }
 
 .feature-img {

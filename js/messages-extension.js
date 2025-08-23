@@ -296,9 +296,6 @@ Object.assign(Dashboard.prototype, {
     this.currentChatUserId = userId;
     await this.loadChatMessages(userId);
     
-    // ИСПРАВЛЕНИЕ 3: Обновляем превью сообщения после загрузки чата
-    this.updateContactPreview(userId);
-    
     // Show chat interface
     this.showChatInterface();
   },
@@ -649,7 +646,6 @@ Object.assign(Dashboard.prototype, {
     if (!messages || messages.length === 0) {
       chatMessages.innerHTML = `
         <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; text-align: center; color: #64748b; padding: 40px 20px;">
-          <div style="font-size: 48px; margin-bottom: 16px;">💬</div>
           <h4 style="margin: 0 0 8px 0; color: #1e293b;">No messages yet</h4>
           <p style="margin: 0; font-size: 14px;">Start the conversation by sending a message!</p>
         </div>

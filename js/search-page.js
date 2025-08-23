@@ -186,17 +186,30 @@ class SearchManager {
         const card = document.createElement('div');
         card.className = 'user-card';
         
+        // Extract photo URL from various possible sources
+        let photoUrl = null;
+        if (user.photo_profil_url) {
+            photoUrl = user.photo_profil_url;
+        } else if (user.all_photos && Array.isArray(user.all_photos) && user.all_photos.length > 0) {
+            photoUrl = user.all_photos[0].url || user.all_photos[0];
+        } else if (user.tab_photo && Array.isArray(user.tab_photo) && user.tab_photo.length > 0) {
+            photoUrl = user.tab_photo[0].url || user.tab_photo[0];
+        } else if (user.photos && Array.isArray(user.photos) && user.photos.length > 0) {
+            photoUrl = user.photos[0].url || user.photos[0];
+        }
+        
         // Generate avatar
-        const avatarHtml = user.photo_profil_url ? 
-            `<img src="${user.photo_profil_url}" alt="${user.pseudo}" class="user-avatar">` :
+        const avatarHtml = photoUrl ? 
+            `<img src="${photoUrl}" alt="${user.pseudo}" class="user-avatar" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+             <div class="user-avatar avatar-placeholder" style="display: none;">${user.pseudo ? user.pseudo.charAt(0).toUpperCase() : 'U'}</div>` :
             `<div class="user-avatar avatar-placeholder">${user.pseudo ? user.pseudo.charAt(0).toUpperCase() : 'U'}</div>`;
         
         // Calculate age
-        const age = user.age || (user.year ? new Date().getFullYear() - user.year : '');
+        const age = user.age || (user.year ? new Date().getFullYear() - user.year : '') || (user.birth_date ? this.calculateAge(user.birth_date) : '');
         
         // Online status
         const onlineStatus = user.connected == 1 ? 
-            '<span class="online-indicator">🟢 Online</span>' : '';
+            '<span class="online-indicator">● Online</span>' : '';
         
         card.innerHTML = `
             ${avatarHtml}
@@ -218,6 +231,18 @@ class SearchManager {
         `;
         
         return card;
+    }
+    
+    calculateAge(birthDate) {
+        if (!birthDate) return '';
+        const birth = new Date(birthDate);
+        const today = new Date();
+        let age = today.getFullYear() - birth.getFullYear();
+        const monthDiff = today.getMonth() - birth.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+            age--;
+        }
+        return age;
     }
 
     async viewProfile(userId) {
