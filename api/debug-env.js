@@ -34,10 +34,10 @@ class DemoUsersSetup {
 
     async loginUser(username, password) {
         try {
-            const url = `${this.baseUrl}/ajax_api/login?api_key=${this.apiKey}`;
+            const url = `${this.baseUrl}/index_api/login?api_key=${this.apiKey}`;
             const body = new URLSearchParams({
-                pseudo: username,
-                password: password
+                login: username,
+                pass: password
             });
             
             console.log(`🔐 [LOGIN REQUEST] URL: ${url}`);
@@ -55,8 +55,19 @@ class DemoUsersSetup {
             console.log(`🔐 [LOGIN RESPONSE] Status: ${response.status} ${response.statusText}`);
             console.log(`🔐 [LOGIN RESPONSE] Headers:`, Object.fromEntries(response.headers.entries()));
             
-            const result = await response.json();
-            console.log(`🔐 [LOGIN RESPONSE] Body:`, JSON.stringify(result, null, 2));
+            // Получаем сырой текст ответа для диагностики
+            const responseText = await response.text();
+            console.log(`🔐 [LOGIN RESPONSE] Raw Text (first 500 chars):`, responseText.substring(0, 500));
+            
+            let result;
+            try {
+                result = JSON.parse(responseText);
+                console.log(`🔐 [LOGIN RESPONSE] Parsed JSON:`, JSON.stringify(result, null, 2));
+            } catch (parseError) {
+                console.error(`🔐 [LOGIN RESPONSE] JSON Parse Error:`, parseError.message);
+                console.log(`🔐 [LOGIN RESPONSE] Full response text:`, responseText);
+                throw new Error(`API returned non-JSON response: ${responseText.substring(0, 200)}...`);
+            }
             
             if (result.result === 'ok' && result.session_id) {
                 console.log(`✅ [LOGIN SUCCESS] User ${username} logged in with session: ${result.session_id}`);
