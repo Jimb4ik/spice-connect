@@ -64,10 +64,14 @@ class SearchManager {
                 ...searchParams
             });
             
-            const response = await fetch(`/api/spice-multi-test?endpoint=/index_api/search&method=POST&${queryParams.toString()}`);
+            const fullUrl = `/api/spice-multi-test?endpoint=/index_api/search&method=POST&${queryParams.toString()}`;
+            console.log('[SEARCH] Full request URL:', fullUrl);
+            console.log('[SEARCH] Query params object:', Object.fromEntries(queryParams.entries()));
+            
+            const response = await fetch(fullUrl);
 
             const result = await response.json();
-            console.log('[SEARCH] Search result:', result);
+            console.log('[SEARCH] Full search result:', JSON.stringify(result, null, 2));
 
             if (result.success && result.data && result.data.result) {
                 this.displayResults(result.data.result, result.data.total || 0);
@@ -122,8 +126,8 @@ class SearchManager {
             }
         }
         
-        // Only with photos - по умолчанию показываем только пользователей с фото
-        params.is_photo = 1;
+        // Only with photos - опционально (убираем принудительный фильтр)
+        // params.is_photo = 1;
         
         // Online only
         const onlineOnly = document.getElementById('onlineOnly')?.checked;
@@ -138,46 +142,52 @@ class SearchManager {
     }
 
     displayResults(results, total) {
-        const container = document.getElementById('searchResults');
-        const statusDiv = document.querySelector('.search-status');
+        console.log('[SEARCH] displayResults called with:', { results, total, resultsLength: results?.length });
         
-        if (!container) return;
+        // Используем правильный контейнер из HTML
+        const container = document.getElementById('searchGrid');
+        const resultsCountEl = document.getElementById('resultsCount');
         
-        if (!results || results.length === 0) {
-            container.innerHTML = `
-                <div class="search-status no-results">
-                    <div class="status-icon">🔍</div>
-                    <h3>No results found</h3>
-                    <p>Try adjusting your search filters</p>
-                    <button class="app-btn app-btn-primary" onclick="window.location.href='discover.html'">
-                        Browse All Profiles
-                    </button>
-                </div>
-            `;
+        if (!container) {
+            console.error('[SEARCH] Container #searchGrid not found!');
             return;
         }
         
-        // Update status
-        if (statusDiv) {
-            statusDiv.innerHTML = `
-                <div class="status-icon">✨</div>
-                <h3>Found ${total} profiles</h3>
-                <p>Showing ${results.length} results</p>
-            `;
+        if (!results || results.length === 0) {
+            console.log('[SEARCH] No results to display');
+            container.innerHTML = '';
+            if (resultsCountEl) resultsCountEl.textContent = '0 results';
+            
+            // Показываем блок "No results"
+            const noResultsDiv = document.getElementById('noResults');
+            if (noResultsDiv) {
+                noResultsDiv.style.display = 'block';
+            }
+            return;
         }
         
-        // Create results grid
-        const resultsGrid = document.createElement('div');
-        resultsGrid.className = 'results-grid';
+        console.log('[SEARCH] Displaying results:', results.length);
+        
+        // Скрываем блок "No results"
+        const noResultsDiv = document.getElementById('noResults');
+        if (noResultsDiv) {
+            noResultsDiv.style.display = 'none';
+        }
+        
+        // Update results count
+        if (resultsCountEl) {
+            resultsCountEl.textContent = `${results.length} results`;
+        }
+        
+        // Clear container and add results
+        container.innerHTML = '';
         
         results.forEach(user => {
             const userCard = this.createUserCard(user);
-            resultsGrid.appendChild(userCard);
+            container.appendChild(userCard);
         });
         
-        container.innerHTML = '';
-        if (statusDiv) container.appendChild(statusDiv);
-        container.appendChild(resultsGrid);
+        console.log('[SEARCH] Results displayed successfully');
     }
 
     createUserCard(user) {
