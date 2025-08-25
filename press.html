@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Press & Media - Lavrilo</title>
+    <link rel="stylesheet" href="landing-styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: white;
+            color: var(--text-primary);
+        }
+        .press-page {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 120px 20px 40px;
+            line-height: 1.6;
+            color: var(--text-primary);
+        }
+        .press-page h1 {
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 2.5rem;
+        }
+        .press-page h2 {
+            color: var(--text-primary);
+            margin: 40px 0 20px 0;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            font-size: 1.8rem;
+        }
+        .press-page h3 {
+            color: var(--text-primary);
+            margin: 30px 0 15px 0;
+            font-size: 1.3rem;
+        }
+        .press-page p {
+            margin-bottom: 15px;
+            color: var(--text-primary);
+        }
+        .press-page ul {
+            margin: 15px 0;
+            padding-left: 30px;
+        }
+        .press-page li {
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+        .hero-section {
+            text-align: center;
+            margin: 40px 0;
+            padding: 60px 40px;
+            background: linear-gradient(135deg, var(--primary-color), #ff6b9d);
+            color: white;
+            border-radius: 20px;
+        }
+        .hero-section h2 {
+            border: none;
+            color: white;
+            margin-bottom: 20px;
+            font-size: 2.2rem;
+        }
+        .hero-section p {
+            font-size: 1.2rem;
+            opacity: 0.95;
+        }
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+        .news-card {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 16px;
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+        .news-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-color: var(--primary-color);
+        }
+        .news-date {
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+        .news-title {
+            color: var(--primary-color);
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+        .news-excerpt {
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        .news-source {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+        }
+        .stat-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid #e5e7eb;
+        }
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        .stat-label {
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+        }
+        .contact-section {
+            background: #f8f9fa;
+            padding: 40px;
+            border-radius: 16px;
+            margin: 40px 0;
+            text-align: center;
+        }
+        .contact-section h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+        .contact-section p {
+            margin-bottom: 20px;
+        }
+        .contact-email {
+            color: var(--primary-color);
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 1.1rem;
+        }
+        .contact-email:hover {
+            text-decoration: underline;
+        }
+        .download-section {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            border: 1px solid #e5e7eb;
+            margin: 30px 0;
+        }
+        .download-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .download-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .download-item:hover {
+            background: #e5e7eb;
+            transform: translateY(-2px);
+        }
+        .download-icon {
+            font-size: 1.5rem;
+        }
+        .download-info h4 {
+            margin: 0 0 5px 0;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+        .download-info p {
+            margin: 0;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+        .timeline {
+            position: relative;
+            margin: 40px 0;
+        }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--primary-color);
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 30px;
+            padding-left: 60px;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 11px;
+            top: 5px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary-color);
+        }
+        .timeline-date {
+            color: #6b7280;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .timeline-title {
+            color: var(--text-primary);
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .timeline-description {
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <h2>Lavrilo</h2>
+            </div>
+            
+            <div class="nav-menu">
+                <a href="index.html#features" class="nav-link">Features</a>
+                <a href="index.html#profiles" class="nav-link">Browse</a>
+                <a href="index.html#testimonials" class="nav-link">Stories</a>
+                <button onclick="window.location.href='index.html'" class="btn-secondary login-btn">Back to Home</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="press-page">
+        <h1>Press & Media</h1>
+        
+        <div class="hero-section">
+            <h2>Revolutionizing Online Dating</h2>
+            <p>Discover how Lavrilo is changing the way people find meaningful connections through innovative technology and authentic experiences.</p>
+        </div>
+
+        <h2>Company Overview</h2>
+        <p>Lavrilo is a next-generation dating platform that uses advanced AI matching algorithms to help singles find meaningful, long-term relationships. Founded in 2024, we've quickly become a trusted name in online dating by prioritizing user safety, authentic connections, and innovative features.</p>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">2M+</div>
+                <div class="stat-label">Active Users</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">500K+</div>
+                <div class="stat-label">Successful Matches</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">50K+</div>
+                <div class="stat-label">Relationships Formed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">95%</div>
+                <div class="stat-label">User Satisfaction</div>
+            </div>
+        </div>
+
+        <h2>Recent News & Coverage</h2>
+
+        <div class="news-grid">
+            <div class="news-card">
+                <div class="news-date">January 15, 2025</div>
+                <div class="news-title">Lavrilo Raises $50M Series A to Expand AI-Powered Matching</div>
+                <div class="news-excerpt">
+                    Leading dating platform secures funding to enhance its proprietary matching algorithm and expand into new markets across Europe and North America.
+                </div>
+                <div class="news-source">TechCrunch</div>
+            </div>
+
+            <div class="news-card">
+                <div class="news-date">December 8, 2024</div>
+                <div class="news-title">The Future of Online Dating: How AI is Creating Better Matches</div>
+                <div class="news-excerpt">
+                    Industry experts discuss how Lavrilo's innovative approach to compatibility matching is setting new standards for the dating industry.
+                </div>
+                <div class="news-source">Forbes</div>
+            </div>
+
+            <div class="news-card">
+                <div class="news-date">November 22, 2024</div>
+                <div class="news-title">Dating App Safety: Lavrilo Leads with Comprehensive Verification</div>
+                <div class="news-excerpt">
+                    New study shows Lavrilo's multi-layer verification system reduces fake profiles by 98% compared to industry average.
+                </div>
+                <div class="news-source">Wired</div>
+            </div>
+
+            <div class="news-card">
+                <div class="news-date">October 30, 2024</div>
+                <div class="news-title">Success Stories: 10,000 Couples Share Their Lavrilo Journey</div>
+                <div class="news-excerpt">
+                    Comprehensive analysis reveals what makes relationships successful on modern dating platforms, with insights from real couples.
+                </div>
+                <div class="news-source">The Wall Street Journal</div>
+            </div>
+
+            <div class="news-card">
+                <div class="news-date">September 15, 2024</div>
+                <div class="news-title">Lavrilo Launches Revolutionary Gift System for Digital Romance</div>
+                <div class="news-excerpt">
+                    Platform introduces virtual gifting feature that allows users to express feelings and build deeper connections before meeting.
+                </div>
+                <div class="news-source">VentureBeat</div>
+            </div>
+
+            <div class="news-card">
+                <div class="news-date">August 3, 2024</div>
+                <div class="news-title">The Psychology of Modern Love: Lavrilo's Data-Driven Approach</div>
+                <div class="news-excerpt">
+                    Research partnership with leading universities reveals new insights into compatibility and relationship success factors.
+                </div>
+                <div class="news-source">Harvard Business Review</div>
+            </div>
+        </div>
+
+        <h2>Company Timeline</h2>
+
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-date">January 2025</div>
+                <div class="timeline-title">Series A Funding</div>
+                <div class="timeline-description">Raised $50M to accelerate growth and expand AI capabilities</div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="timeline-date">October 2024</div>
+                <div class="timeline-title">2 Million Users Milestone</div>
+                <div class="timeline-description">Reached 2 million active users across 15 countries</div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="timeline-date">August 2024</div>
+                <div class="timeline-title">Virtual Gifts Launch</div>
+                <div class="timeline-description">Introduced innovative virtual gifting system for enhanced user engagement</div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="timeline-date">May 2024</div>
+                <div class="timeline-title">AI Matching 2.0</div>
+                <div class="timeline-description">Launched advanced AI matching algorithm with 40% improved compatibility scores</div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="timeline-date">February 2024</div>
+                <div class="timeline-title">Platform Launch</div>
+                <div class="timeline-description">Official launch of Lavrilo dating platform with initial focus on European market</div>
+            </div>
+        </div>
+
+        <h2>Media Resources</h2>
+
+        <div class="download-section">
+            <h3>Brand Assets & Press Kit</h3>
+            <p>Download our official logos, brand guidelines, and press materials for media coverage.</p>
+            
+            <div class="download-grid">
+                <a href="#" class="download-item">
+                    <div class="download-icon">🎨</div>
+                    <div class="download-info">
+                        <h4>Brand Guidelines</h4>
+                        <p>Logo usage, colors, typography</p>
+                    </div>
+                </a>
+                
+                <a href="#" class="download-item">
+                    <div class="download-icon">📸</div>
+                    <div class="download-info">
+                        <h4>High-Res Images</h4>
+                        <p>Product screenshots, team photos</p>
+                    </div>
+                </a>
+                
+                <a href="#" class="download-item">
+                    <div class="download-icon">📊</div>
+                    <div class="download-info">
+                        <h4>Company Fact Sheet</h4>
+                        <p>Key statistics and milestones</p>
+                    </div>
+                </a>
+                
+                <a href="#" class="download-item">
+                    <div class="download-icon">👥</div>
+                    <div class="download-info">
+                        <h4>Executive Bios</h4>
+                        <p>Leadership team profiles</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <h2>Key Differentiators</h2>
+        <ul>
+            <li><strong>AI-Powered Matching:</strong> Proprietary algorithm analyzes 200+ compatibility factors</li>
+            <li><strong>Safety First:</strong> Comprehensive verification system and proactive moderation</li>
+            <li><strong>Authentic Connections:</strong> Focus on meaningful relationships over casual encounters</li>
+            <li><strong>Global Reach:</strong> Available in 15+ countries with localized experiences</li>
+            <li><strong>Innovation:</strong> Continuous development of new features based on user feedback</li>
+            <li><strong>Success Rate:</strong> 3x higher long-term relationship success rate than competitors</li>
+        </ul>
+
+        <h2>Awards & Recognition</h2>
+        <ul>
+            <li><strong>Best Dating App 2024</strong> - Tech Innovation Awards</li>
+            <li><strong>Startup of the Year</strong> - European Tech Awards 2024</li>
+            <li><strong>Best User Experience</strong> - Mobile App Design Awards 2024</li>
+            <li><strong>Safety Excellence Award</strong> - Online Dating Association 2024</li>
+            <li><strong>AI Innovation Award</strong> - Dating Industry Summit 2024</li>
+        </ul>
+
+        <div class="contact-section">
+            <h3>Media Inquiries</h3>
+            <p>For press inquiries, interview requests, or additional information, please contact our media relations team.</p>
+            <a href="mailto:press@lavrilo.com" class="contact-email">press@lavrilo.com</a>
+            <p style="margin-top: 15px; font-size: 0.9rem; color: var(--text-secondary);">
+                We typically respond to media inquiries within 24 hours
+            </p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <h3>Lavrilo</h3>
+                    <p>Connecting hearts worldwide</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-column">
+                        <h4>Company</h4>
+                        <a href="about.html">About Us</a>
+                        <a href="careers.html">Careers</a>
+                        <a href="press.html">Press</a>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Support</h4>
+                        <a href="help.html">Help Center</a>
+                        <a href="safety.html">Safety Tips</a>
+                        <a href="contact.html">Contact Us</a>
+                    </div>
+                    <div class="footer-column">
+                        <h4>Legal</h4>
+                        <a href="privacy.html">Privacy Policy</a>
+                        <a href="terms.html">Terms of Service</a>
+                        <a href="cookies.html">Cookie Policy</a>
+                        <a href="#" class="cookie-settings-link" onclick="showCookieSettings(); return false;">Cookie Settings</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Lavrilo. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
