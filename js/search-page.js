@@ -60,6 +60,7 @@ class SearchManager {
             // Build query string for search API
             const queryParams = new URLSearchParams({
                 session_id: window.authManager.sessionId,
+                get_picture_430: 1, // Добавляем параметр для получения photos_v2
                 ...searchParams
             });
             
@@ -121,11 +122,8 @@ class SearchManager {
             }
         }
         
-        // Only with photos
-        const withPhotos = document.getElementById('withPhotos')?.checked;
-        if (withPhotos) {
-            params.is_photo = 1;
-        }
+        // Only with photos - по умолчанию показываем только пользователей с фото
+        params.is_photo = 1;
         
         // Online only
         const onlineOnly = document.getElementById('onlineOnly')?.checked;
@@ -186,17 +184,28 @@ class SearchManager {
         const card = document.createElement('div');
         card.className = 'user-card simple-card';
         
-        // Extract photo URL from various possible sources
+        // Extract photo URL according to API documentation (MembreBlock structure)
         let photoUrl = null;
-        if (user.photo_profil_url) {
-            photoUrl = user.photo_profil_url;
-        } else if (user.all_photos && Array.isArray(user.all_photos) && user.all_photos.length > 0) {
-            photoUrl = user.all_photos[0].url || user.all_photos[0];
-        } else if (user.tab_photo && Array.isArray(user.tab_photo) && user.tab_photo.length > 0) {
-            photoUrl = user.tab_photo[0].url || user.tab_photo[0];
-        } else if (user.photos && Array.isArray(user.photos) && user.photos.length > 0) {
-            photoUrl = user.photos[0].url || user.photos[0];
+        
+        // Приоритет 1: photos_v2 (PhotoBlockV2) - более новый формат
+        if (user.photos_v2 && Array.isArray(user.photos_v2) && user.photos_v2.length > 0) {
+            const photo = user.photos_v2[0];
+            // Используем sq_middle (215x215px) для карточек поиска
+            photoUrl = photo.sq_middle || photo.sq_430 || photo.normal || photo.sq_small;
         }
+        // Приоритет 2: photos (PhotoBlock) - старый формат
+        else if (user.photos && Array.isArray(user.photos) && user.photos.length > 0) {
+            const photo = user.photos[0];
+            // Используем url_middle (215x215px) для карточек поиска
+            photoUrl = photo.url_middle || photo.url_big || photo.url_small;
+        }
+        
+        console.log('[SEARCH] User photo data:', {
+            pseudo: user.pseudo,
+            photos_v2: user.photos_v2,
+            photos: user.photos,
+            selectedUrl: photoUrl
+        });
         
         // Generate avatar - только фото или заглушка
         const avatarHtml = photoUrl ? 
