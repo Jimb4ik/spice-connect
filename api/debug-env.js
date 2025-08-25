@@ -6,7 +6,7 @@
 class DemoUsersSetup {
     constructor(apiKey, baseUrl = null) {
         this.apiKey = apiKey;
-        this.baseUrl = baseUrl || process.env.SPICE_BASE_URL || 'https://api.fotochat.com';
+        this.baseUrl = baseUrl || process.env.SPICE_BASE_URL || 'https://dev2018.de5a7.com';
         
         if (!this.apiKey) {
             throw new Error('SPICE_API_KEY is required');
