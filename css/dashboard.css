@@ -5153,8 +5153,35 @@
     }
 }
 
+/* Стили для индикатора загрузки в гриде */
+.search-status.loading-status {
+    grid-column: 1 / -1; /* Занимает всю ширину грида */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 20px;
+    margin: 20px 0;
+}
+
+.search-status.loading-status .loading-spinner {
+    margin: 0 auto 20px auto;
+}
+
+.search-status.loading-status h3 {
+    margin: 0 0 10px 0;
+    color: var(--text-primary);
+}
+
+.search-status.loading-status p {
+    margin: 0;
+    color: var(--text-secondary);
+}
+
 @media (max-width: 768px) {
-    .results-grid {
+    .results-grid,
+    .search-grid {
         grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
         gap: 12px;
     }
@@ -5171,5 +5198,9 @@
     
     .user-nickname {
         font-size: 14px;
+    }
+    
+    .search-status.loading-status {
+        padding: 30px 15px;
     }
 }
