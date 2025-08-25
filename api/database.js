@@ -1004,26 +1004,33 @@ async function purchaseGift(pool, req) {
 
         const gift = giftResult.rows[0];
 
-        // Проверяем баланс отправителя
-        const walletResult = await client.query(
-            'SELECT balance FROM user_wallets WHERE session_id = $1',
-            [sender_session_id]
-        );
+        // Проверяем, является ли отправитель системным пользователем
+        const isSystemSender = sender_session_id === 'SYSTEM' || sender_user_id === 'SYSTEM';
 
-        if (walletResult.rows.length === 0) {
-            throw new Error('Sender wallet not found');
+        if (!isSystemSender) {
+            // Проверяем баланс отправителя только для обычных пользователей
+            const walletResult = await client.query(
+                'SELECT balance FROM user_wallets WHERE session_id = $1',
+                [sender_session_id]
+            );
+
+            if (walletResult.rows.length === 0) {
+                throw new Error('Sender wallet not found');
+            }
+
+            const currentBalance = parseFloat(walletResult.rows[0].balance);
+            if (currentBalance < gift.price_credits) {
+                throw new Error('Insufficient credits');
+            }
+
+            // Списываем кредиты с отправителя
+            await client.query(
+                'UPDATE user_wallets SET balance = balance - $1, updated_at = CURRENT_TIMESTAMP WHERE session_id = $2',
+                [gift.price_credits, sender_session_id]
+            );
+        } else {
+            console.log('[DB] System gift - skipping wallet check and credit deduction');
         }
-
-        const currentBalance = parseFloat(walletResult.rows[0].balance);
-        if (currentBalance < gift.price_credits) {
-            throw new Error('Insufficient credits');
-        }
-
-        // Списываем кредиты с отправителя
-        await client.query(
-            'UPDATE user_wallets SET balance = balance - $1, updated_at = CURRENT_TIMESTAMP WHERE session_id = $2',
-            [gift.price_credits, sender_session_id]
-        );
 
         // Создаем запись о подарке
         const userGiftResult = await client.query(
@@ -1062,13 +1069,15 @@ async function purchaseGift(pool, req) {
              gift_id, sender_user_id]
         );
 
-        // Записываем транзакцию кошелька
-        await client.query(
-            `INSERT INTO wallet_transactions 
-             (wallet_id, user_id, transaction_type, amount, description, status)
-             VALUES ((SELECT id FROM user_wallets WHERE session_id = $1), $2, 'purchase', $3, $4, 'completed')`,
-            [sender_session_id, sender_user_id, -gift.price_credits, `Gift purchase: ${gift.name}`]
-        );
+        // Записываем транзакцию кошелька только для обычных пользователей
+        if (!isSystemSender) {
+            await client.query(
+                `INSERT INTO wallet_transactions 
+                 (wallet_id, user_id, transaction_type, amount, description, status)
+                 VALUES ((SELECT id FROM user_wallets WHERE session_id = $1), $2, 'purchase', $3, $4, 'completed')`,
+                [sender_session_id, sender_user_id, -gift.price_credits, `Gift purchase: ${gift.name}`]
+            );
+        }
 
         await client.query('COMMIT');
 
