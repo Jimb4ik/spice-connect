@@ -371,12 +371,12 @@ class AuthManager {
    * Redirect user to profile
    */
   redirectToProfile() {
-    console.log('[AUTH] redirectToProfile() called, scheduling redirect in 800ms');
-    // Small delay to ensure UI updates are complete
+    console.log('[AUTH] redirectToProfile() called, scheduling redirect in 1200ms');
+    // Longer delay to ensure auth state is properly saved
     setTimeout(() => {
-      console.log('[AUTH] Executing redirect to dashboard.html NOW');
+      console.log('[AUTH] Executing redirect to main.html NOW');
       window.location.href = 'main.html';
-    }, 800);
+    }, 1200);
   }
 
   /**

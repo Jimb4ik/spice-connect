@@ -552,36 +552,14 @@ body {
   overflow: hidden;
 }
 
-.step-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: var(--gradient-primary);
-}
+/* Removed red line */
 
 .step-card:hover {
   transform: translateY(-10px);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
 }
 
-.step-number {
-  position: absolute;
-  top: -15px;
-  right: 20px;
-  width: 40px;
-  height: 40px;
-  background: var(--gradient-primary);
-  color: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  font-size: 18px;
-}
+/* Removed step numbers */
 
 .step-icon {
   font-size: 48px;
@@ -599,112 +577,7 @@ body {
   line-height: 1.6;
 }
 
-/* Download App Section */
-.download-app {
-  padding: 100px 0;
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-  color: white;
-}
-
-.download-content {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 60px;
-  align-items: center;
-}
-
-.download-text h2 {
-  font-size: 2.5rem;
-  margin-bottom: 20px;
-  color: white;
-}
-
-.download-text p {
-  font-size: 1.2rem;
-  margin-bottom: 30px;
-  opacity: 0.9;
-}
-
-.app-features {
-  margin-bottom: 40px;
-}
-
-.feature-item {
-  padding: 8px 0;
-  font-size: 1.1rem;
-  opacity: 0.9;
-}
-
-.download-buttons {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-
-.btn-download {
-  background: rgba(255, 255, 255, 0.2);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  color: white;
-  padding: 15px 30px;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-weight: 600;
-  backdrop-filter: blur(10px);
-}
-
-.btn-download:hover {
-  background: rgba(255, 255, 255, 0.3);
-  border-color: rgba(255, 255, 255, 0.5);
-  transform: translateY(-2px);
-}
-
-.phone-mockup {
-  width: 250px;
-  height: 500px;
-  background: #1a1a1a;
-  border-radius: 30px;
-  padding: 20px;
-  margin: 0 auto;
-  position: relative;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-}
-
-.phone-screen {
-  width: 100%;
-  height: 100%;
-  background: white;
-  border-radius: 20px;
-  overflow: hidden;
-  position: relative;
-}
-
-.app-preview {
-  padding: 20px;
-  height: 100%;
-  background: linear-gradient(135deg, #ff4458 0%, #6c5ce7 100%);
-}
-
-.preview-header {
-  color: white;
-  font-size: 24px;
-  font-weight: bold;
-  text-align: center;
-  margin-bottom: 30px;
-}
-
-.preview-content {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.preview-card {
-  height: 80px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
-  backdrop-filter: blur(10px);
-}
+/* Download App Section - Removed */
 
 /* Live Profiles Section */
 .live-profiles {

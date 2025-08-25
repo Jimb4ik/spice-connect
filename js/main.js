@@ -1148,22 +1148,22 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('[MAIN] DOM loaded, initializing MainDashboard...');
     
     // Wait for auth manager to be ready
-    function initMainDashboard(attempt = 1, maxAttempts = 10) {
+    function initMainDashboard(attempt = 1, maxAttempts = 20) {
         if (window.authManager && window.authManager.isLoggedIn) {
             console.log('[MAIN] AuthManager ready, creating MainDashboard instance');
             window.mainDashboard = new MainDashboard();
             window.mainDashboard.init();
         } else if (attempt < maxAttempts) {
             console.log(`[MAIN] AuthManager not ready, retrying... (${attempt}/${maxAttempts})`);
-            setTimeout(() => initMainDashboard(attempt + 1, maxAttempts), 500);
+            setTimeout(() => initMainDashboard(attempt + 1, maxAttempts), 1000);
         } else {
             console.error('[MAIN] Failed to initialize MainDashboard - AuthManager not ready');
             window.location.href = 'index.html';
         }
     }
     
-    // Start initialization
-    setTimeout(() => initMainDashboard(), 100);
+    // Start initialization with longer delay after registration
+    setTimeout(() => initMainDashboard(), 500);
 });
 
 // Cleanup on page unload
