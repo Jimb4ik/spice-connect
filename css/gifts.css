@@ -17,6 +17,7 @@
     font-size: 1.1rem;
     color: rgba(255, 255, 255, 0.9);
     margin: 0;
+    text-align: center;
 }
 
 /* ============ GIFTS STATS SECTION ============ */
@@ -229,8 +230,14 @@
 }
 
 .empty-icon {
-    font-size: 3rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     margin-bottom: 16px;
+}
+
+.empty-icon svg {
+    opacity: 0.6;
 }
 
 .inventory-empty h3,

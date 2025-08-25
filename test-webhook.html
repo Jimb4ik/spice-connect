@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Webhook - Networx Payment</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, textarea, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Networx Webhook</h1>
+        <p>This tool simulates a webhook notification from Networx Payment Gateway to test the payment processing.</p>
+        
+        <form id="webhookForm">
+            <div class="form-group">
+                <label for="shop_id">Shop ID:</label>
+                <input type="text" id="shop_id" name="shop_id" value="test_shop_123" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="order_id">Order ID:</label>
+                <input type="text" id="order_id" name="order_id" value="credits_test_session_1234567890" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="transaction_id">Transaction ID:</label>
+                <input type="text" id="transaction_id" name="transaction_id" value="txn_test_1234567890" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="status">Status:</label>
+                <select id="status" name="status" required>
+                    <option value="success">Success</option>
+                    <option value="declined">Declined</option>
+                    <option value="pending">Pending</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="amount">Amount (in cents):</label>
+                <input type="number" id="amount" name="amount" value="2100" required>
+                <small>Example: 2100 = $21.00</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="currency">Currency:</label>
+                <select id="currency" name="currency" required>
+                    <option value="USD">USD</option>
+                    <option value="EUR">EUR</option>
+                    <option value="GBP">GBP</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="signature">Signature (leave empty for auto-generation):</label>
+                <input type="text" id="signature" name="signature" placeholder="Will be auto-generated">
+            </div>
+            
+            <div class="form-group">
+                <label for="custom_parameters">Custom Parameters (JSON):</label>
+                <textarea id="custom_parameters" name="custom_parameters" rows="4" placeholder='{"session_id": "test_session", "credits": 100, "amount": 21, "currency": "USD"}'></textarea>
+            </div>
+            
+            <button type="submit">🚀 Send Test Webhook</button>
+        </form>
+        
+        <div id="result" class="result" style="display: none;"></div>
+    </div>
+
+    <script>
+        document.getElementById('webhookForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const webhookData = {};
+            
+            // Collect form data
+            for (let [key, value] of formData.entries()) {
+                if (key === 'custom_parameters' && value.trim()) {
+                    try {
+                        webhookData[key] = JSON.parse(value);
+                    } catch (err) {
+                        alert('Invalid JSON in custom parameters');
+                        return;
+                    }
+                } else if (key === 'amount') {
+                    webhookData[key] = parseInt(value);
+                } else {
+                    webhookData[key] = value;
+                }
+            }
+            
+            // Auto-generate signature if empty
+            if (!webhookData.signature) {
+                webhookData.signature = 'test_signature_' + Date.now();
+            }
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.textContent = 'Sending webhook...';
+            resultDiv.className = 'result';
+            
+            try {
+                console.log('Sending webhook data:', webhookData);
+                
+                const response = await fetch('/api/networx-payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(webhookData)
+                });
+                
+                const result = await response.json();
+                
+                resultDiv.className = 'result ' + (result.success ? 'success' : 'error');
+                resultDiv.textContent = JSON.stringify(result, null, 2);
+                
+                if (result.success) {
+                    console.log('✅ Webhook processed successfully:', result);
+                } else {
+                    console.error('❌ Webhook failed:', result);
+                }
+                
+            } catch (error) {
+                console.error('Error sending webhook:', error);
+                resultDiv.className = 'result error';
+                resultDiv.textContent = 'Error: ' + error.message;
+            }
+        });
+        
+        // Auto-fill custom parameters when order_id changes
+        document.getElementById('order_id').addEventListener('input', function(e) {
+            const orderId = e.target.value;
+            const parts = orderId.split('_');
+            
+            if (parts.length >= 3 && parts[0] === 'credits') {
+                const sessionId = parts[1] + '_' + parts[2];
+                const amount = parseFloat(document.getElementById('amount').value) / 100;
+                const currency = document.getElementById('currency').value;
+                
+                // Calculate credits based on currency rates
+                const creditRates = {
+                    'EUR': 0.21,
+                    'USD': 0.23,
+                    'GBP': 0.18
+                };
+                const rate = creditRates[currency] || creditRates['USD'];
+                const credits = Math.floor(amount / rate);
+                
+                const customParams = {
+                    session_id: sessionId,
+                    credits: credits,
+                    amount: amount,
+                    currency: currency
+                };
+                
+                document.getElementById('custom_parameters').value = JSON.stringify(customParams, null, 2);
+            }
+        });
+        
+        // Trigger auto-fill on page load
+        document.getElementById('order_id').dispatchEvent(new Event('input'));
+    </script>
+</body>
+</html>

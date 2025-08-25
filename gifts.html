@@ -106,35 +106,60 @@
             <h1 class="page-title">
                 Your Gifts
             </h1>
-            <p class="page-subtitle" style="text-align: center;">Manage your gift inventory and monetization</p>
+            <p class="page-subtitle">Manage your gift inventory and monetization</p>
         </div>
 
         <!-- Статистика подарков -->
         <div class="gifts-stats-section fade-in-up">
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-icon">📥</div>
+                    <div class="stat-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19 9L12 2L5 9V20C5 20.5304 5.21071 21.0391 5.58579 21.4142C5.96086 21.7893 6.46957 22 7 22H17C17.5304 22 18.0391 21.7893 18.4142 21.4142C18.7893 21.0391 19 20.5304 19 20V9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M9 12H15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M12 9V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
                     <div class="stat-info">
                         <div class="stat-number" id="receivedGiftsCount">0</div>
                         <div class="stat-label">Received Gifts</div>
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon">📤</div>
+                    <div class="stat-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M20 12L14 6V10H4V14H14V18L20 12Z" fill="currentColor"/>
+                        </svg>
+                    </div>
                     <div class="stat-info">
                         <div class="stat-number" id="sentGiftsCount">0</div>
                         <div class="stat-label">Sent Gifts</div>
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon"></div>
+                    <div class="stat-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                            <path d="M12 6V12L16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M8 15C8.5 16 9.5 17 12 17C14.5 17 15.5 16 16 15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
                     <div class="stat-info">
                         <div class="stat-number" id="totalEarnings">€0</div>
                         <div class="stat-label">Total Earnings</div>
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon"></div>
+                    <div class="stat-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2" stroke="currentColor" stroke-width="2"/>
+                            <line x1="8" y1="21" x2="16" y2="21" stroke="currentColor" stroke-width="2"/>
+                            <line x1="12" y1="17" x2="12" y2="21" stroke="currentColor" stroke-width="2"/>
+                            <circle cx="12" cy="10" r="3" stroke="currentColor" stroke-width="2"/>
+                            <path d="M10.5 8.5L13.5 11.5" stroke="currentColor" stroke-width="2"/>
+                            <path d="M13.5 8.5L10.5 11.5" stroke="currentColor" stroke-width="2"/>
+                        </svg>
+                    </div>
                     <div class="stat-info">
                         <div class="stat-number" id="availableValue">€0</div>
                         <div class="stat-label">Available Value</div>
@@ -218,7 +243,15 @@
             </div>
 
             <div class="history-empty" id="historyEmpty" style="display: none;">
-                <div class="empty-icon">📜</div>
+                <div class="empty-icon">
+                    <svg width=\"48\" height=\"48\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">
+                        <path d=\"M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z\" stroke=\"#999\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>
+                        <polyline points=\"14,2 14,8 20,8\" stroke=\"#999\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>
+                        <line x1=\"16\" y1=\"13\" x2=\"8\" y2=\"13\" stroke=\"#999\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>
+                        <line x1=\"16\" y1=\"17\" x2=\"8\" y2=\"17\" stroke=\"#999\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>
+                        <polyline points=\"10,9 9,9 8,9\" stroke=\"#999\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>
+                    </svg>
+                </div>
                 <h3>No transactions found</h3>
                 <p>Your gift history will appear here</p>
             </div>

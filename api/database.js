@@ -725,6 +725,7 @@ async function createWallet(pool, req) {
 async function addWalletTransaction(pool, req) {
     const { 
         user_id, 
+        session_id,
         transaction_type, 
         amount, 
         description, 
@@ -732,29 +733,75 @@ async function addWalletTransaction(pool, req) {
         payment_reference 
     } = req.body;
 
-    if (!user_id || !transaction_type || !amount) {
+    if ((!user_id && !session_id) || !transaction_type || !amount) {
         return {
             success: false,
-            error: 'user_id, transaction_type and amount are required'
+            error: 'user_id or session_id, transaction_type and amount are required'
         };
     }
 
     try {
-        // Получаем кошелек пользователя
-        const walletResult = await pool.query(
-            'SELECT * FROM user_wallets WHERE user_id = $1',
-            [user_id]
-        );
+        // Получаем кошелек пользователя (сначала по user_id, потом по session_id)
+        let walletResult;
+        if (user_id) {
+            walletResult = await pool.query(
+                'SELECT * FROM user_wallets WHERE user_id = $1',
+                [user_id]
+            );
+        }
+        
+        // Если не найден по user_id или user_id не передан, ищем по session_id
+        if ((!walletResult || walletResult.rows.length === 0) && session_id) {
+            walletResult = await pool.query(
+                'SELECT * FROM user_wallets WHERE session_id = $1',
+                [session_id]
+            );
+        }
 
-        if (walletResult.rows.length === 0) {
-            return {
-                success: false,
-                error: 'Wallet not found'
-            };
+        if (!walletResult || walletResult.rows.length === 0) {
+            console.log('[DB] Wallet not found, creating new wallet for session_id:', session_id);
+            
+            // Создаем новый кошелек если не найден
+            if (session_id) {
+                const createWalletResult = await pool.query(
+                    `INSERT INTO user_wallets (user_id, session_id, balance, currency)
+                     VALUES ($1, $2, 0.00, 'USD')
+                     RETURNING *`,
+                    [session_id, session_id] // Используем session_id как user_id для совместимости
+                );
+                
+                if (createWalletResult.rows.length > 0) {
+                    walletResult = createWalletResult;
+                    console.log('[DB] New wallet created:', createWalletResult.rows[0]);
+                } else {
+                    console.error('[DB] Failed to create wallet');
+                    return {
+                        success: false,
+                        error: 'Failed to create wallet'
+                    };
+                }
+            } else {
+                console.error('[DB] Cannot create wallet without session_id');
+                return {
+                    success: false,
+                    error: 'Wallet not found and cannot create without session_id'
+                };
+            }
         }
 
         const wallet = walletResult.rows[0];
         const transactionAmount = parseFloat(amount);
+        const effectiveUserId = user_id || wallet.user_id; // Используем переданный user_id или из кошелька
+
+        console.log('[DB] Adding transaction:', {
+            wallet_id: wallet.id,
+            user_id: effectiveUserId,
+            transaction_type,
+            amount: transactionAmount,
+            description,
+            payment_method,
+            payment_reference
+        });
 
         // Добавляем транзакцию
         const transactionResult = await pool.query(
@@ -762,7 +809,7 @@ async function addWalletTransaction(pool, req) {
              (wallet_id, user_id, transaction_type, amount, description, payment_method, payment_reference)
              VALUES ($1, $2, $3, $4, $5, $6, $7)
              RETURNING *`,
-            [wallet.id, user_id, transaction_type, transactionAmount, description, payment_method, payment_reference]
+            [wallet.id, effectiveUserId, transaction_type, transactionAmount, description, payment_method, payment_reference]
         );
 
         // Обновляем баланс кошелька
@@ -777,6 +824,14 @@ async function addWalletTransaction(pool, req) {
             'UPDATE user_wallets SET balance = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
             [newBalance, wallet.id]
         );
+
+        console.log('[DB] Transaction completed successfully:', {
+            transaction_id: transactionResult.rows[0].id,
+            old_balance: wallet.balance,
+            new_balance: newBalance,
+            amount: transactionAmount,
+            type: transaction_type
+        });
 
         return {
             success: true,
