@@ -2662,6 +2662,74 @@
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
+/* Skeleton Loading для фотографий на странице matches */
+.photo-skeleton {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 0; /* Прямоугольная форма как у карточек */
+  position: relative;
+  overflow: hidden;
+}
+
+/* Shimmer анимация */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Плавные переходы для загрузки фото */
+.match-card-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.match-card-photo img.loaded {
+  opacity: 1;
+}
+
+/* Скрытие skeleton при загрузке фото */
+.match-card-photo.photo-loaded .photo-skeleton {
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
+}
+
+/* Улучшенный placeholder с skeleton эффектом */
+.photo-placeholder.skeleton-mode {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.photo-placeholder.skeleton-mode span {
+  display: none; /* Скрываем букву во время skeleton загрузки */
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+  .photo-skeleton {
+    border-radius: 0;
+  }
+  
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+}
+
 .match-badge {
   position: absolute;
   top: 12px;

@@ -541,10 +541,10 @@
 
                         const cardHtml = `
                 <div class="match-card ${isNew ? 'new-match' : ''}" data-match-id="${match.matched_user_id}">
-                    <div class="match-card-photo">
-                        <img id="photo-${match.matched_user_id}" src="${photoUrl || ''}" alt="${name}" style="display: ${photoUrl ? 'block' : 'none'};" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                        <div class="photo-placeholder" style="display: ${photoUrl ? 'none' : 'flex'};">
-                            <span>${firstLetter}</span>
+                    <div class="match-card-photo" id="photo-container-${match.matched_user_id}">
+                        <img id="photo-${match.matched_user_id}" src="${photoUrl || ''}" alt="${name}" style="display: none;" onload="handlePhotoLoad(this, '${match.matched_user_id}')" onerror="handlePhotoError(this, '${match.matched_user_id}', '${firstLetter}')">
+                        <div class="photo-placeholder skeleton-mode" id="placeholder-${match.matched_user_id}">
+                            <span style="display: none;">${firstLetter}</span>
                         </div>
                         ${isNew ? '<div class="match-badge">NEW</div>' : ''}
                     </div>
@@ -572,6 +572,14 @@
                         tryLoadUserPhoto(match.matched_user_id, imgElement);
                     }
                 }, 100);
+            } else {
+                // Если фото уже есть, загружаем его сразу
+                setTimeout(() => {
+                    const imgElement = document.getElementById(`photo-${match.matched_user_id}`);
+                    if (imgElement && photoUrl) {
+                        imgElement.src = photoUrl;
+                    }
+                }, 50);
             }
             
             return cardHtml;
@@ -780,12 +788,7 @@
                     if (photoUrl) {
                         console.log('[MATCHES] Found high-quality photo URL:', photoUrl);
                         imgElement.src = photoUrl;
-                        imgElement.style.display = 'block';
-                        imgElement.onerror = function() {
-                            console.warn('[MATCHES] High-quality photo failed to load, keeping placeholder');
-                            this.style.display = 'none';
-                            this.nextElementSibling.style.display = 'flex';
-                        };
+                        // handlePhotoLoad будет вызван автоматически через onload
                         return true;
                     }
                 }
@@ -854,6 +857,54 @@
             } catch (error) {
                 console.error('[MATCHES] Error getting API key:', error);
                 return '';
+            }
+        }
+
+        // Обработчик успешной загрузки фото
+        function handlePhotoLoad(imgElement, userId) {
+            console.log('[MATCHES] Photo loaded successfully for user:', userId);
+            
+            const container = document.getElementById(`photo-container-${userId}`);
+            const placeholder = document.getElementById(`placeholder-${userId}`);
+            
+            if (container && placeholder && imgElement) {
+                // Добавляем класс loaded для плавного появления
+                imgElement.classList.add('loaded');
+                imgElement.style.display = 'block';
+                
+                // Скрываем skeleton placeholder с анимацией
+                placeholder.style.opacity = '0';
+                placeholder.style.transition = 'opacity 0.3s ease-out';
+                
+                // Полностью удаляем placeholder через 300ms
+                setTimeout(() => {
+                    if (placeholder.parentNode) {
+                        placeholder.style.display = 'none';
+                    }
+                    container.classList.add('photo-loaded');
+                }, 300);
+            }
+        }
+
+        // Обработчик ошибки загрузки фото
+        function handlePhotoError(imgElement, userId, firstLetter) {
+            console.log('[MATCHES] Photo failed to load for user:', userId, 'showing letter placeholder');
+            
+            const placeholder = document.getElementById(`placeholder-${userId}`);
+            
+            if (placeholder) {
+                // Убираем skeleton режим и показываем букву
+                placeholder.classList.remove('skeleton-mode');
+                placeholder.style.background = 'linear-gradient(135deg, #ff6b9d, #ff8a9b)';
+                
+                const letterSpan = placeholder.querySelector('span');
+                if (letterSpan) {
+                    letterSpan.style.display = 'block';
+                    letterSpan.textContent = firstLetter;
+                }
+                
+                // Скрываем img элемент
+                imgElement.style.display = 'none';
             }
         }
 
