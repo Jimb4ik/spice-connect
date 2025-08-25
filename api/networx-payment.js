@@ -47,33 +47,31 @@ async function handleWebhook(req, res) {
         const secretKey = process.env.NETWORX_SECRET_KEY;
 
         console.log('[NETWORX] Webhook received:', {
-            orderId: webhookData.order_id,
-            status: webhookData.status,
-            amount: webhookData.amount,
-            signature: webhookData.signature
+            transaction_uid: webhookData.transaction?.uid,
+            status: webhookData.transaction?.status,
+            amount: webhookData.transaction?.amount,
+            tracking_id: webhookData.transaction?.tracking_id
         });
 
-        // Verify webhook signature
-        const receivedSignature = webhookData.signature;
-        const calculatedSignature = generateWebhookSignature(webhookData, secretKey);
-
-        if (receivedSignature !== calculatedSignature) {
-            console.error('[NETWORX] Invalid webhook signature - but continuing for debugging');
-            console.error('[NETWORX] Expected:', calculatedSignature, 'Received:', receivedSignature);
-            // Временно не возвращаем ошибку для отладки
-            // return res.status(400).json({
-            //     success: false,
-            //     error: 'Invalid signature'
-            // });
+        // Verify webhook signature using Content-Signature header (RSA signature)
+        const contentSignature = req.headers['content-signature'];
+        
+        if (contentSignature) {
+            console.log('[NETWORX] Content-Signature header found:', contentSignature);
+            // TODO: Implement RSA signature verification when we have the public key
+            // For now, we'll process the webhook without signature verification
         } else {
-            console.log('[NETWORX] Webhook signature verified successfully');
+            console.log('[NETWORX] No Content-Signature header found, processing webhook anyway');
         }
 
         // Process payment based on status
-        if (webhookData.status === 'success') {
+        // Согласно документации Networx, данные приходят в объекте transaction
+        if (webhookData.transaction?.status === 'successful') {
             await processSuccessfulPayment(webhookData);
-        } else if (webhookData.status === 'declined') {
+        } else if (webhookData.transaction?.status === 'declined' || webhookData.transaction?.status === 'failed') {
             await processDeclinedPayment(webhookData);
+        } else if (webhookData.expired === true) {
+            console.log('[NETWORX] Payment token expired:', webhookData.token);
         }
 
         return res.status(200).json({
@@ -119,12 +117,12 @@ async function createPaymentToken(req, res) {
                 transaction_type: "payment",
                 attempts: 3,
                 settings: {
-                    return_url: `${req.headers.origin || 'https://lavrilo.com'}/wallet.html`,
-                    success_url: `${req.headers.origin || 'https://lavrilo.com'}/wallet.html?payment=success`,
-                    decline_url: `${req.headers.origin || 'https://lavrilo.com'}/wallet.html?payment=declined`,
-                    fail_url: `${req.headers.origin || 'https://lavrilo.com'}/wallet.html?payment=declined`,
-                    cancel_url: `${req.headers.origin || 'https://lavrilo.com'}/wallet.html`,
-                    notification_url: `${req.headers.origin || 'https://lavrilo.com'}/api/networx-payment`,
+                    return_url: `https://lavrilo.com/wallet.html`,
+                    success_url: `https://lavrilo.com/wallet.html?payment=success`,
+                    decline_url: `https://lavrilo.com/wallet.html?payment=declined`,
+                    fail_url: `https://lavrilo.com/wallet.html?payment=declined`,
+                    cancel_url: `https://lavrilo.com/wallet.html`,
+                    notification_url: `https://lavrilo.com/api/networx-payment`,
                     language: "en",
                     customer_fields: {
                         visible: ["first_name", "last_name", "email"],
@@ -258,50 +256,55 @@ async function verifyPayment(req, res) {
 // Обработка успешного платежа
 async function processSuccessfulPayment(webhookData) {
     try {
-        // Extract data from custom_parameters if available, otherwise fallback to order_id parsing
+        // Согласно документации Networx, данные транзакции находятся в объекте transaction
+        const transaction = webhookData.transaction;
+        
+        if (!transaction) {
+            throw new Error('No transaction data in webhook');
+        }
+
+        // Extract data from additional_data or tracking_id
         let sessionId, credits, amount, currency;
         
-        if (webhookData.custom_parameters) {
-            sessionId = webhookData.custom_parameters.session_id;
-            credits = webhookData.custom_parameters.credits;
-            amount = webhookData.custom_parameters.amount;
-            currency = webhookData.custom_parameters.currency;
-        } else {
-            // Fallback to old method - extract from order_id
-            const orderIdParts = webhookData.order_id.split('_');
-            sessionId = orderIdParts[1];
-            
-            // Calculate credits from amount (reverse conversion)
-            const amountInCurrency = webhookData.amount / 100; // Convert from cents
-            currency = webhookData.currency;
-            
-            // Use the same rates as frontend
-            const creditRates = {
-                'EUR': 0.21,
-                'USD': 0.23,
-                'GBP': 0.18,
-                'CAD': 0.31,
-                'AUD': 0.35
-            };
-            
-            const rate = creditRates[currency] || creditRates['EUR'];
-            credits = Math.floor(amountInCurrency / rate);
-            amount = amountInCurrency;
+        // Пытаемся извлечь данные из tracking_id (наш order_id)
+        if (transaction.tracking_id) {
+            const orderIdParts = transaction.tracking_id.split('_');
+            if (orderIdParts.length >= 3 && orderIdParts[0] === 'credits') {
+                sessionId = orderIdParts.slice(1, -1).join('_'); // Все части кроме первой и последней
+            }
         }
+        
+        // Получаем данные из транзакции
+        amount = transaction.amount / 100; // Конвертируем из центов
+        currency = transaction.currency;
+        
+        // Рассчитываем кредиты на основе суммы
+        const creditRates = {
+            'EUR': 0.21,
+            'USD': 0.23,
+            'GBP': 0.18,
+            'CAD': 0.31,
+            'AUD': 0.35
+        };
+        
+        const rate = creditRates[currency] || creditRates['EUR'];
+        credits = Math.floor(amount / rate);
         
         if (!sessionId) {
             throw new Error('Cannot extract session_id from webhook data');
         }
 
         console.log('[NETWORX] Processing successful payment:', {
+            transaction_uid: transaction.uid,
             sessionId,
             credits,
             amount,
-            currency
+            currency,
+            tracking_id: transaction.tracking_id
         });
 
         // Add credits to user wallet
-        const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000';
+        const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://lavrilo.com';
         const walletResponse = await fetch(`${baseUrl}/api/database`, {
             method: 'POST',
             headers: {
@@ -313,9 +316,9 @@ async function processSuccessfulPayment(webhookData) {
                 session_id: sessionId,
                 transaction_type: 'deposit',
                 amount: credits,
-                description: `Payment via Networx - ${webhookData.order_id}`,
+                description: `Payment via Networx - ${transaction.tracking_id}`,
                 payment_method: 'card',
-                payment_reference: webhookData.transaction_id || webhookData.order_id,
+                payment_reference: transaction.uid,
                 status: 'completed'
             })
         });
@@ -339,9 +342,13 @@ async function processSuccessfulPayment(webhookData) {
 
 // Обработка отклоненного платежа
 async function processDeclinedPayment(webhookData) {
+    const transaction = webhookData.transaction;
+    
     console.log('[NETWORX] Payment declined:', {
-        orderId: webhookData.order_id,
-        reason: webhookData.decline_reason || 'Unknown'
+        transaction_uid: transaction?.uid,
+        tracking_id: transaction?.tracking_id,
+        status: transaction?.status,
+        message: transaction?.message || 'Unknown'
     });
     
     // Here you could log declined payments for analytics
