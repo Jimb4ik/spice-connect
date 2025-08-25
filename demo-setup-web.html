@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Настройка демо-пользователей - Lavrilo</title>
+    <link rel="stylesheet" href="css/app-styles.css">
+    <style>
+        .setup-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 30px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .setup-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .setup-header h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .demo-users {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .user-info {
+            padding: 15px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .user-info h3 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        
+        .user-info p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin: 5px 0;
+        }
+        
+        .setup-actions {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .setup-btn {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .setup-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .setup-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .setup-log {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .setup-log.show {
+            display: block;
+        }
+        
+        .log-entry {
+            margin: 5px 0;
+            padding: 2px 0;
+        }
+        
+        .log-success { color: #28a745; }
+        .log-error { color: #dc3545; }
+        .log-info { color: #007bff; }
+        .log-warning { color: #ffc107; }
+        
+        .api-key-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .api-key-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        
+        .steps-list {
+            text-align: left;
+            margin: 20px 0;
+        }
+        
+        .steps-list li {
+            margin: 8px 0;
+            color: var(--text-secondary);
+        }
+        
+        .step-complete {
+            color: var(--success-color) !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="setup-container">
+        <div class="setup-header">
+            <h1>🔧 Настройка демо-пользователей</h1>
+            <p>Настройка связей между демо-аккаунтами для тестирования матчинга</p>
+        </div>
+        
+        <div class="demo-users">
+            <div class="user-info">
+                <h3>👤 DannyGrid1988</h3>
+                <p><strong>Пароль:</strong> xigryf-jorFet-dyfry3</p>
+                <p>Основной пользователь</p>
+            </div>
+            <div class="user-info">
+                <h3>👤 Hoopsere</h3>
+                <p><strong>Пароль:</strong> vyrpu8-maCcex-rabsad</p>
+                <p>Станет матчем, контактом и другом</p>
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="apiKey">API Ключ:</label>
+            <input type="password" id="apiKey" class="api-key-input" placeholder="Введите ваш API ключ...">
+        </div>
+        
+        <div class="steps-list">
+            <h3>Этапы настройки:</h3>
+            <ol>
+                <li id="step1">Авторизация пользователей</li>
+                <li id="step2">Добавление в контакты</li>
+                <li id="step3">Добавление в друзья</li>
+                <li id="step4">Создание матча</li>
+            </ol>
+        </div>
+        
+        <div class="setup-actions">
+            <button class="setup-btn" id="setupBtn" onclick="startSetup()">
+                🚀 Начать настройку
+            </button>
+        </div>
+        
+        <div class="setup-log" id="setupLog">
+            <div id="logContent"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'https://dev2018.de5a7.com';
+        
+        const users = {
+            danny: {
+                username: 'DannyGrid1988',
+                password: 'xigryf-jorFet-dyfry3',
+                sessionId: null,
+                userId: null
+            },
+            hoopsere: {
+                username: 'Hoopsere', 
+                password: 'vyrpu8-maCcex-rabsad',
+                sessionId: null,
+                userId: null
+            }
+        };
+        
+        function log(message, type = 'info') {
+            const logContent = document.getElementById('logContent');
+            const logDiv = document.getElementById('setupLog');
+            
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `${new Date().toLocaleTimeString()} - ${message}`;
+            
+            logContent.appendChild(entry);
+            logDiv.classList.add('show');
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        function markStepComplete(stepId) {
+            const step = document.getElementById(stepId);
+            if (step) {
+                step.classList.add('step-complete');
+                step.textContent += ' ✅';
+            }
+        }
+        
+        async function loginUser(username, password, apiKey) {
+            try {
+                log(`🔐 Авторизация пользователя: ${username}`);
+                
+                const response = await fetch(`${API_BASE_URL}/ajax_api/login?api_key=${apiKey}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        pseudo: username,
+                        password: password
+                    })
+                });
+
+                const result = await response.json();
+                log(`📊 Результат авторизации ${username}: ${JSON.stringify(result)}`);
+
+                if (result.result === 'ok' && result.session_id) {
+                    log(`✅ Пользователь ${username} успешно авторизован`, 'success');
+                    return {
+                        sessionId: result.session_id,
+                        userId: result.id,
+                        success: true
+                    };
+                } else {
+                    log(`❌ Ошибка авторизации ${username}: ${JSON.stringify(result)}`, 'error');
+                    return { success: false, error: result };
+                }
+            } catch (error) {
+                log(`❌ Ошибка при авторизации ${username}: ${error.message}`, 'error');
+                return { success: false, error: error.message };
+            }
+        }
+        
+        async function addContact(fromSessionId, toUserId, apiKey) {
+            try {
+                log(`👥 Добавление в контакты: ${toUserId}`);
+                
+                const response = await fetch(`${API_BASE_URL}/ajax_api/setContact?api_key=${apiKey}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        session_id: fromSessionId,
+                        id_user: toUserId,
+                        action: 'add'
+                    })
+                });
+
+                const result = await response.json();
+                log(`📊 Результат добавления в контакты: ${JSON.stringify(result)}`);
+                
+                if (result.result === 'ok') {
+                    log(`✅ Успешно добавлен в контакты`, 'success');
+                } else {
+                    log(`⚠️ Возможная ошибка добавления в контакты: ${JSON.stringify(result)}`, 'warning');
+                }
+                
+                return result;
+            } catch (error) {
+                log(`❌ Ошибка добавления в контакты: ${error.message}`, 'error');
+                return { success: false, error: error.message };
+            }
+        }
+        
+        async function addFriend(fromSessionId, toUserId, apiKey) {
+            try {
+                log(`🤝 Добавление в друзья: ${toUserId}`);
+                
+                const response = await fetch(`${API_BASE_URL}/ajax_api/setFriend?api_key=${apiKey}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        session_id: fromSessionId,
+                        id_user: toUserId,
+                        action: 'add'
+                    })
+                });
+
+                const result = await response.json();
+                log(`📊 Результат добавления в друзья: ${JSON.stringify(result)}`);
+                
+                if (result.result === 'ok') {
+                    log(`✅ Успешно добавлен в друзья`, 'success');
+                } else {
+                    log(`⚠️ Возможная ошибка добавления в друзья: ${JSON.stringify(result)}`, 'warning');
+                }
+                
+                return result;
+            } catch (error) {
+                log(`❌ Ошибка добавления в друзья: ${error.message}`, 'error');
+                return { success: false, error: error.message };
+            }
+        }
+        
+        async function createMatch(fromSessionId, toUserId, apiKey) {
+            try {
+                log(`💖 Создание матча (лайк): ${toUserId}`);
+                
+                const response = await fetch(`${API_BASE_URL}/index_api/match?api_key=${apiKey}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        session_id: fromSessionId,
+                        action: 'set_like',
+                        id_user: toUserId
+                    })
+                });
+
+                const result = await response.json();
+                log(`📊 Результат создания матча: ${JSON.stringify(result)}`);
+                
+                if (result.result === 'match') {
+                    log(`🎉 МАТЧ СОЗДАН!`, 'success');
+                } else if (result.result === 'ok') {
+                    log(`✅ Лайк отправлен`, 'success');
+                } else {
+                    log(`⚠️ Возможная ошибка создания матча: ${JSON.stringify(result)}`, 'warning');
+                }
+                
+                return result;
+            } catch (error) {
+                log(`❌ Ошибка создания матча: ${error.message}`, 'error');
+                return { success: false, error: error.message };
+            }
+        }
+        
+        async function startSetup() {
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const setupBtn = document.getElementById('setupBtn');
+            
+            if (!apiKey) {
+                alert('Пожалуйста, введите API ключ');
+                return;
+            }
+            
+            setupBtn.disabled = true;
+            setupBtn.textContent = '⏳ Настройка...';
+            
+            document.getElementById('logContent').innerHTML = '';
+            
+            try {
+                log('🚀 Начинаем настройку демо-пользователей...', 'info');
+                
+                // 1. Авторизация
+                log('=== ЭТАП 1: АВТОРИЗАЦИЯ ===', 'info');
+                const dannyLogin = await loginUser(users.danny.username, users.danny.password, apiKey);
+                if (!dannyLogin.success) {
+                    throw new Error(`Не удалось авторизовать ${users.danny.username}`);
+                }
+                users.danny.sessionId = dannyLogin.sessionId;
+                users.danny.userId = dannyLogin.userId;
+
+                const hoopsereLogin = await loginUser(users.hoopsere.username, users.hoopsere.password, apiKey);
+                if (!hoopsereLogin.success) {
+                    throw new Error(`Не удалось авторизовать ${users.hoopsere.username}`);
+                }
+                users.hoopsere.sessionId = hoopsereLogin.sessionId;
+                users.hoopsere.userId = hoopsereLogin.userId;
+                
+                markStepComplete('step1');
+                
+                // 2. Добавление в контакты
+                log('\n=== ЭТАП 2: ДОБАВЛЕНИЕ В КОНТАКТЫ ===', 'info');
+                await addContact(users.danny.sessionId, users.hoopsere.userId, apiKey);
+                markStepComplete('step2');
+                
+                // 3. Добавление в друзья
+                log('\n=== ЭТАП 3: ДОБАВЛЕНИЕ В ДРУЗЬЯ ===', 'info');
+                await addFriend(users.danny.sessionId, users.hoopsere.userId, apiKey);
+                markStepComplete('step3');
+                
+                // 4. Создание матча
+                log('\n=== ЭТАП 4: СОЗДАНИЕ МАТЧА ===', 'info');
+                await createMatch(users.danny.sessionId, users.hoopsere.userId, apiKey);
+                await createMatch(users.hoopsere.sessionId, users.danny.userId, apiKey);
+                markStepComplete('step4');
+                
+                log('\n🎉 Настройка демо-пользователей завершена успешно!', 'success');
+                log(`✅ ${users.hoopsere.username} теперь является контактом, другом и матчем для ${users.danny.username}`, 'success');
+                
+                setupBtn.textContent = '✅ Настройка завершена';
+                
+            } catch (error) {
+                log(`\n❌ Ошибка при настройке: ${error.message}`, 'error');
+                setupBtn.disabled = false;
+                setupBtn.textContent = '🚀 Повторить настройку';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -184,7 +184,7 @@ class SearchManager {
 
     createUserCard(user) {
         const card = document.createElement('div');
-        card.className = 'user-card';
+        card.className = 'user-card simple-card';
         
         // Extract photo URL from various possible sources
         let photoUrl = null;
@@ -198,35 +198,19 @@ class SearchManager {
             photoUrl = user.photos[0].url || user.photos[0];
         }
         
-        // Generate avatar
+        // Generate avatar - только фото или заглушка
         const avatarHtml = photoUrl ? 
-            `<img src="${photoUrl}" alt="${user.pseudo}" class="user-avatar" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-             <div class="user-avatar avatar-placeholder" style="display: none;">${user.pseudo ? user.pseudo.charAt(0).toUpperCase() : 'U'}</div>` :
-            `<div class="user-avatar avatar-placeholder">${user.pseudo ? user.pseudo.charAt(0).toUpperCase() : 'U'}</div>`;
+            `<img src="${photoUrl}" alt="${user.pseudo}" class="user-avatar-simple" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+             <div class="user-avatar-placeholder" style="display: none;">${user.pseudo ? user.pseudo.charAt(0).toUpperCase() : 'U'}</div>` :
+            `<div class="user-avatar-placeholder">${user.pseudo ? user.pseudo.charAt(0).toUpperCase() : 'U'}</div>`;
         
-        // Calculate age
-        const age = user.age || (user.year ? new Date().getFullYear() - user.year : '') || (user.birth_date ? this.calculateAge(user.birth_date) : '');
-        
-        // Online status
-        const onlineStatus = user.connected == 1 ? 
-            '<span class="online-indicator">● Online</span>' : '';
-        
+        // Только фото и ник - никаких кнопок и дополнительной информации
         card.innerHTML = `
-            ${avatarHtml}
-            <div class="user-info">
-                <h4 class="user-name">${user.pseudo || 'Anonymous'}</h4>
-                ${age ? `<p class="user-age">${age} years old</p>` : ''}
-                ${user.ville ? `<p class="user-location">📍 ${user.ville}</p>` : ''}
-                ${onlineStatus}
-                ${user.description ? `<p class="user-description">${user.description.substring(0, 100)}${user.description.length > 100 ? '...' : ''}</p>` : ''}
+            <div class="user-photo-container">
+                ${avatarHtml}
             </div>
-            <div class="user-actions">
-                <button class="app-btn app-btn-primary app-btn-sm" onclick="searchManager.viewProfile(${user.id})">
-                    View Profile
-                </button>
-                <button class="app-btn app-btn-outline app-btn-sm" onclick="searchManager.sendMessage(${user.id})">
-                    Message
-                </button>
+            <div class="user-nickname">
+                ${user.pseudo || 'Anonymous'}
             </div>
         `;
         
