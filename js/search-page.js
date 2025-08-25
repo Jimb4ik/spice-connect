@@ -366,10 +366,25 @@ class SearchManager {
     }
 
     showLoading() {
-        const container = document.getElementById('searchResults');
+        const container = document.getElementById('searchResults') || document.querySelector('.search-results');
         if (container) {
-            container.innerHTML = `
-                <div class="search-status">
+            // Скрываем блок "No results"
+            const noResultsDiv = document.getElementById('noResults');
+            if (noResultsDiv) {
+                noResultsDiv.style.display = 'none';
+            }
+            
+            // Показываем индикатор загрузки
+            let loadingContainer = container.querySelector('.search-grid') || container.querySelector('#searchGrid');
+            if (!loadingContainer) {
+                loadingContainer = document.createElement('div');
+                loadingContainer.className = 'search-grid';
+                loadingContainer.id = 'searchGrid';
+                container.appendChild(loadingContainer);
+            }
+            
+            loadingContainer.innerHTML = `
+                <div class="search-status loading-status">
                     <div class="loading-spinner"></div>
                     <h3>Searching...</h3>
                     <p>Finding profiles that match your criteria</p>
@@ -379,7 +394,8 @@ class SearchManager {
     }
 
     hideLoading() {
-        // Loading will be replaced by results
+        // Индикатор загрузки будет заменен результатами в displayResults()
+        console.log('[SEARCH] Hiding loading indicator');
     }
 
     showError(message) {
