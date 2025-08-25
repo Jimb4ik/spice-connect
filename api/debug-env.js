@@ -3,6 +3,8 @@
  * Отладка окружения и настройка демо-пользователей
  */
 
+const crypto = require('crypto');
+
 class DemoUsersSetup {
     constructor(apiKey, baseUrl = null) {
         this.apiKey = apiKey;
@@ -34,10 +36,14 @@ class DemoUsersSetup {
 
     async loginUser(username, password) {
         try {
+            // Хешируем пароль в MD5 как требует API
+            const hashedPassword = crypto.createHash('md5').update(password).digest('hex');
+            
             const url = `${this.baseUrl}/index_api/login?api_key=${this.apiKey}`;
             const body = new URLSearchParams({
                 login: username,
-                pass: password
+                pass: hashedPassword,
+                rememberme: '1'  // Указываем что пароль отправляется в MD5
             });
             
             console.log(`🔐 [LOGIN REQUEST] URL: ${url}`);
