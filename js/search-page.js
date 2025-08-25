@@ -44,7 +44,37 @@ class SearchManager {
 
     async loadInitialResults() {
         console.log('[SEARCH] Loading initial results');
+        // Сначала попробуем поиск без фильтров для тестирования
+        await this.testBasicSearch();
+        // Затем выполним обычный поиск
         await this.performSearch();
+    }
+    
+    async testBasicSearch() {
+        console.log('[SEARCH] Testing basic search without filters...');
+        
+        try {
+            const basicParams = new URLSearchParams({
+                session_id: window.authManager.sessionId,
+                page: 1
+            });
+            
+            const testUrl = `/api/spice-multi-test?endpoint=/index_api/search&method=POST&${basicParams.toString()}`;
+            console.log('[SEARCH] Basic test URL:', testUrl);
+            
+            const response = await fetch(testUrl);
+            const result = await response.json();
+            
+            console.log('[SEARCH] Basic test result:', {
+                success: result.success,
+                dataExists: !!result.data,
+                resultCount: result.data?.result?.length || 0,
+                sampleResult: result.data?.result?.[0] || 'no results'
+            });
+            
+        } catch (error) {
+            console.error('[SEARCH] Basic test failed:', error);
+        }
     }
 
     async performSearch() {
@@ -72,9 +102,24 @@ class SearchManager {
 
             const result = await response.json();
             console.log('[SEARCH] Full search result:', JSON.stringify(result, null, 2));
+            
+            // Детальная диагностика ответа
+            console.log('[SEARCH] Response analysis:', {
+                success: result.success,
+                hasData: !!result.data,
+                hasResult: !!(result.data && result.data.result),
+                resultLength: result.data?.result?.length || 0,
+                total: result.data?.total,
+                dataKeys: result.data ? Object.keys(result.data) : 'no data'
+            });
 
-            if (result.success && result.data && result.data.result) {
-                this.displayResults(result.data.result, result.data.total || 0);
+            if (result.success && result.data) {
+                // Проверяем разные возможные структуры ответа
+                const searchResults = result.data.result || result.data.results || result.data || [];
+                const total = result.data.total || result.data.nb_total || searchResults.length || 0;
+                
+                console.log('[SEARCH] Extracted results:', { searchResults, total, length: searchResults.length });
+                this.displayResults(searchResults, total);
             } else {
                 console.error('[SEARCH] Search failed:', result);
                 this.showError('Search failed. Please try again.');
@@ -144,12 +189,22 @@ class SearchManager {
     displayResults(results, total) {
         console.log('[SEARCH] displayResults called with:', { results, total, resultsLength: results?.length });
         
+        // Диагностика DOM элементов
+        console.log('[SEARCH] Available elements:', {
+            searchGrid: !!document.getElementById('searchGrid'),
+            searchResults: !!document.getElementById('searchResults'),
+            resultsCount: !!document.getElementById('resultsCount'),
+            noResults: !!document.getElementById('noResults')
+        });
+        
         // Используем правильный контейнер из HTML
         const container = document.getElementById('searchGrid');
         const resultsCountEl = document.getElementById('resultsCount');
         
         if (!container) {
             console.error('[SEARCH] Container #searchGrid not found!');
+            console.log('[SEARCH] All elements with class search-grid:', document.querySelectorAll('.search-grid'));
+            console.log('[SEARCH] All elements with id containing "search":', document.querySelectorAll('[id*="search"]'));
             return;
         }
         

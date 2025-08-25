@@ -3,7 +3,7 @@
  * Отладка окружения и настройка демо-пользователей
  */
 
-const API_BASE_URL = 'https://dev2018.de5a7.com';
+const API_BASE_URL = 'https://api.fotochat.com';
 
 class DemoUsersSetup {
     constructor(apiKey) {

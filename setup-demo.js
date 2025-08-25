@@ -13,7 +13,7 @@ if (!process.env.SPICE_API_KEY) {
 }
 
 const fetch = require('node-fetch');
-const API_BASE_URL = 'https://dev2018.de5a7.com';
+const API_BASE_URL = 'https://api.fotochat.com';
 const API_KEY = process.env.SPICE_API_KEY;
 
 // Данные демо-пользователей
