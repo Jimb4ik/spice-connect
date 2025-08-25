@@ -197,16 +197,18 @@ class SearchManager {
             noResults: !!document.getElementById('noResults')
         });
         
-        // Используем правильный контейнер из HTML
-        const container = document.getElementById('searchGrid');
-        const resultsCountEl = document.getElementById('resultsCount');
+        // Используем существующий контейнер из HTML
+        const container = document.getElementById('searchResults') || document.querySelector('.search-results');
+        const resultsCountEl = document.getElementById('resultsCount') || document.querySelector('.results-count');
         
         if (!container) {
-            console.error('[SEARCH] Container #searchGrid not found!');
-            console.log('[SEARCH] All elements with class search-grid:', document.querySelectorAll('.search-grid'));
+            console.error('[SEARCH] Container not found!');
+            console.log('[SEARCH] All elements with class search-results:', document.querySelectorAll('.search-results'));
             console.log('[SEARCH] All elements with id containing "search":', document.querySelectorAll('[id*="search"]'));
             return;
         }
+        
+        console.log('[SEARCH] Using container:', container.id || container.className);
         
         if (!results || results.length === 0) {
             console.log('[SEARCH] No results to display');
@@ -234,15 +236,24 @@ class SearchManager {
             resultsCountEl.textContent = `${results.length} results`;
         }
         
-        // Clear container and add results
-        container.innerHTML = '';
+        // Найдем или создадим контейнер для результатов
+        let resultsContainer = container.querySelector('.search-grid') || container.querySelector('#searchGrid');
+        if (!resultsContainer) {
+            resultsContainer = document.createElement('div');
+            resultsContainer.className = 'search-grid';
+            resultsContainer.id = 'searchGrid';
+            container.appendChild(resultsContainer);
+        }
+        
+        // Clear results container and add results
+        resultsContainer.innerHTML = '';
         
         results.forEach(user => {
             const userCard = this.createUserCard(user);
-            container.appendChild(userCard);
+            resultsContainer.appendChild(userCard);
         });
         
-        console.log('[SEARCH] Results displayed successfully');
+        console.log('[SEARCH] Results displayed successfully in:', resultsContainer.className);
     }
 
     createUserCard(user) {
