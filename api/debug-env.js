@@ -31,88 +31,139 @@ class DemoUsersSetup {
 
     async loginUser(username, password) {
         try {
-            const response = await fetch(`${API_BASE_URL}/ajax_api/login?api_key=${this.apiKey}`, {
+            const url = `${API_BASE_URL}/ajax_api/login?api_key=${this.apiKey}`;
+            const body = new URLSearchParams({
+                pseudo: username,
+                password: password
+            });
+            
+            console.log(`🔐 [LOGIN REQUEST] URL: ${url}`);
+            console.log(`🔐 [LOGIN REQUEST] Body: ${body.toString()}`);
+            console.log(`🔐 [LOGIN REQUEST] Headers: Content-Type: application/x-www-form-urlencoded`);
+            
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: new URLSearchParams({
-                    pseudo: username,
-                    password: password
-                })
+                body: body
             });
 
+            console.log(`🔐 [LOGIN RESPONSE] Status: ${response.status} ${response.statusText}`);
+            console.log(`🔐 [LOGIN RESPONSE] Headers:`, Object.fromEntries(response.headers.entries()));
+            
             const result = await response.json();
+            console.log(`🔐 [LOGIN RESPONSE] Body:`, JSON.stringify(result, null, 2));
+            
             if (result.result === 'ok' && result.session_id) {
+                console.log(`✅ [LOGIN SUCCESS] User ${username} logged in with session: ${result.session_id}`);
                 return {
                     sessionId: result.session_id,
                     userId: result.id,
                     success: true
                 };
             } else {
+                console.error(`❌ [LOGIN FAILED] User ${username}:`, result);
                 return { success: false, error: result };
             }
         } catch (error) {
+            console.error(`❌ [LOGIN ERROR] User ${username}:`, error);
             return { success: false, error: error.message };
         }
     }
 
     async addContact(fromSessionId, toUserId) {
         try {
-            const response = await fetch(`${API_BASE_URL}/ajax_api/setContact?api_key=${this.apiKey}`, {
+            const url = `${API_BASE_URL}/ajax_api/setContact?api_key=${this.apiKey}`;
+            const body = new URLSearchParams({
+                session_id: fromSessionId,
+                id_user: toUserId,
+                action: 'add'
+            });
+            
+            console.log(`👥 [CONTACT REQUEST] URL: ${url}`);
+            console.log(`👥 [CONTACT REQUEST] Body: ${body.toString()}`);
+            
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: new URLSearchParams({
-                    session_id: fromSessionId,
-                    id_user: toUserId,
-                    action: 'add'
-                })
+                body: body
             });
 
-            return await response.json();
+            console.log(`👥 [CONTACT RESPONSE] Status: ${response.status} ${response.statusText}`);
+            
+            const result = await response.json();
+            console.log(`👥 [CONTACT RESPONSE] Body:`, JSON.stringify(result, null, 2));
+            
+            return result;
         } catch (error) {
+            console.error(`❌ [CONTACT ERROR]:`, error);
             return { success: false, error: error.message };
         }
     }
 
     async addFriend(fromSessionId, toUserId) {
         try {
-            const response = await fetch(`${API_BASE_URL}/ajax_api/setFriend?api_key=${this.apiKey}`, {
+            const url = `${API_BASE_URL}/ajax_api/setFriend?api_key=${this.apiKey}`;
+            const body = new URLSearchParams({
+                session_id: fromSessionId,
+                id_user: toUserId,
+                action: 'add'
+            });
+            
+            console.log(`🤝 [FRIEND REQUEST] URL: ${url}`);
+            console.log(`🤝 [FRIEND REQUEST] Body: ${body.toString()}`);
+            
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: new URLSearchParams({
-                    session_id: fromSessionId,
-                    id_user: toUserId,
-                    action: 'add'
-                })
+                body: body
             });
 
-            return await response.json();
+            console.log(`🤝 [FRIEND RESPONSE] Status: ${response.status} ${response.statusText}`);
+            
+            const result = await response.json();
+            console.log(`🤝 [FRIEND RESPONSE] Body:`, JSON.stringify(result, null, 2));
+            
+            return result;
         } catch (error) {
+            console.error(`❌ [FRIEND ERROR]:`, error);
             return { success: false, error: error.message };
         }
     }
 
     async createMatch(fromSessionId, toUserId) {
         try {
-            const response = await fetch(`${API_BASE_URL}/index_api/match?api_key=${this.apiKey}`, {
+            const url = `${API_BASE_URL}/index_api/match?api_key=${this.apiKey}`;
+            const body = new URLSearchParams({
+                session_id: fromSessionId,
+                action: 'set_like',
+                id_user: toUserId
+            });
+            
+            console.log(`💖 [MATCH REQUEST] URL: ${url}`);
+            console.log(`💖 [MATCH REQUEST] Body: ${body.toString()}`);
+            
+            const response = await fetch(url, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: new URLSearchParams({
-                    session_id: fromSessionId,
-                    action: 'set_like',
-                    id_user: toUserId
-                })
+                body: body
             });
 
-            return await response.json();
+            console.log(`💖 [MATCH RESPONSE] Status: ${response.status} ${response.statusText}`);
+            
+            const result = await response.json();
+            console.log(`💖 [MATCH RESPONSE] Body:`, JSON.stringify(result, null, 2));
+            
+            return result;
         } catch (error) {
+            console.error(`❌ [MATCH ERROR]:`, error);
             return { success: false, error: error.message };
         }
     }
@@ -121,42 +172,61 @@ class DemoUsersSetup {
         const logs = [];
         
         try {
+            console.log('🚀 [SETUP] Начинаем настройку демо-пользователей...');
             logs.push('🚀 Начинаем настройку демо-пользователей...');
             
             // 1. Авторизация
+            console.log('🚀 [SETUP] === ЭТАП 1: АВТОРИЗАЦИЯ ===');
             logs.push('=== ЭТАП 1: АВТОРИЗАЦИЯ ===');
+            
+            console.log(`🚀 [SETUP] Авторизуем ${this.users.danny.username}...`);
             const dannyLogin = await this.loginUser(this.users.danny.username, this.users.danny.password);
             if (!dannyLogin.success) {
-                throw new Error(`Не удалось авторизовать ${this.users.danny.username}`);
+                const errorMsg = `Не удалось авторизовать ${this.users.danny.username}: ${JSON.stringify(dannyLogin.error)}`;
+                console.error(`❌ [SETUP] ${errorMsg}`);
+                throw new Error(errorMsg);
             }
             this.users.danny.sessionId = dannyLogin.sessionId;
             this.users.danny.userId = dannyLogin.userId;
+            console.log(`✅ [SETUP] ${this.users.danny.username} авторизован (ID: ${dannyLogin.userId}, Session: ${dannyLogin.sessionId})`);
             logs.push(`✅ ${this.users.danny.username} авторизован`);
 
+            console.log(`🚀 [SETUP] Авторизуем ${this.users.hoopsere.username}...`);
             const hoopsereLogin = await this.loginUser(this.users.hoopsere.username, this.users.hoopsere.password);
             if (!hoopsereLogin.success) {
-                throw new Error(`Не удалось авторизовать ${this.users.hoopsere.username}`);
+                const errorMsg = `Не удалось авторизовать ${this.users.hoopsere.username}: ${JSON.stringify(hoopsereLogin.error)}`;
+                console.error(`❌ [SETUP] ${errorMsg}`);
+                throw new Error(errorMsg);
             }
             this.users.hoopsere.sessionId = hoopsereLogin.sessionId;
             this.users.hoopsere.userId = hoopsereLogin.userId;
+            console.log(`✅ [SETUP] ${this.users.hoopsere.username} авторизован (ID: ${hoopsereLogin.userId}, Session: ${hoopsereLogin.sessionId})`);
             logs.push(`✅ ${this.users.hoopsere.username} авторизован`);
 
             // 2. Добавление в контакты
+            console.log('🚀 [SETUP] === ЭТАП 2: ДОБАВЛЕНИЕ В КОНТАКТЫ ===');
             logs.push('=== ЭТАП 2: ДОБАВЛЕНИЕ В КОНТАКТЫ ===');
             const contactResult = await this.addContact(this.users.danny.sessionId, this.users.hoopsere.userId);
+            console.log(`✅ [SETUP] Контакт добавлен:`, contactResult);
             logs.push(`✅ Контакт добавлен: ${JSON.stringify(contactResult)}`);
 
             // 3. Добавление в друзья
+            console.log('🚀 [SETUP] === ЭТАП 3: ДОБАВЛЕНИЕ В ДРУЗЬЯ ===');
             logs.push('=== ЭТАП 3: ДОБАВЛЕНИЕ В ДРУЗЬЯ ===');
             const friendResult = await this.addFriend(this.users.danny.sessionId, this.users.hoopsere.userId);
+            console.log(`✅ [SETUP] Друг добавлен:`, friendResult);
             logs.push(`✅ Друг добавлен: ${JSON.stringify(friendResult)}`);
 
             // 4. Создание матча
+            console.log('🚀 [SETUP] === ЭТАП 4: СОЗДАНИЕ МАТЧА ===');
             logs.push('=== ЭТАП 4: СОЗДАНИЕ МАТЧА ===');
             const match1 = await this.createMatch(this.users.danny.sessionId, this.users.hoopsere.userId);
+            console.log(`✅ [SETUP] Матч 1 (Danny -> Hoopsere):`, match1);
             const match2 = await this.createMatch(this.users.hoopsere.sessionId, this.users.danny.userId);
+            console.log(`✅ [SETUP] Матч 2 (Hoopsere -> Danny):`, match2);
             logs.push(`✅ Матч создан: ${JSON.stringify(match1)} | ${JSON.stringify(match2)}`);
 
+            console.log('🎉 [SETUP] Настройка завершена успешно!');
             logs.push('🎉 Настройка завершена успешно!');
             
             return {
@@ -167,6 +237,7 @@ class DemoUsersSetup {
             };
 
         } catch (error) {
+            console.error('❌ [SETUP] Критическая ошибка:', error);
             logs.push(`❌ Ошибка: ${error.message}`);
             return {
                 success: false,
