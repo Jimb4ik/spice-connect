@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добавить подарок пользователю</title>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .log-container {
+            margin-top: 30px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .log-entry {
+            margin-bottom: 8px;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-family: 'Monaco', monospace;
+            font-size: 14px;
+        }
+        
+        .log-info { background: #e3f2fd; color: #1976d2; }
+        .log-success { background: #e8f5e8; color: #2e7d32; }
+        .log-error { background: #ffebee; color: #c62828; }
+        
+        .gifts-list {
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            padding: 10px;
+        }
+        
+        .gift-item {
+            padding: 8px;
+            margin-bottom: 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .gift-item:hover {
+            background: #e9ecef;
+        }
+        
+        .gift-item.selected {
+            background: #667eea;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎁 Добавить подарок пользователю</h1>
+        
+        <div class="form-group">
+            <label>Пользователь:</label>
+            <input type="text" id="username" value="DannyGrid1988" readonly>
+        </div>
+        
+        <div class="form-group">
+            <label>User ID (если известен):</label>
+            <input type="text" id="userId" placeholder="Оставьте пустым для автоматического поиска">
+        </div>
+        
+        <div class="form-group">
+            <label>Session ID (если известен):</label>
+            <input type="text" id="sessionId" placeholder="Оставьте пустым для автоматического поиска">
+        </div>
+        
+        <div class="form-group">
+            <button type="button" onclick="loadGiftsCatalog()">📋 Загрузить каталог подарков</button>
+        </div>
+        
+        <div id="giftsContainer" style="display: none;">
+            <label>Выберите подарок:</label>
+            <div id="giftsList" class="gifts-list"></div>
+        </div>
+        
+        <div class="form-group">
+            <label>Сообщение:</label>
+            <textarea id="message" rows="3" placeholder="Подарок от системы для тестирования">Подарок от системы для тестирования</textarea>
+        </div>
+        
+        <button type="button" id="addGiftBtn" onclick="addGiftToUser()" disabled>
+            🎁 Добавить подарок
+        </button>
+        
+        <div id="logContainer" class="log-container" style="display: none;">
+            <h3>Логи:</h3>
+            <div id="logContent"></div>
+        </div>
+    </div>
+
+    <script>
+        let selectedGiftId = null;
+        let gifts = [];
+
+        function log(message, type = 'info') {
+            const logContainer = document.getElementById('logContainer');
+            const logContent = document.getElementById('logContent');
+            
+            logContainer.style.display = 'block';
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry log-${type}`;
+            logEntry.textContent = `${new Date().toLocaleTimeString()} - ${message}`;
+            
+            logContent.appendChild(logEntry);
+            logContent.scrollTop = logContent.scrollHeight;
+        }
+
+        async function loadGiftsCatalog() {
+            try {
+                log('Загружаем каталог подарков...', 'info');
+                
+                const response = await fetch('/api/database', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'get_gifts_catalog'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    gifts = result.data;
+                    displayGifts(gifts);
+                    log(`Загружено ${gifts.length} подарков`, 'success');
+                } else {
+                    log(`Ошибка загрузки каталога: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                log(`Ошибка при загрузке каталога: ${error.message}`, 'error');
+            }
+        }
+
+        function displayGifts(gifts) {
+            const container = document.getElementById('giftsContainer');
+            const list = document.getElementById('giftsList');
+            
+            container.style.display = 'block';
+            list.innerHTML = '';
+            
+            gifts.forEach(gift => {
+                const item = document.createElement('div');
+                item.className = 'gift-item';
+                item.innerHTML = `
+                    <strong>${gift.name}</strong><br>
+                    <small>${gift.description || 'Без описания'}</small><br>
+                    <small>💰 ${gift.price_credits} кредитов | 📂 ${gift.category}</small>
+                `;
+                
+                item.onclick = () => selectGift(gift.id, item);
+                list.appendChild(item);
+            });
+        }
+
+        function selectGift(giftId, element) {
+            // Убираем выделение с других элементов
+            document.querySelectorAll('.gift-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            
+            // Выделяем выбранный элемент
+            element.classList.add('selected');
+            selectedGiftId = giftId;
+            
+            // Активируем кнопку
+            document.getElementById('addGiftBtn').disabled = false;
+            
+            const selectedGift = gifts.find(g => g.id === giftId);
+            log(`Выбран подарок: ${selectedGift.name} (${selectedGift.price_credits} кредитов)`, 'info');
+        }
+
+        async function addGiftToUser() {
+            if (!selectedGiftId) {
+                log('Выберите подарок из каталога', 'error');
+                return;
+            }
+            
+            const username = document.getElementById('username').value;
+            const userId = document.getElementById('userId').value || 'AUTO';
+            const sessionId = document.getElementById('sessionId').value || 'AUTO';
+            const message = document.getElementById('message').value;
+            
+            const btn = document.getElementById('addGiftBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Добавляем подарок...';
+            
+            try {
+                log(`Добавляем подарок пользователю ${username}...`, 'info');
+                
+                const response = await fetch('/api/database', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'purchase_gift',
+                        gift_id: selectedGiftId,
+                        sender_session_id: 'SYSTEM',
+                        sender_user_id: 'SYSTEM',
+                        receiver_session_id: sessionId,
+                        receiver_user_id: userId,
+                        personal_message: message
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    log('🎉 Подарок успешно добавлен!', 'success');
+                    log(`Детали: ${JSON.stringify(result.data)}`, 'info');
+                    btn.textContent = '✅ Подарок добавлен';
+                } else {
+                    log(`Ошибка добавления подарка: ${result.error}`, 'error');
+                    btn.disabled = false;
+                    btn.textContent = '🎁 Добавить подарок';
+                }
+            } catch (error) {
+                log(`Ошибка при добавлении подарка: ${error.message}`, 'error');
+                btn.disabled = false;
+                btn.textContent = '🎁 Добавить подарок';
+            }
+        }
+
+        // Автоматически загружаем каталог при загрузке страницы
+        window.addEventListener('load', () => {
+            loadGiftsCatalog();
+        });
+    </script>
+</body>
+</html>
