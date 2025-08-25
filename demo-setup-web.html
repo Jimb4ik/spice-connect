@@ -181,22 +181,6 @@
     </div>
 
     <script>
-        const API_BASE_URL = 'https://dev2018.de5a7.com';
-        
-        const users = {
-            danny: {
-                username: 'DannyGrid1988',
-                password: 'xigryf-jorFet-dyfry3',
-                sessionId: null,
-                userId: null
-            },
-            hoopsere: {
-                username: 'Hoopsere', 
-                password: 'vyrpu8-maCcex-rabsad',
-                sessionId: null,
-                userId: null
-            }
-        };
         
         function log(message, type = 'info') {
             const logContent = document.getElementById('logContent');
@@ -219,138 +203,7 @@
             }
         }
         
-        async function loginUser(username, password, apiKey) {
-            try {
-                log(`🔐 Авторизация пользователя: ${username}`);
-                
-                const response = await fetch(`${API_BASE_URL}/ajax_api/login?api_key=${apiKey}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: new URLSearchParams({
-                        pseudo: username,
-                        password: password
-                    })
-                });
 
-                const result = await response.json();
-                log(`📊 Результат авторизации ${username}: ${JSON.stringify(result)}`);
-
-                if (result.result === 'ok' && result.session_id) {
-                    log(`✅ Пользователь ${username} успешно авторизован`, 'success');
-                    return {
-                        sessionId: result.session_id,
-                        userId: result.id,
-                        success: true
-                    };
-                } else {
-                    log(`❌ Ошибка авторизации ${username}: ${JSON.stringify(result)}`, 'error');
-                    return { success: false, error: result };
-                }
-            } catch (error) {
-                log(`❌ Ошибка при авторизации ${username}: ${error.message}`, 'error');
-                return { success: false, error: error.message };
-            }
-        }
-        
-        async function addContact(fromSessionId, toUserId, apiKey) {
-            try {
-                log(`👥 Добавление в контакты: ${toUserId}`);
-                
-                const response = await fetch(`${API_BASE_URL}/ajax_api/setContact?api_key=${apiKey}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: new URLSearchParams({
-                        session_id: fromSessionId,
-                        id_user: toUserId,
-                        action: 'add'
-                    })
-                });
-
-                const result = await response.json();
-                log(`📊 Результат добавления в контакты: ${JSON.stringify(result)}`);
-                
-                if (result.result === 'ok') {
-                    log(`✅ Успешно добавлен в контакты`, 'success');
-                } else {
-                    log(`⚠️ Возможная ошибка добавления в контакты: ${JSON.stringify(result)}`, 'warning');
-                }
-                
-                return result;
-            } catch (error) {
-                log(`❌ Ошибка добавления в контакты: ${error.message}`, 'error');
-                return { success: false, error: error.message };
-            }
-        }
-        
-        async function addFriend(fromSessionId, toUserId, apiKey) {
-            try {
-                log(`🤝 Добавление в друзья: ${toUserId}`);
-                
-                const response = await fetch(`${API_BASE_URL}/ajax_api/setFriend?api_key=${apiKey}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: new URLSearchParams({
-                        session_id: fromSessionId,
-                        id_user: toUserId,
-                        action: 'add'
-                    })
-                });
-
-                const result = await response.json();
-                log(`📊 Результат добавления в друзья: ${JSON.stringify(result)}`);
-                
-                if (result.result === 'ok') {
-                    log(`✅ Успешно добавлен в друзья`, 'success');
-                } else {
-                    log(`⚠️ Возможная ошибка добавления в друзья: ${JSON.stringify(result)}`, 'warning');
-                }
-                
-                return result;
-            } catch (error) {
-                log(`❌ Ошибка добавления в друзья: ${error.message}`, 'error');
-                return { success: false, error: error.message };
-            }
-        }
-        
-        async function createMatch(fromSessionId, toUserId, apiKey) {
-            try {
-                log(`💖 Создание матча (лайк): ${toUserId}`);
-                
-                const response = await fetch(`${API_BASE_URL}/index_api/match?api_key=${apiKey}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: new URLSearchParams({
-                        session_id: fromSessionId,
-                        action: 'set_like',
-                        id_user: toUserId
-                    })
-                });
-
-                const result = await response.json();
-                log(`📊 Результат создания матча: ${JSON.stringify(result)}`);
-                
-                if (result.result === 'match') {
-                    log(`🎉 МАТЧ СОЗДАН!`, 'success');
-                } else if (result.result === 'ok') {
-                    log(`✅ Лайк отправлен`, 'success');
-                } else {
-                    log(`⚠️ Возможная ошибка создания матча: ${JSON.stringify(result)}`, 'warning');
-                }
-                
-                return result;
-            } catch (error) {
-                log(`❌ Ошибка создания матча: ${error.message}`, 'error');
-                return { success: false, error: error.message };
-            }
-        }
         
         async function startSetup() {
             const apiKey = document.getElementById('apiKey').value.trim();
@@ -367,46 +220,44 @@
             document.getElementById('logContent').innerHTML = '';
             
             try {
-                log('🚀 Начинаем настройку демо-пользователей...', 'info');
+                log('🚀 Отправляем запрос на настройку демо-пользователей...', 'info');
                 
-                // 1. Авторизация
-                log('=== ЭТАП 1: АВТОРИЗАЦИЯ ===', 'info');
-                const dannyLogin = await loginUser(users.danny.username, users.danny.password, apiKey);
-                if (!dannyLogin.success) {
-                    throw new Error(`Не удалось авторизовать ${users.danny.username}`);
-                }
-                users.danny.sessionId = dannyLogin.sessionId;
-                users.danny.userId = dannyLogin.userId;
+                // Используем объединенный API endpoint
+                const response = await fetch('/api/debug-env', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
 
-                const hoopsereLogin = await loginUser(users.hoopsere.username, users.hoopsere.password, apiKey);
-                if (!hoopsereLogin.success) {
-                    throw new Error(`Не удалось авторизовать ${users.hoopsere.username}`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Выводим логи из сервера
+                    result.logs.forEach(logMessage => {
+                        if (logMessage.includes('✅')) {
+                            log(logMessage, 'success');
+                        } else if (logMessage.includes('❌')) {
+                            log(logMessage, 'error');
+                        } else if (logMessage.includes('===')) {
+                            log(logMessage, 'info');
+                        } else {
+                            log(logMessage, 'info');
+                        }
+                    });
+                    
+                    // Отмечаем все этапы как завершенные
+                    markStepComplete('step1');
+                    markStepComplete('step2');
+                    markStepComplete('step3');
+                    markStepComplete('step4');
+                    
+                    log('\n🎉 Настройка демо-пользователей завершена успешно!', 'success');
+                    setupBtn.textContent = '✅ Настройка завершена';
+                    
+                } else {
+                    throw new Error(result.error || 'Неизвестная ошибка');
                 }
-                users.hoopsere.sessionId = hoopsereLogin.sessionId;
-                users.hoopsere.userId = hoopsereLogin.userId;
-                
-                markStepComplete('step1');
-                
-                // 2. Добавление в контакты
-                log('\n=== ЭТАП 2: ДОБАВЛЕНИЕ В КОНТАКТЫ ===', 'info');
-                await addContact(users.danny.sessionId, users.hoopsere.userId, apiKey);
-                markStepComplete('step2');
-                
-                // 3. Добавление в друзья
-                log('\n=== ЭТАП 3: ДОБАВЛЕНИЕ В ДРУЗЬЯ ===', 'info');
-                await addFriend(users.danny.sessionId, users.hoopsere.userId, apiKey);
-                markStepComplete('step3');
-                
-                // 4. Создание матча
-                log('\n=== ЭТАП 4: СОЗДАНИЕ МАТЧА ===', 'info');
-                await createMatch(users.danny.sessionId, users.hoopsere.userId, apiKey);
-                await createMatch(users.hoopsere.sessionId, users.danny.userId, apiKey);
-                markStepComplete('step4');
-                
-                log('\n🎉 Настройка демо-пользователей завершена успешно!', 'success');
-                log(`✅ ${users.hoopsere.username} теперь является контактом, другом и матчем для ${users.danny.username}`, 'success');
-                
-                setupBtn.textContent = '✅ Настройка завершена';
                 
             } catch (error) {
                 log(`\n❌ Ошибка при настройке: ${error.message}`, 'error');

@@ -1,3 +1,182 @@
+/**
+ * Объединенная функция: Debug Environment + Demo Users Setup
+ * Отладка окружения и настройка демо-пользователей
+ */
+
+const API_BASE_URL = 'https://dev2018.de5a7.com';
+
+class DemoUsersSetup {
+    constructor(apiKey) {
+        this.apiKey = apiKey;
+        if (!this.apiKey) {
+            throw new Error('SPICE_API_KEY is required');
+        }
+        
+        // Данные демо-пользователей
+        this.users = {
+            danny: {
+                username: 'DannyGrid1988',
+                password: 'xigryf-jorFet-dyfry3',
+                sessionId: null,
+                userId: null
+            },
+            hoopsere: {
+                username: 'Hoopsere', 
+                password: 'vyrpu8-maCcex-rabsad',
+                sessionId: null,
+                userId: null
+            }
+        };
+    }
+
+    async loginUser(username, password) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/ajax_api/login?api_key=${this.apiKey}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    pseudo: username,
+                    password: password
+                })
+            });
+
+            const result = await response.json();
+            if (result.result === 'ok' && result.session_id) {
+                return {
+                    sessionId: result.session_id,
+                    userId: result.id,
+                    success: true
+                };
+            } else {
+                return { success: false, error: result };
+            }
+        } catch (error) {
+            return { success: false, error: error.message };
+        }
+    }
+
+    async addContact(fromSessionId, toUserId) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/ajax_api/setContact?api_key=${this.apiKey}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    session_id: fromSessionId,
+                    id_user: toUserId,
+                    action: 'add'
+                })
+            });
+
+            return await response.json();
+        } catch (error) {
+            return { success: false, error: error.message };
+        }
+    }
+
+    async addFriend(fromSessionId, toUserId) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/ajax_api/setFriend?api_key=${this.apiKey}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    session_id: fromSessionId,
+                    id_user: toUserId,
+                    action: 'add'
+                })
+            });
+
+            return await response.json();
+        } catch (error) {
+            return { success: false, error: error.message };
+        }
+    }
+
+    async createMatch(fromSessionId, toUserId) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/index_api/match?api_key=${this.apiKey}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    session_id: fromSessionId,
+                    action: 'set_like',
+                    id_user: toUserId
+                })
+            });
+
+            return await response.json();
+        } catch (error) {
+            return { success: false, error: error.message };
+        }
+    }
+
+    async setupDemoUsers() {
+        const logs = [];
+        
+        try {
+            logs.push('🚀 Начинаем настройку демо-пользователей...');
+            
+            // 1. Авторизация
+            logs.push('=== ЭТАП 1: АВТОРИЗАЦИЯ ===');
+            const dannyLogin = await this.loginUser(this.users.danny.username, this.users.danny.password);
+            if (!dannyLogin.success) {
+                throw new Error(`Не удалось авторизовать ${this.users.danny.username}`);
+            }
+            this.users.danny.sessionId = dannyLogin.sessionId;
+            this.users.danny.userId = dannyLogin.userId;
+            logs.push(`✅ ${this.users.danny.username} авторизован`);
+
+            const hoopsereLogin = await this.loginUser(this.users.hoopsere.username, this.users.hoopsere.password);
+            if (!hoopsereLogin.success) {
+                throw new Error(`Не удалось авторизовать ${this.users.hoopsere.username}`);
+            }
+            this.users.hoopsere.sessionId = hoopsereLogin.sessionId;
+            this.users.hoopsere.userId = hoopsereLogin.userId;
+            logs.push(`✅ ${this.users.hoopsere.username} авторизован`);
+
+            // 2. Добавление в контакты
+            logs.push('=== ЭТАП 2: ДОБАВЛЕНИЕ В КОНТАКТЫ ===');
+            const contactResult = await this.addContact(this.users.danny.sessionId, this.users.hoopsere.userId);
+            logs.push(`✅ Контакт добавлен: ${JSON.stringify(contactResult)}`);
+
+            // 3. Добавление в друзья
+            logs.push('=== ЭТАП 3: ДОБАВЛЕНИЕ В ДРУЗЬЯ ===');
+            const friendResult = await this.addFriend(this.users.danny.sessionId, this.users.hoopsere.userId);
+            logs.push(`✅ Друг добавлен: ${JSON.stringify(friendResult)}`);
+
+            // 4. Создание матча
+            logs.push('=== ЭТАП 4: СОЗДАНИЕ МАТЧА ===');
+            const match1 = await this.createMatch(this.users.danny.sessionId, this.users.hoopsere.userId);
+            const match2 = await this.createMatch(this.users.hoopsere.sessionId, this.users.danny.userId);
+            logs.push(`✅ Матч создан: ${JSON.stringify(match1)} | ${JSON.stringify(match2)}`);
+
+            logs.push('🎉 Настройка завершена успешно!');
+            
+            return {
+                success: true,
+                message: 'Демо-пользователи настроены успешно',
+                logs: logs,
+                users: this.users
+            };
+
+        } catch (error) {
+            logs.push(`❌ Ошибка: ${error.message}`);
+            return {
+                success: false,
+                error: error.message,
+                logs: logs
+            };
+        }
+    }
+}
+
 export default async function handler(req, res) {
     // CORS headers
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -9,44 +188,75 @@ export default async function handler(req, res) {
         return;
     }
 
-    // Проверяем environment variables (НЕ показываем сам ключ в целях безопасности)
     const API_KEY = process.env.SPICE_API_KEY;
     const BASE_URL = process.env.SPICE_BASE_URL;
 
-    const debug_info = {
-        timestamp: new Date().toISOString(),
-        environment_variables: {
-            SPICE_API_KEY: {
-                exists: !!API_KEY,
-                length: API_KEY ? API_KEY.length : 0,
-                first_chars: API_KEY ? API_KEY.substring(0, 4) + '...' : 'не найден',
-                last_chars: API_KEY ? '...' + API_KEY.substring(API_KEY.length - 4) : 'не найден'
+    // Если это GET запрос - показываем debug информацию
+    if (req.method === 'GET') {
+        const debug_info = {
+            timestamp: new Date().toISOString(),
+            environment_variables: {
+                SPICE_API_KEY: {
+                    exists: !!API_KEY,
+                    length: API_KEY ? API_KEY.length : 0,
+                    first_chars: API_KEY ? API_KEY.substring(0, 4) + '...' : 'не найден',
+                    last_chars: API_KEY ? '...' + API_KEY.substring(API_KEY.length - 4) : 'не найден'
+                },
+                SPICE_BASE_URL: {
+                    exists: !!BASE_URL,
+                    value: BASE_URL || 'не найден'
+                }
             },
-            SPICE_BASE_URL: {
-                exists: !!BASE_URL,
-                value: BASE_URL || 'не найден'
+            request_info: {
+                method: req.method,
+                url: req.url,
+                headers: {
+                    'user-agent': req.headers['user-agent'],
+                    'host': req.headers['host']
+                }
+            },
+            deployment_info: {
+                vercel_env: process.env.VERCEL_ENV || 'не найдено',
+                vercel_url: process.env.VERCEL_URL || 'не найдено',
+                node_version: process.version
             }
-        },
-        request_info: {
-            method: req.method,
-            url: req.url,
-            headers: {
-                'user-agent': req.headers['user-agent'],
-                'host': req.headers['host']
-            }
-        },
-        deployment_info: {
-            vercel_env: process.env.VERCEL_ENV || 'не найдено',
-            vercel_url: process.env.VERCEL_URL || 'не найдено',
-            node_version: process.version
+        };
+
+        console.log('🔍 Debug info:', debug_info);
+
+        return res.status(200).json({
+            success: true,
+            message: 'Debug information (API ключ скрыт для безопасности)',
+            ...debug_info
+        });
+    }
+
+    // Если это POST запрос - запускаем настройку демо-пользователей
+    if (req.method === 'POST') {
+        if (!API_KEY) {
+            return res.status(400).json({
+                success: false,
+                error: 'SPICE_API_KEY environment variable is required'
+            });
         }
-    };
 
-    console.log('🔍 Debug info:', debug_info);
+        try {
+            const setup = new DemoUsersSetup(API_KEY);
+            const result = await setup.setupDemoUsers();
+            
+            return res.status(200).json(result);
+        } catch (error) {
+            console.error('Setup error:', error);
+            return res.status(500).json({
+                success: false,
+                error: error.message
+            });
+        }
+    }
 
-    res.status(200).json({
-        success: true,
-        message: 'Debug information (API ключ скрыт для безопасности)',
-        ...debug_info
+    // Неподдерживаемый метод
+    return res.status(405).json({
+        success: false,
+        error: 'Method not allowed. Use GET for debug info or POST for demo setup.'
     });
-} 
+}
