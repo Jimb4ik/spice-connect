@@ -3,14 +3,17 @@
  * Отладка окружения и настройка демо-пользователей
  */
 
-const API_BASE_URL = 'https://api.fotochat.com';
-
 class DemoUsersSetup {
-    constructor(apiKey) {
+    constructor(apiKey, baseUrl = null) {
         this.apiKey = apiKey;
+        this.baseUrl = baseUrl || process.env.SPICE_BASE_URL || 'https://dev2018.de5a7.com';
+        
         if (!this.apiKey) {
             throw new Error('SPICE_API_KEY is required');
         }
+        
+        console.log(`🔧 [SETUP] Using API Base URL: ${this.baseUrl}`);
+        console.log(`🔧 [SETUP] Using API Key: ${this.apiKey.substring(0, 8)}...`);
         
         // Данные демо-пользователей
         this.users = {
@@ -31,7 +34,7 @@ class DemoUsersSetup {
 
     async loginUser(username, password) {
         try {
-            const url = `${API_BASE_URL}/ajax_api/login?api_key=${this.apiKey}`;
+            const url = `${this.baseUrl}/ajax_api/login?api_key=${this.apiKey}`;
             const body = new URLSearchParams({
                 pseudo: username,
                 password: password
@@ -74,7 +77,7 @@ class DemoUsersSetup {
 
     async addContact(fromSessionId, toUserId) {
         try {
-            const url = `${API_BASE_URL}/ajax_api/setContact?api_key=${this.apiKey}`;
+            const url = `${this.baseUrl}/ajax_api/setContact?api_key=${this.apiKey}`;
             const body = new URLSearchParams({
                 session_id: fromSessionId,
                 id_user: toUserId,
@@ -106,7 +109,7 @@ class DemoUsersSetup {
 
     async addFriend(fromSessionId, toUserId) {
         try {
-            const url = `${API_BASE_URL}/ajax_api/setFriend?api_key=${this.apiKey}`;
+            const url = `${this.baseUrl}/ajax_api/setFriend?api_key=${this.apiKey}`;
             const body = new URLSearchParams({
                 session_id: fromSessionId,
                 id_user: toUserId,
@@ -138,7 +141,7 @@ class DemoUsersSetup {
 
     async createMatch(fromSessionId, toUserId) {
         try {
-            const url = `${API_BASE_URL}/index_api/match?api_key=${this.apiKey}`;
+            const url = `${this.baseUrl}/index_api/match?api_key=${this.apiKey}`;
             const body = new URLSearchParams({
                 session_id: fromSessionId,
                 action: 'set_like',
@@ -312,7 +315,7 @@ export default async function handler(req, res) {
         }
 
         try {
-            const setup = new DemoUsersSetup(API_KEY);
+            const setup = new DemoUsersSetup(API_KEY, BASE_URL);
             const result = await setup.setupDemoUsers();
             
             return res.status(200).json(result);
