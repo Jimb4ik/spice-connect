@@ -15,7 +15,7 @@
       "destination": "/lp/$1"
     },
     {
-      "source": "/((?!lp).*)",
+      "source": "/((?!api/|lp/|js/|css/|images/|icons/|gifts/|fonts/|assets/|static/|sw/|.*\\.[^/]+$).*)",
       "destination": "/index.html"
     }
   ],
