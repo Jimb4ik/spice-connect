@@ -280,13 +280,13 @@
 }
 
 .transaction-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: 16px;
+    margin-right: 20px;
 }
 
 .transaction-icon.deposit {
@@ -305,8 +305,8 @@
 }
 
 .transaction-icon img {
-    width: 24px;
-    height: 24px;
+    width: 32px;
+    height: 32px;
 }
 
 .transaction-details {
