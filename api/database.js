@@ -10,12 +10,12 @@ export default async function handler(req, res) {
         return res.status(200).end();
     }
 
-    // УМНАЯ ЗАГЛУШКА - перенаправляем кошелек, остальное заглушаем
+    // Перенаправляем ТОЛЬКО запросы кошелька на отдельный API
     const { action } = req.method === 'GET' ? req.query : req.body;
     
     console.log('[DATABASE] Processing action:', action);
     
-    // Перенаправляем запросы кошелька на рабочий API
+    // ТОЛЬКО для кошелька используем отдельный API
     if (action === 'get_wallet' || action === 'get_wallet_transactions' || action === 'add_transaction') {
         try {
             const walletResponse = await fetch(`${req.headers.host ? `https://${req.headers.host}` : 'https://lavrilo.com'}/api/wallet-transactions`, {
@@ -37,12 +37,7 @@ export default async function handler(req, res) {
         }
     }
     
-    // Для остальных запросов возвращаем пустые успешные ответы
-    return res.status(200).json({
-        success: true,
-        data: [],
-        message: `Stub response for action: ${action}`
-    });
+    // Для ВСЕХ остальных запросов используем обычную базу данных
 
     try {
         const { Pool } = await import('pg');
