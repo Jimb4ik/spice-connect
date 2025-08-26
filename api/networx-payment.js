@@ -85,9 +85,11 @@ async function handleWebhook(req, res) {
 
     } catch (error) {
         console.error('[NETWORX] Webhook error:', error);
+        console.error('[NETWORX] Error stack:', error.stack);
         return res.status(500).json({
             success: false,
-            error: 'Webhook processing failed'
+            error: 'Webhook processing failed',
+            details: error.message
         });
     }
 }
