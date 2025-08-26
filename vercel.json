@@ -5,29 +5,14 @@
       "maxDuration": 30
     }
   },
-  "redirects": [
-    {
-      "source": "/lp$",
-      "destination": "/lp/index",
-      "permanent": false
-    }
-  ],
   "rewrites": [
     {
       "source": "/api/(.*)",
       "destination": "/api/$1"
     },
     {
-      "source": "/lp/index$",
-      "destination": "/lp/index.html"
-    },
-    {
-      "source": "/lp/index1$",
-      "destination": "/lp/index1.html"
-    },
-    {
-      "source": "/lp/(.*)\\.(html|css|js|avif|gif|mp4|png|jpg|jpeg)$",
-      "destination": "/lp/$1.$2"
+      "source": "/lp/(.*)",
+      "destination": "/lp/$1"
     },
     {
       "source": "/((?!lp).*)",
@@ -85,6 +70,6 @@
   ],
   "buildCommand": "",
   "outputDirectory": ".",
-  "cleanUrls": true,
+  "cleanUrls": false,
   "trailingSlash": false
 } 
