@@ -321,8 +321,9 @@ async function processSuccessfulPayment(webhookData) {
             user_id: sessionId, // Используем session_id как user_id для совместимости
             session_id: sessionId,
             transaction_type: 'deposit',
-            amount: credits,
-            currency: currency, // Добавляем валюту из реальных данных
+            amount: amount, // Реальная сумма в реальной валюте
+            credits: credits, // Количество кредитов для добавления к балансу
+            currency: currency, // Валюта реальной транзакции
             description: `Payment via Networx - ${transaction.tracking_id}`,
             payment_method: 'card',
             payment_reference: transaction.uid,
