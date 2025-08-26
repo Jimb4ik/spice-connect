@@ -207,7 +207,7 @@ class WalletManager {
     
     getTransactionIcon(type) {
         const iconMap = {
-            'deposit': 'plus-circle.png',
+            'deposit': 'wallet-topup.png',
             'withdrawal': 'minus-circle.png',
             'purchase': 'shopping-cart.png',
             'refund': 'refresh.png'
