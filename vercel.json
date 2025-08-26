@@ -15,6 +15,10 @@
       "destination": "/lp/index.html"
     },
     {
+      "source": "/lp/index$",
+      "destination": "/lp/index.html"
+    },
+    {
       "source": "/lp/(.*)",
       "destination": "/lp/$1"
     },
