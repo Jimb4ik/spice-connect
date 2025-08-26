@@ -76,9 +76,12 @@ async function addWalletTransaction(pool, req) {
     }
 
     try {
-        // Получаем кошелек пользователя (сначала по user_id, потом по session_id)
+        // Ищем кошелек по всем возможным связям
         let walletResult;
         
+        console.log('[WALLET] Searching for existing wallet...', { user_id, session_id });
+        
+        // Сначала ищем по точному совпадению user_id
         if (user_id) {
             console.log('[WALLET] Looking for wallet by user_id:', user_id);
             walletResult = await pool.query(
@@ -88,13 +91,34 @@ async function addWalletTransaction(pool, req) {
             console.log('[WALLET] Wallet search result for user_id', user_id, ':', walletResult.rows.length > 0 ? 'found' : 'not found');
         }
         
-        // Если не найден по user_id или user_id не передан, ищем по session_id
+        // Если не найден по user_id, ищем по session_id
         if ((!walletResult || walletResult.rows.length === 0) && session_id) {
-            console.log('[WALLET] Fallback: searching wallet by session_id:', session_id);
+            console.log('[WALLET] Searching by session_id:', session_id);
             walletResult = await pool.query(
-                'SELECT * FROM user_wallets WHERE session_id = $1',
+                'SELECT * FROM user_wallets WHERE session_id = $1 OR user_id = $1',
                 [session_id]
             );
+            console.log('[WALLET] Wallet search result for session_id', session_id, ':', walletResult.rows.length > 0 ? 'found' : 'not found');
+        }
+        
+        // Если все еще не найден, попробуем найти по связи через user_progress
+        if ((!walletResult || walletResult.rows.length === 0) && session_id) {
+            console.log('[WALLET] Searching via user_progress table...');
+            const userLookupResult = await pool.query(
+                'SELECT DISTINCT up.user_id FROM user_progress up WHERE up.session_id = $1 LIMIT 1',
+                [session_id]
+            );
+            
+            if (userLookupResult.rows.length > 0) {
+                const realUserId = userLookupResult.rows[0].user_id;
+                console.log('[WALLET] Found real user_id via user_progress:', realUserId);
+                
+                walletResult = await pool.query(
+                    'SELECT * FROM user_wallets WHERE user_id = $1',
+                    [realUserId]
+                );
+                console.log('[WALLET] Wallet search result for real user_id', realUserId, ':', walletResult.rows.length > 0 ? 'found' : 'not found');
+            }
         }
 
         if (!walletResult || walletResult.rows.length === 0) {

@@ -113,8 +113,8 @@ async function createPaymentToken(req, res) {
             throw new Error('Networx credentials not configured');
         }
 
-        // Генерируем уникальный order ID
-        const orderId = `credits_${session_id}_${Date.now()}`;
+        // Генерируем уникальный order ID с реальным user_id
+        const orderId = `credits_${user_id || session_id}_${Date.now()}`;
         
         // Формируем данные для создания токена согласно официальной документации Networx
         const checkoutData = {

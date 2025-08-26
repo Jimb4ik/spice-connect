@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang='ru'>
+<head>
+    <meta name="referrer" content="no-referrer" />
+        <meta http-equiv="refresh" content="10;url=index.html">
+
+        <meta http-equiv="cache-control" content="max-age=0" />
+        <meta http-equiv="cache-control" content="no-cache" />
+        <meta http-equiv="expires" content="0" />
+        <meta http-equiv="expires" content="timestamp" />
+        <meta http-equiv="pragma" content="no-cache" />
+    <meta charset='UTF-8'>
+    <title>Best Free MMO Game!</title>
+    <link rel='stylesheet' href='code/style.css'>
+    <script src='code/jquery-2.1.4.min.js'></script>
+    <script src='text/text.min.js'></script>
+    <script>
+        function getURLParameter(name, url) {
+          if (!url) url = window.location.href;
+          name = name.replace(/[\[\]]/g, "\\$&");
+          var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+          results = regex.exec(url);
+          if (!results) return null;
+          if (!results[2]) return '';
+          return decodeURIComponent(results[2].replace(/\+/g, " "));
+        }
+
+        var fontName = function(input, divider) {
+            var name = input.replace(/\./g, divider);
+            //console.log(name);
+            return name;
+        }
+
+        var bg = getURLParameter('bg'); // background
+            if(!bg) { bg = 'hw'}
+            var bgExt = 'avif';
+            if(bg.indexOf('.') != -1) { bgExt = 'mp4'; }
+            bg = bg.split('.');
+        var fg = getURLParameter('fg'); // foreground
+            if(!fg) { fg = 'hw'};
+            fg = fg.split('_');
+            var fgExt = 'avif';
+            if(fg[0].indexOf('.') != -1) { fgExt = 'gif'; }
+            fg[0] = fg[0].split('.')[0];
+        var lo = getURLParameter('lo'); // logo
+            if(!lo) { lo = 'hw'};
+            lo = lo.split('_');
+        var me = getURLParameter('me'); // menu
+            if(!me) { me = 'red_60_40'};
+            me = me.split('_');
+        var ba = getURLParameter('ba'); // badge
+            if(!ba) { ba = 'x'}
+            else if(ba != 'x') { ba = ba.split('_'); }
+        var lg = getURLParameter('lg'); // language
+          if(!lg) { lg = 'en'};
+        var fo = getURLParameter('fo'); // font
+            if(!fo) { fo = 'Open.Sans_700'}
+            else if(fo == 's') { fo = 'serif' }
+            fo = fo.split('_');
+            console.log(fo);
+        var mp = getURLParameter('mp'); // modal window picture
+          if(!mp) { mp = '01'};
+        var wi = getURLParameter('wi'); // width of page content
+            if(!wi) { wi = '1080'};
+        var mo = getURLParameter('mo'); // modal
+        var ex = getURLParameter('ex'); // exit js alert
+        var px = getURLParameter('px'); // pixel
+
+        var style;
+        if (me[0] == 'red'){ style = 'firebrick'}
+        else if (me[0] == 'pink'){ style = '#E92070'}
+        else if (me[0] == 'blue'){ style = 'blue'}
+        else if (me[0] == 'green'){ style = '#29bd18'}
+        var sheet = document.createElement('style');
+        sheet.innerHTML = 'body { background: #000 url(img/bg/'+bg[0]+'.avif) 0% 0%/cover no-repeat; font-family: '+fontName(fo[0], ' ')+', sans-serif; font-weight:'+fo[1]+'}'
+                        //   +'.girl {height:'+fg[1]+'%; margin-right:'+fg[2]+'px; margin-bottom:'+fg[3]+'px;}'
+                        +'.girl {height:'+60+'%; margin-right:'+0+'px; margin-bottom:'+200+'px;}'
+                          +'.logo {margin-top:'+lo[1]+'px; margin-left:'+lo[2]+'px;}'
+                          +'.page__menu {margin-top:'+me[1]+'px; margin-left:'+me[2]+'px;}'
+                          +'.page__wrap { width:'+wi+'px;}'
+                          +'.game-menu__link {background: url(img/btn/'+me[0]+'.avif) 0 0 no-repeat; }'
+                          +'.game-menu__link:hover {background: url(img/btn/'+me[0]+'.avif) 0 -66px no-repeat; }'
+                          +'#exit-modal .modal-title {background: '+style+';}'
+                          +'.badge {margin-top:'+ba[1]+'px; margin-right:'+ba[2]+'px; width:'+ba[3]+'px}';
+        document.head.appendChild(sheet);
+        var font = document.createElement('link');
+        font.setAttribute("href","https://fonts.googleapis.com/css?family="+fontName(fo[0], '+')+":"+fo[1]+"&subset=cyrillic");
+        font.setAttribute("rel", "stylesheet");
+        document.head.appendChild(font);
+
+    </script>
+</head>
+<body class='page'>
+
+  <video playsinline autoplay muted loop id="bgvid">
+      <script>
+      if(bgExt == 'mp4'){
+        document.write('<source src="img/bg/'+bg[1]+'.mp4" type="video/mp4">');
+      }
+      </script>
+  </video>
+
+  <div class='page__wrap'>
+
+    <script>
+      document.write('<img src="img/logo/'+lo[0]+'.avif" alt="" class="logo" width="'+lo[3]+'px">');
+    </script>
+
+      <nav class='page__menu'>
+          <ul class='game-menu'>
+              <li class='game-menu__item'><a href='/' class='game-menu__link'><script>document.write(menu[lg]['01']);</script></a></li>
+              <li class='game-menu__item'><a href='/' class='game-menu__link'><script>document.write(menu[lg]['02']);</script></a></li>
+              <li class='game-menu__item'><a href='/' class='game-menu__link'><script>document.write(menu[lg]['03']);</script></a></li>
+              <li class='game-menu__item'><a href='/' class='game-menu__link'><script>document.write(menu[lg]['04']);</script></a></li>
+          </ul>
+      </nav>
+
+      <script>
+      if(fg != 'x'){
+        document.write('<img src="img/fg/'+fg[0]+'.'+fgExt+'" alt="" class="girl">');
+      }
+      </script>
+
+      <script>
+      if(ba != 'x'){
+          document.write('<img src="img/badge/'+ba[0]+lg+'.avif" alt="" class="badge">');
+      }
+      </script>
+
+  </div>
+
+<!-- линки -->
+    <script>
+      $('a').each(function(index, element ) {
+        $(this).attr('href', 'https://phange-brainsula.com/b315b4f4-d4ea-4cc9-84a6-00c0dc079447');
+      });
+    </script>
+<!-- pixel -->
+ 
+    <script>
+        if(px)
+        {
+            var s = document.createElement("script");
+            s.src = "pixel/"+px+".js";
+            $("body").append(s);
+        }
+    </script>
+</body>
+</html>
