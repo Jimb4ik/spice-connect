@@ -326,7 +326,7 @@ async function processSuccessfulPayment(webhookData) {
             amount: amount, // Реальная сумма в реальной валюте
             credits: credits, // Количество кредитов для добавления к балансу
             currency: currency, // Валюта реальной транзакции
-            description: `Payment via Networx - ${transaction.tracking_id}`,
+            description: `${transaction.tracking_id}`,
             payment_method: 'card',
             payment_reference: transaction.uid,
             status: 'completed'

@@ -510,6 +510,16 @@
         // Проверяем статус платежа при загрузке страницы
         document.addEventListener('DOMContentLoaded', () => {
             setTimeout(handlePaymentReturn, 1000); // Даем время walletManager инициализироваться
+            
+            // Обработчик кнопки logout
+            const logoutBtn = document.getElementById('logoutBtn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', () => {
+                    if (window.authManager) {
+                        window.authManager.logout();
+                    }
+                });
+            }
         });
     </script>
 

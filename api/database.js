@@ -10,6 +10,18 @@ export default async function handler(req, res) {
         return res.status(200).end();
     }
 
+    // ВРЕМЕННАЯ ЗАГЛУШКА - возвращаем пустые успешные ответы
+    const { action } = req.method === 'GET' ? req.query : req.body;
+    
+    console.log('[DATABASE] Stub response for action:', action);
+    
+    // Возвращаем пустые успешные ответы для всех запросов
+    return res.status(200).json({
+        success: true,
+        data: [],
+        message: 'Stub response - database temporarily disabled'
+    });
+
     try {
         const { Pool } = await import('pg');
         
