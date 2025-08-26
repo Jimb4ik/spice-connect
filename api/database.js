@@ -467,23 +467,42 @@ async function getViewedProfiles(pool, req) {
         };
     }
 
-    let query = 'SELECT * FROM viewed_profiles WHERE user_id = $1';
-    const params = [user_id];
+    try {
+        let query = 'SELECT * FROM viewed_profiles WHERE user_id = $1';
+        const params = [user_id];
 
-    if (action) {
-        query += ' AND action = $2';
-        params.push(action);
+        if (action) {
+            query += ' AND action = $2';
+            params.push(action);
+        }
+
+        query += ' ORDER BY created_at DESC';
+
+        const result = await pool.query(query, params);
+        
+        return {
+            success: true,
+            data: result.rows,
+            count: result.rows.length
+        };
+    } catch (error) {
+        console.error('[DB] Error getting viewed profiles:', error);
+        
+        // Если таблица не существует, возвращаем пустой результат
+        if (error.code === '42P01') { // relation does not exist
+            console.log('[DB] viewed_profiles table does not exist, returning empty result');
+            return {
+                success: true,
+                data: [],
+                count: 0
+            };
+        }
+        
+        return {
+            success: false,
+            error: error.message
+        };
     }
-
-    query += ' ORDER BY created_at DESC';
-
-    const result = await pool.query(query, params);
-    
-    return {
-        success: true,
-        data: result.rows,
-        count: result.rows.length
-    };
 }
 
 // Отметить профиль как просмотренный
@@ -548,35 +567,60 @@ async function getMatches(pool, req) {
         };
     }
 
-    let query = 'SELECT * FROM matches WHERE user_id = $1';
-    const params = [user_id];
+    try {
+        let query = 'SELECT * FROM matches WHERE user_id = $1';
+        const params = [user_id];
 
-    if (unread_only === 'true') {
-        query += ' AND is_read = FALSE';
+        if (unread_only === 'true') {
+            query += ' AND is_read = FALSE';
+        }
+
+        query += ' ORDER BY match_date DESC LIMIT $2 OFFSET $3';
+        params.push(parseInt(limit), parseInt(offset));
+
+        console.log('[DB] Getting matches for user:', user_id, 'query:', query);
+        const result = await pool.query(query, params);
+        
+        let countQuery = 'SELECT COUNT(*) FROM matches WHERE user_id = $1';
+        const countParams = [user_id];
+        
+        if (unread_only === 'true') {
+            countQuery += ' AND is_read = FALSE';
+        }
+        
+        const countResult = await pool.query(countQuery, countParams);
+        
+        console.log('[DB] Found', result.rows.length, 'matches for user', user_id);
+        
+        return {
+            success: true,
+            data: result.rows,
+            total: parseInt(countResult.rows[0].count),
+            count: result.rows.length,
+            limit: parseInt(limit),
+            offset: parseInt(offset)
+        };
+    } catch (error) {
+        console.error('[DB] Error getting matches:', error);
+        
+        // Если таблица не существует, возвращаем пустой результат
+        if (error.code === '42P01') { // relation does not exist
+            console.log('[DB] matches table does not exist, returning empty result');
+            return {
+                success: true,
+                data: [],
+                total: 0,
+                count: 0,
+                limit: parseInt(limit),
+                offset: parseInt(offset)
+            };
+        }
+        
+        return {
+            success: false,
+            error: error.message
+        };
     }
-
-    query += ' ORDER BY match_date DESC LIMIT $2 OFFSET $3';
-    params.push(parseInt(limit), parseInt(offset));
-
-    const result = await pool.query(query, params);
-    
-    let countQuery = 'SELECT COUNT(*) FROM matches WHERE user_id = $1';
-    const countParams = [user_id];
-    
-    if (unread_only === 'true') {
-        countQuery += ' AND is_read = FALSE';
-    }
-    
-    const countResult = await pool.query(countQuery, countParams);
-    
-    return {
-        success: true,
-        data: result.rows,
-        total: parseInt(countResult.rows[0].count),
-        count: result.rows.length,
-        limit: parseInt(limit),
-        offset: parseInt(offset)
-    };
 }
 
 // Сохранить матч
