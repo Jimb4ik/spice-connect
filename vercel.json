@@ -5,22 +5,21 @@
       "maxDuration": 30
     }
   },
+  "redirects": [
+    {
+      "source": "/lp/index.html",
+      "destination": "/lp/index",
+      "permanent": false
+    }
+  ],
   "rewrites": [
     {
       "source": "/api/(.*)",
       "destination": "/api/$1"
     },
     {
-      "source": "/lp/index.html",
-      "destination": "/lp/main.html"
-    },
-    {
-      "source": "/lp/index$",
-      "destination": "/lp/main.html"
-    },
-    {
-      "source": "/lp$",
-      "destination": "/lp/main.html"
+      "source": "/lp/index",
+      "destination": "/lp/index.html"
     },
     {
       "source": "/lp/(.*)",
