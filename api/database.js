@@ -728,6 +728,7 @@ async function addWalletTransaction(pool, req) {
         session_id,
         transaction_type, 
         amount, 
+        currency,
         description, 
         payment_method, 
         payment_reference 
@@ -798,6 +799,7 @@ async function addWalletTransaction(pool, req) {
             user_id: effectiveUserId,
             transaction_type,
             amount: transactionAmount,
+            currency: currency || 'USD',
             description,
             payment_method,
             payment_reference
@@ -806,10 +808,10 @@ async function addWalletTransaction(pool, req) {
         // Добавляем транзакцию
         const transactionResult = await pool.query(
             `INSERT INTO wallet_transactions 
-             (wallet_id, user_id, transaction_type, amount, description, payment_method, payment_reference)
-             VALUES ($1, $2, $3, $4, $5, $6, $7)
+             (wallet_id, user_id, transaction_type, amount, currency, description, payment_method, payment_reference)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
              RETURNING *`,
-            [wallet.id, effectiveUserId, transaction_type, transactionAmount, description, payment_method, payment_reference]
+            [wallet.id, effectiveUserId, transaction_type, transactionAmount, currency || 'USD', description, payment_method, payment_reference]
         );
 
         // Обновляем баланс кошелька

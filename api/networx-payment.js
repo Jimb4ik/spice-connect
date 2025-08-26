@@ -50,8 +50,12 @@ async function handleWebhook(req, res) {
             transaction_uid: webhookData.transaction?.uid,
             status: webhookData.transaction?.status,
             amount: webhookData.transaction?.amount,
+            currency: webhookData.transaction?.currency,
             tracking_id: webhookData.transaction?.tracking_id
         });
+        
+        // Детальное логирование для отладки
+        console.log('[NETWORX] Full webhook data:', JSON.stringify(webhookData, null, 2));
 
         // Verify webhook signature using Content-Signature header (RSA signature)
         const contentSignature = req.headers['content-signature'];
@@ -267,10 +271,16 @@ async function processSuccessfulPayment(webhookData) {
         let sessionId, credits, amount, currency;
         
         // Пытаемся извлечь данные из tracking_id (наш order_id)
+        // Формат: credits_SESSION_ID_TIMESTAMP
         if (transaction.tracking_id) {
+            console.log('[NETWORX] Parsing tracking_id:', transaction.tracking_id);
             const orderIdParts = transaction.tracking_id.split('_');
+            console.log('[NETWORX] Order ID parts:', orderIdParts);
+            
             if (orderIdParts.length >= 3 && orderIdParts[0] === 'credits') {
-                sessionId = orderIdParts.slice(1, -1).join('_'); // Все части кроме первой и последней
+                // Берем все части между 'credits' и последним timestamp
+                sessionId = orderIdParts.slice(1, -1).join('_');
+                console.log('[NETWORX] Extracted session_id:', sessionId);
             }
         }
         
@@ -305,22 +315,28 @@ async function processSuccessfulPayment(webhookData) {
 
         // Add credits to user wallet
         const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://lavrilo.com';
+        
+        const transactionData = {
+            action: 'add_transaction',
+            user_id: sessionId, // Используем session_id как user_id для совместимости
+            session_id: sessionId,
+            transaction_type: 'deposit',
+            amount: credits,
+            currency: currency, // Добавляем валюту из реальных данных
+            description: `Payment via Networx - ${transaction.tracking_id}`,
+            payment_method: 'card',
+            payment_reference: transaction.uid,
+            status: 'completed'
+        };
+        
+        console.log('[NETWORX] Sending transaction data to database:', transactionData);
+        
         const walletResponse = await fetch(`${baseUrl}/api/database`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                action: 'add_transaction',
-                user_id: sessionId, // Используем session_id как user_id для совместимости
-                session_id: sessionId,
-                transaction_type: 'deposit',
-                amount: credits,
-                description: `Payment via Networx - ${transaction.tracking_id}`,
-                payment_method: 'card',
-                payment_reference: transaction.uid,
-                status: 'completed'
-            })
+            body: JSON.stringify(transactionData)
         });
 
         const walletResult = await walletResponse.json();
