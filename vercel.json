@@ -11,8 +11,8 @@
       "destination": "/api/$1"
     },
     {
-      "source": "/lp/index$",
-      "destination": "/lp/index.html"
+      "source": "/lp/index.html",
+      "destination": "/lp/main.html"
     },
     {
       "source": "/lp/(.*)",
@@ -75,11 +75,5 @@
   "buildCommand": "",
   "outputDirectory": ".",
   "cleanUrls": true,
-  "trailingSlash": false,
-  "routes": [
-    {
-      "src": "/lp/(.*)",
-      "dest": "/lp/$1"
-    }
-  ]
+  "trailingSlash": false
 } 
