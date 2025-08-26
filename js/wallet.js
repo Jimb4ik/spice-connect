@@ -173,6 +173,17 @@ class WalletManager {
             const amountPrefix = isPositive ? '+' : '-';
             const iconType = this.getTransactionIcon(transaction.transaction_type);
             
+            // Рассчитываем кредиты на основе суммы и валюты (как в networx-payment.js)
+            const creditRates = {
+                'EUR': 0.21,
+                'USD': 0.23,
+                'GBP': 0.18,
+                'CAD': 0.31,
+                'AUD': 0.35
+            };
+            const rate = creditRates[transaction.currency] || creditRates['EUR'];
+            const credits = Math.floor(parseFloat(transaction.amount) / rate);
+            
             return `
                 <div class="transaction-item">
                     <div class="transaction-icon ${transaction.transaction_type}">
@@ -184,7 +195,8 @@ class WalletManager {
                         <div class="transaction-date">${this.formatDate(transaction.created_at)}</div>
                     </div>
                     <div class="transaction-amount ${amountClass}">
-                        ${amountPrefix}$${parseFloat(transaction.amount).toFixed(2)}
+                        <div class="amount-money">${amountPrefix}${parseFloat(transaction.amount).toFixed(2)} ${transaction.currency}</div>
+                        ${isPositive ? `<div class="amount-credits">+${credits} credits</div>` : ''}
                     </div>
                 </div>
             `;
@@ -729,8 +741,20 @@ function viewTransactionHistory() {
     }
 }
 
-function viewAllTransactions() {
-    viewTransactionHistory();
+async function viewAllTransactions() {
+    if (walletManager) {
+        // Загружаем все транзакции (без лимита)
+        await walletManager.loadRecentTransactions(100); // Загружаем до 100 транзакций
+        
+        // Прокручиваем к секции транзакций
+        viewTransactionHistory();
+        
+        // Скрываем кнопку "View All" после загрузки всех транзакций
+        const viewAllBtn = document.querySelector('.view-all-btn');
+        if (viewAllBtn) {
+            viewAllBtn.style.display = 'none';
+        }
+    }
 }
 
 // Success message

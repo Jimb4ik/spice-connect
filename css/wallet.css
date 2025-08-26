@@ -345,6 +345,20 @@
     color: #f44336;
 }
 
+/* Стили для отображения денег и кредитов */
+.amount-money {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.amount-credits {
+    font-size: 14px;
+    font-weight: 500;
+    color: #666;
+    margin-top: 2px;
+}
+
 /* ============ LOADING STATES ============ */
 .loading-transactions {
     display: flex;
