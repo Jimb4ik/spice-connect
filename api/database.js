@@ -10,16 +10,38 @@ export default async function handler(req, res) {
         return res.status(200).end();
     }
 
-    // ВРЕМЕННАЯ ЗАГЛУШКА - возвращаем пустые успешные ответы
+    // УМНАЯ ЗАГЛУШКА - перенаправляем кошелек, остальное заглушаем
     const { action } = req.method === 'GET' ? req.query : req.body;
     
-    console.log('[DATABASE] Stub response for action:', action);
+    console.log('[DATABASE] Processing action:', action);
     
-    // Возвращаем пустые успешные ответы для всех запросов
+    // Перенаправляем запросы кошелька на рабочий API
+    if (action === 'get_wallet' || action === 'get_wallet_transactions' || action === 'add_transaction') {
+        try {
+            const walletResponse = await fetch(`${req.headers.host ? `https://${req.headers.host}` : 'https://lavrilo.com'}/api/wallet-transactions`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(req.body)
+            });
+            
+            const walletResult = await walletResponse.json();
+            return res.status(walletResponse.status).json(walletResult);
+        } catch (error) {
+            console.error('[DATABASE] Wallet redirect error:', error);
+            return res.status(500).json({
+                success: false,
+                error: 'Wallet operation failed'
+            });
+        }
+    }
+    
+    // Для остальных запросов возвращаем пустые успешные ответы
     return res.status(200).json({
         success: true,
         data: [],
-        message: 'Stub response - database temporarily disabled'
+        message: `Stub response for action: ${action}`
     });
 
     try {
