@@ -95,7 +95,7 @@ class WalletManager {
         try {
             console.log('[WALLET] Loading wallet data...');
             
-            const response = await fetch('/api/database', {
+            const response = await fetch('/api/wallet-transactions', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -125,12 +125,13 @@ class WalletManager {
         try {
             console.log('[WALLET] Loading recent transactions...');
             
-            const response = await fetch('/api/database', {
+            const response = await fetch('/api/wallet-transactions', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    action: 'get_transactions',
+                    action: 'get_wallet_transactions',
                     user_id: this.userId,
+                    session_id: this.sessionId,
                     limit: limit
                 })
             });

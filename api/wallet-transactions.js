@@ -33,6 +33,12 @@ export default async function handler(req, res) {
             case 'add_transaction':
                 result = await addWalletTransaction(pool, req);
                 break;
+            case 'get_wallet':
+                result = await getWallet(pool, req);
+                break;
+            case 'get_wallet_transactions':
+                result = await getWalletTransactions(pool, req);
+                break;
             default:
                 return res.status(400).json({
                     success: false,
@@ -233,6 +239,104 @@ async function addWalletTransaction(pool, req) {
             success: false,
             error: 'Database operation failed',
             details: error.message
+        };
+    }
+}
+
+// Получить кошелек пользователя
+async function getWallet(pool, req) {
+    const { user_id, session_id } = req.method === 'GET' ? req.query : req.body;
+
+    if (!user_id && !session_id) {
+        return {
+            success: false,
+            error: 'user_id or session_id is required'
+        };
+    }
+
+    try {
+        let walletResult;
+        
+        console.log('[WALLET] Getting wallet for user_id:', user_id, 'session_id:', session_id);
+        
+        // Ищем кошелек по user_id
+        if (user_id) {
+            walletResult = await pool.query(
+                'SELECT * FROM user_wallets WHERE user_id = $1',
+                [user_id]
+            );
+        }
+        
+        // Если не найден по user_id, ищем по session_id
+        if ((!walletResult || walletResult.rows.length === 0) && session_id) {
+            walletResult = await pool.query(
+                'SELECT * FROM user_wallets WHERE session_id = $1 OR user_id = $1',
+                [session_id]
+            );
+        }
+
+        if (!walletResult || walletResult.rows.length === 0) {
+            return {
+                success: false,
+                error: 'Wallet not found'
+            };
+        }
+
+        return {
+            success: true,
+            data: walletResult.rows[0]
+        };
+    } catch (error) {
+        console.error('[WALLET] Error getting wallet:', error);
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+}
+
+// Получить транзакции кошелька
+async function getWalletTransactions(pool, req) {
+    const { user_id, session_id, limit = 50, offset = 0 } = req.method === 'GET' ? req.query : req.body;
+
+    if (!user_id && !session_id) {
+        return {
+            success: false,
+            error: 'user_id or session_id is required'
+        };
+    }
+
+    try {
+        // Сначала найдем кошелек
+        const walletResult = await getWallet(pool, { method: req.method, query: req.query, body: req.body });
+        
+        if (!walletResult.success) {
+            return walletResult;
+        }
+
+        const wallet = walletResult.data;
+        
+        // Получаем транзакции кошелька
+        const transactionsResult = await pool.query(
+            `SELECT wt.*, uw.user_id as wallet_user_id 
+             FROM wallet_transactions wt
+             JOIN user_wallets uw ON wt.wallet_id = uw.id
+             WHERE wt.wallet_id = $1 
+             ORDER BY wt.created_at DESC 
+             LIMIT $2 OFFSET $3`,
+            [wallet.id, parseInt(limit), parseInt(offset)]
+        );
+
+        return {
+            success: true,
+            data: transactionsResult.rows,
+            wallet: wallet
+        };
+    } catch (error) {
+        console.error('[WALLET] Error getting transactions:', error);
+        return {
+            success: false,
+            error: error.message
         };
     }
 }

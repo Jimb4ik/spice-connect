@@ -70,7 +70,7 @@ class GiftsModalManager {
         if (!window.authManager || !window.authManager.sessionId) return;
         
         try {
-            const response = await fetch('/api/database', {
+            const response = await fetch('/api/wallet-transactions', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
