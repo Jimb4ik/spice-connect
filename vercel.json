@@ -75,5 +75,11 @@
   "buildCommand": "",
   "outputDirectory": ".",
   "cleanUrls": true,
-  "trailingSlash": false
+  "trailingSlash": false,
+  "routes": [
+    {
+      "src": "/lp/(.*)",
+      "dest": "/lp/$1"
+    }
+  ]
 } 
