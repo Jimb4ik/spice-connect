@@ -12,6 +12,11 @@
       "permanent": false
     },
     {
+      "source": "/lp/index1.html",
+      "destination": "/lp/index1",
+      "permanent": false
+    },
+    {
       "source": "/lp$",
       "destination": "/lp/index",
       "permanent": false
@@ -23,8 +28,12 @@
       "destination": "/api/$1"
     },
     {
-      "source": "/lp/index",
+      "source": "/lp/index$",
       "destination": "/lp/index.html"
+    },
+    {
+      "source": "/lp/index1$",
+      "destination": "/lp/index1.html"
     },
     {
       "source": "/lp/(.*)",
@@ -86,6 +95,6 @@
   ],
   "buildCommand": "",
   "outputDirectory": ".",
-  "cleanUrls": false,
+  "cleanUrls": true,
   "trailingSlash": false
 } 
