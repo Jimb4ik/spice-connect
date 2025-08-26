@@ -7,16 +7,6 @@
   },
   "redirects": [
     {
-      "source": "/lp/index.html",
-      "destination": "/lp/index",
-      "permanent": false
-    },
-    {
-      "source": "/lp/index1.html",
-      "destination": "/lp/index1",
-      "permanent": false
-    },
-    {
       "source": "/lp$",
       "destination": "/lp/index",
       "permanent": false
@@ -36,8 +26,8 @@
       "destination": "/lp/index1.html"
     },
     {
-      "source": "/lp/(.*)",
-      "destination": "/lp/$1"
+      "source": "/lp/(.*)\\.(html|css|js|avif|gif|mp4|png|jpg|jpeg)$",
+      "destination": "/lp/$1.$2"
     },
     {
       "source": "/((?!lp).*)",
