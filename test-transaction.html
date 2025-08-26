@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Transaction - SpiceConnect</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .success {
+            background: #28a745;
+        }
+        .success:hover {
+            background: #1e7e34;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+        }
+        .error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        .success-result {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+        pre {
+            background: #f1f1f1;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        .session-info {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Transaction System</h1>
+        
+        <div class="session-info">
+            <h3>📋 Session Information</h3>
+            <p><strong>Session ID:</strong> <span id="sessionId">Loading...</span></p>
+            <p><strong>User ID:</strong> <span id="userId">Loading...</span></p>
+        </div>
+
+        <div class="test-section">
+            <h3>💳 Test Networx Webhook</h3>
+            <p>Отправить тестовый webhook с правильной структурой данных Networx</p>
+            <button onclick="testNetworxWebhook()">Send Test Webhook</button>
+            <div id="webhookResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>💰 Test Payment Flow</h3>
+            <p>Создать реальный payment token для тестирования</p>
+            <label>
+                Amount (EUR): 
+                <input type="number" id="paymentAmount" value="21" min="1" max="1000">
+            </label>
+            <br><br>
+            <button onclick="createPaymentToken()" class="success">Create Payment Token</button>
+            <div id="paymentResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📊 Check Wallet Balance</h3>
+            <p>Проверить текущий баланс кошелька</p>
+            <button onclick="checkWallet()">Check Wallet</button>
+            <div id="walletResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>📜 Transaction History</h3>
+            <p>Показать последние транзакции</p>
+            <button onclick="getTransactions()">Get Transactions</button>
+            <div id="transactionsResult" class="result" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        // Получаем session ID из localStorage или генерируем новый
+        let sessionId = localStorage.getItem('sessionId');
+        if (!sessionId) {
+            sessionId = 'test_' + Math.random().toString(36).substr(2, 20);
+            localStorage.setItem('sessionId', sessionId);
+        }
+
+        // Получаем user ID из localStorage или используем session ID
+        let userId = localStorage.getItem('userId') || sessionId;
+
+        document.getElementById('sessionId').textContent = sessionId;
+        document.getElementById('userId').textContent = userId;
+
+        // Тест Networx webhook
+        async function testNetworxWebhook() {
+            const resultDiv = document.getElementById('webhookResult');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '⏳ Отправляем тестовый webhook...';
+            resultDiv.className = 'result';
+
+            try {
+                const webhookData = {
+                    "transaction": {
+                        "uid": "test-" + Date.now(),
+                        "status": "successful",
+                        "amount": 2100, // 21.00 EUR
+                        "currency": "EUR",
+                        "description": "Test payment",
+                        "type": "payment",
+                        "payment_method_type": "credit_card",
+                        "tracking_id": `credits_${sessionId}_${Date.now()}`,
+                        "message": "Successfully processed",
+                        "test": true,
+                        "created_at": new Date().toISOString(),
+                        "updated_at": new Date().toISOString(),
+                        "paid_at": new Date().toISOString()
+                    }
+                };
+
+                const response = await fetch('/api/networx-payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Content-Signature': 'test_signature_' + Date.now()
+                    },
+                    body: JSON.stringify(webhookData)
+                });
+
+                const result = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.className = 'result success-result';
+                    resultDiv.innerHTML = `
+                        ✅ <strong>Webhook успешно обработан!</strong><br>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `
+                        ❌ <strong>Ошибка webhook:</strong><br>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ <strong>Ошибка:</strong> ${error.message}`;
+            }
+        }
+
+        // Создание payment token
+        async function createPaymentToken() {
+            const resultDiv = document.getElementById('paymentResult');
+            const amount = document.getElementById('paymentAmount').value;
+            
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '⏳ Создаем payment token...';
+            resultDiv.className = 'result';
+
+            try {
+                const response = await fetch('/api/networx-payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'create_token',
+                        amount: parseFloat(amount),
+                        session_id: sessionId
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    resultDiv.className = 'result success-result';
+                    resultDiv.innerHTML = `
+                        ✅ <strong>Payment token создан!</strong><br>
+                        <strong>Token:</strong> ${result.token}<br>
+                        <strong>Payment URL:</strong> <a href="${result.payment_url}" target="_blank">Открыть страницу оплаты</a><br>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `
+                        ❌ <strong>Ошибка создания token:</strong><br>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ <strong>Ошибка:</strong> ${error.message}`;
+            }
+        }
+
+        // Проверка кошелька
+        async function checkWallet() {
+            const resultDiv = document.getElementById('walletResult');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '⏳ Проверяем кошелек...';
+            resultDiv.className = 'result';
+
+            try {
+                const response = await fetch(`/api/database?action=get_wallet&session_id=${sessionId}`);
+                const result = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.className = 'result success-result';
+                    resultDiv.innerHTML = `
+                        ✅ <strong>Кошелек найден!</strong><br>
+                        <strong>Balance:</strong> ${result.wallet?.balance || 0} credits<br>
+                        <strong>Currency:</strong> ${result.wallet?.currency || 'USD'}<br>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `
+                        ❌ <strong>Ошибка:</strong><br>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ <strong>Ошибка:</strong> ${error.message}`;
+            }
+        }
+
+        // Получение транзакций
+        async function getTransactions() {
+            const resultDiv = document.getElementById('transactionsResult');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '⏳ Загружаем транзакции...';
+            resultDiv.className = 'result';
+
+            try {
+                const response = await fetch(`/api/database?action=get_transactions&session_id=${sessionId}`);
+                const result = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.className = 'result success-result';
+                    const transactions = result.transactions || [];
+                    resultDiv.innerHTML = `
+                        ✅ <strong>Найдено транзакций: ${transactions.length}</strong><br>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `
+                        ❌ <strong>Ошибка:</strong><br>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ <strong>Ошибка:</strong> ${error.message}`;
+            }
+        }
+
+        // Автоматически проверяем кошелек при загрузке
+        window.addEventListener('load', () => {
+            setTimeout(checkWallet, 1000);
+        });
+    </script>
+</body>
+</html>

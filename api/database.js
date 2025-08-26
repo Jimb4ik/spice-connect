@@ -74,6 +74,9 @@ export default async function handler(req, res) {
             case 'get_transactions':
                 result = await getWalletTransactions(pool, req);
                 break;
+            case 'get_wallet':
+                result = await getWallet(pool, req);
+                break;
             case 'save_consent':
                 result = await saveUserConsent(pool, req);
                 break;
@@ -852,29 +855,79 @@ async function addWalletTransaction(pool, req) {
     }
 }
 
-// Получить транзакции кошелька
-async function getWalletTransactions(pool, req) {
-    const { user_id, limit = 50, offset = 0 } = req.method === 'GET' ? req.query : req.body;
+// Получить кошелек пользователя
+async function getWallet(pool, req) {
+    const { user_id, session_id } = req.method === 'GET' ? req.query : req.body;
 
-    if (!user_id) {
+    if (!user_id && !session_id) {
         return {
             success: false,
-            error: 'user_id is required'
+            error: 'user_id or session_id is required'
         };
     }
 
     try {
+        let walletResult;
+        
+        if (user_id) {
+            walletResult = await pool.query(
+                'SELECT * FROM wallets WHERE user_id = $1',
+                [user_id]
+            );
+        }
+        
+        if ((!walletResult || walletResult.rows.length === 0) && session_id) {
+            walletResult = await pool.query(
+                'SELECT * FROM wallets WHERE user_id = $1',
+                [session_id]
+            );
+        }
+
+        if (walletResult.rows.length === 0) {
+            return {
+                success: false,
+                error: 'Wallet not found'
+            };
+        }
+
+        return {
+            success: true,
+            wallet: walletResult.rows[0]
+        };
+    } catch (error) {
+        console.error('[DB] Error getting wallet:', error);
+        return {
+            success: false,
+            error: error.message
+        };
+    }
+}
+
+// Получить транзакции кошелька
+async function getWalletTransactions(pool, req) {
+    const { user_id, session_id, limit = 50, offset = 0 } = req.method === 'GET' ? req.query : req.body;
+
+    if (!user_id && !session_id) {
+        return {
+            success: false,
+            error: 'user_id or session_id is required'
+        };
+    }
+
+    try {
+        const effectiveUserId = user_id || session_id;
+        
         const result = await pool.query(
             `SELECT * FROM wallet_transactions 
              WHERE user_id = $1 
              ORDER BY created_at DESC 
              LIMIT $2 OFFSET $3`,
-            [user_id, parseInt(limit), parseInt(offset)]
+            [effectiveUserId, parseInt(limit), parseInt(offset)]
         );
 
         const countResult = await pool.query(
             'SELECT COUNT(*) FROM wallet_transactions WHERE user_id = $1',
-            [user_id]
+            [effectiveUserId]
         );
 
         return {
