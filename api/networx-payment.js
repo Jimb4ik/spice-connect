@@ -334,7 +334,7 @@ async function processSuccessfulPayment(webhookData) {
         
         console.log('[NETWORX] Sending transaction data to database:', transactionData);
         
-        const walletResponse = await fetch(`${baseUrl}/api/database`, {
+        const walletResponse = await fetch(`${baseUrl}/api/wallet-transactions`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
