@@ -122,7 +122,12 @@ async function addWalletTransaction(pool, req) {
         }
 
         if (!walletResult || walletResult.rows.length === 0) {
-            console.log('[WALLET] Wallet not found, creating new wallet for user_id:', user_id, 'session_id:', session_id);
+            console.log('[WALLET] ❌ NO EXISTING WALLET FOUND!');
+            console.log('[WALLET] Will create new wallet for user_id:', user_id, 'session_id:', session_id);
+            console.log('[WALLET] This means either:');
+            console.log('[WALLET] 1. User has no wallet yet');
+            console.log('[WALLET] 2. user_id/session_id mismatch');
+            console.log('[WALLET] 3. Database connection issue');
             
             // Создаем новый кошелек если не найден
             if (session_id) {
@@ -148,6 +153,15 @@ async function addWalletTransaction(pool, req) {
                     error: 'Wallet not found and cannot create without session_id'
                 };
             }
+        } else {
+            console.log('[WALLET] ✅ EXISTING WALLET FOUND!');
+            console.log('[WALLET] Wallet details:', {
+                id: walletResult.rows[0].id,
+                user_id: walletResult.rows[0].user_id,
+                session_id: walletResult.rows[0].session_id,
+                balance: walletResult.rows[0].balance,
+                currency: walletResult.rows[0].currency
+            });
         }
 
         const wallet = walletResult.rows[0];
