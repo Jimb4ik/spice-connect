@@ -271,7 +271,7 @@ async function processSuccessfulPayment(webhookData) {
         let sessionId, credits, amount, currency;
         
         // Пытаемся извлечь данные из tracking_id (наш order_id)
-        // Формат: credits_SESSION_ID_TIMESTAMP
+        // Формат: credits_USER_ID_TIMESTAMP
         if (transaction.tracking_id) {
             console.log('[NETWORX] Parsing tracking_id:', transaction.tracking_id);
             const orderIdParts = transaction.tracking_id.split('_');
@@ -280,7 +280,7 @@ async function processSuccessfulPayment(webhookData) {
             if (orderIdParts.length >= 3 && orderIdParts[0] === 'credits') {
                 // Берем все части между 'credits' и последним timestamp
                 sessionId = orderIdParts.slice(1, -1).join('_');
-                console.log('[NETWORX] Extracted session_id:', sessionId);
+                console.log('[NETWORX] Extracted user_id from tracking_id:', sessionId);
             }
         }
         
@@ -318,8 +318,8 @@ async function processSuccessfulPayment(webhookData) {
         
         const transactionData = {
             action: 'add_transaction',
-            user_id: sessionId, // Используем session_id как user_id для совместимости
-            session_id: sessionId,
+            user_id: sessionId, // Используем извлеченный user_id из tracking_id
+            session_id: sessionId, // Тот же ID как session_id для совместимости
             transaction_type: 'deposit',
             amount: amount, // Реальная сумма в реальной валюте
             credits: credits, // Количество кредитов для добавления к балансу
