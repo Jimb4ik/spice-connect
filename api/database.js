@@ -77,6 +77,9 @@ export default async function handler(req, res) {
             case 'get_wallet':
                 result = await getWallet(pool, req);
                 break;
+            case 'test_connection':
+                result = await testConnection(pool, req);
+                break;
             case 'save_consent':
                 result = await saveUserConsent(pool, req);
                 break;
@@ -850,6 +853,34 @@ async function addWalletTransaction(pool, req) {
         return {
             success: false,
             error: 'Database operation failed',
+            details: error.message
+        };
+    }
+}
+
+// Тестовое подключение к базе данных
+async function testConnection(pool, req) {
+    try {
+        const result = await pool.query('SELECT NOW() as current_time, version() as postgres_version');
+        
+        return {
+            success: true,
+            message: 'Database connection successful',
+            data: {
+                current_time: result.rows[0].current_time,
+                postgres_version: result.rows[0].postgres_version,
+                connection_info: {
+                    host: pool.options.host || 'unknown',
+                    database: pool.options.database || 'unknown',
+                    user: pool.options.user || 'unknown'
+                }
+            }
+        };
+    } catch (error) {
+        console.error('[DB] Connection test failed:', error);
+        return {
+            success: false,
+            error: 'Database connection failed',
             details: error.message
         };
     }

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Environment - Vercel</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+        }
+        .error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        .success {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+        pre {
+            background: #f1f1f1;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Debug Environment Variables</h1>
+        
+        <div class="test-section">
+            <h3>🌍 Check Environment Variables</h3>
+            <p>Проверить доступность переменных окружения на Vercel</p>
+            <button onclick="checkEnv()">Check Environment</button>
+            <div id="envResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🗄️ Test Database Connection</h3>
+            <p>Проверить подключение к базе данных</p>
+            <button onclick="testDatabase()">Test Database</button>
+            <div id="dbResult" class="result" style="display: none;"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>🔧 Initialize Database</h3>
+            <p>Инициализировать таблицы базы данных</p>
+            <button onclick="initDatabase()">Initialize DB</button>
+            <div id="initResult" class="result" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        async function checkEnv() {
+            const resultDiv = document.getElementById('envResult');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '⏳ Проверяем переменные окружения...';
+            resultDiv.className = 'result';
+
+            try {
+                const response = await fetch('/api/debug-env');
+                const result = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        ✅ <strong>Environment Variables:</strong><br>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `
+                        ❌ <strong>Ошибка:</strong><br>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ <strong>Ошибка:</strong> ${error.message}`;
+            }
+        }
+
+        async function testDatabase() {
+            const resultDiv = document.getElementById('dbResult');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '⏳ Тестируем подключение к БД...';
+            resultDiv.className = 'result';
+
+            try {
+                const response = await fetch('/api/database?action=test_connection', {
+                    method: 'GET'
+                });
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        ✅ <strong>Database Connection OK!</strong><br>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `
+                        ❌ <strong>Database Error:</strong><br>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ <strong>Ошибка:</strong> ${error.message}`;
+            }
+        }
+
+        async function initDatabase() {
+            const resultDiv = document.getElementById('initResult');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '⏳ Инициализируем базу данных...';
+            resultDiv.className = 'result';
+
+            try {
+                const response = await fetch('/api/database', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'init_db'
+                    })
+                });
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        ✅ <strong>Database Initialized!</strong><br>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.className = 'result error';
+                    resultDiv.innerHTML = `
+                        ❌ <strong>Init Error:</strong><br>
+                        <pre>${JSON.stringify(result, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ <strong>Ошибка:</strong> ${error.message}`;
+            }
+        }
+
+        // Автоматически проверяем окружение при загрузке
+        window.addEventListener('load', () => {
+            setTimeout(checkEnv, 1000);
+        });
+    </script>
+</body>
+</html>
