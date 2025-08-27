@@ -76,6 +76,39 @@ async function getMessages(userId, contactId, sessionId) {
   }
 }
 
+// Получение "сообщений-подарков" из истории транзакций
+async function getGiftMessages(userId, contactId, sessionId) {
+  const client = await pool.connect();
+  try {
+    const result = await client.query(`
+      SELECT gt.created_at, g.name AS gift_name
+      FROM gift_transactions gt
+      LEFT JOIN gifts g ON gt.gift_id = g.id
+      WHERE gt.transaction_type = 'purchase'
+        AND (
+              (gt.user_id = $1 AND gt.related_user_id = $2)
+           OR (gt.session_id = $3 AND gt.related_user_id = $2)
+        )
+      ORDER BY gt.created_at ASC
+    `, [userId, contactId, sessionId]);
+
+    // Преобразуем транзакции в формат сообщений
+    return result.rows.map(row => ({
+      sender_id: userId,
+      recipient_id: contactId,
+      message_text: `Sent a gift: ${row.gift_name}`,
+      created_at: row.created_at,
+      session_id: sessionId,
+      is_own: true
+    }));
+  } catch (error) {
+    console.error('[MESSAGES-DB] Ошибка получения gift-сообщений:', error);
+    return [];
+  } finally {
+    client.release();
+  }
+}
+
 export default async function handler(req, res) {
   // Инициализируем таблицу при первом запросе
   await initMessagesTable();
@@ -128,11 +161,19 @@ export default async function handler(req, res) {
           });
         }
         
-        const messages = await getMessages(user_id, contact_id, session_id);
+        const [messages, giftMessages] = await Promise.all([
+          getMessages(user_id, contact_id, session_id),
+          getGiftMessages(user_id, contact_id, session_id)
+        ]);
+
+        // Объединяем и сортируем
+        const combined = [...messages, ...giftMessages].sort((a, b) => {
+          return new Date(a.created_at) - new Date(b.created_at);
+        });
         
         return res.status(200).json({
           success: true,
-          data: messages
+          data: combined
         });
       }
       
