@@ -6,6 +6,7 @@
     <title>Matches - Lavrilo</title>
     <link rel="stylesheet" href="css/app-styles.css">
     <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/matches.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -495,6 +496,7 @@
             // Создаем HTML для каждого матча
             const matchesHTML = matches.map(match => createMatchCard(match)).join('');
             matchesGrid.innerHTML = matchesHTML;
+            initMatchesImageLazyLoading();
         }
 
         function createMatchCard(match) {
@@ -539,12 +541,12 @@
             console.log('[MATCHES] Final photo URL from DB:', photoUrl);
             console.log('[MATCHES] ========================');
 
-                        const cardHtml = `
+            const cardHtml = `
                 <div class="match-card ${isNew ? 'new-match' : ''}" data-match-id="${match.matched_user_id}">
                     <div class="match-card-photo" id="photo-container-${match.matched_user_id}">
-                        <img id="photo-${match.matched_user_id}" src="${photoUrl || ''}" alt="${name}" style="display: none;" onload="handlePhotoLoad(this, '${match.matched_user_id}')" onerror="handlePhotoError(this, '${match.matched_user_id}', '${firstLetter}')">
-                        <div class="photo-placeholder skeleton-mode" id="placeholder-${match.matched_user_id}">
-                            <span style="display: none;">${firstLetter}</span>
+                        <img id="photo-${match.matched_user_id}" class="match-photo-img" data-src="${photoUrl || ''}" alt="${name}" loading="lazy" style="display: none;" onload="handlePhotoLoad(this, '${match.matched_user_id}')" onerror="handlePhotoError(this, '${match.matched_user_id}', '${firstLetter}')">
+                        <div class="photo-placeholder photo-skeleton skeleton-mode" id="placeholder-${match.matched_user_id}">
+                            <span class="letter-avatar" style="display: none;">${firstLetter}</span>
                         </div>
                         ${isNew ? '<div class="match-badge">NEW</div>' : ''}
                     </div>
@@ -573,13 +575,7 @@
                     }
                 }, 100);
             } else {
-                // Если фото уже есть, загружаем его сразу
-                setTimeout(() => {
-                    const imgElement = document.getElementById(`photo-${match.matched_user_id}`);
-                    if (imgElement && photoUrl) {
-                        imgElement.src = photoUrl;
-                    }
-                }, 50);
+                // Src будет устанавливаться через lazy loader (IntersectionObserver)
             }
             
             return cardHtml;
@@ -906,6 +902,33 @@
                 // Скрываем img элемент
                 imgElement.style.display = 'none';
             }
+        }
+
+        // Lazy loading for match images
+        function initMatchesImageLazyLoading() {
+            const images = document.querySelectorAll('.match-card-photo img[data-src]');
+            if (!('IntersectionObserver' in window)) {
+                images.forEach(img => {
+                    if (img.dataset.src) img.src = img.dataset.src;
+                });
+                return;
+            }
+
+            const io = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        const src = img.getAttribute('data-src');
+                        if (src) {
+                            img.src = src;
+                            img.removeAttribute('data-src');
+                        }
+                        observer.unobserve(img);
+                    }
+                });
+            }, { rootMargin: '200px 0px', threshold: 0.01 });
+
+            images.forEach(img => io.observe(img));
         }
 
         function viewMatchDetails(matchId) {
