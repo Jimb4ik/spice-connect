@@ -1178,23 +1178,24 @@ async function purchaseGift(pool, req) {
         if (!isSystemSender) {
             // Проверяем баланс отправителя только для обычных пользователей
             const walletResult = await client.query(
-                'SELECT balance FROM user_wallets WHERE session_id = $1',
-                [sender_session_id]
+                'SELECT id, balance FROM user_wallets WHERE user_id = $1 OR session_id = $2 LIMIT 1',
+                [sender_user_id, sender_session_id]
             );
 
             if (walletResult.rows.length === 0) {
                 throw new Error('Sender wallet not found');
             }
 
-            const currentBalance = parseFloat(walletResult.rows[0].balance);
+            const wallet = walletResult.rows[0];
+            const currentBalance = parseFloat(wallet.balance);
             if (currentBalance < gift.price_credits) {
                 throw new Error('Insufficient credits');
             }
 
-            // Списываем кредиты с отправителя
+            // Списываем кредиты с отправителя (по id кошелька)
             await client.query(
-                'UPDATE user_wallets SET balance = balance - $1, updated_at = CURRENT_TIMESTAMP WHERE session_id = $2',
-                [gift.price_credits, sender_session_id]
+                'UPDATE user_wallets SET balance = balance - $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+                [gift.price_credits, wallet.id]
             );
         } else {
             console.log('[DB] System gift - skipping wallet check and credit deduction');
@@ -1239,11 +1240,17 @@ async function purchaseGift(pool, req) {
 
         // Записываем транзакцию кошелька только для обычных пользователей
         if (!isSystemSender) {
+            // Привязываем транзакцию к конкретному кошельку отправителя
+            const senderWallet = await client.query(
+                'SELECT id FROM user_wallets WHERE user_id = $1 OR session_id = $2 LIMIT 1',
+                [sender_user_id, sender_session_id]
+            );
+            const walletId = senderWallet.rows[0]?.id;
             await client.query(
                 `INSERT INTO wallet_transactions 
                  (wallet_id, user_id, transaction_type, amount, description, status)
-                 VALUES ((SELECT id FROM user_wallets WHERE session_id = $1), $2, 'purchase', $3, $4, 'completed')`,
-                [sender_session_id, sender_user_id, -gift.price_credits, `Gift purchase: ${gift.name}`]
+                 VALUES ($1, $2, 'purchase', $3, $4, 'completed')`,
+                [walletId, sender_user_id, -gift.price_credits, `Gift purchase: ${gift.name}`]
             );
         }
 
