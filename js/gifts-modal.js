@@ -338,18 +338,21 @@ class GiftsModalManager {
             if (result.success) {
                 console.log('[GIFTS_MODAL] Gift sent successfully:', result.data);
                 
+                // Сохраняем ссылку до закрытия модалки
+                const sentGift = this.selectedGift;
+                
                 // Обновляем баланс
-                this.userBalance -= this.selectedGift.price_credits;
+                this.userBalance -= sentGift.price_credits;
                 this.updateBalanceDisplay();
                 
                 // Показываем уведомление
-                this.showSuccessMessage(`Gift "${this.selectedGift.name}" sent successfully!`);
+                this.showSuccessMessage(`Gift "${sentGift.name}" sent successfully!`);
+                
+                // Добавляем сообщение в чат (до сброса состояния)
+                this.addGiftMessageToChat(sentGift, personalMessage);
                 
                 // Закрываем модальное окно
                 this.closeGiftModal();
-                
-                // Добавляем сообщение в чат
-                this.addGiftMessageToChat(this.selectedGift, personalMessage);
                 
             } else {
                 console.error('[GIFTS_MODAL] Error sending gift:', result.error);

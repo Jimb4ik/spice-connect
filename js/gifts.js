@@ -325,15 +325,19 @@ class GiftsManager {
 
     createHistoryItem(transaction) {
         const typeConfig = {
-            'receive': { icon: '📥', color: '#28a745' },
-            'purchase': { icon: '🛒', color: '#007bff' },
-            'monetize': { icon: '💰', color: '#ffc107' }
+            'receive': { icon: '🎁', color: '#d6246a' },
+            'purchase': { icon: '🎁', color: '#d6246a' },
+            'monetize': { icon: '🎁', color: '#d6246a' }
         };
         
         const config = typeConfig[transaction.transaction_type];
         const amount = transaction.credits_spent || transaction.usd_earned || 0;
         const currency = transaction.transaction_type === 'monetize' ? 
             `€${amount.toFixed(2)}` : `${amount} credits`;
+        
+        // Имя отправителя/получателя вместо ID, если доступно
+        const counterpartName = transaction.related_user_pseudo || transaction.related_user_name || transaction.related_user_id || '';
+        const description = transaction.description ? transaction.description.replace(/\b\d{3,}\b/g, counterpartName) : '';
         
         return `
             <div class="history-item">
@@ -342,7 +346,7 @@ class GiftsManager {
                 </div>
                 <div class="history-details">
                     <div class="history-title">${transaction.gift_name || 'Gift Transaction'}</div>
-                    <div class="history-description">${transaction.description}</div>
+                    <div class="history-description">${description}</div>
                 </div>
                 <div class="history-meta">
                     <div class="history-amount">${currency}</div>
