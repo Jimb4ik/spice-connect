@@ -665,6 +665,10 @@ Object.assign(Dashboard.prototype, {
     const isOwn = message.isOwn || message.from_me || false;
     const text = message.text || message.message || message.content || '';
     const time = this.formatMessageTime(message.timestamp || message.created_at || Date.now());
+
+    // Поддержка сообщений-подарков с эмодзи и подписью
+    const isGift = message.isGift || /Sent a gift:/i.test(text);
+    const bubble = isGift ? `<span style="font-size:18px">🎁</span> <span>${text}</span>` : text;
     
     return `
       <div class="message-item ${isOwn ? 'own' : ''}">
@@ -673,7 +677,7 @@ Object.assign(Dashboard.prototype, {
         </div>
         <div class="message-content">
           <div class="message-bubble">
-            ${text}
+            ${bubble}
           </div>
           <div class="message-time">${time}</div>
         </div>

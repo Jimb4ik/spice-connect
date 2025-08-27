@@ -339,10 +339,11 @@ class GiftsManager {
         const counterpartName = transaction.related_user_pseudo || transaction.related_user_name || transaction.related_user_id || '';
         const description = transaction.description ? transaction.description.replace(/\b\d{3,}\b/g, counterpartName) : '';
         
+        const giftEmoji = this.getGiftEmoji(transaction.gift_name || '');
         return `
             <div class="history-item">
                 <div class="history-icon" style="background-color: ${config.color}20; color: ${config.color};">
-                    ${config.icon}
+                    ${giftEmoji}
                 </div>
                 <div class="history-details">
                     <div class="history-title">${transaction.gift_name || 'Gift Transaction'}</div>

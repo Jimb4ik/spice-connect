@@ -195,7 +195,9 @@ class WalletManager {
                         <div class="transaction-date">${this.formatDate(transaction.created_at)}</div>
                     </div>
                     <div class="transaction-amount ${amountClass}">
-                        <div class="amount-money">${amountPrefix}${parseFloat(transaction.amount).toFixed(2)} ${transaction.currency}</div>
+                        ${transaction.transaction_type === 'purchase' 
+                            ? `<div class="amount-credits">-${Math.abs(parseInt(transaction.amount))} credits</div>`
+                            : `<div class="amount-money">${amountPrefix}${parseFloat(transaction.amount).toFixed(2)} ${transaction.currency}</div>`}
                         ${isPositive ? `<div class="amount-credits">+${credits} credits</div>` : ''}
                     </div>
                 </div>
@@ -221,7 +223,7 @@ class WalletManager {
         const iconMap = {
             'deposit': 'wallet-topup.png',
             'withdrawal': 'minus-circle.png',
-            'purchase': 'shopping-cart.png',
+            'purchase': 'gift-purchase.png',
             'refund': 'refresh.png'
         };
         return iconMap[type] || 'wallet.png';
