@@ -75,7 +75,8 @@ class GiftsModalManager {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     action: 'get_wallet',
-                    session_id: window.authManager.sessionId
+                    session_id: window.authManager.sessionId,
+                    user_id: window.authManager.userId
                 })
             });
             

@@ -75,7 +75,8 @@ class GiftsManager {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     action: 'get_received_gifts',
-                    session_id: sessionId
+                    session_id: sessionId,
+                    user_id: window.authManager.userId
                 })
             });
             
@@ -91,7 +92,8 @@ class GiftsManager {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     action: 'get_sent_gifts',
-                    session_id: sessionId
+                    session_id: sessionId,
+                    user_id: window.authManager.userId
                 })
             });
             
@@ -123,6 +125,7 @@ class GiftsManager {
                 body: JSON.stringify({
                     action: 'get_gift_transactions',
                     session_id: sessionId,
+                    user_id: window.authManager.userId,
                     limit: 100
                 })
             });

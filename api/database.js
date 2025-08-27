@@ -1342,7 +1342,7 @@ async function getReceivedGifts(pool, req) {
 
 // Получить отправленные подарки
 async function getSentGifts(pool, req) {
-    const { session_id } = req.method === 'GET' ? req.query : req.body;
+    const { session_id, user_id } = req.method === 'GET' ? req.query : req.body;
 
     if (!session_id) {
         return {
@@ -1352,13 +1352,21 @@ async function getSentGifts(pool, req) {
     }
 
     try {
+        const params = [session_id];
+        let whereParts = ['ug.sender_session_id = $1'];
+        let nextIndex = 2;
+        if (user_id) {
+            whereParts.push(`ug.sender_user_id = $${nextIndex++}`);
+            params.push(user_id);
+        }
+
         const result = await pool.query(
             `SELECT ug.*, g.name as gift_name, g.description, g.image_url, g.category
              FROM user_gifts ug
              JOIN gifts g ON ug.gift_id = g.id
-             WHERE ug.sender_session_id = $1
+             WHERE ${whereParts.join(' OR ')}
              ORDER BY ug.sent_at DESC`,
-            [session_id]
+            params
         );
 
         return {
@@ -1377,7 +1385,7 @@ async function getSentGifts(pool, req) {
 
 // Получить транзакции подарков
 async function getGiftTransactions(pool, req) {
-    const { session_id, transaction_type, limit = 50, offset = 0 } = req.method === 'GET' ? req.query : req.body;
+    const { session_id, user_id, transaction_type, limit = 50, offset = 0 } = req.method === 'GET' ? req.query : req.body;
 
     if (!session_id) {
         return {
@@ -1394,10 +1402,10 @@ async function getGiftTransactions(pool, req) {
             WHERE gt.session_id = $1
         `;
         const params = [session_id];
-
-        if (transaction_type) {
-            query += ' AND gt.transaction_type = $2';
-            params.push(transaction_type);
+        let nextIndex = 2;
+        if (user_id) {
+            query += ` OR gt.user_id = $${nextIndex++}`;
+            params.push(user_id);
         }
 
         query += ' ORDER BY gt.created_at DESC LIMIT $' + (params.length + 1) + ' OFFSET $' + (params.length + 2);
@@ -1406,9 +1414,10 @@ async function getGiftTransactions(pool, req) {
         const result = await pool.query(query, params);
 
         const countResult = await pool.query(
-            `SELECT COUNT(*) FROM gift_transactions WHERE session_id = $1` + 
-            (transaction_type ? ' AND transaction_type = $2' : ''),
-            transaction_type ? [session_id, transaction_type] : [session_id]
+            `SELECT COUNT(*) FROM gift_transactions WHERE (session_id = $1${user_id ? ' OR user_id = $2' : ''})` + 
+            (transaction_type ? ` AND transaction_type = $${user_id ? '3' : '2'}` : ''),
+            user_id ? (transaction_type ? [session_id, user_id, transaction_type] : [session_id, user_id])
+                    : (transaction_type ? [session_id, transaction_type] : [session_id])
         );
 
         return {
