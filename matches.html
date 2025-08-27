@@ -497,6 +497,16 @@
             const matchesHTML = matches.map(match => createMatchCard(match)).join('');
             matchesGrid.innerHTML = matchesHTML;
             initMatchesImageLazyLoading();
+            // Fallback: for already-rendered cards, if data-src exists and IO didn't trigger yet
+            setTimeout(() => {
+                document.querySelectorAll('.match-card-photo img[data-src]').forEach(img => {
+                    const src = img.getAttribute('data-src');
+                    if (src) {
+                        img.src = src;
+                        img.removeAttribute('data-src');
+                    }
+                });
+            }, 200);
         }
 
         function createMatchCard(match) {
@@ -544,7 +554,7 @@
             const cardHtml = `
                 <div class="match-card ${isNew ? 'new-match' : ''}" data-match-id="${match.matched_user_id}">
                     <div class="match-card-photo" id="photo-container-${match.matched_user_id}">
-                        <img id="photo-${match.matched_user_id}" class="match-photo-img" data-src="${photoUrl || ''}" alt="${name}" loading="lazy" style="display: none;" onload="handlePhotoLoad(this, '${match.matched_user_id}')" onerror="handlePhotoError(this, '${match.matched_user_id}', '${firstLetter}')">
+                        <img id="photo-${match.matched_user_id}" class="match-photo-img" data-src="${photoUrl || ''}" alt="${name}" loading="lazy" onload="handlePhotoLoad(this, '${match.matched_user_id}')" onerror="handlePhotoError(this, '${match.matched_user_id}', '${firstLetter}')">
                         <div class="photo-placeholder photo-skeleton skeleton-mode" id="placeholder-${match.matched_user_id}">
                             <span class="letter-avatar" style="display: none;">${firstLetter}</span>
                         </div>
