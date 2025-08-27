@@ -1273,7 +1273,7 @@ async function purchaseGift(pool, req) {
 
 // Получить полученные подарки
 async function getReceivedGifts(pool, req) {
-    const { session_id, status } = req.method === 'GET' ? req.query : req.body;
+    const { session_id, status, user_id } = req.method === 'GET' ? req.query : req.body;
 
     if (!session_id) {
         return {
@@ -1300,8 +1300,13 @@ async function getReceivedGifts(pool, req) {
         let whereParts = ['ug.receiver_session_id = $1'];
         const params = [session_id];
 
-        if (realUserId) {
-            whereParts.push('ug.receiver_user_id = $2');
+        let nextIndex = 2;
+        if (user_id) {
+            whereParts.push(`ug.receiver_user_id = $${nextIndex++}`);
+            params.push(user_id);
+        }
+        if (realUserId && (!user_id || realUserId !== user_id)) {
+            whereParts.push(`ug.receiver_user_id = $${nextIndex++}`);
             params.push(realUserId);
         }
 
