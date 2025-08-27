@@ -666,9 +666,11 @@ Object.assign(Dashboard.prototype, {
     const text = message.text || message.message || message.content || '';
     const time = this.formatMessageTime(message.timestamp || message.created_at || Date.now());
 
-    // Поддержка сообщений-подарков с эмодзи и подписью
+    // Поддержка сообщений-подарков: выводим только один значок подарка + текст
     const isGift = message.isGift || /Sent a gift:/i.test(text);
-    const bubble = isGift ? `<span style="font-size:18px">🎁</span> <span>${text}</span>` : text;
+    const bubble = isGift
+      ? `<span style="font-size:18px; margin-right:6px">🎁</span><span>${text.replace(/^[^:]*:/, 'Sent a gift:')}</span>`
+      : text;
     
     return `
       <div class="message-item ${isOwn ? 'own' : ''}">

@@ -369,11 +369,12 @@ class GiftsModalManager {
         // Добавляем визуальное сообщение о подарке в чат
         if (window.messagesSystem && window.messagesSystem.addMessageToChat) {
             const giftMessage = {
-                text: `🎁 Sent a gift: ${gift.name}${personalMessage ? '\n💌 "' + personalMessage + '"' : ''}`,
+                text: `Sent a gift: ${gift.name}${personalMessage ? ' \u201C' + personalMessage + '\u201D' : ''}`,
                 isOwn: true,
                 timestamp: new Date().toISOString(),
                 sender: 'You',
-                isGift: true
+                isGift: true,
+                gift_name: gift.name
             };
             
             window.messagesSystem.addMessageToChat(giftMessage);

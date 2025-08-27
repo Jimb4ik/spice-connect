@@ -238,7 +238,7 @@ class GiftsManager {
             'Bracelet': '📿',
             'Watch': '⌚',
             'Gold Chain': '📿',
-            'Diamond Earrings': '💍',
+            'Diamond Earrings': '💎',
             'Gold Ring': '💍',
             'Pearl Necklace': '📿',
             'Diamond Bracelet': '💎',
@@ -332,6 +332,7 @@ class GiftsManager {
         
         const config = typeConfig[transaction.transaction_type];
         const amount = transaction.credits_spent || transaction.usd_earned || 0;
+        const showAmount = transaction.transaction_type !== 'receive';
         const currency = transaction.transaction_type === 'monetize' ? 
             `€${amount.toFixed(2)}` : `${amount} credits`;
         
@@ -350,7 +351,7 @@ class GiftsManager {
                     <div class="history-description">${description}</div>
                 </div>
                 <div class="history-meta">
-                    <div class="history-amount">${currency}</div>
+                    ${showAmount ? `<div class=\"history-amount\">${currency}</div>` : ''}
                     <div class="history-date">${this.formatDate(transaction.created_at)}</div>
                 </div>
             </div>
