@@ -1283,16 +1283,37 @@ async function getReceivedGifts(pool, req) {
     }
 
     try {
+        // Attempt to resolve a stable user_id from session_id to support legacy rows saved by user_id
+        let realUserId = null;
+        try {
+            const userRow = await pool.query(
+                'SELECT user_id FROM user_progress WHERE session_id = $1 ORDER BY updated_at DESC NULLS LAST, created_at DESC LIMIT 1',
+                [session_id]
+            );
+            if (userRow.rows.length > 0) {
+                realUserId = userRow.rows[0].user_id;
+            }
+        } catch (e) {
+            // non-fatal
+        }
+
+        let whereParts = ['ug.receiver_session_id = $1'];
+        const params = [session_id];
+
+        if (realUserId) {
+            whereParts.push('ug.receiver_user_id = $2');
+            params.push(realUserId);
+        }
+
         let query = `
             SELECT ug.*, g.name as gift_name, g.description, g.image_url, g.category
             FROM user_gifts ug
             JOIN gifts g ON ug.gift_id = g.id
-            WHERE ug.receiver_session_id = $1
+            WHERE ${whereParts.join(' OR ')}
         `;
-        const params = [session_id];
 
         if (status) {
-            query += ' AND ug.status = $2';
+            query += ` AND ug.status = $${params.length + 1}`;
             params.push(status);
         }
 
