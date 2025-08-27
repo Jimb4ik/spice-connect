@@ -666,11 +666,37 @@ Object.assign(Dashboard.prototype, {
     const text = message.text || message.message || message.content || '';
     const time = this.formatMessageTime(message.timestamp || message.created_at || Date.now());
 
-    // Поддержка сообщений-подарков: выводим только один значок подарка + текст
+    // Поддержка сообщений-подарков: показываем соответствующий значок подарка + текст
     const isGift = message.isGift || /Sent a gift:/i.test(text);
-    const bubble = isGift
-      ? `<span style="font-size:18px; margin-right:6px">🎁</span><span>${text.replace(/^[^:]*:/, 'Sent a gift:')}</span>`
-      : text;
+    let bubble = text;
+    if (isGift) {
+      const nameMatch = text.match(/Sent a gift:\s*(.+)$/i);
+      const giftName = nameMatch ? nameMatch[1] : '';
+      const emojiMap = {
+        'Red Rose': '🌹',
+        'Tulip Bouquet': '🌷',
+        'Heart Chocolate': '🍫',
+        'Coffee & Cookies': '☕',
+        'Teddy Bear': '🧸',
+        'Balloons': '🎈',
+        'Rose Bouquet': '💐',
+        'Perfume': '🌸',
+        'Silver Earrings': '💎',
+        'Bracelet': '📿',
+        'Watch': '⌚',
+        'Gold Chain': '📿',
+        'Diamond Earrings': '💍',
+        'Gold Ring': '💍',
+        'Pearl Necklace': '📿',
+        'Diamond Bracelet': '💎',
+        'Platinum Ring': '💍',
+        'Luxury Watch': '⌚',
+        'Diamond Necklace': '💎',
+        'Royal Crown': '👑'
+      };
+      const icon = emojiMap[giftName] || '🎁';
+      bubble = `<span style="font-size:18px; margin-right:6px">${icon}</span><span>Sent a gift: ${giftName || text.replace(/^[^:]*:/,'').trim()}</span>`;
+    }
     
     return `
       <div class="message-item ${isOwn ? 'own' : ''}">
