@@ -421,9 +421,8 @@
 }
 
 .message-item.own .message-bubble {
-  background: linear-gradient(135deg, #ffb3ba 0%, #ff9aa2 100%); /* еще более тусклый градиент */
+  background: var(--gradient-primary); /* такой же градиент как у кнопки Send */
   color: white;
-  opacity: 0.9; /* больше прозрачности */
 }
 
 .message-time {
@@ -491,7 +490,8 @@
 }
 
 .chat-input-container .app-btn-primary:hover {
-  background: var(--gradient-primary-hover);
+  background: linear-gradient(135deg, #ff5569 0%, #ff7c8b 100%); /* чуть светлее основного */
+  transform: translateY(-1px);
 }
 
 .chat-input-container .app-btn-outline {

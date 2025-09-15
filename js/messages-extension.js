@@ -678,6 +678,7 @@ Object.assign(Dashboard.prototype, {
     // Поддержка сообщений-подарков: показываем соответствующий значок подарка + текст
     const isGift = message.isGift || /Sent a gift:/i.test(text);
     let bubble = text;
+    let giftIcon = '';
     if (isGift) {
       const nameMatch = text.match(/Sent a gift:\s*(.+)$/i);
       const giftName = nameMatch ? nameMatch[1] : '';
@@ -704,7 +705,11 @@ Object.assign(Dashboard.prototype, {
         'Royal Crown': '👑'
       };
       const icon = emojiMap[giftName] || '🎁';
-      bubble = `<span style="font-size:18px; margin-right:6px">${icon}</span><span>Sent a gift: ${giftName || text.replace(/^[^:]*:/,'').trim()}</span>`;
+      bubble = `Sent a gift: ${giftName || text.replace(/^[^:]*:/,'').trim()}`;
+      // Подарок отображается отдельно под сообщением
+      giftIcon = `<div style="text-align: ${isOwn ? 'right' : 'left'}; margin-top: 8px;">
+        <span style="font-size: 48px; display: inline-block;">${icon}</span>
+      </div>`;
     }
     
     return `
@@ -716,6 +721,7 @@ Object.assign(Dashboard.prototype, {
           <div class="message-bubble">
             ${bubble}
           </div>
+          ${giftIcon}
           <div class="message-time">${time}</div>
         </div>
       </div>
