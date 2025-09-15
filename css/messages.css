@@ -144,18 +144,18 @@
 /* Увеличиваем ширину контента только на странице сообщений */
 .messages-page .app-main {
   max-width: 1200px;
-  padding-bottom: 1rem;
+  padding-bottom: 0; /* убираем полосу между чатом и футером */
 }
 
 /* Стили точно как у profile-hero-section */
 .messages-container {
-  margin-bottom: 3rem;
+  margin-bottom: 0; /* убираем нижний отступ под чатом */
   /* Расширяем рабочую область сообщений */
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 1.5rem;
-  height: calc(100vh - 180px); /* фиксируем доступную высоту для скролла */
+  height: calc(100vh - 140px); /* делаем окно чата выше */
 }
 
 .messages-chat-card {
