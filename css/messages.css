@@ -155,7 +155,7 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 1.5rem;
-  height: calc(100vh - 180px); /* увеличиваем высоту окна чата */
+  height: calc(100vh - 80px); /* еще выше на 100px */
 }
 
 .messages-chat-card {
