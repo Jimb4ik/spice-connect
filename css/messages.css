@@ -155,7 +155,7 @@
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 1.5rem;
-  height: calc(100vh - 220px); /* с учетом отступов */
+  height: calc(100vh - 180px); /* увеличиваем высоту окна чата */
 }
 
 .messages-chat-card {
@@ -421,9 +421,9 @@
 }
 
 .message-item.own .message-bubble {
-  background: linear-gradient(135deg, #ff8a95 0%, #ff6b7a 100%); /* более мягкий градиент */
+  background: linear-gradient(135deg, #ffb3ba 0%, #ff9aa2 100%); /* еще более тусклый градиент */
   color: white;
-  opacity: 0.95; /* чуть прозрачнее */
+  opacity: 0.9; /* больше прозрачности */
 }
 
 .message-time {
