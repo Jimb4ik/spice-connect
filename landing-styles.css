@@ -1,5 +1,338 @@
 /* Modern Landing Page Styles for Lavrilo */
 
+/* Button loader styles */
+.button-loader {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-left-color: white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Registration success styles */
+.registration-success {
+  text-align: center;
+  padding: 40px 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: var(--shadow-light);
+}
+
+.success-icon {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+.registration-success h3 {
+  color: var(--primary-color);
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.registration-success p {
+  color: var(--text-secondary);
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+/* Inclusivity Section */
+.inclusivity-section {
+  padding: 80px 0;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.inclusivity-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+
+.inclusivity-text h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+  line-height: 1.2;
+}
+
+.inclusivity-subtitle {
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+  margin-bottom: 40px;
+  line-height: 1.6;
+}
+
+.inclusivity-features {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.inclusivity-feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.inclusivity-feature .feature-icon {
+  font-size: 2rem;
+  width: 60px;
+  height: 60px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-light);
+  flex-shrink: 0;
+}
+
+.inclusivity-feature .feature-content h4 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.inclusivity-feature .feature-content p {
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.inclusivity-visual {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+}
+
+.pride-gradient {
+  width: 300px;
+  height: 200px;
+  background: linear-gradient(45deg, 
+    #e40303 0%, 
+    #ff8c00 16.66%, 
+    #ffed00 33.33%, 
+    #008018 50%, 
+    #0066ff 66.66%, 
+    #8b00ff 83.33%, 
+    #e40303 100%);
+  border-radius: 20px;
+  box-shadow: var(--shadow-medium);
+  position: relative;
+  overflow: hidden;
+}
+
+.pride-gradient::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(1px);
+}
+
+.inclusivity-stats {
+  display: flex;
+  gap: 30px;
+}
+
+.inclusivity-stats .stat-item {
+  text-align: center;
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: var(--shadow-light);
+  min-width: 80px;
+}
+
+.inclusivity-stats .stat-number {
+  display: block;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin-bottom: 5px;
+}
+
+.inclusivity-stats .stat-label {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* Monetization Section */
+.monetization-section {
+  padding: 80px 0;
+  background: white;
+}
+
+.monetization-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+}
+
+.monetization-visual {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.gift-animation {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gift-box {
+  font-size: 4rem;
+  animation: bounce 2s infinite;
+}
+
+.coins {
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  font-size: 2rem;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-20px);
+  }
+  60% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-20px) rotate(10deg);
+  }
+}
+
+.monetization-text h2 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 20px;
+  line-height: 1.2;
+}
+
+.monetization-subtitle {
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+  margin-bottom: 40px;
+  line-height: 1.6;
+}
+
+.monetization-features {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.monetization-feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.monetization-feature .feature-icon {
+  font-size: 2rem;
+  width: 60px;
+  height: 60px;
+  background: var(--gradient-primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-light);
+  flex-shrink: 0;
+}
+
+.monetization-feature .feature-content h4 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.monetization-feature .feature-content p {
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.monetization-note {
+  padding: 20px;
+  background: var(--background-light);
+  border-radius: 12px;
+  border-left: 4px solid var(--primary-color);
+}
+
+.monetization-note p {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Mobile Responsiveness for New Sections */
+@media (max-width: 768px) {
+  .inclusivity-content,
+  .monetization-content {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  
+  .inclusivity-text h2,
+  .monetization-text h2 {
+    font-size: 2rem;
+  }
+  
+  .inclusivity-subtitle,
+  .monetization-subtitle {
+    font-size: 1.1rem;
+  }
+  
+  .inclusivity-stats {
+    gap: 15px;
+  }
+  
+  .inclusivity-stats .stat-item {
+    padding: 15px;
+    min-width: 70px;
+  }
+  
+  .pride-gradient {
+    width: 250px;
+    height: 150px;
+  }
+}
+
 :root {
   --primary-color: #ff4458;
   --primary-dark: #e63946;

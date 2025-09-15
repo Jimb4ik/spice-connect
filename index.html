@@ -323,6 +323,109 @@
         </div>
     </section>
 
+    <!-- Inclusivity Section -->
+    <section class="inclusivity-section">
+        <div class="container">
+            <div class="inclusivity-content">
+                <div class="inclusivity-text">
+                    <h2>🏳️‍🌈 Love Knows No Boundaries</h2>
+                    <p class="inclusivity-subtitle">
+                        At Lavrilo, we celebrate diversity and believe that everyone deserves to find meaningful connections, 
+                        regardless of sexual orientation or gender identity.
+                    </p>
+                    <div class="inclusivity-features">
+                        <div class="inclusivity-feature">
+                            <div class="feature-icon">💝</div>
+                            <div class="feature-content">
+                                <h4>LGBTQ+ Friendly</h4>
+                                <p>Our platform welcomes all individuals seeking genuine relationships in a safe, respectful environment.</p>
+                            </div>
+                        </div>
+                        <div class="inclusivity-feature">
+                            <div class="feature-icon">🛡️</div>
+                            <div class="feature-content">
+                                <h4>Safe Space</h4>
+                                <p>We maintain strict community guidelines to ensure everyone feels comfortable expressing their authentic self.</p>
+                            </div>
+                        </div>
+                        <div class="inclusivity-feature">
+                            <div class="feature-icon">🤝</div>
+                            <div class="feature-content">
+                                <h4>Equal Opportunities</h4>
+                                <p>Every member has the same chance to connect, match, and build meaningful relationships.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="inclusivity-visual">
+                    <div class="pride-gradient"></div>
+                    <div class="inclusivity-stats">
+                        <div class="stat-item">
+                            <span class="stat-number">100%</span>
+                            <span class="stat-label">Inclusive</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">24/7</span>
+                            <span class="stat-label">Support</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-number">0</span>
+                            <span class="stat-label">Tolerance for Hate</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Monetization Section -->
+    <section class="monetization-section">
+        <div class="container">
+            <div class="monetization-content">
+                <div class="monetization-visual">
+                    <div class="gift-animation">
+                        <div class="gift-box">🎁</div>
+                        <div class="coins">💰</div>
+                    </div>
+                </div>
+                <div class="monetization-text">
+                    <h2>💎 Turn Connections into Earnings</h2>
+                    <p class="monetization-subtitle">
+                        Lavrilo offers a unique opportunity to earn while building meaningful relationships. 
+                        Receive gifts from admirers and convert them into real earnings.
+                    </p>
+                    <div class="monetization-features">
+                        <div class="monetization-feature">
+                            <div class="feature-icon">🎁</div>
+                            <div class="feature-content">
+                                <h4>Receive Gifts</h4>
+                                <p>Members can send you virtual gifts as tokens of appreciation and interest.</p>
+                            </div>
+                        </div>
+                        <div class="monetization-feature">
+                            <div class="feature-icon">💳</div>
+                            <div class="feature-content">
+                                <h4>Earn Real Money</h4>
+                                <p>Convert received gifts into cash and withdraw directly to your bank card.</p>
+                            </div>
+                        </div>
+                        <div class="monetization-feature">
+                            <div class="feature-icon">📈</div>
+                            <div class="feature-content">
+                                <h4>Build Your Profile</h4>
+                                <p>The more engaging your profile, the more gifts you're likely to receive from interested members.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="monetization-note">
+                        <p><strong>Note:</strong> All transactions are secure and comply with financial regulations. 
+                        Age verification (18+) and identity confirmation required for withdrawals.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Registration CTA Section -->
     <section class="cta-section">
         <div class="container">
@@ -330,41 +433,51 @@
                 <h2>Ready to Find Your Perfect Match?</h2>
                 <p>Join <span id="liveMemberCount">50,000+</span> singles who trust Lavrilo to find meaningful relationships</p>
                 
-                <div class="registration-form" id="registrationForm">
+                <form class="registration-form" id="registrationForm">
                     <div class="form-steps">
                         <div class="form-step active">
                             <h3>Join Free in 30 Seconds</h3>
                             <div class="form-row">
-                                <input type="text" placeholder="First Name" required>
-                                <input type="email" placeholder="Email Address" required>
+                                <input type="text" id="regFirstName" placeholder="First Name" required>
+                                <input type="email" id="regEmail" placeholder="Email Address" required>
+                            </div>
+                            <div class="form-row">
+                                <input type="password" id="regPassword" placeholder="Choose Password" required minlength="6">
+                                <input type="text" id="regUsername" placeholder="Username" required minlength="3">
                             </div>
                             <div class="form-row">
                                 <div class="custom-select">
-                                    <select required>
+                                    <select id="regGender" required>
                                         <option value="">I am a...</option>
                                         <option value="1">Man</option>
                                         <option value="2">Woman</option>
+                                        <option value="3">Couple</option>
                                     </select>
                                 </div>
                                 <div class="custom-select">
-                                    <select required>
+                                    <select id="regLookingFor" required>
                                         <option value="">Looking for...</option>
                                         <option value="1">Men</option>
                                         <option value="2">Women</option>
-                                        <option value="all">Everyone</option>
+                                        <option value="3">Couples</option>
                                     </select>
                                 </div>
                             </div>
-                            <button class="btn-registration" type="submit">
-                                Create My Profile - Free!
+                            <div class="form-row">
+                                <input type="date" id="regBirthdate" required max="2006-01-01">
+                                <input type="text" id="regCity" placeholder="Your City" required>
+                            </div>
+                            <button class="btn-registration" type="submit" id="submitRegistration">
+                                <span id="regButtonText">Create My Profile - Free!</span>
+                                <div id="regButtonLoader" class="button-loader" style="display: none;"></div>
                             </button>
                             <p class="form-disclaimer">
-                                By clicking "Create My Profile", you agree to our Terms of Service and Privacy Policy. 
+                                By clicking "Create My Profile", you agree to our <a href="terms.html">Terms of Service</a> and <a href="privacy.html">Privacy Policy</a>. 
                                 It's free and always will be.
                             </p>
                         </div>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
     </section>
@@ -409,5 +522,215 @@
     <script src="js/auth-modal.js?v=1.0"></script>
     <script src="js/cookie-consent.js?v=1.0"></script>
     <script src="landing-script.js?v=3.9"></script>
+    
+    <script>
+        // Quick Registration Handler
+        document.addEventListener('DOMContentLoaded', function() {
+            const registrationForm = document.getElementById('registrationForm');
+            
+            if (registrationForm) {
+                registrationForm.addEventListener('submit', handleQuickRegistration);
+            }
+        });
+        
+        async function handleQuickRegistration(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitRegistration');
+            const buttonText = document.getElementById('regButtonText');
+            const buttonLoader = document.getElementById('regButtonLoader');
+            
+            // Get form data
+            const formData = {
+                firstName: document.getElementById('regFirstName').value.trim(),
+                email: document.getElementById('regEmail').value.trim(),
+                password: document.getElementById('regPassword').value,
+                username: document.getElementById('regUsername').value.trim(),
+                gender: document.getElementById('regGender').value,
+                lookingFor: document.getElementById('regLookingFor').value,
+                birthdate: document.getElementById('regBirthdate').value,
+                city: document.getElementById('regCity').value.trim()
+            };
+            
+            // Validate form
+            if (!validateRegistrationForm(formData)) {
+                return;
+            }
+            
+            // Show loading state
+            submitBtn.disabled = true;
+            buttonText.style.display = 'none';
+            buttonLoader.style.display = 'inline-block';
+            
+            try {
+                // Get user's IP address
+                const ipResponse = await fetch('https://api.ipify.org?format=json');
+                const ipData = await ipResponse.json();
+                
+                // Get API key
+                const apiKeyResponse = await fetch('/api/get-api-key');
+                const apiConfig = await apiKeyResponse.json();
+                
+                if (!apiConfig.apiKey) {
+                    throw new Error('API key not available');
+                }
+                
+                // Parse birthdate
+                const birthDate = new Date(formData.birthdate);
+                const year = birthDate.getFullYear();
+                const month = birthDate.getMonth() + 1;
+                const day = birthDate.getDate();
+                
+                // Prepare registration parameters
+                const registrationParams = new URLSearchParams({
+                    api_key: apiConfig.apiKey,
+                    login: formData.username,
+                    pass: formData.password,
+                    mail: formData.email,
+                    'fast-part': '1', // Fast registration
+                    sex: formData.gender,
+                    cherche1: formData.lookingFor,
+                    year: year,
+                    month: month,
+                    day: day,
+                    ip_adress: ipData.ip,
+                    city: '1', // Default city ID - will be improved later
+                    region: '1', // Default region ID
+                    countryObj: '64', // France by default
+                    lang_ui: 'en'
+                });
+                
+                // Make registration request
+                const response = await fetch(`https://dev2018.de5a7.com/index_api/subscribe?${registrationParams.toString()}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success && result.session_id) {
+                    // Registration successful
+                    showRegistrationSuccess();
+                    
+                    // Store session and redirect after a delay
+                    if (window.authManager) {
+                        window.authManager.sessionId = result.session_id;
+                        window.authManager.currentUser = {
+                            pseudo: formData.username,
+                            email: formData.email,
+                            id: result.user_id
+                        };
+                        window.authManager.isLoggedIn = true;
+                        
+                        // Save to localStorage
+                        localStorage.setItem('authSession', JSON.stringify({
+                            sessionId: result.session_id,
+                            user: window.authManager.currentUser,
+                            timestamp: Date.now()
+                        }));
+                    }
+                    
+                    // Redirect to main page after 2 seconds
+                    setTimeout(() => {
+                        window.location.href = 'main.html';
+                    }, 2000);
+                    
+                } else {
+                    throw new Error(result.message || 'Registration failed');
+                }
+                
+            } catch (error) {
+                console.error('Registration error:', error);
+                showRegistrationError(error.message);
+            } finally {
+                // Reset button state
+                submitBtn.disabled = false;
+                buttonText.style.display = 'inline';
+                buttonLoader.style.display = 'none';
+            }
+        }
+        
+        function validateRegistrationForm(data) {
+            if (!data.firstName || data.firstName.length < 2) {
+                alert('Please enter your first name (at least 2 characters)');
+                return false;
+            }
+            
+            if (!data.email || !isValidEmail(data.email)) {
+                alert('Please enter a valid email address');
+                return false;
+            }
+            
+            if (!data.password || data.password.length < 6) {
+                alert('Password must be at least 6 characters long');
+                return false;
+            }
+            
+            if (!data.username || data.username.length < 3) {
+                alert('Username must be at least 3 characters long');
+                return false;
+            }
+            
+            if (!data.gender) {
+                alert('Please select your gender');
+                return false;
+            }
+            
+            if (!data.lookingFor) {
+                alert('Please select who you are looking for');
+                return false;
+            }
+            
+            if (!data.birthdate) {
+                alert('Please enter your birth date');
+                return false;
+            }
+            
+            // Check age (must be 18+)
+            const birthDate = new Date(data.birthdate);
+            const today = new Date();
+            const age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            
+            if (age < 18) {
+                alert('You must be at least 18 years old to register');
+                return false;
+            }
+            
+            if (!data.city || data.city.length < 2) {
+                alert('Please enter your city');
+                return false;
+            }
+            
+            return true;
+        }
+        
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+        
+        function showRegistrationSuccess() {
+            const form = document.getElementById('registrationForm');
+            form.innerHTML = `
+                <div class="registration-success">
+                    <div class="success-icon">✅</div>
+                    <h3>Welcome to Lavrilo!</h3>
+                    <p>Your account has been created successfully.</p>
+                    <p>Redirecting you to your dashboard...</p>
+                </div>
+            `;
+        }
+        
+        function showRegistrationError(message) {
+            alert('Registration failed: ' + message + '\nPlease try again or contact support.');
+        }
+    </script>
 </body>
 </html>
