@@ -3623,9 +3623,7 @@ body[data-page="discover"] .photo-modal-image,
     max-height: 3.2rem;
   }
   
-  .action-buttons-new {
-    /* absolute positioning на всех устройствах */
-  }
+  /* .action-buttons-new - absolute positioning на всех устройствах */
   
   .action-btn-new {
     width: 50px;
@@ -4315,7 +4313,7 @@ body[data-page="discover"] .photo-modal-image,
 
 .danger-zone {
   border: 2px solid #ff4757;
-  background: rgba(255, 71, 87, 0.05);
+  background: white;
 }
 
 .app-btn-danger {

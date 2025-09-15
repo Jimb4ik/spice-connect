@@ -325,3 +325,115 @@
     transform: rotate(360deg);
   }
 }
+
+/* Rating Section */
+.rating-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  padding: 20px;
+}
+
+.rating-stars {
+  display: flex;
+  gap: 5px;
+  font-size: 28px;
+}
+
+.star {
+  color: #ddd;
+  transition: color 0.3s ease;
+}
+
+.star.filled {
+  color: #ffc107;
+}
+
+.star.half {
+  position: relative;
+  color: #ddd;
+}
+
+.star.half::before {
+  content: '★';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 50%;
+  overflow: hidden;
+  color: #ffc107;
+}
+
+.star.empty {
+  color: #ddd;
+}
+
+.rating-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.rating-value {
+  font-size: 20px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.rating-votes {
+  color: #64748b;
+  font-size: 16px;
+}
+
+/* Personality Section */
+.personality-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.interests-section {
+  margin-top: 10px;
+}
+
+.interests-section h4 {
+  color: #2c3e50;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.interests-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.interest-tag {
+  background: #f0f4f8;
+  color: #4a5568;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+.interest-tag:hover {
+  background: #e2e8f0;
+  border-color: #cbd5e0;
+}
+
+/* Improved spacing between sections */
+.profile-section {
+  margin-bottom: 25px;
+}
+
+/* Better visual hierarchy */
+.profile-section h3 {
+  border-bottom: 2px solid #f0f4f8;
+  padding-bottom: 12px;
+  margin-bottom: 25px;
+}

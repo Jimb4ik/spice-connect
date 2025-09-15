@@ -253,7 +253,7 @@ async function displayDescription(profile) {
  */
 async function displayPersonalDetails(profile) {
     // Load necessary configuration arrays
-    await loadConfigArrays(['SITUATION', 'CHEVEUX', 'YEUX', 'FUMEUR', 'ETUDES']);
+    await loadConfigArrays(['SITUATION', 'CHEVEUX', 'YEUX', 'FUMEUR', 'ETUDES', 'TRAVAIL', 'POUR', 'SILHOUETTE', 'PERSONNALITE']);
     
     // Marital status
     if (profile.situation && configArrays.SITUATION) {
@@ -264,30 +264,20 @@ async function displayPersonalDetails(profile) {
         }
     }
     
-    // Hair color
-    if (profile.cheveux && configArrays.CHEVEUX) {
-        const hairColor = configArrays.CHEVEUX[profile.cheveux];
-        if (hairColor) {
-            document.getElementById('hairColor').textContent = hairColor;
-            document.getElementById('hairColorItem').style.display = 'flex';
+    // Children (basic logic based on common patterns)
+    if (profile.child !== undefined) {
+        let childrenText = 'No information';
+        if (profile.child === '0' || profile.child === 0) {
+            childrenText = 'No children';
+        } else if (profile.child === '1' || profile.child === 1) {
+            childrenText = '1 child';
+        } else if (profile.child > 1) {
+            childrenText = `${profile.child} children`;
         }
-    }
-    
-    // Eye color
-    if (profile.yeux && configArrays.YEUX) {
-        const eyeColor = configArrays.YEUX[profile.yeux];
-        if (eyeColor) {
-            document.getElementById('eyeColor').textContent = eyeColor;
-            document.getElementById('eyeColorItem').style.display = 'flex';
-        }
-    }
-    
-    // Smoking
-    if (profile.fumeur && configArrays.FUMEUR) {
-        const smoking = configArrays.FUMEUR[profile.fumeur];
-        if (smoking) {
-            document.getElementById('smoking').textContent = smoking;
-            document.getElementById('smokingItem').style.display = 'flex';
+        
+        if (childrenText !== 'No information') {
+            document.getElementById('children').textContent = childrenText;
+            document.getElementById('childrenItem').style.display = 'flex';
         }
     }
     
@@ -300,22 +290,159 @@ async function displayPersonalDetails(profile) {
         }
     }
     
-    // Children (basic logic based on common patterns)
-    if (profile.child !== undefined) {
-        let childrenText = 'No information';
-        if (profile.child === '0' || profile.child === 0) {
-            childrenText = 'No children';
-        } else if (profile.child === '1' || profile.child === 1) {
-            childrenText = 'Has children';
-        } else if (profile.child) {
-            childrenText = 'Has children';
-        }
-        
-        if (childrenText !== 'No information') {
-            document.getElementById('children').textContent = childrenText;
-            document.getElementById('childrenItem').style.display = 'flex';
+    // Profession
+    if (profile.travail && configArrays.TRAVAIL) {
+        const profession = configArrays.TRAVAIL[profile.travail];
+        if (profession) {
+            document.getElementById('profession').textContent = profession;
+            document.getElementById('professionItem').style.display = 'flex';
         }
     }
+    
+    // Smoking
+    if (profile.fumeur && configArrays.FUMEUR) {
+        const smoking = configArrays.FUMEUR[profile.fumeur];
+        if (smoking) {
+            document.getElementById('smoking').textContent = smoking;
+            document.getElementById('smokingItem').style.display = 'flex';
+        }
+    }
+    
+    // Looking for
+    if (profile.pour && configArrays.POUR) {
+        const lookingFor = configArrays.POUR[profile.pour];
+        if (lookingFor) {
+            document.getElementById('lookingFor').textContent = lookingFor;
+            document.getElementById('lookingForItem').style.display = 'flex';
+        }
+    }
+    
+    // Physical appearance section
+    let hasAppearanceData = false;
+    
+    // Height
+    if (profile.taille && profile.taille > 0) {
+        document.getElementById('height').textContent = `${profile.taille} cm`;
+        document.getElementById('heightItem').style.display = 'flex';
+        hasAppearanceData = true;
+    }
+    
+    // Weight
+    if (profile.poids && profile.poids > 0) {
+        document.getElementById('weight').textContent = `${profile.poids} kg`;
+        document.getElementById('weightItem').style.display = 'flex';
+        hasAppearanceData = true;
+    }
+    
+    // Body type
+    if (profile.silhouette && configArrays.SILHOUETTE) {
+        const bodyType = configArrays.SILHOUETTE[profile.silhouette];
+        if (bodyType) {
+            document.getElementById('bodyType').textContent = bodyType;
+            document.getElementById('bodyTypeItem').style.display = 'flex';
+            hasAppearanceData = true;
+        }
+    }
+    
+    // Hair color
+    if (profile.cheveux && configArrays.CHEVEUX) {
+        const hairColor = configArrays.CHEVEUX[profile.cheveux];
+        if (hairColor) {
+            document.getElementById('hairColor').textContent = hairColor;
+            document.getElementById('hairColorItem').style.display = 'flex';
+            hasAppearanceData = true;
+        }
+    }
+    
+    // Eye color
+    if (profile.yeux && configArrays.YEUX) {
+        const eyeColor = configArrays.YEUX[profile.yeux];
+        if (eyeColor) {
+            document.getElementById('eyeColor').textContent = eyeColor;
+            document.getElementById('eyeColorItem').style.display = 'flex';
+            hasAppearanceData = true;
+        }
+    }
+    
+    // Show appearance section if has data
+    if (hasAppearanceData) {
+        document.getElementById('appearanceSection').style.display = 'block';
+    }
+    
+    // Personality section
+    let hasPersonalityData = false;
+    
+    if (profile.personnalite && configArrays.PERSONNALITE) {
+        const personality = configArrays.PERSONNALITE[profile.personnalite];
+        if (personality) {
+            document.getElementById('personality').textContent = personality;
+            document.getElementById('personalityItem').style.display = 'flex';
+            hasPersonalityData = true;
+        }
+    }
+    
+    // Interests
+    if (profile.tab_interests2 && profile.tab_interests2.length > 0) {
+        // TODO: Load interests configuration and display
+        hasPersonalityData = true;
+    }
+    
+    // Show personality section if has data
+    if (hasPersonalityData) {
+        document.getElementById('personalitySection').style.display = 'block';
+    }
+    
+    // Rating section
+    if (profile.vote && profile.vote > 0) {
+        displayRating(profile.moyenne || 0, profile.vote);
+        document.getElementById('ratingSection').style.display = 'block';
+    }
+}
+
+/**
+ * Display rating stars
+ */
+function displayRating(rating, votes) {
+    const ratingStars = document.getElementById('ratingStars');
+    const ratingValue = document.getElementById('ratingValue');
+    const ratingVotes = document.getElementById('ratingVotes');
+    
+    // Clear existing stars
+    ratingStars.innerHTML = '';
+    
+    // Convert 0-10 rating to 0-5 stars
+    const starRating = rating / 2;
+    const fullStars = Math.floor(starRating);
+    const hasHalfStar = starRating % 1 >= 0.5;
+    
+    // Add full stars
+    for (let i = 0; i < fullStars; i++) {
+        const star = document.createElement('span');
+        star.className = 'star filled';
+        star.textContent = '★';
+        ratingStars.appendChild(star);
+    }
+    
+    // Add half star if needed
+    if (hasHalfStar && fullStars < 5) {
+        const star = document.createElement('span');
+        star.className = 'star half';
+        star.textContent = '★';
+        ratingStars.appendChild(star);
+    }
+    
+    // Add empty stars
+    const totalStars = fullStars + (hasHalfStar ? 1 : 0);
+    for (let i = totalStars; i < 5; i++) {
+        const star = document.createElement('span');
+        star.className = 'star empty';
+        star.textContent = '☆';
+        ratingStars.appendChild(star);
+    }
+    
+    // Update text values
+    ratingValue.textContent = `${rating.toFixed(1)}/10`;
+    ratingVotes.textContent = `(${votes} vote${votes !== 1 ? 's' : ''})`;
 }
 
 /**
@@ -323,7 +450,6 @@ async function displayPersonalDetails(profile) {
  */
 function setupActionButtons(profile) {
     const messageBtn = document.getElementById('messageBtn');
-    const backBtn = document.getElementById('backBtn');
     
     // Message button
     messageBtn.onclick = () => {
@@ -332,11 +458,6 @@ function setupActionButtons(profile) {
         
         // Redirect to messages page with contact parameter
         window.location.href = `messages.html?contact=${userId}`;
-    };
-    
-    // Back button
-    backBtn.onclick = () => {
-        history.back();
     };
 }
 
@@ -425,3 +546,4 @@ function showError() {
 
 // Make functions globally available
 window.initializeUserProfile = initializeUserProfile;
+
