@@ -173,7 +173,7 @@ class WalletManager {
             const amountPrefix = isPositive ? '+' : '-';
             const iconType = this.getTransactionIcon(transaction.transaction_type);
             
-            // Рассчитываем кредиты на основе суммы и валюты (как в networx-payment.js)
+            // Рассчитываем кредиты на основе суммы и валюты
             const creditRates = {
                 'EUR': 0.21,
                 'USD': 0.23,
@@ -484,11 +484,11 @@ class WalletManager {
         }
     }
 
-    // ============ NETWORX PAYMENT INTEGRATION ============
+    // ============ PAYMENT INTEGRATION ============
     
-    async initializeNetworxPayment(amount, currency, credits) {
+    async initializePayment(amount, currency, credits) {
         try {
-            console.log('[WALLET] Initializing Networx payment...', { amount, currency, credits });
+            console.log('[WALLET] Initializing payment...', { amount, currency, credits });
             
             // Получаем email пользователя из API
             const userEmail = await this.getCurrentUserEmail();
@@ -525,7 +525,7 @@ class WalletManager {
             if (result.success) {
                 console.log('[WALLET] Payment token created:', result.data.token);
                 
-                // Перенаправляем на платежную страницу Networx
+                // Перенаправляем на платежную страницу
                 window.location.href = result.data.payment_url;
                 
             } else {
@@ -534,7 +534,7 @@ class WalletManager {
             }
             
         } catch (error) {
-            console.error('[WALLET] Error initializing Networx payment:', error);
+            console.error('[WALLET] Error initializing payment:', error);
             this.showErrorMessage('Failed to initialize payment. Please try again.');
         }
     }

@@ -370,6 +370,12 @@ Object.assign(Dashboard.prototype, {
     
     if (chatEmpty) chatEmpty.style.display = 'none';
     if (chatActive) chatActive.style.display = 'flex';
+    // После показа активного чата убеждаемся, что область сообщений прокручивается,
+    // а нижняя панель не пропадает из-за переполнения
+    const chatArea = document.querySelector('.chat-area');
+    const chatMessages = document.getElementById('chatMessages');
+    if (chatArea) chatArea.style.minHeight = '0';
+    if (chatMessages) chatMessages.style.overflowY = 'auto';
   },
 
   async loadChatMessages(userId) {
@@ -640,6 +646,7 @@ Object.assign(Dashboard.prototype, {
 
   displayChatMessages(messages) {
     const chatMessages = document.getElementById('chatMessages');
+    const chatArea = document.querySelector('.chat-area');
     
     if (!chatMessages) return;
 
@@ -657,7 +664,9 @@ Object.assign(Dashboard.prototype, {
     const messagesHTML = messages.map(message => this.createSimpleMessageItem(message)).join('');
     chatMessages.innerHTML = messagesHTML;
     
-    // Scroll to bottom
+    // Ensure layout allows scrolling and scroll to bottom
+    if (chatArea) chatArea.style.minHeight = '0';
+    if (chatMessages) chatMessages.style.overflowY = 'auto';
     this.scrollToBottom();
   },
 

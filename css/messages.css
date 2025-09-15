@@ -331,6 +331,7 @@
   flex: 1;
   display: none;
   flex-direction: column;
+  min-height: 0; /* важно: позволяет дочернему .chat-messages занимать доступное пространство */
 }
 
 .chat-header {
@@ -439,6 +440,7 @@
   padding: 24px 28px;
   border-top: 1px solid #e2e8f0;
   background: #f8fafc;
+  flex-shrink: 0; /* не сжимать, чтобы панель ввода всегда была видна */
 }
 
 .chat-input-container {
