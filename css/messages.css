@@ -149,13 +149,12 @@
 
 /* Стили точно как у profile-hero-section */
 .messages-container {
-  margin-bottom: 16px; /* небольшой зазор над футером (фон градиента) */
   /* Расширяем рабочую область сообщений */
   width: 100%;
   max-width: 1200px;
-  margin: 0 auto;
+  margin: 0 auto 2rem; /* добавляем нормальный отступ снизу */
   padding: 0 1.5rem;
-  height: calc(100vh - 140px); /* делаем окно чата выше */
+  height: calc(100vh - 200px); /* уменьшаем высоту, чтобы был зазор */
 }
 
 .messages-chat-card {
