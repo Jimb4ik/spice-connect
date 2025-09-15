@@ -517,9 +517,6 @@ class Dashboard {
           </div>
           
           <div class="user-actions">
-            <button class="btn-primary btn-sm" onclick="dashboard.viewUserProfile('${userId}')">
-              👁️ View
-            </button>
             <button class="btn-secondary btn-sm" onclick="dashboard.sendMessage('${userId}')">
               💬 Message
             </button>

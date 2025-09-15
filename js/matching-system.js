@@ -1157,9 +1157,6 @@ class MatchingSystem {
         <p>${match.description || 'No description'}</p>
       </div>
       <div class="match-card-actions">
-        <button class="match-action-btn view-profile">
-          👤 View Profile
-        </button>
         <button class="match-action-btn message">
           💬 Message
         </button>
