@@ -704,7 +704,7 @@ Object.assign(Dashboard.prototype, {
         'Royal Crown': '👑'
       };
       const icon = emojiMap[giftName] || '🎁';
-      bubble = `<span style="font-size:18px; margin-right:6px">${icon}</span><span>Sent a gift: ${giftName || text.replace(/^[^:]*:/,'').trim()}</span>`;
+      bubble = `<span style="font-size:18px; margin-right:6px; background: white; padding: 2px 6px; border-radius: 8px; display: inline-block;">${icon}</span><span>Sent a gift: ${giftName || text.replace(/^[^:]*:/,'').trim()}</span>`;
     }
     
     return `

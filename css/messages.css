@@ -3,7 +3,7 @@
 .messages-page {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 180vh;
 }
 
 /* Modern Dropdown Styles - копия из dashboard.css */
