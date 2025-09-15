@@ -149,7 +149,7 @@
 
 /* Стили точно как у profile-hero-section */
 .messages-container {
-  margin-bottom: 0; /* убираем нижний отступ под чатом */
+  margin-bottom: 16px; /* небольшой зазор над футером (фон градиента) */
   /* Расширяем рабочую область сообщений */
   width: 100%;
   max-width: 1200px;
@@ -163,7 +163,7 @@
   backdrop-filter: blur(20px);
   border-radius: var(--border-radius);
   padding: 0; /* Внутренние отступы задаются дочерним областям */
-  padding-bottom: 1rem;
+  padding-bottom: 0; /* убираем белую полоску внутри карточки у низа */
   box-shadow: var(--shadow);
   border: 1px solid rgba(255, 255, 255, 0.2);
   display: flex;
