@@ -144,17 +144,18 @@
 /* Увеличиваем ширину контента только на странице сообщений */
 .messages-page .app-main {
   max-width: 1200px;
-  padding-bottom: 0; /* убираем полосу между чатом и футером */
+  padding-bottom: 2rem; /* нормальный отступ до футера */
 }
 
 /* Стили точно как у profile-hero-section */
 .messages-container {
+  margin-bottom: 2rem; /* нормальный отступ как у других страниц */
   /* Расширяем рабочую область сообщений */
   width: 100%;
   max-width: 1200px;
-  margin: 0 auto 2rem; /* добавляем нормальный отступ снизу */
+  margin: 0 auto;
   padding: 0 1.5rem;
-  height: calc(100vh - 200px); /* уменьшаем высоту, чтобы был зазор */
+  height: calc(100vh - 220px); /* с учетом отступов */
 }
 
 .messages-chat-card {
@@ -420,8 +421,9 @@
 }
 
 .message-item.own .message-bubble {
-  background: var(--gradient-primary);
+  background: linear-gradient(135deg, #ff8a95 0%, #ff6b7a 100%); /* более мягкий градиент */
   color: white;
+  opacity: 0.95; /* чуть прозрачнее */
 }
 
 .message-time {
