@@ -80,8 +80,11 @@ async function getMessages(userId, contactId, sessionId) {
 async function getGiftMessages(userId, contactId, sessionId) {
   const client = await pool.connect();
   try {
-    const result = await client.query(`
-      SELECT gt.created_at, g.name AS gift_name
+    console.log('[MESSAGES-DB] Ищем подарки между:', { userId, contactId, sessionId });
+    
+    // Сначала попробуем найти подарки отправленные текущим пользователем
+    const sentGiftsResult = await client.query(`
+      SELECT gt.created_at, g.name AS gift_name, gt.related_user_id, gt.user_id, gt.session_id
       FROM gift_transactions gt
       LEFT JOIN gifts g ON gt.gift_id = g.id
       WHERE gt.transaction_type = 'purchase'
@@ -91,16 +94,55 @@ async function getGiftMessages(userId, contactId, sessionId) {
         )
       ORDER BY gt.created_at ASC
     `, [userId, contactId, sessionId]);
+    
+    console.log('[MESSAGES-DB] Найдено отправленных подарков:', sentGiftsResult.rows.length);
+    if (sentGiftsResult.rows.length > 0) {
+      console.log('[MESSAGES-DB] Отправленные подарки:', sentGiftsResult.rows);
+    }
+    
+    // Теперь найдем подарки полученные от контакта
+    const receivedGiftsResult = await client.query(`
+      SELECT gt.created_at, g.name AS gift_name, gt.related_user_id, gt.user_id, gt.session_id
+      FROM gift_transactions gt
+      LEFT JOIN gifts g ON gt.gift_id = g.id
+      WHERE gt.transaction_type = 'purchase'
+        AND (
+              (gt.user_id = $2 AND gt.related_user_id = $1)
+           OR (gt.session_id = $2 AND gt.related_user_id = $3)
+        )
+      ORDER BY gt.created_at ASC
+    `, [userId, contactId, sessionId]);
+    
+    console.log('[MESSAGES-DB] Найдено полученных подарков:', receivedGiftsResult.rows.length);
+    if (receivedGiftsResult.rows.length > 0) {
+      console.log('[MESSAGES-DB] Полученные подарки:', receivedGiftsResult.rows);
+    }
 
     // Преобразуем транзакции в формат сообщений
-    return result.rows.map(row => ({
+    const sentMessages = sentGiftsResult.rows.map(row => ({
       sender_id: userId,
       recipient_id: contactId,
       message_text: `Sent a gift: ${row.gift_name}`,
       created_at: row.created_at,
       session_id: sessionId,
-      is_own: true
+      is_own: true,
+      isGift: true
     }));
+    
+    const receivedMessages = receivedGiftsResult.rows.map(row => ({
+      sender_id: contactId,
+      recipient_id: userId,
+      message_text: `Sent a gift: ${row.gift_name}`,
+      created_at: row.created_at,
+      session_id: row.session_id,
+      is_own: false,
+      isGift: true
+    }));
+    
+    const allGiftMessages = [...sentMessages, ...receivedMessages];
+    console.log('[MESSAGES-DB] Всего сообщений-подарков:', allGiftMessages.length);
+    
+    return allGiftMessages;
   } catch (error) {
     console.error('[MESSAGES-DB] Ошибка получения gift-сообщений:', error);
     return [];
@@ -166,9 +208,39 @@ export default async function handler(req, res) {
           getGiftMessages(user_id, contact_id, session_id)
         ]);
 
+        // Дополнительно проверим таблицу user_gifts напрямую для отладки
+        const client = await pool.connect();
+        try {
+          const debugGifts = await client.query(`
+            SELECT ug.*, g.name as gift_name, 
+                   ug.sender_user_id, ug.sender_session_id,
+                   ug.receiver_user_id, ug.receiver_session_id
+            FROM user_gifts ug
+            LEFT JOIN gifts g ON ug.gift_id = g.id
+            WHERE (ug.sender_user_id = $1 OR ug.sender_session_id = $3)
+               OR (ug.receiver_user_id = $1 OR ug.receiver_session_id = $3)
+               OR (ug.sender_user_id = $2 OR ug.sender_session_id = $2)
+               OR (ug.receiver_user_id = $2 OR ug.receiver_session_id = $2)
+            ORDER BY ug.created_at DESC
+            LIMIT 10
+          `, [user_id, contact_id, session_id]);
+          
+          console.log('[MESSAGES-DB] DEBUG: Все подарки связанные с пользователями:', debugGifts.rows);
+        } catch (err) {
+          console.error('[MESSAGES-DB] DEBUG ERROR:', err);
+        } finally {
+          client.release();
+        }
+
         // Объединяем и сортируем
         const combined = [...messages, ...giftMessages].sort((a, b) => {
           return new Date(a.created_at) - new Date(b.created_at);
+        });
+        
+        console.log('[MESSAGES-DB] Итоговое количество сообщений:', {
+          regular: messages.length,
+          gifts: giftMessages.length,
+          total: combined.length
         });
         
         return res.status(200).json({
