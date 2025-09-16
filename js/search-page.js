@@ -1,7 +1,10 @@
 class SearchManager {
     constructor() {
         this.currentPage = 1;
+        this.totalPages = 1;
+        this.totalResults = 0;
         this.isLoading = false;
+        this.lastSearchParams = null;
         this.init();
     }
 
@@ -77,8 +80,13 @@ class SearchManager {
         }
     }
 
-    async performSearch() {
+    async performSearch(isNewSearch = true) {
         if (this.isLoading) return;
+        
+        // Если это новый поиск (не пагинация), сбрасываем на первую страницу
+        if (isNewSearch) {
+            this.currentPage = 1;
+        }
         
         this.isLoading = true;
         this.showLoading();
@@ -117,9 +125,23 @@ class SearchManager {
                 // Проверяем разные возможные структуры ответа
                 const searchResults = result.data.result || result.data.results || result.data || [];
                 const total = result.data.total || result.data.nb_total || searchResults.length || 0;
+                const totalPages = result.data.nb_pages || Math.ceil(total / 30) || 1;
                 
-                console.log('[SEARCH] Extracted results:', { searchResults, total, length: searchResults.length });
+                console.log('[SEARCH] Extracted results:', { 
+                    searchResults, 
+                    total, 
+                    totalPages,
+                    currentPage: this.currentPage,
+                    length: searchResults.length 
+                });
+                
+                // Сохраняем данные пагинации
+                this.totalResults = total;
+                this.totalPages = totalPages;
+                this.lastSearchParams = searchParams;
+                
                 this.displayResults(searchResults, total);
+                this.updatePagination();
             } else {
                 console.error('[SEARCH] Search failed:', result);
                 this.showError('Search failed. Please try again.');
@@ -136,17 +158,21 @@ class SearchManager {
     getSearchParams() {
         const params = {};
         
-        // Name search
+        // Name search - используем и nick и nom для более широкого поиска
         const searchName = document.getElementById('searchName')?.value?.trim();
         if (searchName) {
-            params.nick = searchName;
+            params.nick = searchName;  // Поиск по username
+            params.nom = searchName;   // Поиск по имени
         }
         
-        // Location search
+        // Location search - используем nom для поиска по локации как текст
         const searchLocation = document.getElementById('searchLocation')?.value?.trim();
         if (searchLocation) {
-            // For now, just search by name if location is provided
-            // In a real implementation, you'd need to resolve location to id_ville
+            // Используем nom для поиска по локации (город, регион)
+            if (!searchName) {
+                params.nom = searchLocation;
+            }
+            // TODO: В будущем можно добавить геокодинг для получения id_ville
         }
         
         // Age range
@@ -171,9 +197,6 @@ class SearchManager {
             }
         }
         
-        // Only with photos - опционально (убираем принудительный фильтр)
-        // params.is_photo = 1;
-        
         // Online only
         const onlineOnly = document.getElementById('onlineOnly')?.checked;
         if (onlineOnly) {
@@ -182,6 +205,18 @@ class SearchManager {
         
         // Page
         params.page = this.currentPage;
+        
+        // Устанавливаем 30 профилей на страницу для пагинации
+        params.pas = 30;
+        
+        // Запрашиваем только пользователей с фото для лучшего UX
+        params.is_photo = 1;
+        
+        // Запрашиваем полную информацию профилей
+        params.profile_complete = 1;
+        
+        // Запрашиваем фото в высоком разрешении
+        params.get_picture_430 = 1;
         
         return params;
     }
@@ -233,7 +268,9 @@ class SearchManager {
         
         // Update results count
         if (resultsCountEl) {
-            resultsCountEl.textContent = `${results.length} results`;
+            const startResult = (this.currentPage - 1) * 30 + 1;
+            const endResult = Math.min(this.currentPage * 30, this.totalResults);
+            resultsCountEl.textContent = `${startResult}-${endResult} of ${this.totalResults} results`;
         }
         
         // Найдем или создадим контейнер для результатов
@@ -289,13 +326,21 @@ class SearchManager {
              <div class="user-avatar-placeholder" style="display: none;">${user.pseudo ? user.pseudo.charAt(0).toUpperCase() : 'U'}</div>` :
             `<div class="user-avatar-placeholder">${user.pseudo ? user.pseudo.charAt(0).toUpperCase() : 'U'}</div>`;
         
-        // Только фото и ник - никаких кнопок и дополнительной информации
+        // Добавляем больше информации благодаря profile_complete=1
+        const age = user.age ? `, ${user.age}` : '';
+        const location = user.ville || user.region || user.pays || '';
+        const locationText = location ? `📍 ${location}` : '';
+        
         card.innerHTML = `
             <div class="user-photo-container">
                 ${avatarHtml}
             </div>
-            <div class="user-nickname">
-                ${user.pseudo || 'Anonymous'}
+            <div class="user-info">
+                <div class="user-nickname">
+                    ${user.pseudo || 'Anonymous'}${age}
+                </div>
+                ${locationText ? `<div class="user-location">${locationText}</div>` : ''}
+                ${user.description ? `<div class="user-description">${user.description.substring(0, 100)}${user.description.length > 100 ? '...' : ''}</div>` : ''}
             </div>
         `;
         
@@ -362,6 +407,9 @@ class SearchManager {
         document.getElementById('onlineOnly').checked = false;
         
         this.currentPage = 1;
+        this.totalPages = 1;
+        this.totalResults = 0;
+        this.lastSearchParams = null;
         this.performSearch();
     }
 
@@ -411,6 +459,82 @@ class SearchManager {
                     </button>
                 </div>
             `;
+        }
+    }
+
+    updatePagination() {
+        // Найдем или создадим контейнер пагинации
+        let paginationContainer = document.getElementById('searchPagination');
+        if (!paginationContainer) {
+            paginationContainer = document.createElement('div');
+            paginationContainer.id = 'searchPagination';
+            paginationContainer.className = 'search-pagination';
+            
+            const searchResults = document.getElementById('searchResults');
+            if (searchResults) {
+                searchResults.appendChild(paginationContainer);
+            }
+        }
+
+        // Если только одна страница, скрываем пагинацию
+        if (this.totalPages <= 1) {
+            paginationContainer.style.display = 'none';
+            return;
+        }
+
+        paginationContainer.style.display = 'flex';
+        
+        let paginationHTML = '<div class="pagination-controls">';
+        
+        // Кнопка "Предыдущая"
+        if (this.currentPage > 1) {
+            paginationHTML += `<button class="pagination-btn" onclick="searchManager.goToPage(${this.currentPage - 1})">← Previous</button>`;
+        }
+        
+        // Номера страниц
+        const startPage = Math.max(1, this.currentPage - 2);
+        const endPage = Math.min(this.totalPages, this.currentPage + 2);
+        
+        if (startPage > 1) {
+            paginationHTML += `<button class="pagination-btn" onclick="searchManager.goToPage(1)">1</button>`;
+            if (startPage > 2) {
+                paginationHTML += `<span class="pagination-dots">...</span>`;
+            }
+        }
+        
+        for (let i = startPage; i <= endPage; i++) {
+            const activeClass = i === this.currentPage ? 'active' : '';
+            paginationHTML += `<button class="pagination-btn ${activeClass}" onclick="searchManager.goToPage(${i})">${i}</button>`;
+        }
+        
+        if (endPage < this.totalPages) {
+            if (endPage < this.totalPages - 1) {
+                paginationHTML += `<span class="pagination-dots">...</span>`;
+            }
+            paginationHTML += `<button class="pagination-btn" onclick="searchManager.goToPage(${this.totalPages})">${this.totalPages}</button>`;
+        }
+        
+        // Кнопка "Следующая"
+        if (this.currentPage < this.totalPages) {
+            paginationHTML += `<button class="pagination-btn" onclick="searchManager.goToPage(${this.currentPage + 1})">Next →</button>`;
+        }
+        
+        paginationHTML += '</div>';
+        paginationHTML += `<div class="pagination-info">Page ${this.currentPage} of ${this.totalPages}</div>`;
+        
+        paginationContainer.innerHTML = paginationHTML;
+    }
+
+    async goToPage(page) {
+        if (page < 1 || page > this.totalPages || page === this.currentPage || this.isLoading) {
+            return;
+        }
+        
+        this.currentPage = page;
+        
+        // Используем последние параметры поиска
+        if (this.lastSearchParams) {
+            await this.performSearch(false); // false = это пагинация, не новый поиск
         }
     }
 }

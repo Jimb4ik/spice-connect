@@ -429,7 +429,12 @@ class Dashboard {
   
       // Add pagination
       params.append('page', (page - 1).toString()); // API uses 0-based pagination
-      params.append('pas', '12'); // Results per page
+      params.append('pas', '30'); // Results per page - 30 для пагинации
+      
+      // Добавляем параметры для лучшего качества результатов
+      params.append('is_photo', '1'); // Только с фото
+      params.append('profile_complete', '1'); // Полная информация
+      params.append('get_picture_430', '1'); // Фото высокого разрешения
   
       console.log('[SEARCH] API call with params:', params.toString());
   
