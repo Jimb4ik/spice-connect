@@ -68,22 +68,8 @@ async function loadUserProfile(userId) {
             return;
         }
         
-        // Get API key
-        const apiKey = await getApiKey();
-        if (!apiKey) {
-            console.error('[USER-PROFILE] No API key available');
-            showError();
-            return;
-        }
-        
-        // Call user API
-        const userParams = new URLSearchParams({
-            api_key: apiKey,
-            session_id: sessionId,
-            id: userId
-        });
-        
-        const apiUrl = `/api/spice-multi-test?endpoint=/index_api/user&method=POST&${userParams.toString()}`;
+        // Call user API using the correct endpoint
+        const apiUrl = `/api/spice-multi-test?endpoint=/index_api/user&method=POST&session_id=${sessionId}&id=${userId}`;
         console.log('[USER-PROFILE] API request:', apiUrl);
         
         const response = await fetch(apiUrl);
@@ -199,22 +185,31 @@ async function displayProfilePhoto(profile) {
     }
     
     if (photoUrl) {
-        // Fix URL if needed
-        if (!photoUrl.startsWith('http') && !photoUrl.startsWith('/')) {
-            photoUrl = 'https://dev2018.de5a7.com/' + photoUrl;
+        // Fix URL if needed - ensure it's a full URL
+        if (!photoUrl.startsWith('http')) {
+            if (photoUrl.startsWith('/')) {
+                photoUrl = 'https://dev2018.de5a7.com' + photoUrl;
+            } else {
+                photoUrl = 'https://dev2018.de5a7.com/' + photoUrl;
+            }
         }
         
         console.log('[USER-PROFILE] Loading photo:', photoUrl);
         
-        photoElement.src = photoUrl;
-        photoElement.style.display = 'block';
-        placeholderElement.style.display = 'none';
-        
+        // Set up error handling before setting src
         photoElement.onerror = function() {
             console.warn('[USER-PROFILE] Photo failed to load, showing placeholder');
             this.style.display = 'none';
             placeholderElement.style.display = 'flex';
         };
+        
+        photoElement.onload = function() {
+            console.log('[USER-PROFILE] Photo loaded successfully');
+            this.style.display = 'block';
+            placeholderElement.style.display = 'none';
+        };
+        
+        photoElement.src = photoUrl;
     } else {
         console.log('[USER-PROFILE] No photo URL found, showing placeholder');
         photoElement.style.display = 'none';
@@ -466,19 +461,16 @@ function setupActionButtons(profile) {
  */
 async function loadConfigArrays(arrayNames) {
     try {
-        const apiKey = await getApiKey();
-        if (!apiKey) return;
-        
         for (const arrayName of arrayNames) {
             if (configArrays[arrayName]) continue; // Already loaded
             
             try {
-                const response = await fetch(`https://dev2018.de5a7.com/index_api/array/get/${arrayName}?api_key=${apiKey}`);
-                const data = await response.json();
+                const response = await fetch(`/api/spice-multi-test?endpoint=/index_api/array/get/${arrayName}&method=GET`);
+                const result = await response.json();
                 
-                if (data && typeof data === 'object') {
-                    configArrays[arrayName] = data;
-                    console.log(`[USER-PROFILE] Loaded config array ${arrayName}:`, data);
+                if (result.success && result.data && typeof result.data === 'object') {
+                    configArrays[arrayName] = result.data;
+                    console.log(`[USER-PROFILE] Loaded config array ${arrayName}:`, result.data);
                 }
             } catch (error) {
                 console.warn(`[USER-PROFILE] Failed to load config array ${arrayName}:`, error);
@@ -521,19 +513,6 @@ async function translateToEnglish(text) {
     return text;
 }
 
-/**
- * Get API key
- */
-async function getApiKey() {
-    try {
-        const response = await fetch('/api/get-api-key');
-        const config = await response.json();
-        return config.apiKey;
-    } catch (error) {
-        console.error('[USER-PROFILE] Error getting API key:', error);
-        return null;
-    }
-}
 
 /**
  * Show error state

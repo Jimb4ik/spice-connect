@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Search Issues</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .test-result { margin: 10px 0; padding: 10px; background: #f5f5f5; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🐛 Debug Search Issues</h1>
+    
+    <div class="test-section">
+        <h2>1. Test Nick Search Problem</h2>
+        <p>Testing why "kat" doesn't work when searching specifically</p>
+        <button onclick="testNickSearch()">Test Nick Search</button>
+        <div id="nickResult" class="test-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. Test Location Search Problem</h2>
+        <p>Testing why "Paris" returns users named Paris instead of users from Paris</p>
+        <button onclick="testLocationSearch()">Test Location Search</button>
+        <div id="locationResult" class="test-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. Test getRegionsAutocomp API</h2>
+        <input type="text" id="cityInput" placeholder="Enter city name" value="Paris">
+        <button onclick="testGetCityId()">Get City ID</button>
+        <div id="cityResult" class="test-result"></div>
+    </div>
+
+    <script>
+        const API_KEY = localStorage.getItem('spice_api_key') || 'test_key';
+        const BASE_URL = 'https://dev2018.de5a7.com';
+        
+        async function makeSearchRequest(params) {
+            const queryString = new URLSearchParams({
+                api_key: API_KEY,
+                force_pays: 64,
+                ...params
+            }).toString();
+            
+            const url = `${BASE_URL}/index_api/search?${queryString}`;
+            console.log('Search request:', url);
+            
+            try {
+                const response = await fetch(url, { method: 'POST' });
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                return { error: error.message };
+            }
+        }
+        
+        async function makeRegionsRequest(params) {
+            const queryString = new URLSearchParams({
+                api_key: API_KEY,
+                force_pays: 64,
+                ...params
+            }).toString();
+            
+            const url = `${BASE_URL}/ajax_api/getRegionsAutocomp?${queryString}`;
+            console.log('Regions request:', url);
+            
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                return { error: error.message };
+            }
+        }
+        
+        async function testNickSearch() {
+            const resultDiv = document.getElementById('nickResult');
+            resultDiv.innerHTML = '🔄 Testing nick search...';
+            
+            // Test 1: Search without any name filter (should show "kat")
+            const noFilterResult = await makeSearchRequest({
+                pas: 10,
+                page: 0
+            });
+            
+            let katFound = false;
+            if (noFilterResult.result) {
+                katFound = noFilterResult.result.some(user => 
+                    user.pseudo && user.pseudo.toLowerCase().includes('kat')
+                );
+            }
+            
+            // Test 2: Search with nick="kat"
+            const nickResult = await makeSearchRequest({
+                nick: 'kat',
+                pas: 10,
+                page: 0
+            });
+            
+            // Test 3: Search with nom="kat"
+            const nomResult = await makeSearchRequest({
+                nom: 'kat',
+                pas: 10,
+                page: 0
+            });
+            
+            // Test 4: Search with both nick and nom
+            const bothResult = await makeSearchRequest({
+                nick: 'kat',
+                nom: 'kat',
+                pas: 10,
+                page: 0
+            });
+            
+            const nickCount = nickResult.result ? nickResult.result.length : 0;
+            const nomCount = nomResult.result ? nomResult.result.length : 0;
+            const bothCount = bothResult.result ? bothResult.result.length : 0;
+            
+            resultDiv.innerHTML = `
+                <div class="${katFound ? 'success' : 'error'}">
+                    📊 Nick Search Test Results:<br>
+                    • "kat" visible without filter: ${katFound ? 'YES' : 'NO'}<br>
+                    • Search with nick="kat": ${nickCount} results<br>
+                    • Search with nom="kat": ${nomCount} results<br>
+                    • Search with both nick+nom="kat": ${bothCount} results<br>
+                </div>
+                <details>
+                    <summary>Raw Results</summary>
+                    <pre>No filter: ${JSON.stringify(noFilterResult, null, 2).substring(0, 500)}...</pre>
+                    <pre>Nick: ${JSON.stringify(nickResult, null, 2).substring(0, 500)}...</pre>
+                    <pre>Nom: ${JSON.stringify(nomResult, null, 2).substring(0, 500)}...</pre>
+                </details>
+            `;
+        }
+        
+        async function testLocationSearch() {
+            const resultDiv = document.getElementById('locationResult');
+            resultDiv.innerHTML = '🔄 Testing location search...';
+            
+            // Test current wrong approach: nom="Paris"
+            const wrongResult = await makeSearchRequest({
+                nom: 'Paris',
+                pas: 10,
+                page: 0
+            });
+            
+            let parisNameUsers = 0;
+            if (wrongResult.result) {
+                parisNameUsers = wrongResult.result.filter(user => 
+                    user.pseudo && user.pseudo.toLowerCase().includes('paris')
+                ).length;
+            }
+            
+            const wrongCount = wrongResult.result ? wrongResult.result.length : 0;
+            
+            resultDiv.innerHTML = `
+                <div class="error">
+                    🏙️ Location Search Problem:<br>
+                    • Search nom="Paris": ${wrongCount} results<br>
+                    • Users with "paris" in name: ${parisNameUsers}<br>
+                    • Problem: We're searching names, not locations!<br>
+                    • Solution: Need to use id_ville parameter with city ID
+                </div>
+                <details>
+                    <summary>Raw Results</summary>
+                    <pre>${JSON.stringify(wrongResult, null, 2).substring(0, 500)}...</pre>
+                </details>
+            `;
+        }
+        
+        async function testGetCityId() {
+            const resultDiv = document.getElementById('cityResult');
+            const cityName = document.getElementById('cityInput').value;
+            
+            if (!cityName) {
+                resultDiv.innerHTML = '<div class="error">Please enter a city name</div>';
+                return;
+            }
+            
+            resultDiv.innerHTML = `🔄 Getting ID for "${cityName}"...`;
+            
+            const result = await makeRegionsRequest({
+                q: cityName,
+                territory: 'city'
+            });
+            
+            if (result.error) {
+                resultDiv.innerHTML = `<div class="error">❌ Error: ${result.error}</div>`;
+                return;
+            }
+            
+            const cities = result.result || [];
+            
+            resultDiv.innerHTML = `
+                <div class="success">
+                    🏙️ City ID Results for "${cityName}":<br>
+                    • Found ${cities.length} cities<br>
+                    ${cities.slice(0, 5).map(city => 
+                        `• ${city.nom_ville || city.name} (ID: ${city.id_ville || city.id}) - ${city.nom_region || city.region}, ${city.nom_pays || city.country}`
+                    ).join('<br>')}
+                    ${cities.length > 5 ? '<br>• ... and more' : ''}
+                </div>
+                <details>
+                    <summary>Full Response</summary>
+                    <pre>${JSON.stringify(result, null, 2)}</pre>
+                </details>
+            `;
+            
+            // Test search with first city ID if available
+            if (cities.length > 0) {
+                const cityId = cities[0].id_ville || cities[0].id;
+                if (cityId) {
+                    setTimeout(() => testSearchWithCityId(cityId, cities[0].nom_ville || cities[0].name), 1000);
+                }
+            }
+        }
+        
+        async function testSearchWithCityId(cityId, cityName) {
+            const resultDiv = document.getElementById('cityResult');
+            const currentContent = resultDiv.innerHTML;
+            
+            const result = await makeSearchRequest({
+                id_ville: cityId,
+                pas: 10,
+                page: 0
+            });
+            
+            const count = result.result ? result.result.length : 0;
+            
+            resultDiv.innerHTML = currentContent + `
+                <div class="success" style="margin-top: 10px;">
+                    ✅ Search with id_ville=${cityId} (${cityName}): ${count} results
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

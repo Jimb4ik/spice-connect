@@ -92,8 +92,23 @@ class SearchManager {
         this.showLoading();
         
         try {
-            const searchParams = this.getSearchParams();
-            console.log('[SEARCH] Search params:', searchParams);
+            let searchParams = this.getSearchParams();
+            console.log('[SEARCH] Initial search params:', searchParams);
+            
+            // Обрабатываем поиск по локации если указан
+            if (searchParams._location_name) {
+                const locationName = searchParams._location_name;
+                delete searchParams._location_name; // Удаляем временный параметр
+                
+                console.log('[SEARCH] Resolving location:', locationName);
+                const cityId = await this.getCityId(locationName);
+                if (cityId) {
+                    searchParams.id_ville = cityId;
+                    console.log('[SEARCH] Using city ID:', cityId);
+                } else {
+                    console.log('[SEARCH] City not found, skipping location filter');
+                }
+            }
             
             // Build query string for search API
             const queryParams = new URLSearchParams({
@@ -158,21 +173,17 @@ class SearchManager {
     getSearchParams() {
         const params = {};
         
-        // Name search - используем и nick и nom для более широкого поиска
+        // Name search - используем только nick для поиска по username
         const searchName = document.getElementById('searchName')?.value?.trim();
         if (searchName) {
             params.nick = searchName;  // Поиск по username
-            params.nom = searchName;   // Поиск по имени
+            // НЕ используем nom одновременно с nick - это может конфликтовать
         }
         
-        // Location search - используем nom для поиска по локации как текст
+        // Location search - будет обработан асинхронно в performSearch
         const searchLocation = document.getElementById('searchLocation')?.value?.trim();
         if (searchLocation) {
-            // Используем nom для поиска по локации (город, регион)
-            if (!searchName) {
-                params.nom = searchLocation;
-            }
-            // TODO: В будущем можно добавить геокодинг для получения id_ville
+            params._location_name = searchLocation; // Временный параметр для обработки
         }
         
         // Age range
@@ -535,6 +546,36 @@ class SearchManager {
         // Используем последние параметры поиска
         if (this.lastSearchParams) {
             await this.performSearch(false); // false = это пагинация, не новый поиск
+        }
+    }
+
+    async getCityId(cityName) {
+        try {
+            const queryParams = new URLSearchParams({
+                session_id: window.authManager.sessionId,
+                q: cityName,
+                territory: 'city'
+            });
+            
+            const fullUrl = `/api/spice-multi-test?endpoint=/ajax_api/getRegionsAutocomp&method=GET&${queryParams.toString()}`;
+            console.log('[SEARCH] Getting city ID for:', cityName, fullUrl);
+            
+            const response = await fetch(fullUrl);
+            const result = await response.json();
+            
+            console.log('[SEARCH] City lookup result:', result);
+            
+            if (result.success && result.data && result.data.result && result.data.result.length > 0) {
+                const firstCity = result.data.result[0];
+                const cityId = firstCity.id_ville || firstCity.id;
+                console.log('[SEARCH] Found city ID:', cityId, 'for', firstCity.nom_ville || firstCity.name);
+                return cityId;
+            }
+            
+            return null;
+        } catch (error) {
+            console.error('[SEARCH] Error getting city ID:', error);
+            return null;
         }
     }
 }
