@@ -566,6 +566,9 @@
                         <p class="match-time">Matched ${timeAgo}</p>
                     </div>
                     <div class="match-card-actions">
+                        <button class="match-action-btn secondary" onclick="viewUserProfile('${match.matched_user_id}', '${name}')">
+                            👤 View Profile
+                        </button>
                         <button class="match-action-btn primary" onclick="startChatWithContact('${match.matched_user_id}', '${name}')">
                             💬 Message
                         </button>
@@ -1019,6 +1022,21 @@
                     filterMatches(filter);
                 });
             });
+            
+            // Обработчик для кнопки "View Full Profile" в модальном окне
+            const viewFullProfileBtn = document.getElementById('viewFullProfileBtn');
+            if (viewFullProfileBtn) {
+                viewFullProfileBtn.addEventListener('click', () => {
+                    // Получаем данные текущего матча из модального окна
+                    const matchName = document.getElementById('matchName').textContent;
+                    const matchId = viewFullProfileBtn.dataset.userId; // Будем устанавливать при открытии модала
+                    
+                    if (matchId) {
+                        console.log('[MATCHES] Opening full profile for:', matchId, matchName);
+                        viewUserProfile(matchId, matchName);
+                    }
+                });
+            }
         });
         
         function filterMatches(filter) {
