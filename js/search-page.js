@@ -104,9 +104,12 @@ class SearchManager {
                 const cityId = await this.getCityId(locationName);
                 if (cityId) {
                     searchParams.id_ville = cityId;
-                    console.log('[SEARCH] Using city ID:', cityId);
+                    console.log('[SEARCH] Using city ID:', cityId, 'for location:', locationName);
                 } else {
-                    console.log('[SEARCH] City not found, skipping location filter');
+                    console.log('[SEARCH] City not found:', locationName);
+                    // Показываем предупреждение пользователю
+                    this.showLocationWarning(locationName);
+                    // Продолжаем поиск без фильтра по городу
                 }
             }
             
@@ -120,6 +123,11 @@ class SearchManager {
             const fullUrl = `/api/spice-multi-test?endpoint=/index_api/search&method=POST&${queryParams.toString()}`;
             console.log('[SEARCH] Full request URL:', fullUrl);
             console.log('[SEARCH] Query params object:', Object.fromEntries(queryParams.entries()));
+            
+            // Специальное логирование для поиска по городу
+            if (searchParams.id_ville) {
+                console.log('[SEARCH] 🏙️ CITY SEARCH - Using city ID:', searchParams.id_ville);
+            }
             
             const response = await fetch(fullUrl);
 
@@ -565,17 +573,68 @@ class SearchManager {
             
             console.log('[SEARCH] City lookup result:', result);
             
+            // Проверяем правильную структуру ответа API
             if (result.success && result.data && result.data.result && result.data.result.length > 0) {
                 const firstCity = result.data.result[0];
-                const cityId = firstCity.id_ville || firstCity.id;
-                console.log('[SEARCH] Found city ID:', cityId, 'for', firstCity.nom_ville || firstCity.name);
+                // API возвращает ID_city, не id_ville
+                const cityId = firstCity.ID_city || firstCity.id_ville || firstCity.id;
+                const cityName = firstCity.zone_name || firstCity.nom_ville || firstCity.name;
+                console.log('[SEARCH] Found city ID:', cityId, 'for', cityName);
+                return cityId;
+            }
+            // Если наш прокси не работает, попробуем прямой формат ответа
+            else if (result.result && result.result.length > 0) {
+                const firstCity = result.result[0];
+                const cityId = firstCity.ID_city || firstCity.id_ville || firstCity.id;
+                const cityName = firstCity.zone_name || firstCity.nom_ville || firstCity.name;
+                console.log('[SEARCH] Found city ID (direct):', cityId, 'for', cityName);
                 return cityId;
             }
             
+            console.log('[SEARCH] No cities found for:', cityName);
             return null;
         } catch (error) {
             console.error('[SEARCH] Error getting city ID:', error);
             return null;
+        }
+    }
+
+    showLocationWarning(locationName) {
+        // Показываем временное предупреждение пользователю
+        const resultsContainer = document.getElementById('searchResults');
+        if (resultsContainer) {
+            const warningDiv = document.createElement('div');
+            warningDiv.className = 'location-warning';
+            warningDiv.style.cssText = `
+                background: #fff3cd;
+                color: #856404;
+                padding: 12px 16px;
+                border-radius: 8px;
+                margin-bottom: 16px;
+                border: 1px solid #ffeaa7;
+                font-size: 14px;
+            `;
+            warningDiv.innerHTML = `
+                ⚠️ <strong>Location "${locationName}" not found.</strong> 
+                Showing results without location filter. 
+                Try searching for a major city name.
+            `;
+            
+            // Удаляем предыдущие предупреждения
+            const existingWarning = resultsContainer.querySelector('.location-warning');
+            if (existingWarning) {
+                existingWarning.remove();
+            }
+            
+            // Добавляем новое предупреждение в начало
+            resultsContainer.insertBefore(warningDiv, resultsContainer.firstChild);
+            
+            // Автоматически скрываем через 5 секунд
+            setTimeout(() => {
+                if (warningDiv.parentNode) {
+                    warningDiv.remove();
+                }
+            }, 5000);
         }
     }
 }

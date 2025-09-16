@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug City Search</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .test-result { margin: 10px 0; padding: 10px; background: #f5f5f5; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .warning { background: #fff3cd; color: #856404; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 12px; }
+        .comparison { display: flex; gap: 20px; }
+        .comparison > div { flex: 1; }
+    </style>
+</head>
+<body>
+    <h1>🏙️ Debug City Search Issue</h1>
+    
+    <div class="test-section">
+        <h2>1. Test City ID Resolution</h2>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <input type="text" id="cityInput1" placeholder="Enter city" value="Paris" style="padding: 8px;">
+            <button onclick="testCityResolution()">Get City ID</button>
+        </div>
+        <div id="cityResult1" class="test-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>2. Compare Paris vs Milan</h2>
+        <button onclick="compareCities()">Compare Paris vs Milan</button>
+        <div id="comparisonResult" class="test-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>3. Test Search with Different City IDs</h2>
+        <button onclick="testSearchWithCityIds()">Test Search Results</button>
+        <div id="searchResult" class="test-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>4. Debug Current Search Implementation</h2>
+        <p>Симулируем поиск как на реальной странице:</p>
+        <div style="display: flex; gap: 10px; align-items: center;">
+            <input type="text" id="debugCity" placeholder="City name" value="Paris" style="padding: 8px;">
+            <button onclick="debugCurrentImplementation()">Debug Search</button>
+        </div>
+        <div id="debugResult" class="test-result"></div>
+    </div>
+
+    <script>
+        const API_KEY = localStorage.getItem('spice_api_key') || 'test_key';
+        const BASE_URL = 'https://dev2018.de5a7.com';
+        
+        // Симулируем метод из search-page.js
+        async function getCityId(cityName) {
+            try {
+                const queryParams = new URLSearchParams({
+                    api_key: API_KEY,
+                    force_pays: 64,
+                    q: cityName,
+                    territory: 'city'
+                });
+                
+                const fullUrl = `${BASE_URL}/ajax_api/getRegionsAutocomp?${queryParams.toString()}`;
+                console.log('[DEBUG] Getting city ID for:', cityName, fullUrl);
+                
+                const response = await fetch(fullUrl);
+                const result = await response.json();
+                
+                console.log('[DEBUG] City lookup result:', result);
+                
+                if (result.result && result.result.length > 0) {
+                    const firstCity = result.result[0];
+                    const cityId = firstCity.id_ville || firstCity.id;
+                    console.log('[DEBUG] Found city ID:', cityId, 'for', firstCity.nom_ville || firstCity.name);
+                    return { cityId, cityData: firstCity, fullResult: result };
+                }
+                
+                return { cityId: null, error: 'City not found', fullResult: result };
+            } catch (error) {
+                console.error('[DEBUG] Error getting city ID:', error);
+                return { cityId: null, error: error.message };
+            }
+        }
+        
+        async function makeSearchRequest(params) {
+            const queryString = new URLSearchParams({
+                api_key: API_KEY,
+                force_pays: 64,
+                ...params
+            }).toString();
+            
+            const url = `${BASE_URL}/index_api/search?${queryString}`;
+            console.log('[DEBUG] Search request:', url);
+            
+            try {
+                const response = await fetch(url, { method: 'POST' });
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                return { error: error.message };
+            }
+        }
+        
+        async function testCityResolution() {
+            const cityName = document.getElementById('cityInput1').value;
+            const resultDiv = document.getElementById('cityResult1');
+            
+            if (!cityName) {
+                resultDiv.innerHTML = '<div class="error">Please enter a city name</div>';
+                return;
+            }
+            
+            resultDiv.innerHTML = `🔄 Resolving "${cityName}"...`;
+            
+            const result = await getCityId(cityName);
+            
+            if (result.cityId) {
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        ✅ City resolved successfully:<br>
+                        • City: ${result.cityData.nom_ville || result.cityData.name}<br>
+                        • ID: ${result.cityId}<br>
+                        • Region: ${result.cityData.nom_region || result.cityData.region || 'N/A'}<br>
+                        • Country: ${result.cityData.nom_pays || result.cityData.country || 'N/A'}
+                    </div>
+                    <details>
+                        <summary>Full API Response</summary>
+                        <pre>${JSON.stringify(result.fullResult, null, 2)}</pre>
+                    </details>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        ❌ Failed to resolve city:<br>
+                        • Error: ${result.error}<br>
+                        • City: ${cityName}
+                    </div>
+                    <details>
+                        <summary>API Response</summary>
+                        <pre>${JSON.stringify(result.fullResult, null, 2)}</pre>
+                    </details>
+                `;
+            }
+        }
+        
+        async function compareCities() {
+            const resultDiv = document.getElementById('comparisonResult');
+            resultDiv.innerHTML = '🔄 Comparing Paris vs Milan...';
+            
+            const parisResult = await getCityId('Paris');
+            const milanResult = await getCityId('Milan');
+            
+            resultDiv.innerHTML = `
+                <div class="comparison">
+                    <div>
+                        <h4>Paris</h4>
+                        ${parisResult.cityId ? `
+                            <div class="success">
+                                ✅ ID: ${parisResult.cityId}<br>
+                                Name: ${parisResult.cityData.nom_ville || parisResult.cityData.name}<br>
+                                Region: ${parisResult.cityData.nom_region || 'N/A'}<br>
+                                Country: ${parisResult.cityData.nom_pays || 'N/A'}
+                            </div>
+                        ` : `
+                            <div class="error">❌ Not found: ${parisResult.error}</div>
+                        `}
+                    </div>
+                    <div>
+                        <h4>Milan</h4>
+                        ${milanResult.cityId ? `
+                            <div class="success">
+                                ✅ ID: ${milanResult.cityId}<br>
+                                Name: ${milanResult.cityData.nom_ville || milanResult.cityData.name}<br>
+                                Region: ${milanResult.cityData.nom_region || 'N/A'}<br>
+                                Country: ${milanResult.cityData.nom_pays || 'N/A'}
+                            </div>
+                        ` : `
+                            <div class="error">❌ Not found: ${milanResult.error}</div>
+                        `}
+                    </div>
+                </div>
+                <div style="margin-top: 15px;">
+                    ${parisResult.cityId && milanResult.cityId ? 
+                        (parisResult.cityId === milanResult.cityId ? 
+                            '<div class="error">⚠️ PROBLEM: Same city ID for different cities!</div>' :
+                            '<div class="success">✅ Different city IDs - this is correct</div>'
+                        ) : 
+                        '<div class="warning">⚠️ Cannot compare - one or both cities not found</div>'
+                    }
+                </div>
+            `;
+        }
+        
+        async function testSearchWithCityIds() {
+            const resultDiv = document.getElementById('searchResult');
+            resultDiv.innerHTML = '🔄 Testing search with city IDs...';
+            
+            // Get city IDs
+            const parisResult = await getCityId('Paris');
+            const milanResult = await getCityId('Milan');
+            
+            if (!parisResult.cityId || !milanResult.cityId) {
+                resultDiv.innerHTML = '<div class="error">❌ Cannot test - failed to get city IDs</div>';
+                return;
+            }
+            
+            // Search with Paris ID
+            const parisSearch = await makeSearchRequest({
+                id_ville: parisResult.cityId,
+                pas: 10,
+                page: 0
+            });
+            
+            // Search with Milan ID
+            const milanSearch = await makeSearchRequest({
+                id_ville: milanResult.cityId,
+                pas: 10,
+                page: 0
+            });
+            
+            const parisCount = parisSearch.result ? parisSearch.result.length : 0;
+            const milanCount = milanSearch.result ? milanSearch.result.length : 0;
+            
+            // Check if results are identical
+            const parisUsers = parisSearch.result ? parisSearch.result.map(u => u.id || u.pseudo).sort() : [];
+            const milanUsers = milanSearch.result ? milanSearch.result.map(u => u.id || u.pseudo).sort() : [];
+            const identical = JSON.stringify(parisUsers) === JSON.stringify(milanUsers);
+            
+            resultDiv.innerHTML = `
+                <div class="comparison">
+                    <div>
+                        <h4>Paris Search (ID: ${parisResult.cityId})</h4>
+                        <div class="${parisSearch.error ? 'error' : 'success'}">
+                            ${parisSearch.error ? `❌ Error: ${parisSearch.error}` : `✅ Found ${parisCount} users`}
+                        </div>
+                        ${parisCount > 0 ? `
+                            <details>
+                                <summary>Sample users</summary>
+                                <pre>${JSON.stringify(parisSearch.result.slice(0, 3), null, 2)}</pre>
+                            </details>
+                        ` : ''}
+                    </div>
+                    <div>
+                        <h4>Milan Search (ID: ${milanResult.cityId})</h4>
+                        <div class="${milanSearch.error ? 'error' : 'success'}">
+                            ${milanSearch.error ? `❌ Error: ${milanSearch.error}` : `✅ Found ${milanCount} users`}
+                        </div>
+                        ${milanCount > 0 ? `
+                            <details>
+                                <summary>Sample users</summary>
+                                <pre>${JSON.stringify(milanSearch.result.slice(0, 3), null, 2)}</pre>
+                            </details>
+                        ` : ''}
+                    </div>
+                </div>
+                <div style="margin-top: 15px;">
+                    ${identical ? 
+                        '<div class="error">🚨 PROBLEM: Identical results for different cities!</div>' :
+                        '<div class="success">✅ Different results - search working correctly</div>'
+                    }
+                </div>
+            `;
+        }
+        
+        async function debugCurrentImplementation() {
+            const cityName = document.getElementById('debugCity').value;
+            const resultDiv = document.getElementById('debugResult');
+            
+            resultDiv.innerHTML = `🔄 Debugging search for "${cityName}"...`;
+            
+            // Step 1: Get city ID (как в search-page.js)
+            console.log('[DEBUG] Step 1: Getting city ID...');
+            const cityResult = await getCityId(cityName);
+            
+            if (!cityResult.cityId) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        ❌ Step 1 Failed: Cannot get city ID<br>
+                        Error: ${cityResult.error}
+                    </div>
+                `;
+                return;
+            }
+            
+            // Step 2: Search with city ID
+            console.log('[DEBUG] Step 2: Searching with city ID:', cityResult.cityId);
+            const searchResult = await makeSearchRequest({
+                id_ville: cityResult.cityId,
+                pas: 30,
+                is_photo: 1,
+                profile_complete: 1,
+                get_picture_430: 1,
+                page: 0
+            });
+            
+            const count = searchResult.result ? searchResult.result.length : 0;
+            
+            resultDiv.innerHTML = `
+                <div class="success">
+                    📊 Debug Results for "${cityName}":<br>
+                    <strong>Step 1:</strong> City ID = ${cityResult.cityId}<br>
+                    <strong>Step 2:</strong> Search found ${count} users<br>
+                    <strong>City:</strong> ${cityResult.cityData.nom_ville || cityResult.cityData.name}<br>
+                    <strong>Region:</strong> ${cityResult.cityData.nom_region || 'N/A'}<br>
+                    <strong>Country:</strong> ${cityResult.cityData.nom_pays || 'N/A'}
+                </div>
+                <details>
+                    <summary>Search Parameters Used</summary>
+                    <pre>id_ville: ${cityResult.cityId}
+pas: 30
+is_photo: 1
+profile_complete: 1
+get_picture_430: 1
+page: 0</pre>
+                </details>
+                <details>
+                    <summary>Sample Search Results</summary>
+                    <pre>${JSON.stringify(searchResult.result ? searchResult.result.slice(0, 3) : [], null, 2)}</pre>
+                </details>
+            `;
+        }
+    </script>
+</body>
+</html>
