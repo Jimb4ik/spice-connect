@@ -287,11 +287,6 @@
             border-color: var(--primary-color);
         }
         .research-icon {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            background: white;
-            border: 1px solid #e5e7eb;
             width: 60px;
             height: 60px;
             border-radius: 50%;
@@ -299,7 +294,14 @@
             align-items: center;
             justify-content: center;
             margin: 0 auto 15px auto;
-            letter-spacing: -0.5px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            padding: 12px;
+        }
+        .research-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
         .research-card h3 {
             color: var(--text-primary);
@@ -334,8 +336,20 @@
         }
         .stats-infographic {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
             gap: 30px;
+        }
+        @media (max-width: 768px) {
+            .stats-infographic {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+        }
+        @media (max-width: 480px) {
+            .stats-infographic {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
         }
         .infographic-item {
             text-align: center;
@@ -490,28 +504,36 @@
         <div class="research-section">
             <div class="research-grid">
                 <div class="research-card">
-                    <div class="research-icon">CHART</div>
+                    <div class="research-icon">
+                        <img src="images/research-icons/chart-icon.png" alt="Chart">
+                    </div>
                     <h3>Dating Behavior Analysis</h3>
                     <p>Our 2024 study of 25,000+ users reveals that profiles with authentic photos and detailed descriptions receive 3x more meaningful matches.</p>
                     <div class="research-stat">73% higher response rate</div>
                 </div>
                 
                 <div class="research-card">
-                    <div class="research-icon">HEART</div>
+                    <div class="research-icon">
+                        <img src="images/research-icons/heart-icon.png" alt="Heart">
+                    </div>
                     <h3>Relationship Success Factors</h3>
                     <p>Analysis of successful couples shows that shared values and communication style compatibility are stronger predictors than physical attraction alone.</p>
                     <div class="research-stat">85% relationship satisfaction</div>
                 </div>
                 
                 <div class="research-card">
-                    <div class="research-icon">SHIELD</div>
+                    <div class="research-icon">
+                        <img src="images/research-icons/shield-icon.png" alt="Shield">
+                    </div>
                     <h3>Safety & Trust Report</h3>
                     <p>Our comprehensive safety measures have resulted in a 94% reduction in fake profiles and inappropriate behavior compared to industry averages.</p>
                     <div class="research-stat">94% safer environment</div>
                 </div>
                 
                 <div class="research-card">
-                    <div class="research-icon">GLOBE</div>
+                    <div class="research-icon">
+                        <img src="images/research-icons/globe-icon.png" alt="Globe">
+                    </div>
                     <h3>Global Dating Trends</h3>
                     <p>Cross-cultural analysis reveals that users prioritize emotional connection and shared interests over traditional demographic factors.</p>
                     <div class="research-stat">67% value personality match</div>

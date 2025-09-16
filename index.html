@@ -365,19 +365,21 @@
                     </div>
                 </div>
                 <div class="inclusivity-visual">
-                    <div class="pride-gradient"></div>
-                    <div class="inclusivity-stats">
-                        <div class="stat-item">
-                            <span class="stat-number">100%</span>
-                            <span class="stat-label">Inclusive</span>
+                    <div class="animated-stats-container">
+                        <div class="animated-stat-card">
+                            <div class="stat-icon-animated">💝</div>
+                            <div class="stat-number-animated" data-target="100">0</div>
+                            <div class="stat-label-animated">% Inclusive</div>
                         </div>
-                        <div class="stat-item">
-                            <span class="stat-number">24/7</span>
-                            <span class="stat-label">Support</span>
+                        <div class="animated-stat-card">
+                            <div class="stat-icon-animated">🛡️</div>
+                            <div class="stat-number-animated" data-target="24">0</div>
+                            <div class="stat-label-animated">/7 Support</div>
                         </div>
-                        <div class="stat-item">
-                            <span class="stat-number">0</span>
-                            <span class="stat-label">Tolerance for Hate</span>
+                        <div class="animated-stat-card">
+                            <div class="stat-icon-animated">🚫</div>
+                            <div class="stat-number-animated" data-target="0">0</div>
+                            <div class="stat-label-animated">Tolerance for Hate</div>
                         </div>
                     </div>
                 </div>
@@ -534,6 +536,50 @@
     <script src="js/auth-modal.js?v=1.0"></script>
     <script src="js/cookie-consent.js?v=1.0"></script>
     <script src="landing-script.js?v=3.9"></script>
+    
+    <script>
+        // Animated Counter for Stats
+        function animateCounters() {
+            const counters = document.querySelectorAll('.stat-number-animated');
+            
+            counters.forEach(counter => {
+                const target = parseInt(counter.getAttribute('data-target'));
+                const increment = target / 100;
+                let current = 0;
+                
+                const timer = setInterval(() => {
+                    current += increment;
+                    if (current >= target) {
+                        current = target;
+                        clearInterval(timer);
+                    }
+                    counter.textContent = Math.floor(current);
+                }, 20);
+            });
+        }
+        
+        // Trigger animation when section comes into view
+        const observerOptions = {
+            threshold: 0.5,
+            rootMargin: '0px 0px -100px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateCounters();
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const statsContainer = document.querySelector('.animated-stats-container');
+            if (statsContainer) {
+                observer.observe(statsContainer);
+            }
+        });
+    </script>
     
     <script>
         // Quick Registration Handler

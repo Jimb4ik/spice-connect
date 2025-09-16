@@ -121,32 +121,74 @@
   gap: 40px;
 }
 
-.pride-gradient {
-  width: 300px;
-  height: 200px;
-  background: linear-gradient(45deg, 
-    #e40303 0%, 
-    #ff8c00 16.66%, 
-    #ffed00 33.33%, 
-    #008018 50%, 
-    #0066ff 66.66%, 
-    #8b00ff 83.33%, 
-    #e40303 100%);
-  border-radius: 20px;
-  box-shadow: var(--shadow-medium);
-  position: relative;
-  overflow: hidden;
+.animated-stats-container {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 30px;
 }
 
-.pride-gradient::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(1px);
+.animated-stat-card {
+  background: white;
+  padding: 25px 20px;
+  border-radius: 16px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  min-width: 140px;
+  transition: all 0.3s ease;
+  animation: fadeInUp 0.6s ease forwards;
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.animated-stat-card:nth-child(1) { animation-delay: 0.1s; }
+.animated-stat-card:nth-child(2) { animation-delay: 0.3s; }
+.animated-stat-card:nth-child(3) { animation-delay: 0.5s; }
+
+.animated-stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+}
+
+.stat-icon-animated {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+  animation: bounce 2s infinite;
+}
+
+.stat-number-animated {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--primary-color);
+  margin-bottom: 5px;
+  display: block;
+}
+
+.stat-label-animated {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
 }
 
 .inclusivity-stats {
@@ -251,7 +293,8 @@
 .monetization-feature .feature-icon {
   width: 60px;
   height: 60px;
-  background: var(--gradient-primary);
+  background: white;
+  border: 1px solid #e5e7eb;
   border-radius: 50%;
   display: flex;
   align-items: center;
