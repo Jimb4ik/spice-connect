@@ -35,6 +35,15 @@ body {
   flex-direction: column;
 }
 
+/* Убираем синий outline по умолчанию и заменяем на цвет сайта */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none !important;
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 3px rgba(255, 68, 88, 0.1) !important;
+}
+
 /* Хедер */
 .app-header {
   background: rgba(255, 255, 255, 0.95);

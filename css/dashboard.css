@@ -570,8 +570,8 @@
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(255, 68, 88, 0.1);
 }
 
 .form-group textarea {
@@ -829,8 +829,8 @@
 .filter-group input[type="number"]:focus,
 .filter-group select:focus {
   outline: none;
-  border-color: #8b5cf6;
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(255, 68, 88, 0.1);
 }
 
 /* Custom Checkbox Styles */
@@ -1169,7 +1169,7 @@
 
 .contacts-search input:focus {
   outline: none;
-  border-color: #8b5cf6;
+  border-color: var(--primary-color);
   background: white;
 }
 
@@ -1477,7 +1477,7 @@
 }
 
 .chat-input:focus-within {
-  border-color: #8b5cf6;
+  border-color: var(--primary-color);
   background: white;
 }
 
@@ -4286,7 +4286,7 @@
 
 .photo-title-input:focus {
   outline: none;
-  border-color: #ec4899;
+  border-color: var(--primary-color);
   background: white;
 }
 

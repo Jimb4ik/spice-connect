@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Focus Colors</title>
+    <link rel="stylesheet" href="css/app-styles.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/auth-modal.css">
+    <style>
+        .test-container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+        }
+        .test-section h3 {
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        .color-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🎨 Test Focus Colors</h1>
+        
+        <div class="color-info">
+            <strong>Цвет сайта:</strong> var(--primary-color) = #ff4458<br>
+            <strong>Focus shadow:</strong> rgba(255, 68, 88, 0.1)<br>
+            <strong>Ожидаемый результат:</strong> Все поля должны иметь красную рамку при фокусе
+        </div>
+
+        <div class="test-section">
+            <h3>1. Обычные Input поля</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Text Input</label>
+                    <input type="text" placeholder="Кликните для фокуса" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label>Email Input</label>
+                    <input type="email" placeholder="email@example.com" class="form-input">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Password Input</label>
+                    <input type="password" placeholder="Пароль" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label>Number Input</label>
+                    <input type="number" placeholder="123" class="form-input">
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>2. Select и Textarea</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Select</label>
+                    <select class="form-input">
+                        <option>Выберите опцию</option>
+                        <option>Опция 1</option>
+                        <option>Опция 2</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Textarea</label>
+                    <textarea class="form-input" rows="3" placeholder="Введите текст..."></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>3. Поля поиска (как на странице search)</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Name or Username</label>
+                    <input type="text" placeholder="Search by name..." class="form-input" id="searchName">
+                </div>
+                <div class="form-group">
+                    <label>Location</label>
+                    <input type="text" placeholder="City or region..." class="form-input" id="searchLocation">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Age Min</label>
+                    <input type="number" min="18" max="80" value="18" class="form-input" id="ageMin">
+                </div>
+                <div class="form-group">
+                    <label>Age Max</label>
+                    <input type="number" min="18" max="80" value="80" class="form-input" id="ageMax">
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>4. Auth Modal стили</h3>
+            <div class="form-row">
+                <div class="auth-form-group">
+                    <label>Auth Input</label>
+                    <input type="text" placeholder="Auth style input">
+                </div>
+                <div class="auth-form-group">
+                    <label>Auth Select</label>
+                    <select>
+                        <option>Auth style select</option>
+                        <option>Option 1</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>5. Dashboard стили</h3>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Dashboard Input</label>
+                    <input type="text" placeholder="Dashboard style">
+                </div>
+                <div class="filter-group">
+                    <label>Filter Input</label>
+                    <input type="number" placeholder="Filter number">
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 30px; padding: 20px; background: #f0f9ff; border-radius: 8px;">
+            <h4>📝 Инструкция по тестированию:</h4>
+            <ol>
+                <li>Кликните на каждое поле ввода</li>
+                <li>Проверьте, что рамка становится красной (#ff4458)</li>
+                <li>Убедитесь, что есть легкая красная тень вокруг поля</li>
+                <li>Все поля должны иметь одинаковый стиль фокуса</li>
+            </ol>
+        </div>
+    </div>
+</body>
+</html>
