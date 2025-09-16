@@ -303,7 +303,7 @@ body.cookie-consent-active > *:not(.cookie-consent-banner) {
     color: var(--primary-color, #ff4458);
     text-decoration: none;
     cursor: pointer;
-    font-weight: 500;
+    font-weight: normal !important;
 }
 
 .cookie-settings-link:hover {
