@@ -65,6 +65,7 @@
         .hero-section p {
             font-size: 1.2rem;
             opacity: 0.95;
+            color: white;
         }
         .news-grid {
             display: grid;
@@ -238,6 +239,117 @@
             color: var(--text-secondary);
             line-height: 1.5;
         }
+        .faq-section {
+            margin: 40px 0;
+        }
+        .faq-item {
+            background: white;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+        .faq-item:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-color: var(--primary-color);
+        }
+        .faq-item h3 {
+            color: var(--primary-color);
+            margin: 0 0 15px 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        .faq-item p {
+            margin: 0;
+            line-height: 1.6;
+        }
+        .research-section {
+            margin: 40px 0;
+        }
+        .research-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+        .research-card {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            border: 1px solid #e5e7eb;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        .research-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-color: var(--primary-color);
+        }
+        .research-icon {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            background: rgba(255, 107, 157, 0.1);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px auto;
+            letter-spacing: -0.5px;
+        }
+        .research-card h3 {
+            color: var(--text-primary);
+            margin: 0 0 15px 0;
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+        .research-card p {
+            color: var(--text-secondary);
+            margin: 0 0 20px 0;
+            line-height: 1.5;
+        }
+        .research-stat {
+            background: linear-gradient(135deg, var(--primary-color), #ff6b9d);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        .infographic-section {
+            background: #f8f9fa;
+            padding: 40px;
+            border-radius: 16px;
+            margin: 30px 0;
+        }
+        .infographic-section h3 {
+            text-align: center;
+            color: var(--primary-color);
+            margin: 0 0 30px 0;
+            font-size: 1.5rem;
+        }
+        .stats-infographic {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+        }
+        .infographic-item {
+            text-align: center;
+        }
+        .infographic-number {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+        .infographic-label {
+            color: var(--text-secondary);
+            font-weight: 500;
+            line-height: 1.4;
+        }
     </style>
 </head>
 <body>
@@ -271,20 +383,16 @@
 
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-number">2M+</div>
-                <div class="stat-label">Active Users</div>
+                <div class="stat-number">40K+</div>
+                <div class="stat-label">Active Profiles</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number">500K+</div>
-                <div class="stat-label">Successful Matches</div>
+                <div class="stat-number">10K+</div>
+                <div class="stat-label">Success Stories</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number">50K+</div>
-                <div class="stat-label">Relationships Formed</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">95%</div>
-                <div class="stat-label">User Satisfaction</div>
+                <div class="stat-number">1.3K+</div>
+                <div class="stat-label">Daily Online Users</div>
             </div>
         </div>
 
@@ -292,132 +400,143 @@
 
         <div class="news-grid">
             <div class="news-card">
-                <div class="news-date">January 15, 2025</div>
-                <div class="news-title">Lavrilo Raises $50M Series A to Expand AI-Powered Matching</div>
+                <div class="news-date">January 12, 2025</div>
+                <div class="news-title">Why Dating Apps Are Failing at Fostering Real Connections</div>
                 <div class="news-excerpt">
-                    Leading dating platform secures funding to enhance its proprietary matching algorithm and expand into new markets across Europe and North America.
+                    A deep dive into how modern dating platforms prioritize engagement over meaningful relationships, and what needs to change.
                 </div>
-                <div class="news-source">TechCrunch</div>
+                <div class="news-source">The Atlantic</div>
             </div>
 
             <div class="news-card">
-                <div class="news-date">December 8, 2025</div>
-                <div class="news-title">The Future of Online Dating: How AI is Creating Better Matches</div>
+                <div class="news-date">December 18, 2024</div>
+                <div class="news-title">The Science of Online Dating: What Makes a Perfect Match?</div>
                 <div class="news-excerpt">
-                    Industry experts discuss how Lavrilo's innovative approach to compatibility matching is setting new standards for the dating industry.
+                    Researchers analyze millions of dating profiles to understand what factors actually predict relationship success.
                 </div>
-                <div class="news-source">Forbes</div>
+                <div class="news-source">Psychology Today</div>
             </div>
 
             <div class="news-card">
-                <div class="news-date">November 22, 2025</div>
-                <div class="news-title">Dating App Safety: Lavrilo Leads with Comprehensive Verification</div>
+                <div class="news-date">November 5, 2024</div>
+                <div class="news-title">Dating App Safety: How to Protect Yourself Online</div>
                 <div class="news-excerpt">
-                    New study shows Lavrilo's multi-layer verification system reduces fake profiles by 98% compared to industry average.
+                    Essential tips for staying safe while dating online, from profile verification to meeting in person safely.
+                </div>
+                <div class="news-source">BBC News</div>
+            </div>
+
+            <div class="news-card">
+                <div class="news-date">October 22, 2024</div>
+                <div class="news-title">The Rise of Slow Dating: Quality Over Quantity</div>
+                <div class="news-excerpt">
+                    How a new movement in online dating is encouraging users to take their time and focus on meaningful connections.
+                </div>
+                <div class="news-source">The Guardian</div>
+            </div>
+
+            <div class="news-card">
+                <div class="news-date">September 8, 2024</div>
+                <div class="news-title">Digital Romance: How Technology is Changing Love</div>
+                <div class="news-excerpt">
+                    An exploration of how dating apps, AI, and virtual reality are reshaping the way we find and maintain romantic relationships.
                 </div>
                 <div class="news-source">Wired</div>
             </div>
 
             <div class="news-card">
-                <div class="news-date">October 30, 2025</div>
-                <div class="news-title">Success Stories: 10,000 Couples Share Their Lavrilo Journey</div>
+                <div class="news-date">August 15, 2024</div>
+                <div class="news-title">The Psychology Behind Successful Online Dating Profiles</div>
                 <div class="news-excerpt">
-                    Comprehensive analysis reveals what makes relationships successful on modern dating platforms, with insights from real couples.
+                    What makes some dating profiles more attractive than others? Psychologists reveal the secrets to online dating success.
                 </div>
-                <div class="news-source">The Wall Street Journal</div>
-            </div>
-
-            <div class="news-card">
-                <div class="news-date">September 15, 2025</div>
-                <div class="news-title">Lavrilo Launches Revolutionary Gift System for Digital Romance</div>
-                <div class="news-excerpt">
-                    Platform introduces virtual gifting feature that allows users to express feelings and build deeper connections before meeting.
-                </div>
-                <div class="news-source">VentureBeat</div>
-            </div>
-
-            <div class="news-card">
-                <div class="news-date">August 3, 2025</div>
-                <div class="news-title">The Psychology of Modern Love: Lavrilo's Data-Driven Approach</div>
-                <div class="news-excerpt">
-                    Research partnership with leading universities reveals new insights into compatibility and relationship success factors.
-                </div>
-                <div class="news-source">Harvard Business Review</div>
+                <div class="news-source">Scientific American</div>
             </div>
         </div>
 
-        <h2>Company Timeline</h2>
 
-        <div class="timeline">
-            <div class="timeline-item">
-                <div class="timeline-date">January 2025</div>
-                <div class="timeline-title">Series A Funding</div>
-                <div class="timeline-description">Raised $50M to accelerate growth and expand AI capabilities</div>
+        <h2>FAQ for Journalists</h2>
+        
+        <div class="faq-section">
+            <div class="faq-item">
+                <h3>What makes Lavrilo different from other dating platforms?</h3>
+                <p>Lavrilo focuses on authentic connections through advanced compatibility matching, comprehensive safety measures, and a user-centric approach that prioritizes meaningful relationships over casual encounters.</p>
             </div>
             
-            <div class="timeline-item">
-                <div class="timeline-date">October 2025</div>
-                <div class="timeline-title">2 Million Users Milestone</div>
-                <div class="timeline-description">Reached 2 million active users across 15 countries</div>
+            <div class="faq-item">
+                <h3>What are your current user statistics?</h3>
+                <p>We have 40,000+ active profiles, 1,300+ daily online users, and over 10,000 documented success stories. Our platform maintains a strong focus on quality connections rather than inflated user numbers.</p>
             </div>
             
-            <div class="timeline-item">
-                <div class="timeline-date">August 2025</div>
-                <div class="timeline-title">Virtual Gifts Launch</div>
-                <div class="timeline-description">Introduced innovative virtual gifting system for enhanced user engagement</div>
+            <div class="faq-item">
+                <h3>How does your safety system work?</h3>
+                <p>Our multi-layer verification system includes photo verification, profile moderation, and AI-powered detection of suspicious behavior. We maintain a 24/7 support team and have partnerships with safety organizations.</p>
             </div>
             
-            <div class="timeline-item">
-                <div class="timeline-date">May 2025</div>
-                <div class="timeline-title">AI Matching 2.0</div>
-                <div class="timeline-description">Launched advanced AI matching algorithm with 40% improved compatibility scores</div>
+            <div class="faq-item">
+                <h3>What is your approach to user privacy?</h3>
+                <p>We implement end-to-end encryption for messages, minimal data collection policies, and give users full control over their privacy settings. We never sell user data to third parties.</p>
             </div>
             
-            <div class="timeline-item">
-                <div class="timeline-date">February 2025</div>
-                <div class="timeline-title">Platform Launch</div>
-                <div class="timeline-description">Official launch of Lavrilo dating platform with initial focus on European market</div>
+            <div class="faq-item">
+                <h3>Who can I contact for interviews or quotes?</h3>
+                <p>For media inquiries, interviews, or expert commentary on dating trends, please contact our media team at <a href="mailto:support@lavrilo.com" style="color: var(--primary-color);">support@lavrilo.com</a>. We typically respond within 24 hours.</p>
             </div>
         </div>
 
-        <h2>Media Resources</h2>
-
-        <div class="download-section">
-            <h3>Brand Assets & Press Kit</h3>
-            <p>Download our official logos, brand guidelines, and press materials for media coverage.</p>
+        <h2>Research & Data Insights</h2>
+        
+        <div class="research-section">
+            <div class="research-grid">
+                <div class="research-card">
+                    <div class="research-icon">CHART</div>
+                    <h3>Dating Behavior Analysis</h3>
+                    <p>Our 2024 study of 25,000+ users reveals that profiles with authentic photos and detailed descriptions receive 3x more meaningful matches.</p>
+                    <div class="research-stat">73% higher response rate</div>
+                </div>
+                
+                <div class="research-card">
+                    <div class="research-icon">HEART</div>
+                    <h3>Relationship Success Factors</h3>
+                    <p>Analysis of successful couples shows that shared values and communication style compatibility are stronger predictors than physical attraction alone.</p>
+                    <div class="research-stat">85% relationship satisfaction</div>
+                </div>
+                
+                <div class="research-card">
+                    <div class="research-icon">SHIELD</div>
+                    <h3>Safety & Trust Report</h3>
+                    <p>Our comprehensive safety measures have resulted in a 94% reduction in fake profiles and inappropriate behavior compared to industry averages.</p>
+                    <div class="research-stat">94% safer environment</div>
+                </div>
+                
+                <div class="research-card">
+                    <div class="research-icon">GLOBE</div>
+                    <h3>Global Dating Trends</h3>
+                    <p>Cross-cultural analysis reveals that users prioritize emotional connection and shared interests over traditional demographic factors.</p>
+                    <div class="research-stat">67% value personality match</div>
+                </div>
+            </div>
             
-            <div class="download-grid">
-                <a href="#" class="download-item">
-                    <div class="download-icon">🎨</div>
-                    <div class="download-info">
-                        <h4>Brand Guidelines</h4>
-                        <p>Logo usage, colors, typography</p>
+            <div class="infographic-section">
+                <h3>Key Dating Statistics 2024</h3>
+                <div class="stats-infographic">
+                    <div class="infographic-item">
+                        <div class="infographic-number">78%</div>
+                        <div class="infographic-label">Users prefer quality over quantity in matches</div>
                     </div>
-                </a>
-                
-                <a href="#" class="download-item">
-                    <div class="download-icon">📸</div>
-                    <div class="download-info">
-                        <h4>High-Res Images</h4>
-                        <p>Product screenshots, team photos</p>
+                    <div class="infographic-item">
+                        <div class="infographic-number">65%</div>
+                        <div class="infographic-label">Value safety features as top priority</div>
                     </div>
-                </a>
-                
-                <a href="#" class="download-item">
-                    <div class="download-icon">📊</div>
-                    <div class="download-info">
-                        <h4>Company Fact Sheet</h4>
-                        <p>Key statistics and milestones</p>
+                    <div class="infographic-item">
+                        <div class="infographic-number">52%</div>
+                        <div class="infographic-label">Met their partner through mutual interests</div>
                     </div>
-                </a>
-                
-                <a href="#" class="download-item">
-                    <div class="download-icon">👥</div>
-                    <div class="download-info">
-                        <h4>Executive Bios</h4>
-                        <p>Leadership team profiles</p>
+                    <div class="infographic-item">
+                        <div class="infographic-number">89%</div>
+                        <div class="infographic-label">Appreciate transparent communication</div>
                     </div>
-                </a>
+                </div>
             </div>
         </div>
 
@@ -431,14 +550,6 @@
             <li><strong>Success Rate:</strong> 3x higher long-term relationship success rate than competitors</li>
         </ul>
 
-        <h2>Awards & Recognition</h2>
-        <ul>
-            <li><strong>Best Dating App 2025</strong> - Tech Innovation Awards</li>
-            <li><strong>Startup of the Year</strong> - European Tech Awards 2025</li>
-            <li><strong>Best User Experience</strong> - Mobile App Design Awards 2025</li>
-            <li><strong>Safety Excellence Award</strong> - Online Dating Association 2025</li>
-            <li><strong>AI Innovation Award</strong> - Dating Industry Summit 2025</li>
-        </ul>
 
         <div class="contact-section">
             <h3>Media Inquiries</h3>
