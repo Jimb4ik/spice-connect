@@ -363,10 +363,10 @@ class SearchManager {
             </div>
             <div class="user-actions">
                 <button class="user-action-btn secondary" onclick="searchManager.viewProfile('${user.id || user.id_membre}')">
-                    👤 View Profile
+                    View Profile
                 </button>
                 <button class="user-action-btn primary" onclick="searchManager.sendMessage('${user.id || user.id_membre}')">
-                    💬 Message
+                    Message
                 </button>
             </div>
         `;

@@ -523,7 +523,7 @@ class Dashboard {
           
           <div class="user-actions">
             <button class="btn-secondary btn-sm" onclick="dashboard.sendMessage('${userId}')">
-              💬 Message
+              Message
             </button>
           </div>
         </div>

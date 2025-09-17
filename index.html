@@ -611,16 +611,9 @@
             buttonLoader.style.display = 'inline-block';
             
             try {
-                // Get user's IP address
-                const ipResponse = await fetch('https://api.ipify.org?format=json');
-                const ipData = await ipResponse.json();
-                
-                // Get API key
-                const apiKeyResponse = await fetch('/api/get-api-key');
-                const apiConfig = await apiKeyResponse.json();
-                
-                if (!apiConfig.apiKey) {
-                    throw new Error('API key not available');
+                // Check if authManager is available
+                if (!window.authManager) {
+                    throw new Error('Authentication system not available');
                 }
                 
                 // Parse birthdate
@@ -629,56 +622,28 @@
                 const month = birthDate.getMonth() + 1;
                 const day = birthDate.getDate();
                 
-                // Prepare registration parameters for full registration
-                const registrationParams = new URLSearchParams({
-                    api_key: apiConfig.apiKey,
+                // Prepare data for authManager registration (same as modal)
+                const userData = {
                     login: formData.username,
                     pass: formData.password,
-                    mail: formData.email,
-                    sex: formData.gender,
-                    cherche1: formData.lookingFor,
-                    year: year,
-                    month: month,
-                    day: day,
-                    ip_adress: ipData.ip,
-                    city: '1', // Default city ID - will be improved later
-                    region: '1', // Default region ID
-                    countryObj: '64', // France by default
-                    lang_ui: 'en'
-                });
+                    email: formData.email,
+                    gender: formData.gender,
+                    looking_for: formData.lookingFor,
+                    birth_year: year,
+                    birth_month: month,
+                    birth_day: day,
+                    city: 1, // Default city
+                    region: 1, // Default region
+                    country: 64, // France by default
+                    fastRegistration: false
+                };
                 
-                // Make registration request
-                const response = await fetch(`https://dev2018.de5a7.com/index_api/subscribe?${registrationParams.toString()}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
+                // Use authManager registration (same as modal)
+                const result = await window.authManager.register(userData);
                 
-                const result = await response.json();
-                console.log('Registration API Response:', result);
-                
-                if (result.accepted === 1 && result.session_id) {
+                if (result.success) {
                     // Registration successful
                     showRegistrationSuccess();
-                    
-                    // Store session and redirect after a delay
-                    if (window.authManager) {
-                        window.authManager.sessionId = result.session_id;
-                        window.authManager.currentUser = {
-                            pseudo: formData.username,
-                            email: formData.email,
-                            id: result.user_id
-                        };
-                        window.authManager.isLoggedIn = true;
-                        
-                        // Save to localStorage
-                        localStorage.setItem('authSession', JSON.stringify({
-                            sessionId: result.session_id,
-                            user: window.authManager.currentUser,
-                            timestamp: Date.now()
-                        }));
-                    }
                     
                     // Redirect to main page after 2 seconds
                     setTimeout(() => {
@@ -687,8 +652,7 @@
                     
                 } else {
                     // Registration failed
-                    const errorMessage = result.error || 'Registration failed';
-                    throw new Error(errorMessage);
+                    throw new Error(result.error || 'Registration failed');
                 }
                 
             } catch (error) {

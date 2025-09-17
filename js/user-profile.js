@@ -68,8 +68,8 @@ async function loadUserProfile(userId) {
             return;
         }
         
-        // Call user API using the correct endpoint
-        const apiUrl = `/api/spice-multi-test?endpoint=/index_api/user&method=POST&session_id=${sessionId}&id=${userId}`;
+        // Call user API using the correct endpoint with get_picture_430=1 to get photos_v2
+        const apiUrl = `/api/spice-multi-test?endpoint=/index_api/user&method=POST&session_id=${sessionId}&id=${userId}&get_picture_430=1`;
         console.log('[USER-PROFILE] API request:', apiUrl);
         
         const response = await fetch(apiUrl);
@@ -77,10 +77,11 @@ async function loadUserProfile(userId) {
         
         console.log('[USER-PROFILE] API response:', result);
         
-        if (result.success && result.data) {
-            await displayUserProfile(result.data);
+        // API возвращает данные в поле data.result согласно документации
+        if (result.success && result.data && result.data.connected === 1 && result.data.result) {
+            await displayUserProfile(result.data.result);
         } else {
-            console.error('[USER-PROFILE] API returned error:', result);
+            console.error('[USER-PROFILE] API returned error or user not found:', result);
             showError();
         }
         
@@ -137,15 +138,14 @@ async function displayBasicInfo(profile) {
         document.getElementById('profileAge').textContent = profile.age;
     }
     
-    // Location
-    const location = [profile.ville, profile.pays].filter(Boolean).join(', ');
-    if (location) {
-        document.getElementById('profileLocation').textContent = location;
+    // Location - используем zone_name из API документации
+    if (profile.zone_name) {
+        document.getElementById('profileLocation').textContent = profile.zone_name;
     }
     
-    // Birth date and zodiac
-    if (profile.date && profile.date !== '1988-03-20') { // Skip default dates
-        const birthDate = new Date(profile.date);
+    // Birth date and zodiac - используем поле naissance из API документации
+    if (profile.naissance && profile.naissance !== '1988-03-20') { // Skip default dates
+        const birthDate = new Date(profile.naissance);
         const zodiac = getZodiacSign(birthDate);
         
         if (zodiac) {
@@ -171,17 +171,19 @@ async function displayProfilePhoto(profile) {
     const name = profile.nom_complet || profile.pseudo || 'User';
     placeholderLetter.textContent = name.charAt(0).toUpperCase();
     
-    // Try to get high-quality photo
+    // Try to get high-quality photo according to API documentation
     let photoUrl = null;
     
-    if (profile.main_photo && profile.main_photo.real_size) {
+    // Приоритет 1: photos_v2 (PhotoBlockV2) - новый формат
+    if (profile.photos_v2 && Array.isArray(profile.photos_v2) && profile.photos_v2.length > 0) {
+        const mainPhoto = profile.photos_v2.find(photo => photo.num === 0) || profile.photos_v2[0];
+        photoUrl = mainPhoto.sq_430 || mainPhoto.normal || mainPhoto.sq_middle || mainPhoto.sq_small;
+    }
+    // Приоритет 2: старые поля для совместимости
+    else if (profile.main_photo && profile.main_photo.real_size) {
         photoUrl = profile.main_photo.real_size;
     } else if (profile.main_photo) {
         photoUrl = profile.main_photo.sqmiddle || profile.main_photo.sqsmall;
-    } else if (profile.picture_430) {
-        photoUrl = profile.picture_430;
-    } else if (profile.picture) {
-        photoUrl = profile.picture;
     }
     
     if (photoUrl) {
@@ -468,6 +470,7 @@ async function loadConfigArrays(arrayNames) {
                 const response = await fetch(`/api/spice-multi-test?endpoint=/index_api/array/get/${arrayName}&method=GET`);
                 const result = await response.json();
                 
+                // Для массивов конфигурации API возвращает данные напрямую в result.data
                 if (result.success && result.data && typeof result.data === 'object') {
                     configArrays[arrayName] = result.data;
                     console.log(`[USER-PROFILE] Loaded config array ${arrayName}:`, result.data);

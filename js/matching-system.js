@@ -1158,7 +1158,7 @@ class MatchingSystem {
       </div>
       <div class="match-card-actions">
         <button class="match-action-btn message">
-          💬 Message
+          Message
         </button>
       </div>
     `;

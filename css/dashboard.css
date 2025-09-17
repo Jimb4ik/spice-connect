@@ -2810,9 +2810,16 @@
 }
 
 .match-action-btn.secondary {
-  background: rgba(255, 255, 255, 0.2);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: #f8fafc;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+  font-weight: 500;
+}
+
+.match-action-btn.secondary:hover {
+  background: #e2e8f0;
+  color: #475569;
+  transform: translateY(-1px);
 }
 
 /* No Matches State */
