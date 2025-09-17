@@ -309,9 +309,10 @@ class AuthModal {
   async handleRegister() {
     const formData = this.getRegisterFormData();
     
-    // Get password values using multiple methods to ensure reliability
-    const passwordField = document.getElementById('regPassword');
-    const confirmPasswordField = document.getElementById('regConfirmPassword');
+    // Get password values from modal form specifically (not from main page form)
+    const modalForm = document.getElementById('registerForm');
+    const passwordField = modalForm ? modalForm.querySelector('#regPassword') : null;
+    const confirmPasswordField = modalForm ? modalForm.querySelector('#regConfirmPassword') : null;
     
     // Try multiple ways to get the password value
     let passwordValue = '';
@@ -642,16 +643,24 @@ class AuthModal {
   }
 
   getRegisterFormData() {
-    const birthDate = new Date(document.getElementById('regBirthDate').value);
+    // Get values from modal form specifically (not from main page form)
+    const modalForm = document.getElementById('registerForm');
+    if (!modalForm) {
+      console.error('Modal form not found');
+      return {};
+    }
     
-    // Get values directly from DOM elements to ensure we have the latest values
-    const usernameField = document.getElementById('regUsername');
-    const emailField = document.getElementById('regEmail');
-    const passwordField = document.getElementById('regPassword');
-    const confirmPasswordField = document.getElementById('regConfirmPassword');
-    const genderField = document.getElementById('regGender');
-    const lookingForField = document.getElementById('regLookingFor');
-    const fastRegistrationField = document.getElementById('fastRegistration');
+    // Use querySelector to get fields within the modal form only
+    const usernameField = modalForm.querySelector('#regUsername');
+    const emailField = modalForm.querySelector('#regEmail');
+    const passwordField = modalForm.querySelector('#regPassword');
+    const confirmPasswordField = modalForm.querySelector('#regConfirmPassword');
+    const genderField = modalForm.querySelector('#regGender');
+    const lookingForField = modalForm.querySelector('#regLookingFor');
+    const birthDateField = modalForm.querySelector('#regBirthDate');
+    const fastRegistrationField = modalForm.querySelector('#fastRegistration');
+    
+    const birthDate = birthDateField ? new Date(birthDateField.value) : new Date();
     
     // Get user's IP address (will be handled by server)
     const userIP = '127.0.0.1'; // Default, server should detect real IP
