@@ -309,16 +309,46 @@ class AuthModal {
   async handleRegister() {
     const formData = this.getRegisterFormData();
     
-    // Get password values directly from DOM elements to ensure we have the latest values
+    // Get password values using multiple methods to ensure reliability
     const passwordField = document.getElementById('regPassword');
     const confirmPasswordField = document.getElementById('regConfirmPassword');
     
-    // Debug logging to understand what's happening
-    console.log('Password field exists:', !!passwordField);
-    console.log('Confirm password field exists:', !!confirmPasswordField);
+    // Try multiple ways to get the password value
+    let passwordValue = '';
+    let confirmPasswordValue = '';
     
-    const passwordValue = passwordField ? passwordField.value : '';
-    const confirmPasswordValue = confirmPasswordField ? confirmPasswordField.value : '';
+    if (passwordField) {
+      // Method 1: Direct value access
+      passwordValue = passwordField.value || '';
+      
+      // Method 2: getAttribute if value is empty
+      if (!passwordValue) {
+        passwordValue = passwordField.getAttribute('value') || '';
+      }
+      
+      // Method 3: Use FormData as fallback
+      if (!passwordValue) {
+        const form = passwordField.closest('form');
+        if (form) {
+          const formData = new FormData(form);
+          passwordValue = formData.get('regPassword') || '';
+        }
+      }
+    }
+    
+    if (confirmPasswordField) {
+      confirmPasswordValue = confirmPasswordField.value || '';
+      if (!confirmPasswordValue) {
+        confirmPasswordValue = confirmPasswordField.getAttribute('value') || '';
+      }
+      if (!confirmPasswordValue) {
+        const form = confirmPasswordField.closest('form');
+        if (form) {
+          const formData = new FormData(form);
+          confirmPasswordValue = formData.get('regConfirmPassword') || '';
+        }
+      }
+    }
     
     console.log('Password value length:', passwordValue.length);
     console.log('Confirm password value length:', confirmPasswordValue.length);
@@ -353,6 +383,27 @@ class AuthModal {
     if (!emailRegex.test(emailValue)) {
       this.showError('Please enter a valid email address.');
       return;
+    }
+    
+    // If we still don't have password values, try to trigger focus/blur events to get them
+    if (!passwordValue || !confirmPasswordValue) {
+      console.log('Attempting to retrieve password values via events...');
+      
+      // Focus and blur to trigger any value updates
+      if (passwordField && !passwordValue) {
+        passwordField.focus();
+        passwordField.blur();
+        passwordValue = passwordField.value || '';
+      }
+      
+      if (confirmPasswordField && !confirmPasswordValue) {
+        confirmPasswordField.focus();
+        confirmPasswordField.blur();
+        confirmPasswordValue = confirmPasswordField.value || '';
+      }
+      
+      console.log('After events - Password length:', passwordValue.length);
+      console.log('After events - Confirm password length:', confirmPasswordValue.length);
     }
     
     // Check if either field is empty (without trim to avoid issues)
