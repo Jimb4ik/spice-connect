@@ -98,24 +98,50 @@ async function displayUserProfile(profile) {
     try {
         console.log('[USER-PROFILE] Displaying profile data:', profile);
         
+        if (!profile) {
+            console.error('[USER-PROFILE] No profile data provided');
+            showError();
+            return;
+        }
+        
         // Hide loading, show content
         document.getElementById('profileLoading').style.display = 'none';
         document.getElementById('profileContent').style.display = 'block';
         
         // Basic information
-        await displayBasicInfo(profile);
+        try {
+            await displayBasicInfo(profile);
+        } catch (error) {
+            console.warn('[USER-PROFILE] Error displaying basic info:', error);
+        }
         
         // Profile photo
-        await displayProfilePhoto(profile);
+        try {
+            await displayProfilePhoto(profile);
+        } catch (error) {
+            console.warn('[USER-PROFILE] Error displaying photo:', error);
+        }
         
         // Description
-        await displayDescription(profile);
+        try {
+            await displayDescription(profile);
+        } catch (error) {
+            console.warn('[USER-PROFILE] Error displaying description:', error);
+        }
         
         // Personal details
-        await displayPersonalDetails(profile);
+        try {
+            await displayPersonalDetails(profile);
+        } catch (error) {
+            console.warn('[USER-PROFILE] Error displaying personal details:', error);
+        }
         
         // Setup action buttons
-        setupActionButtons(profile);
+        try {
+            setupActionButtons(profile);
+        } catch (error) {
+            console.warn('[USER-PROFILE] Error setting up action buttons:', error);
+        }
         
         console.log('[USER-PROFILE] ✅ Profile displayed successfully');
         
@@ -391,7 +417,8 @@ async function displayPersonalDetails(profile) {
     
     // Rating section
     if (profile.vote && profile.vote > 0) {
-        displayRating(profile.moyenne || 0, profile.vote);
+        const rating = parseFloat(profile.moyenne) || 0;
+        displayRating(rating, profile.vote);
         document.getElementById('ratingSection').style.display = 'block';
     }
 }
@@ -404,11 +431,20 @@ function displayRating(rating, votes) {
     const ratingValue = document.getElementById('ratingValue');
     const ratingVotes = document.getElementById('ratingVotes');
     
+    if (!ratingStars || !ratingValue || !ratingVotes) {
+        console.warn('[USER-PROFILE] Rating elements not found');
+        return;
+    }
+    
+    // Ensure rating is a valid number
+    const validRating = parseFloat(rating) || 0;
+    const validVotes = parseInt(votes) || 0;
+    
     // Clear existing stars
     ratingStars.innerHTML = '';
     
     // Convert 0-10 rating to 0-5 stars
-    const starRating = rating / 2;
+    const starRating = validRating / 2;
     const fullStars = Math.floor(starRating);
     const hasHalfStar = starRating % 1 >= 0.5;
     
@@ -438,8 +474,8 @@ function displayRating(rating, votes) {
     }
     
     // Update text values
-    ratingValue.textContent = `${rating.toFixed(1)}/10`;
-    ratingVotes.textContent = `(${votes} vote${votes !== 1 ? 's' : ''})`;
+    ratingValue.textContent = `${validRating.toFixed(1)}/10`;
+    ratingVotes.textContent = `(${validVotes} vote${validVotes !== 1 ? 's' : ''})`;
 }
 
 /**
@@ -448,10 +484,25 @@ function displayRating(rating, votes) {
 function setupActionButtons(profile) {
     const messageBtn = document.getElementById('messageBtn');
     
+    if (!messageBtn) {
+        console.warn('[USER-PROFILE] Message button not found');
+        return;
+    }
+    
+    if (!profile) {
+        console.warn('[USER-PROFILE] No profile data for action buttons');
+        return;
+    }
+    
     // Message button
     messageBtn.onclick = () => {
         const userId = profile.id || profile.id_membre;
         const userName = profile.nom_complet || profile.pseudo;
+        
+        if (!userId) {
+            console.error('[USER-PROFILE] No user ID found for messaging');
+            return;
+        }
         
         // Redirect to messages page with contact parameter
         window.location.href = `messages.html?contact=${userId}`;
