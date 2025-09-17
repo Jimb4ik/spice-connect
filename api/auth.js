@@ -29,19 +29,23 @@ export default async function handler(req, res) {
       let endpoint = '';
       let method = 'POST';
       
-      // Determine endpoint based on action
+      // Determine endpoint and method based on action
       switch (action) {
         case 'login':
           endpoint = '/index_api/login';
+          method = 'POST';
           break;
         case 'register':
           endpoint = '/index_api/subscribe';
+          method = 'POST'; // API documentation shows POST method
           break;
         case 'changepass':
           endpoint = '/index_api/changepass';
+          method = 'POST';
           break;
         case 'logout':
           endpoint = '/index_api/logout';
+          method = 'POST';
           break;
         default:
           return res.status(400).json({ 
@@ -76,6 +80,7 @@ export default async function handler(req, res) {
       const apiUrl = `${BASE_URL}${endpoint}?${queryParams}`;
       
       console.log(`[AUTH API] ${action.toUpperCase()} request to:`, apiUrl);
+      console.log(`[AUTH API] Parameters being sent:`, params);
   
       const response = await fetch(apiUrl, {
         method: method,

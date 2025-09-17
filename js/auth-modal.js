@@ -379,10 +379,16 @@ class AuthModal {
       return;
     }
     
-    // Email validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // Email validation - more strict to match API expectations
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(emailValue)) {
-      this.showError('Please enter a valid email address.');
+      this.showError('Please enter a valid email address (example: user@domain.com).');
+      return;
+    }
+    
+    // Additional check for test emails that API might reject
+    if (emailValue.includes('example.com') || emailValue.includes('test.')) {
+      this.showError('Please use a real email address. Test emails are not accepted.');
       return;
     }
     
