@@ -331,6 +331,30 @@ class AuthModal {
       return;
     }
     
+    // Enhanced client-side validation before API call
+    const usernameValue = formData.login || '';
+    const emailValue = formData.email || '';
+    
+    // Username validation
+    if (usernameValue.length < 3) {
+      this.showError('Username must be at least 3 characters long.');
+      return;
+    }
+    
+    // Username format validation (only letters and numbers, no accents)
+    const usernameRegex = /^[a-zA-Z0-9]+$/;
+    if (!usernameRegex.test(usernameValue)) {
+      this.showError('Username can only contain letters and numbers (no special characters or accents).');
+      return;
+    }
+    
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(emailValue)) {
+      this.showError('Please enter a valid email address.');
+      return;
+    }
+    
     // Check if either field is empty (without trim to avoid issues)
     if (passwordValue === '' || confirmPasswordValue === '') {
       // Try alternative method using FormData
@@ -369,7 +393,9 @@ class AuthModal {
                 this.hide();
               }, 1000);
             } else {
-              this.showError(result.error || 'Registration failed. Please try again.');
+              // Try to translate error message if it's in French
+              const translatedError = await this.translateErrorMessage(result.error || 'Registration failed. Please try again.');
+              this.showError(translatedError);
             }
           } catch (error) {
             this.showError('Network error. Please try again.');
@@ -398,6 +424,12 @@ class AuthModal {
       return;
     }
     
+    // Check if password is too similar to username
+    if (this.isPasswordSimilarToUsername(passwordValue, usernameValue)) {
+      this.showError('Password cannot be identical or too similar to your username.');
+      return;
+    }
+    
     // Update formData with correct password value
     formData.pass = passwordValue;
     
@@ -414,13 +446,133 @@ class AuthModal {
           this.hide();
         }, 1000);
       } else {
-        this.showError(result.error || 'Registration failed. Please try again.');
+        // Try to translate error message if it's in French
+        const translatedError = await this.translateErrorMessage(result.error || 'Registration failed. Please try again.');
+        this.showError(translatedError);
       }
     } catch (error) {
       this.showError('Network error. Please try again.');
     }
     
     this.hideLoading('registerSubmit', 'Create Account');
+  }
+
+  /**
+   * Check if password is too similar to username
+   */
+  isPasswordSimilarToUsername(password, username) {
+    if (!password || !username) return false;
+    
+    const passwordLower = password.toLowerCase();
+    const usernameLower = username.toLowerCase();
+    
+    // Check if password contains username or vice versa
+    if (passwordLower.includes(usernameLower) || usernameLower.includes(passwordLower)) {
+      return true;
+    }
+    
+    // Check if they are identical
+    if (passwordLower === usernameLower) {
+      return true;
+    }
+    
+    // Check similarity using Levenshtein distance (simple version)
+    const similarity = this.calculateSimilarity(passwordLower, usernameLower);
+    return similarity > 0.7; // 70% similarity threshold
+  }
+
+  /**
+   * Calculate similarity between two strings (0-1, where 1 is identical)
+   */
+  calculateSimilarity(str1, str2) {
+    const longer = str1.length > str2.length ? str1 : str2;
+    const shorter = str1.length > str2.length ? str2 : str1;
+    
+    if (longer.length === 0) return 1.0;
+    
+    const editDistance = this.levenshteinDistance(longer, shorter);
+    return (longer.length - editDistance) / longer.length;
+  }
+
+  /**
+   * Calculate Levenshtein distance between two strings
+   */
+  levenshteinDistance(str1, str2) {
+    const matrix = [];
+    
+    for (let i = 0; i <= str2.length; i++) {
+      matrix[i] = [i];
+    }
+    
+    for (let j = 0; j <= str1.length; j++) {
+      matrix[0][j] = j;
+    }
+    
+    for (let i = 1; i <= str2.length; i++) {
+      for (let j = 1; j <= str1.length; j++) {
+        if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+          matrix[i][j] = matrix[i - 1][j - 1];
+        } else {
+          matrix[i][j] = Math.min(
+            matrix[i - 1][j - 1] + 1,
+            matrix[i][j - 1] + 1,
+            matrix[i - 1][j] + 1
+          );
+        }
+      }
+    }
+    
+    return matrix[str2.length][str1.length];
+  }
+
+  /**
+   * Translate error message from French to English using OpenAI
+   */
+  async translateErrorMessage(errorMessage) {
+    try {
+      // Skip translation for short messages or if already in English
+      if (!errorMessage || errorMessage.length < 10) {
+        return errorMessage;
+      }
+      
+      // Check if message is likely in French (contains French words)
+      const frenchWords = ['pseudo', 'trop', 'court', 'lettres', 'chiffres', 'accents', 'mots', 'passe', 'identiques', 'similaires', 'autorisés', 'invalide'];
+      const containsFrench = frenchWords.some(word => errorMessage.toLowerCase().includes(word));
+      
+      if (!containsFrench) {
+        return errorMessage;
+      }
+      
+      console.log('[AUTH MODAL] Translating error message:', errorMessage);
+      
+      const response = await fetch('/api/translate-text', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          text: errorMessage,
+          targetLanguage: 'English'
+        })
+      });
+      
+      if (!response.ok) {
+        console.warn('[AUTH MODAL] Translation API failed, using original message');
+        return errorMessage;
+      }
+      
+      const data = await response.json();
+      
+      if (data.success && data.translatedText) {
+        console.log('[AUTH MODAL] Translation successful:', errorMessage, '->', data.translatedText);
+        return data.translatedText;
+      }
+      
+      return errorMessage;
+    } catch (error) {
+      console.warn('[AUTH MODAL] Translation failed, using original message:', error);
+      return errorMessage;
+    }
   }
 
   async handleForgotPassword() {
