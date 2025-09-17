@@ -242,9 +242,13 @@ class AuthModal {
     
     // Function to validate passwords
     const validatePasswords = () => {
+      // Get current values directly from DOM
+      const passwordValue = password ? password.value.trim() : '';
+      const confirmPasswordValue = confirmPassword ? confirmPassword.value.trim() : '';
+      
       // Only validate if both fields have values
-      if (password.value && confirmPassword.value) {
-        if (password.value !== confirmPassword.value) {
+      if (passwordValue && confirmPasswordValue) {
+        if (passwordValue !== confirmPasswordValue) {
           confirmPassword.setCustomValidity('Passwords do not match');
         } else {
           confirmPassword.setCustomValidity('');
@@ -305,22 +309,32 @@ class AuthModal {
   async handleRegister() {
     const formData = this.getRegisterFormData();
     
-    // Validate passwords match
-    if (!formData.pass || !formData.confirmPassword) {
+    // Get password values directly from DOM elements to ensure we have the latest values
+    const passwordField = document.getElementById('regPassword');
+    const confirmPasswordField = document.getElementById('regConfirmPassword');
+    
+    const passwordValue = passwordField ? passwordField.value.trim() : '';
+    const confirmPasswordValue = confirmPasswordField ? confirmPasswordField.value.trim() : '';
+    
+    // Validate passwords match using direct DOM values
+    if (!passwordValue || !confirmPasswordValue) {
       this.showError('Please fill in both password fields.');
       return;
     }
     
-    if (formData.pass !== formData.confirmPassword) {
+    if (passwordValue !== confirmPasswordValue) {
       this.showError('Passwords do not match.');
       return;
     }
     
     // Additional password validation
-    if (formData.pass.length < 6) {
+    if (passwordValue.length < 6) {
       this.showError('Password must be at least 6 characters long.');
       return;
     }
+    
+    // Update formData with correct password value
+    formData.pass = passwordValue;
     
     this.showLoading('registerSubmit', 'Creating account...');
     this.clearMessages();
@@ -362,17 +376,26 @@ class AuthModal {
   getRegisterFormData() {
     const birthDate = new Date(document.getElementById('regBirthDate').value);
     
+    // Get values directly from DOM elements to ensure we have the latest values
+    const usernameField = document.getElementById('regUsername');
+    const emailField = document.getElementById('regEmail');
+    const passwordField = document.getElementById('regPassword');
+    const confirmPasswordField = document.getElementById('regConfirmPassword');
+    const genderField = document.getElementById('regGender');
+    const lookingForField = document.getElementById('regLookingFor');
+    const fastRegistrationField = document.getElementById('fastRegistration');
+    
     return {
-      login: document.getElementById('regUsername').value,
-      email: document.getElementById('regEmail').value, 
-      pass: document.getElementById('regPassword').value,
-      confirmPassword: document.getElementById('regConfirmPassword').value,
-      gender: parseInt(document.getElementById('regGender').value),
-      looking_for: parseInt(document.getElementById('regLookingFor').value),
+      login: usernameField ? usernameField.value.trim() : '',
+      email: emailField ? emailField.value.trim() : '', 
+      pass: passwordField ? passwordField.value : '',
+      confirmPassword: confirmPasswordField ? confirmPasswordField.value : '',
+      gender: genderField ? parseInt(genderField.value) : 0,
+      looking_for: lookingForField ? parseInt(lookingForField.value) : 0,
       birth_year: birthDate.getFullYear(),
       birth_month: birthDate.getMonth() + 1,
       birth_day: birthDate.getDate(),
-      fastRegistration: document.getElementById('fastRegistration').checked
+      fastRegistration: fastRegistrationField ? fastRegistrationField.checked : false
     };
   }
 
