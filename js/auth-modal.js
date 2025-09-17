@@ -129,12 +129,12 @@ class AuthModal {
         
         <div class="auth-form-group">
           <label for="regPassword">Password</label>
-          <input type="password" id="regPassword" required minlength="6">
+          <input type="password" id="regPassword" name="regPassword" required minlength="6">
         </div>
         
         <div class="auth-form-group">
           <label for="regConfirmPassword">Confirm Password</label>
-          <input type="password" id="regConfirmPassword" required>
+          <input type="password" id="regConfirmPassword" name="regConfirmPassword" required>
         </div>
         
         <div class="auth-form-group">
@@ -313,13 +313,78 @@ class AuthModal {
     const passwordField = document.getElementById('regPassword');
     const confirmPasswordField = document.getElementById('regConfirmPassword');
     
-    const passwordValue = passwordField ? passwordField.value.trim() : '';
-    const confirmPasswordValue = confirmPasswordField ? confirmPasswordField.value.trim() : '';
+    // Debug logging to understand what's happening
+    console.log('Password field exists:', !!passwordField);
+    console.log('Confirm password field exists:', !!confirmPasswordField);
     
-    // Validate passwords match using direct DOM values
-    if (!passwordValue || !confirmPasswordValue) {
-      this.showError('Please fill in both password fields.');
+    const passwordValue = passwordField ? passwordField.value : '';
+    const confirmPasswordValue = confirmPasswordField ? confirmPasswordField.value : '';
+    
+    console.log('Password value length:', passwordValue.length);
+    console.log('Confirm password value length:', confirmPasswordValue.length);
+    console.log('Password value:', passwordValue ? '[HIDDEN]' : 'EMPTY');
+    console.log('Confirm password value:', confirmPasswordValue ? '[HIDDEN]' : 'EMPTY');
+    
+    // More lenient validation - check if fields exist and have content
+    if (!passwordField || !confirmPasswordField) {
+      this.showError('Password fields not found. Please try again.');
       return;
+    }
+    
+    // Check if either field is empty (without trim to avoid issues)
+    if (passwordValue === '' || confirmPasswordValue === '') {
+      // Try alternative method using FormData
+      const form = document.getElementById('registerForm');
+      if (form) {
+        const htmlFormData = new FormData(form);
+        const altPassword = htmlFormData.get('regPassword') || '';
+        const altConfirmPassword = htmlFormData.get('regConfirmPassword') || '';
+        
+        console.log('Alternative password length:', altPassword.length);
+        console.log('Alternative confirm password length:', altConfirmPassword.length);
+        
+        if (altPassword && altConfirmPassword) {
+          console.log('Using alternative FormData method');
+          // Use alternative values
+          if (altPassword !== altConfirmPassword) {
+            this.showError('Passwords do not match.');
+            return;
+          }
+          if (altPassword.length < 6) {
+            this.showError('Password must be at least 6 characters long.');
+            return;
+          }
+          formData.pass = altPassword;
+          // Skip the original validation and continue with registration
+          this.showLoading('registerSubmit', 'Creating account...');
+          this.clearMessages();
+          
+          try {
+            const result = await window.authManager.register(formData);
+            
+            if (result.success) {
+              this.showSuccess('Account created successfully! Welcome to Lavrilo.');
+              // AuthManager will handle the redirect, just hide the modal after short delay
+              setTimeout(() => {
+                this.hide();
+              }, 1000);
+            } else {
+              this.showError(result.error || 'Registration failed. Please try again.');
+            }
+          } catch (error) {
+            this.showError('Network error. Please try again.');
+          }
+          
+          this.hideLoading('registerSubmit', 'Create Account');
+          return;
+        } else {
+          this.showError('Please fill in both password fields.');
+          return;
+        }
+      } else {
+        this.showError('Please fill in both password fields.');
+        return;
+      }
     }
     
     if (passwordValue !== confirmPasswordValue) {
