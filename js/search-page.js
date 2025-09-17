@@ -361,15 +361,12 @@ class SearchManager {
                 ${locationText ? `<div class="user-location">${locationText}</div>` : ''}
                 ${user.description ? `<div class="user-description">${user.description.substring(0, 100)}${user.description.length > 100 ? '...' : ''}</div>` : ''}
             </div>
-            <div class="user-actions">
-                <button class="user-action-btn secondary" onclick="searchManager.viewProfile('${user.id || user.id_membre}')">
-                    View Profile
-                </button>
-                <button class="user-action-btn primary" onclick="searchManager.sendMessage('${user.id || user.id_membre}')">
-                    Message
-                </button>
-            </div>
         `;
+        
+        // Делаем всю карточку кликабельной для открытия профиля
+        card.addEventListener('click', () => {
+            this.viewProfile(user.id || user.id_membre);
+        });
         
         return card;
     }

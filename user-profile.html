@@ -151,15 +151,23 @@
             <!-- About Section -->
             <div class="profile-section fade-in-up" id="aboutSection" style="display: none;">
                 <h3 class="section-title">About Me</h3>
-                <div class="section-content">
+                <div class="section-loading" id="aboutLoading">
+                    <div class="section-loading-spinner"></div>
+                    <span class="section-loading-text">Loading description...</span>
+                </div>
+                <div class="section-content" id="aboutContent" style="display: none;">
                     <p id="profileDescription">No description available.</p>
                 </div>
             </div>
 
             <!-- Personal Details -->
-            <div class="profile-section fade-in-up">
+            <div class="profile-section fade-in-up" id="personalDetailsSection">
                 <h3 class="section-title">Personal Details</h3>
-                <div class="details-grid">
+                <div class="section-loading" id="personalDetailsLoading">
+                    <div class="section-loading-spinner"></div>
+                    <span class="section-loading-text">Loading personal details...</span>
+                </div>
+                <div class="details-grid" id="personalDetailsContent" style="display: none;">
                     <div class="detail-item" id="maritalStatusItem" style="display: none;">
                         <div class="detail-content">
                             <span class="detail-label">Marital Status</span>
@@ -202,7 +210,11 @@
             <!-- Physical Appearance -->
             <div class="profile-section fade-in-up" id="appearanceSection" style="display: none;">
                 <h3 class="section-title">Physical Appearance</h3>
-                <div class="details-grid">
+                <div class="section-loading" id="appearanceLoading">
+                    <div class="section-loading-spinner"></div>
+                    <span class="section-loading-text">Loading appearance details...</span>
+                </div>
+                <div class="details-grid" id="appearanceContent" style="display: none;">
                     <div class="detail-item" id="heightItem" style="display: none;">
                         <div class="detail-content">
                             <span class="detail-label">Height</span>

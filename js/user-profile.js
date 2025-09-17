@@ -104,9 +104,12 @@ async function displayUserProfile(profile) {
             return;
         }
         
-        // Hide loading, show content
+        // Hide main loading, show content
         document.getElementById('profileLoading').style.display = 'none';
         document.getElementById('profileContent').style.display = 'block';
+        
+        // Show section loading indicators
+        showSectionLoadingIndicators();
         
         // Basic information
         try {
@@ -159,8 +162,8 @@ async function displayBasicInfo(profile) {
     const displayName = profile.pseudo || profile.nom_complet || 'Unknown User';
     document.getElementById('profileFullName').textContent = displayName;
     
-    // Обновляем заголовок страницы
-    document.getElementById('profileName').textContent = displayName;
+    // Обновляем заголовок страницы - показываем "Profile" вместо дублирования имени
+    document.getElementById('profileName').textContent = 'Profile';
     
     // Age
     if (profile.age) {
@@ -253,7 +256,6 @@ async function displayProfilePhoto(profile) {
  */
 async function displayDescription(profile) {
     if (profile.description && profile.description.trim()) {
-        const aboutSection = document.getElementById('aboutSection');
         const descriptionElement = document.getElementById('profileDescription');
         
         // Show original description
@@ -270,7 +272,9 @@ async function displayDescription(profile) {
         }
         
         descriptionElement.textContent = description;
-        aboutSection.style.display = 'block';
+        hideSectionLoading('about', true);
+    } else {
+        hideSectionLoading('about', false);
     }
 }
 
@@ -392,7 +396,19 @@ async function displayPersonalDetails(profile) {
     
     // Show appearance section if has data
     if (hasAppearanceData) {
-        document.getElementById('appearanceSection').style.display = 'block';
+        hideSectionLoading('appearance', true);
+    } else {
+        hideSectionLoading('appearance', false);
+    }
+    
+    // Hide personal details loading and show content
+    const hasPersonalDetailsData = profile.situation || profile.child !== undefined || 
+                                  profile.etudes || profile.travail || profile.fumeur || profile.pour;
+    
+    if (hasPersonalDetailsData) {
+        hideSectionLoading('personalDetails', true);
+    } else {
+        hideSectionLoading('personalDetails', false);
     }
     
     // Personality section
@@ -562,34 +578,42 @@ function getZodiacSign(birthDate) {
 }
 
 /**
- * Simple translation to English using Google Translate API
+ * Smart translation to English using OpenAI GPT
  */
 async function translateToEnglish(text) {
     try {
-        // Проверяем, нужен ли перевод (если текст уже на английском или очень короткий)
+        // Проверяем, нужен ли перевод (если текст очень короткий)
         if (!text || text.length < 10) {
             return text;
         }
         
-        // Простая проверка - если текст содержит много английских слов, не переводим
-        const englishWords = text.match(/\b[a-zA-Z]+\b/g) || [];
-        const totalWords = text.split(/\s+/).length;
+        console.log('[USER-PROFILE] Attempting to translate text:', text);
         
-        if (englishWords.length / totalWords > 0.7) {
-            console.log('[USER-PROFILE] Text appears to be in English, skipping translation');
+        // Используем OpenAI API для перевода
+        const response = await fetch('/api/translate-text', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                text: text,
+                targetLanguage: 'English'
+            })
+        });
+        
+        if (!response.ok) {
+            console.warn('[USER-PROFILE] Translation API error:', response.status);
             return text;
         }
         
-        // Используем Google Translate через публичный API
-        const response = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=${encodeURIComponent(text)}`);
         const data = await response.json();
         
-        if (data && data[0] && data[0][0] && data[0][0][0]) {
-            const translatedText = data[0].map(item => item[0]).join('');
-            console.log('[USER-PROFILE] Translation successful:', text, '->', translatedText);
-            return translatedText;
+        if (data.success && data.translatedText) {
+            console.log('[USER-PROFILE] Translation successful:', text, '->', data.translatedText);
+            return data.translatedText;
         }
         
+        console.warn('[USER-PROFILE] Translation API returned no result');
         return text;
     } catch (error) {
         console.warn('[USER-PROFILE] Translation failed:', error);
@@ -597,6 +621,48 @@ async function translateToEnglish(text) {
     }
 }
 
+
+/**
+ * Show section loading indicators
+ */
+function showSectionLoadingIndicators() {
+    // Show loading for sections that will be populated
+    const sections = [
+        { section: 'aboutSection', loading: 'aboutLoading' },
+        { section: 'personalDetailsSection', loading: 'personalDetailsLoading' },
+        { section: 'appearanceSection', loading: 'appearanceLoading' }
+    ];
+    
+    sections.forEach(({ section, loading }) => {
+        const sectionEl = document.getElementById(section);
+        const loadingEl = document.getElementById(loading);
+        
+        if (sectionEl && loadingEl) {
+            sectionEl.style.display = 'block';
+            loadingEl.style.display = 'flex';
+        }
+    });
+}
+
+/**
+ * Hide section loading indicator and show content
+ */
+function hideSectionLoading(sectionName, hasContent = true) {
+    const loadingEl = document.getElementById(`${sectionName}Loading`);
+    const contentEl = document.getElementById(`${sectionName}Content`);
+    const sectionEl = document.getElementById(`${sectionName}Section`);
+    
+    if (loadingEl) {
+        loadingEl.style.display = 'none';
+    }
+    
+    if (hasContent && contentEl) {
+        contentEl.style.display = 'block';
+    } else if (!hasContent && sectionEl) {
+        // Hide entire section if no content
+        sectionEl.style.display = 'none';
+    }
+}
 
 /**
  * Show error state
