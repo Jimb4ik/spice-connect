@@ -40,7 +40,7 @@ async function initializeUserProfile() {
         
         console.log('[USER-PROFILE] Loading profile for user:', userId, userName);
         
-        // Update page title
+        // Update page title with URL parameter if available
         if (userName) {
             document.getElementById('profileName').textContent = decodeURIComponent(userName);
         }
@@ -155,9 +155,12 @@ async function displayUserProfile(profile) {
  * Display basic profile information
  */
 async function displayBasicInfo(profile) {
-    // Full name
-    const fullName = profile.nom_complet || profile.pseudo || 'Unknown User';
-    document.getElementById('profileFullName').textContent = fullName;
+    // Full name - используем приоритет: pseudo (никнейм) для единообразия с другими страницами
+    const displayName = profile.pseudo || profile.nom_complet || 'Unknown User';
+    document.getElementById('profileFullName').textContent = displayName;
+    
+    // Обновляем заголовок страницы
+    document.getElementById('profileName').textContent = displayName;
     
     // Age
     if (profile.age) {
@@ -559,12 +562,39 @@ function getZodiacSign(birthDate) {
 }
 
 /**
- * Simple translation to English (basic implementation)
+ * Simple translation to English using Google Translate API
  */
 async function translateToEnglish(text) {
-    // For now, return original text
-    // In the future, we could integrate with a translation API
-    return text;
+    try {
+        // Проверяем, нужен ли перевод (если текст уже на английском или очень короткий)
+        if (!text || text.length < 10) {
+            return text;
+        }
+        
+        // Простая проверка - если текст содержит много английских слов, не переводим
+        const englishWords = text.match(/\b[a-zA-Z]+\b/g) || [];
+        const totalWords = text.split(/\s+/).length;
+        
+        if (englishWords.length / totalWords > 0.7) {
+            console.log('[USER-PROFILE] Text appears to be in English, skipping translation');
+            return text;
+        }
+        
+        // Используем Google Translate через публичный API
+        const response = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=en&dt=t&q=${encodeURIComponent(text)}`);
+        const data = await response.json();
+        
+        if (data && data[0] && data[0][0] && data[0][0][0]) {
+            const translatedText = data[0].map(item => item[0]).join('');
+            console.log('[USER-PROFILE] Translation successful:', text, '->', translatedText);
+            return translatedText;
+        }
+        
+        return text;
+    } catch (error) {
+        console.warn('[USER-PROFILE] Translation failed:', error);
+        return text;
+    }
 }
 
 

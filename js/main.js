@@ -541,7 +541,7 @@ class MainDashboard {
                     const location = member.ville || member.region || 'Unknown';
                     
                     return `
-                        <div class="member-item">
+                        <div class="member-item" onclick="viewUserProfile('${member.id || member.id_membre}', '${member.pseudo || 'Anonymous'}')" style="cursor: pointer;">
                             <div class="member-rank">#${index + 1}</div>
                             <div class="member-avatar">
                                 ${photoUrl ? `<img src="${photoUrl}" alt="${member.pseudo}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''}

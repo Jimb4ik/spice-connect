@@ -142,12 +142,12 @@
 }
 
 .zodiac-sign {
-  background: linear-gradient(135deg, #ff6b9d, #ff8a9b);
-  color: white;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 600;
+    background: linear-gradient(135deg, #ff6b9d, #ff8a9b);
+    color: white !important;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
 }
 
 .profile-section {
