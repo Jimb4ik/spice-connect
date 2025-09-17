@@ -367,17 +367,14 @@
                 <div class="inclusivity-visual">
                     <div class="animated-stats-container">
                         <div class="animated-stat-card">
-                            <div class="stat-icon-animated">💝</div>
                             <div class="stat-number-animated" data-target="100">0</div>
                             <div class="stat-label-animated">% Inclusive</div>
                         </div>
                         <div class="animated-stat-card">
-                            <div class="stat-icon-animated">🛡️</div>
                             <div class="stat-number-animated" data-target="24">0</div>
                             <div class="stat-label-animated">/7 Support</div>
                         </div>
                         <div class="animated-stat-card">
-                            <div class="stat-icon-animated">🚫</div>
                             <div class="stat-number-animated" data-target="0">0</div>
                             <div class="stat-label-animated">Tolerance for Hate</div>
                         </div>
@@ -397,7 +394,7 @@
                     </div>
                 </div>
                 <div class="monetization-text">
-                    <h2>💎 Turn Connections into Earnings</h2>
+                    <h2>Turn Connections into Earnings</h2>
                     <p class="monetization-subtitle">
                         Lavrilo offers a unique opportunity to earn while building meaningful relationships. 
                         Receive gifts from admirers and convert them into real earnings.
@@ -544,8 +541,15 @@
             
             counters.forEach(counter => {
                 const target = parseInt(counter.getAttribute('data-target'));
-                const increment = target / 100;
                 let current = 0;
+                
+                if (target === 0) {
+                    // Special case for zero - just set it directly
+                    counter.textContent = '0';
+                    return;
+                }
+                
+                const increment = target / 50; // Faster animation
                 
                 const timer = setInterval(() => {
                     current += increment;
@@ -554,30 +558,16 @@
                         clearInterval(timer);
                     }
                     counter.textContent = Math.floor(current);
-                }, 20);
+                }, 30);
             });
         }
         
-        // Trigger animation when section comes into view
-        const observerOptions = {
-            threshold: 0.5,
-            rootMargin: '0px 0px -100px 0px'
-        };
-        
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    animateCounters();
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, observerOptions);
-        
+        // Start animation when page loads
         document.addEventListener('DOMContentLoaded', () => {
-            const statsContainer = document.querySelector('.animated-stats-container');
-            if (statsContainer) {
-                observer.observe(statsContainer);
-            }
+            // Delay animation slightly to ensure elements are rendered
+            setTimeout(() => {
+                animateCounters();
+            }, 1000);
         });
     </script>
     
@@ -639,13 +629,12 @@
                 const month = birthDate.getMonth() + 1;
                 const day = birthDate.getDate();
                 
-                // Prepare registration parameters
+                // Prepare registration parameters for full registration
                 const registrationParams = new URLSearchParams({
                     api_key: apiConfig.apiKey,
                     login: formData.username,
                     pass: formData.password,
                     mail: formData.email,
-                    'fast-part': '1', // Fast registration
                     sex: formData.gender,
                     cherche1: formData.lookingFor,
                     year: year,
@@ -667,8 +656,9 @@
                 });
                 
                 const result = await response.json();
+                console.log('Registration API Response:', result);
                 
-                if (result.success && result.session_id) {
+                if (result.accepted === 1 && result.session_id) {
                     // Registration successful
                     showRegistrationSuccess();
                     
@@ -696,7 +686,9 @@
                     }, 2000);
                     
                 } else {
-                    throw new Error(result.message || 'Registration failed');
+                    // Registration failed
+                    const errorMessage = result.error || 'Registration failed';
+                    throw new Error(errorMessage);
                 }
                 
             } catch (error) {
@@ -749,7 +741,7 @@
             // Check age (must be 18+)
             const birthDate = new Date(data.birthdate);
             const today = new Date();
-            const age = today.getFullYear() - birthDate.getFullYear();
+            let age = today.getFullYear() - birthDate.getFullYear();
             const monthDiff = today.getMonth() - birthDate.getMonth();
             
             if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
