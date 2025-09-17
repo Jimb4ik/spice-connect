@@ -240,13 +240,28 @@ class AuthModal {
     const password = document.getElementById('regPassword');
     const confirmPassword = document.getElementById('regConfirmPassword');
     
-    confirmPassword.addEventListener('input', () => {
-      if (password.value !== confirmPassword.value) {
-        confirmPassword.setCustomValidity('Passwords do not match');
+    // Function to validate passwords
+    const validatePasswords = () => {
+      // Only validate if both fields have values
+      if (password.value && confirmPassword.value) {
+        if (password.value !== confirmPassword.value) {
+          confirmPassword.setCustomValidity('Passwords do not match');
+        } else {
+          confirmPassword.setCustomValidity('');
+        }
       } else {
+        // Clear validation if either field is empty
         confirmPassword.setCustomValidity('');
       }
-    });
+    };
+    
+    // Add event listeners to both fields
+    confirmPassword.addEventListener('input', validatePasswords);
+    password.addEventListener('input', validatePasswords);
+    
+    // Also validate on blur to catch cases where user tabs through fields
+    confirmPassword.addEventListener('blur', validatePasswords);
+    password.addEventListener('blur', validatePasswords);
   }
 
   setupForgotEvents() {
@@ -291,8 +306,19 @@ class AuthModal {
     const formData = this.getRegisterFormData();
     
     // Validate passwords match
+    if (!formData.pass || !formData.confirmPassword) {
+      this.showError('Please fill in both password fields.');
+      return;
+    }
+    
     if (formData.pass !== formData.confirmPassword) {
       this.showError('Passwords do not match.');
+      return;
+    }
+    
+    // Additional password validation
+    if (formData.pass.length < 6) {
+      this.showError('Password must be at least 6 characters long.');
       return;
     }
     
