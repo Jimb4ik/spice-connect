@@ -50,6 +50,23 @@ export default async function handler(req, res) {
           });
       }
   
+      // Get real user IP address
+      const userIP = req.headers['x-forwarded-for'] || 
+                     req.headers['x-real-ip'] || 
+                     req.connection?.remoteAddress || 
+                     req.socket?.remoteAddress ||
+                     '127.0.0.1';
+      
+      // For registration, add required fields and fix IP
+      if (action === 'register') {
+        params.ip_adress = userIP.split(',')[0].trim(); // Get first IP if multiple
+        
+        // Ensure required fields have default values
+        if (!params.city) params.city = 1; // Default to Paris
+        if (!params.region) params.region = 1; // Default region
+        if (!params.countryObj) params.countryObj = 64; // Default to France
+      }
+
       // Build query parameters (API requires api_key in URL)
       const queryParams = new URLSearchParams({
         api_key: API_KEY,

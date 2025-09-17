@@ -249,7 +249,7 @@ class AuthModal {
       // Only validate if both fields have values
       if (passwordValue && confirmPasswordValue) {
         if (passwordValue !== confirmPasswordValue) {
-          confirmPassword.setCustomValidity('Passwords do not match');
+        confirmPassword.setCustomValidity('Passwords do not match');
         } else {
           confirmPassword.setCustomValidity('');
         }
@@ -363,7 +363,7 @@ class AuthModal {
     
     // Enhanced client-side validation before API call
     const usernameValue = formData.login || '';
-    const emailValue = formData.email || '';
+    const emailValue = formData.mail || ''; // Use 'mail' field as per API
     
     // Username validation
     if (usernameValue.length < 3) {
@@ -653,16 +653,27 @@ class AuthModal {
     const lookingForField = document.getElementById('regLookingFor');
     const fastRegistrationField = document.getElementById('fastRegistration');
     
+    // Get user's IP address (will be handled by server)
+    const userIP = '127.0.0.1'; // Default, server should detect real IP
+    
     return {
+      // API required parameters (matching Spice API documentation)
       login: usernameField ? usernameField.value.trim() : '',
-      email: emailField ? emailField.value.trim() : '', 
+      mail: emailField ? emailField.value.trim() : '', // API uses 'mail' not 'email'
       pass: passwordField ? passwordField.value : '',
+      sex: genderField ? parseInt(genderField.value) : 1, // API uses 'sex' not 'gender'
+      cherche1: lookingForField ? parseInt(lookingForField.value) : 2, // API uses 'cherche1' not 'looking_for'
+      year: birthDate.getFullYear(),
+      month: birthDate.getMonth() + 1,
+      day: birthDate.getDate(),
+      ip_adress: userIP, // Required by API
+      city: 1, // Default city ID (Paris) - should be made configurable
+      region: 1, // Default region ID - should be made configurable  
+      countryObj: 64, // Default country ID (France) - should be made configurable
+      'fast-part': fastRegistrationField && fastRegistrationField.checked ? '1' : '0',
+      
+      // Internal validation fields (not sent to API)
       confirmPassword: confirmPasswordField ? confirmPasswordField.value : '',
-      gender: genderField ? parseInt(genderField.value) : 0,
-      looking_for: lookingForField ? parseInt(lookingForField.value) : 0,
-      birth_year: birthDate.getFullYear(),
-      birth_month: birthDate.getMonth() + 1,
-      birth_day: birthDate.getDate(),
       fastRegistration: fastRegistrationField ? fastRegistrationField.checked : false
     };
   }
