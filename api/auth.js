@@ -26,6 +26,10 @@ export default async function handler(req, res) {
     try {
       const { action, ...params } = req.method === 'GET' ? req.query : req.body;
       
+      console.log(`[AUTH API] Raw request body:`, req.body);
+      console.log(`[AUTH API] Action:`, action);
+      console.log(`[AUTH API] Extracted params:`, params);
+      
       let endpoint = '';
       let method = 'POST';
       

@@ -193,17 +193,17 @@ class AuthManager {
           action: 'register',
           login: userData.login,
           pass: userData.pass,
-          mail: userData.email,
-          sex: userData.gender,
-          cherche1: userData.looking_for,
-          year: userData.birth_year,
-          month: userData.birth_month,
-          day: userData.birth_day,
+          mail: userData.mail, // Use 'mail' field as returned by getRegisterFormData()
+          sex: userData.sex, // Use 'sex' field as returned by getRegisterFormData()
+          cherche1: userData.cherche1, // Use 'cherche1' field as returned by getRegisterFormData()
+          year: userData.year,
+          month: userData.month,
+          day: userData.day,
           ip_adress: userIP,
           city: userData.city || 1, // Default city if not provided
           region: userData.region || 1, // Default region
-          countryObj: userData.country || 64, // Default to France
-          'fast-part': userData.fastRegistration ? '1' : '0'
+          countryObj: userData.countryObj || 64, // Default to France
+          'fast-part': userData['fast-part'] || '0'
         })
       });
 
