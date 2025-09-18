@@ -4,6 +4,47 @@
 // Configuration arrays cache
 const configArrays = {};
 
+// Function to get configuration arrays from API
+async function getConfigArray(arrayName) {
+    if (configArrays[arrayName]) {
+        return configArrays[arrayName];
+    }
+    
+    try {
+        const apiUrl = `/api/spice-multi-test?endpoint=/index_api/array/get/${arrayName}&method=GET`;
+        const response = await fetch(apiUrl);
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+            configArrays[arrayName] = result.data;
+            return result.data;
+        }
+    } catch (error) {
+        console.error(`[USER-PROFILE] Error loading ${arrayName} array:`, error);
+    }
+    
+    return {};
+}
+
+// Helper functions for mapping values
+function getGenderText(sexe) {
+    const genderMap = {
+        1: 'Male',
+        2: 'Female', 
+        3: 'Couple'
+    };
+    return genderMap[sexe] || 'Unknown';
+}
+
+function getOrientationText(sexe) {
+    const orientationMap = {
+        1: 'Heterosexual',
+        2: 'Gay/Lesbian',
+        3: 'Bisexual'
+    };
+    return orientationMap[sexe] || 'Unknown';
+}
+
 // Zodiac signs mapping
 const zodiacSigns = {
     'aries': { name: 'Aries', symbol: '♈', dates: '21 Mar - 19 Apr' },
@@ -165,25 +206,70 @@ async function displayUserProfile(profile) {
  * Display basic profile information
  */
 async function displayBasicInfo(profile) {
-    // Full name - используем приоритет: pseudo (никнейм) для единообразия с другими страницами
-    const displayName = profile.pseudo || profile.nom_complet || 'Unknown User';
-    document.getElementById('profileFullName').textContent = displayName;
+    // Full name and nickname
+    const fullName = profile.nom_complet || 'Unknown User';
+    const nickname = profile.pseudo || '';
     
-    // Обновляем заголовок страницы - показываем "Profile" вместо дублирования имени
-    document.getElementById('profileName').textContent = 'Profile';
+    document.getElementById('profileFullName').textContent = fullName;
+    
+    // Show nickname if different from full name
+    const nicknameElement = document.getElementById('profileNickname');
+    if (nickname && nickname !== fullName) {
+        nicknameElement.textContent = `"${nickname}"`;
+        nicknameElement.style.display = 'block';
+    } else {
+        nicknameElement.style.display = 'none';
+    }
+    
+    // Online status
+    const onlineElement = document.getElementById('profileOnlineStatus');
+    if (profile.online) {
+        onlineElement.innerHTML = '<span class="online-indicator">🟢</span> Online';
+        onlineElement.className = 'online-status online';
+    } else {
+        onlineElement.innerHTML = '<span class="offline-indicator">⚫</span> Offline';
+        onlineElement.className = 'online-status offline';
+    }
     
     // Age
     if (profile.age) {
         document.getElementById('profileAge').textContent = profile.age;
     }
     
-    // Location - используем zone_name из API документации
+    // Location
     if (profile.zone_name) {
         document.getElementById('profileLocation').textContent = profile.zone_name;
     }
     
-    // Birth date and zodiac - используем поле naissance из API документации
-    if (profile.naissance && profile.naissance !== '1988-03-20') { // Skip default dates
+    // Gender and orientation
+    const genderElement = document.getElementById('profileGender');
+    const orientationElement = document.getElementById('profileOrientation');
+    
+    if (profile.sexe1) {
+        genderElement.textContent = getGenderText(profile.sexe1);
+    }
+    
+    if (profile.sexe2) {
+        orientationElement.textContent = getOrientationText(profile.sexe2);
+    }
+    
+    // Looking for
+    const lookingForElement = document.getElementById('profileLookingFor');
+    const lookingForOrientationElement = document.getElementById('profileLookingForOrientation');
+    
+    if (profile.cherche1) {
+        lookingForElement.textContent = getGenderText(profile.cherche1);
+    }
+    
+    if (profile.cherche2) {
+        lookingForOrientationElement.textContent = getOrientationText(profile.cherche2);
+    }
+    
+    // Hair and eye color (load from API arrays)
+    await displayPhysicalAttributes(profile);
+    
+    // Birth date and zodiac
+    if (profile.naissance && profile.naissance !== '1988-03-20') {
         const birthDate = new Date(profile.naissance);
         const zodiac = getZodiacSign(birthDate);
         
@@ -195,6 +281,34 @@ async function displayBasicInfo(profile) {
             zodiacElement.title = zodiac.dates;
             zodiacSection.style.display = 'flex';
         }
+    }
+}
+
+/**
+ * Display physical attributes (hair, eyes)
+ */
+async function displayPhysicalAttributes(profile) {
+    try {
+        // Load hair and eye color arrays
+        const [cheveuxArray, yeuxArray] = await Promise.all([
+            getConfigArray('CHEVEUX'),
+            getConfigArray('YEUX')
+        ]);
+        
+        // Hair color
+        const hairElement = document.getElementById('profileHairColor');
+        if (profile.cheveux && cheveuxArray[profile.cheveux]) {
+            hairElement.textContent = cheveuxArray[profile.cheveux];
+        }
+        
+        // Eye color
+        const eyeElement = document.getElementById('profileEyeColor');
+        if (profile.yeux && yeuxArray[profile.yeux]) {
+            eyeElement.textContent = yeuxArray[profile.yeux];
+        }
+        
+    } catch (error) {
+        console.error('[USER-PROFILE] Error loading physical attributes:', error);
     }
 }
 
@@ -685,28 +799,29 @@ async function displayPhotoGallery(profile) {
         return;
     }
     
-    // Extract photos from profile data
+    // Extract photos from profile data - prioritize public_album
     let photos = [];
     
-    // Check photos_v2 field (returned when get_picture_430=1)
-    if (profile.photos_v2) {
+    // First check public_album (from API logs)
+    if (profile.public_album && typeof profile.public_album === 'object') {
+        console.log('[USER-PROFILE] Found public_album:', profile.public_album);
+        photos = Object.values(profile.public_album);
+    }
+    // Then check photos_v2 field (returned when get_picture_430=1)
+    else if (profile.photos_v2) {
         console.log('[USER-PROFILE] Found photos_v2:', profile.photos_v2);
         
         if (profile.photos_v2.public && typeof profile.photos_v2.public === 'object') {
-            // photos_v2.public contains photo objects
             photos = Object.values(profile.photos_v2.public);
         } else if (Array.isArray(profile.photos_v2)) {
             photos = profile.photos_v2;
         }
     }
-    
     // Fallback to other photo fields
-    if (photos.length === 0) {
-        if (profile.photos && Array.isArray(profile.photos)) {
-            photos = profile.photos;
-        } else if (profile.all_photos && typeof profile.all_photos === 'object') {
-            photos = Object.values(profile.all_photos);
-        }
+    else if (profile.photos && Array.isArray(profile.photos)) {
+        photos = profile.photos;
+    } else if (profile.all_photos && typeof profile.all_photos === 'object') {
+        photos = Object.values(profile.all_photos);
     }
     
     console.log('[USER-PROFILE] Extracted photos:', photos);
@@ -760,15 +875,15 @@ async function displayPhotoGallery(profile) {
 function getPhotoUrl(photo) {
     if (!photo) return null;
     
-    // Priority order for photo URLs (highest quality first)
+    // Priority order for photo URLs (normal quality first for better display)
     const urlFields = [
-        'sq_430',      // 430x430 square
+        'normal',      // Normal size - best for gallery display
         'real_size',   // Original size
+        'sq_430',      // 430x430 square
         'sq_middle',   // Medium square
-        'normal',      // Normal size
-        'sq_small',    // Small square
         'url_big',     // Big URL
         'url_middle',  // Middle URL
+        'sq_small',    // Small square
         'url_small'    // Small URL
     ];
     

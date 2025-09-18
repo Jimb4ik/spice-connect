@@ -6,7 +6,7 @@
     <title>User Profile - Lavrilo</title>
     <link rel="stylesheet" href="css/app-styles.css?v=1.1">
     <link rel="stylesheet" href="css/dashboard.css?v=1.1">
-    <link rel="stylesheet" href="css/user-profile.css?v=1.1">
+    <link rel="stylesheet" href="css/user-profile.css?v=1.2">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -130,6 +130,9 @@
                     </div>
                     <div class="profile-basic-info">
                         <h2 id="profileFullName">Full Name</h2>
+                        <div id="profileNickname" class="profile-nickname" style="display: none;">Nickname</div>
+                        <div id="profileOnlineStatus" class="online-status">Offline</div>
+                        
                         <div class="profile-meta">
                             <div class="meta-item">
                                 <span class="meta-label">Age:</span>
@@ -138,6 +141,30 @@
                             <div class="meta-item">
                                 <span class="meta-label">Location:</span>
                                 <span id="profileLocation">--</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">Gender:</span>
+                                <span id="profileGender">--</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">Orientation:</span>
+                                <span id="profileOrientation">--</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">Looking for:</span>
+                                <span id="profileLookingFor">--</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">Partner orientation:</span>
+                                <span id="profileLookingForOrientation">--</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">Hair color:</span>
+                                <span id="profileHairColor">--</span>
+                            </div>
+                            <div class="meta-item">
+                                <span class="meta-label">Eye color:</span>
+                                <span id="profileEyeColor">--</span>
                             </div>
                             <div class="meta-item" id="zodiacSection" style="display: none;">
                                 <span class="meta-label">Zodiac:</span>
@@ -351,7 +378,7 @@
     <script src="js/cache-buster.js?v=1.0"></script>
     <script src="js/auth-manager.js?v=1.3"></script>
     <script src="js/header-avatar.js?v=1.5"></script>
-    <script src="js/user-profile.js?v=1.1"></script>
+    <script src="js/user-profile.js?v=1.2"></script>
     
     <script>
         // Проверка авторизации при загрузке страницы
