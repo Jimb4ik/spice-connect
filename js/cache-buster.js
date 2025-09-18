@@ -1,7 +1,7 @@
 // Cache Buster - автоматическое обновление версий файлов
 class CacheBuster {
     constructor() {
-        this.version = '1.0.7'; // Увеличивайте при каждом обновлении
+        this.version = '1.0.8'; // Увеличивайте при каждом обновлении
         this.init();
         this.registerServiceWorker();
     }
@@ -44,36 +44,11 @@ class CacheBuster {
     }
 
     reloadIfNeeded() {
-        // Показываем уведомление пользователю
-        this.showUpdateNotification();
-    }
-
-    showUpdateNotification() {
-        // Создаем красивое уведомление
-        const notification = document.createElement('div');
-        notification.className = 'update-notification';
-        notification.innerHTML = `
-            <div class="update-content">
-                <div class="update-icon">🚀</div>
-                <div class="update-text">
-                    <h4>Обновление доступно!</h4>
-                    <p>Новая версия сайта загружена. Обновить страницу?</p>
-                </div>
-                <div class="update-actions">
-                    <button class="update-btn primary" onclick="cacheBuster.forceReload()">Обновить</button>
-                    <button class="update-btn secondary" onclick="cacheBuster.dismissNotification()">Позже</button>
-                </div>
-            </div>
-        `;
-        
-        document.body.appendChild(notification);
-        
-        // Автоматически обновляем через 10 секунд если пользователь не ответил
+        // Автоматически обновляем через 2 секунды
+        console.log('🔄 Автоматическое обновление через 2 секунды...');
         setTimeout(() => {
-            if (document.querySelector('.update-notification')) {
-                this.forceReload();
-            }
-        }, 10000);
+            this.forceReload();
+        }, 2000);
     }
 
     forceReload() {
@@ -81,12 +56,6 @@ class CacheBuster {
         window.location.reload(true);
     }
 
-    dismissNotification() {
-        const notification = document.querySelector('.update-notification');
-        if (notification) {
-            notification.remove();
-        }
-    }
 
     // Регистрация Service Worker
     async registerServiceWorker() {
@@ -101,7 +70,8 @@ class CacheBuster {
                     newWorker.addEventListener('statechange', () => {
                         if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                             console.log('[SW] New Service Worker available');
-                            this.showUpdateNotification();
+                            // Автоматически обновляем без уведомлений
+                            setTimeout(() => this.forceReload(), 1000);
                         }
                     });
                 });
