@@ -345,10 +345,8 @@ class SearchManager {
              <div class="user-avatar-placeholder" style="display: none;">${user.pseudo ? user.pseudo.charAt(0).toUpperCase() : 'U'}</div>` :
             `<div class="user-avatar-placeholder">${user.pseudo ? user.pseudo.charAt(0).toUpperCase() : 'U'}</div>`;
         
-        // Добавляем больше информации благодаря profile_complete=1
+        // Только имя и возраст
         const age = user.age ? `, ${user.age}` : '';
-        const location = user.ville || user.region || user.pays || '';
-        const locationText = location ? `📍 ${location}` : '';
         
         card.innerHTML = `
             <div class="user-photo-container">
@@ -358,8 +356,6 @@ class SearchManager {
                 <div class="user-nickname">
                     ${user.pseudo || 'Anonymous'}${age}
                 </div>
-                ${locationText ? `<div class="user-location">${locationText}</div>` : ''}
-                ${user.description ? `<div class="user-description">${user.description.substring(0, 100)}${user.description.length > 100 ? '...' : ''}</div>` : ''}
             </div>
         `;
         
