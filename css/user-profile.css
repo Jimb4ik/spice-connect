@@ -532,24 +532,23 @@
 
 /* Photo Gallery Styles */
 .profile-photos-section {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
-  backdrop-filter: blur(15px);
+  background: white;
   border-radius: 25px;
   padding: 35px;
   margin-bottom: 30px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(0, 0, 0, 0.1);
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
 }
 
 .profile-photos-section h3 {
-  color: white;
+  color: #333;
   font-size: 26px;
   font-weight: 700;
   margin-bottom: 25px;
   text-align: center;
   padding-bottom: 15px;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.3);
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+  text-shadow: none;
 }
 
 .photos-grid {

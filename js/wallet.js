@@ -680,8 +680,15 @@ async function openTopUpModal(amount = null, credits = null) {
     if (modal) {
         modal.style.display = 'flex';
         
+        // Reset to money mode by default
+        switchInputMode('money');
+        
         if (amount && amountInput) {
             amountInput.value = amount.toFixed(2);
+            updateConversion(amount);
+        } else {
+            amountInput.value = '';
+            updateConversion(0);
         }
         
         // Update modal title to show credits if provided

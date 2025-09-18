@@ -11,9 +11,22 @@ async function getConfigArray(arrayName) {
     }
     
     try {
-        const apiUrl = `/api/spice-multi-test?endpoint=/index_api/array/get/${arrayName}&method=GET`;
-        const response = await fetch(apiUrl);
+        // Get API key first
+        const apiKeyResponse = await fetch('/api/get-api-key');
+        const apiKeyData = await apiKeyResponse.json();
+        
+        if (!apiKeyData.success) {
+            throw new Error('Failed to get API key');
+        }
+        
+        // Use direct API URL as specified in documentation
+        const apiUrl = `https://dev2018.de5a7.com/index_api/array/get/${arrayName}?api_key=${apiKeyData.apiKey}`;
+        console.log(`[USER-PROFILE] Loading ${arrayName} from:`, apiUrl);
+        
+        const response = await fetch(`/api/spice-proxy-simple?url=${encodeURIComponent(apiUrl)}`);
         const result = await response.json();
+        
+        console.log(`[USER-PROFILE] ${arrayName} response:`, result);
         
         if (result.success && result.data) {
             configArrays[arrayName] = result.data;
@@ -211,6 +224,11 @@ async function displayBasicInfo(profile) {
     const nickname = profile.pseudo || '';
     
     document.getElementById('profileFullName').textContent = fullName;
+    
+    // Update page title
+    const displayName = nickname || fullName;
+    document.getElementById('profileName').textContent = `Profile: ${displayName}`;
+    document.title = `Profile: ${displayName} - Lavrilo`;
     
     // Show nickname if different from full name
     const nicknameElement = document.getElementById('profileNickname');
