@@ -250,13 +250,23 @@ async function displayBasicInfo(profile) {
     }
     
     // Age
-    if (profile.age) {
-        document.getElementById('profileAge').textContent = profile.age;
+    const ageElement = document.getElementById('profileAge');
+    if (profile.age && profile.age > 0) {
+        ageElement.textContent = profile.age;
+        ageElement.className = '';
+    } else {
+        ageElement.textContent = 'Not specified';
+        ageElement.className = 'not-provided';
     }
     
     // Location
+    const locationElement = document.getElementById('profileLocation');
     if (profile.zone_name) {
-        document.getElementById('profileLocation').textContent = profile.zone_name;
+        locationElement.textContent = profile.zone_name;
+        locationElement.className = '';
+    } else {
+        locationElement.textContent = 'Location not shared';
+        locationElement.className = 'not-provided';
     }
     
     // Gender and orientation
@@ -265,10 +275,18 @@ async function displayBasicInfo(profile) {
     
     if (profile.sexe1) {
         genderElement.textContent = getGenderText(profile.sexe1);
+        genderElement.className = '';
+    } else {
+        genderElement.textContent = 'Not specified';
+        genderElement.className = 'not-provided';
     }
     
     if (profile.sexe2) {
         orientationElement.textContent = getOrientationText(profile.sexe2);
+        orientationElement.className = '';
+    } else {
+        orientationElement.textContent = 'Not specified';
+        orientationElement.className = 'not-provided';
     }
     
     // Looking for
@@ -277,10 +295,18 @@ async function displayBasicInfo(profile) {
     
     if (profile.cherche1) {
         lookingForElement.textContent = getGenderText(profile.cherche1);
+        lookingForElement.className = '';
+    } else {
+        lookingForElement.textContent = 'Open to anyone';
+        lookingForElement.className = 'not-provided';
     }
     
     if (profile.cherche2) {
         lookingForOrientationElement.textContent = getOrientationText(profile.cherche2);
+        lookingForOrientationElement.className = '';
+    } else {
+        lookingForOrientationElement.textContent = 'No preference';
+        lookingForOrientationElement.className = 'not-provided';
     }
     
     // Hair and eye color (load from API arrays)
@@ -317,16 +343,38 @@ async function displayPhysicalAttributes(profile) {
         const hairElement = document.getElementById('profileHairColor');
         if (profile.cheveux && cheveuxArray[profile.cheveux]) {
             hairElement.textContent = cheveuxArray[profile.cheveux];
+            hairElement.className = '';
+        } else {
+            hairElement.textContent = 'Not shared';
+            hairElement.className = 'not-provided';
         }
         
         // Eye color
         const eyeElement = document.getElementById('profileEyeColor');
         if (profile.yeux && yeuxArray[profile.yeux]) {
             eyeElement.textContent = yeuxArray[profile.yeux];
+            eyeElement.className = '';
+        } else {
+            eyeElement.textContent = 'Not shared';
+            eyeElement.className = 'not-provided';
         }
         
     } catch (error) {
         console.error('[USER-PROFILE] Error loading physical attributes:', error);
+        
+        // Set fallback messages if API fails
+        const hairElement = document.getElementById('profileHairColor');
+        const eyeElement = document.getElementById('profileEyeColor');
+        
+        if (hairElement && !hairElement.textContent) {
+            hairElement.textContent = 'Not available';
+            hairElement.className = 'not-provided';
+        }
+        
+        if (eyeElement && !eyeElement.textContent) {
+            eyeElement.textContent = 'Not available';
+            eyeElement.className = 'not-provided';
+        }
     }
 }
 
@@ -394,9 +442,9 @@ async function displayProfilePhoto(profile) {
  * Display description with translation
  */
 async function displayDescription(profile) {
+    const descriptionElement = document.getElementById('profileDescription');
+    
     if (profile.description && profile.description.trim()) {
-        const descriptionElement = document.getElementById('profileDescription');
-        
         // Show original description
         let description = profile.description.trim();
         
@@ -411,9 +459,12 @@ async function displayDescription(profile) {
         }
         
         descriptionElement.textContent = description;
+        descriptionElement.className = '';
         hideSectionLoading('about', true);
     } else {
-        hideSectionLoading('about', false);
+        descriptionElement.textContent = "This user hasn't shared their story yet. Maybe they're the mysterious type! 😊";
+        descriptionElement.className = 'not-provided-description';
+        hideSectionLoading('about', true);
     }
 }
 

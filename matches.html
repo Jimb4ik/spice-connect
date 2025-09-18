@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Matches - Lavrilo</title>
     <link rel="stylesheet" href="css/app-styles.css?v=1.1">
-    <link rel="stylesheet" href="css/dashboard.css?v=1.1">
-    <link rel="stylesheet" href="css/matches.css?v=1.1">
+    <link rel="stylesheet" href="css/dashboard.css?v=1.2">
+    <link rel="stylesheet" href="css/matches.css?v=1.2">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -278,7 +278,7 @@
     <script src="js/auth-manager.js?v=1.3"></script>
     <script src="js/header-avatar.js?v=1.5"></script>
     <script src="js/match-utils.js?v=1.1"></script>
-    <script src="js/matching-system-v2.js?v=1.1"></script>
+    <script src="js/matching-system-v2.js?v=1.2"></script>
     
     <script>
         // Загрузка матчей из нашей базы данных
@@ -481,6 +481,7 @@
         function displayMatches(matches) {
             const matchesGrid = document.getElementById('matchesGrid');
             const noMatchesElement = document.getElementById('noMatches');
+            const contentContainer = document.querySelector('.matches-content-container');
             
             if (!matches || matches.length === 0) {
                 showNoMatches();
@@ -490,6 +491,11 @@
             // Скрываем no-matches
             if (noMatchesElement) {
                 noMatchesElement.style.display = 'none';
+            }
+            
+            // Показываем контейнер с матчами
+            if (contentContainer) {
+                contentContainer.style.display = 'flex';
             }
 
             // Создаем HTML для каждого матча
@@ -622,6 +628,7 @@
         function showNoMatches() {
             const noMatchesElement = document.getElementById('noMatches');
             const matchesGrid = document.getElementById('matchesGrid');
+            const contentContainer = document.querySelector('.matches-content-container');
             
             if (noMatchesElement) {
                 noMatchesElement.style.display = 'block';
@@ -629,6 +636,10 @@
             // Скрываем грид когда нет матчей, чтобы не было белой полосы
             if (matchesGrid) {
                 matchesGrid.style.display = 'none';
+            }
+            // Скрываем весь контейнер с сайдбаром и сеткой
+            if (contentContainer) {
+                contentContainer.style.display = 'none';
             }
         }
 

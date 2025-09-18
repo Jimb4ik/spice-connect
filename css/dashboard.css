@@ -2828,9 +2828,11 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 60px 20px;
+  padding: 40px 20px;
   text-align: center;
   color: white;
+  min-height: 400px;
+  margin-top: -50px;
 }
 
 .no-matches-icon {

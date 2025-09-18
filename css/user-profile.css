@@ -174,6 +174,22 @@
   font-weight: 600;
 }
 
+.meta-item span.not-provided {
+  color: #95a5a6 !important;
+  font-style: italic !important;
+  font-weight: 400 !important;
+}
+
+.not-provided-description {
+  color: #95a5a6 !important;
+  font-style: italic !important;
+  text-align: center !important;
+  padding: 20px !important;
+  background: rgba(149, 165, 166, 0.1) !important;
+  border-radius: 10px !important;
+  border: 1px dashed rgba(149, 165, 166, 0.3) !important;
+}
+
 .zodiac-sign {
     background: linear-gradient(135deg, #ff6b9d, #ff8a9b);
     color: white !important;
