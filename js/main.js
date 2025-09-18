@@ -687,7 +687,7 @@ class MainDashboard {
                     const timeAgo = visitTime ? this.getTimeAgo(visitTime) : 'Recently';
                     
                     return `
-                        <div class="visitor-item">
+                        <div class="visitor-item" onclick="viewUserProfile('${visitor.id || visitor.id_membre}', '${visitor.pseudo || visitor.nom_complet || 'Anonymous'}')" style="cursor: pointer;">
                             <div class="visitor-avatar">
                                 ${photoUrl ? `<img src="${photoUrl}" alt="${visitor.pseudo}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''}
                                 <div class="avatar-fallback" style="${photoUrl ? 'display: none;' : ''}">${(visitor.pseudo || 'U').charAt(0).toUpperCase()}</div>
@@ -736,7 +736,7 @@ class MainDashboard {
                     const timeAgo = this.getProgressiveTimeAgo(index);
                     
                     return `
-                        <div class="visitor-item">
+                        <div class="visitor-item" onclick="viewUserProfile('${visitor.id || visitor.id_membre}', '${visitor.pseudo || 'Anonymous'}')" style="cursor: pointer;">
                             <div class="visitor-avatar">
                                 ${photoUrl ? `<img src="${photoUrl}" alt="${visitor.pseudo}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''}
                                 <div class="avatar-fallback" style="${photoUrl ? 'display: none;' : ''}">${(visitor.pseudo || 'U').charAt(0).toUpperCase()}</div>

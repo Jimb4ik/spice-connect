@@ -216,10 +216,19 @@ class AuthManager {
         this.currentUser = {
           id: data.user_id,
           pseudo: userData.login,
-          lang: data.lang_ui
+          lang: data.lang_ui || 'en'
         };
         this.sessionId = data.session_id;
+        this.tokenLogin = data.token_login || data.session_id; // Use session_id as fallback
         this.isLoggedIn = true;
+        
+        console.log('[AUTH] User data set:', {
+          id: this.currentUser.id,
+          pseudo: this.currentUser.pseudo,
+          sessionId: this.sessionId,
+          tokenLogin: this.tokenLogin,
+          isLoggedIn: this.isLoggedIn
+        });
         
         this.saveSession();
         this.onLoginSuccess();

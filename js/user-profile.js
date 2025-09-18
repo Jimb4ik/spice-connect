@@ -139,6 +139,13 @@ async function displayUserProfile(profile) {
             console.warn('[USER-PROFILE] Error displaying personal details:', error);
         }
         
+        // Photo gallery
+        try {
+            await displayPhotoGallery(profile);
+        } catch (error) {
+            console.warn('[USER-PROFILE] Error displaying photo gallery:', error);
+        }
+        
         // Setup action buttons
         try {
             setupActionButtons(profile);
@@ -665,6 +672,153 @@ function hideSectionLoading(sectionName, hasContent = true) {
 }
 
 /**
+ * Display photo gallery
+ */
+async function displayPhotoGallery(profile) {
+    console.log('[USER-PROFILE] Displaying photo gallery...');
+    
+    const photosSection = document.getElementById('profilePhotosSection');
+    const photosGrid = document.getElementById('profilePhotosGrid');
+    
+    if (!photosSection || !photosGrid) {
+        console.warn('[USER-PROFILE] Photo gallery elements not found');
+        return;
+    }
+    
+    // Extract photos from profile data
+    let photos = [];
+    
+    // Check photos_v2 field (returned when get_picture_430=1)
+    if (profile.photos_v2) {
+        console.log('[USER-PROFILE] Found photos_v2:', profile.photos_v2);
+        
+        if (profile.photos_v2.public && typeof profile.photos_v2.public === 'object') {
+            // photos_v2.public contains photo objects
+            photos = Object.values(profile.photos_v2.public);
+        } else if (Array.isArray(profile.photos_v2)) {
+            photos = profile.photos_v2;
+        }
+    }
+    
+    // Fallback to other photo fields
+    if (photos.length === 0) {
+        if (profile.photos && Array.isArray(profile.photos)) {
+            photos = profile.photos;
+        } else if (profile.all_photos && typeof profile.all_photos === 'object') {
+            photos = Object.values(profile.all_photos);
+        }
+    }
+    
+    console.log('[USER-PROFILE] Extracted photos:', photos);
+    
+    if (photos.length === 0) {
+        console.log('[USER-PROFILE] No photos found');
+        photosSection.style.display = 'none';
+        return;
+    }
+    
+    // Sort photos by number/order if available
+    photos.sort((a, b) => {
+        const numA = parseInt(a.num || a.order || 0);
+        const numB = parseInt(b.num || b.order || 0);
+        return numA - numB;
+    });
+    
+    // Create photo gallery HTML
+    const photosHTML = photos.map((photo, index) => {
+        const photoUrl = getPhotoUrl(photo);
+        const photoId = `photo-${index}`;
+        
+        if (!photoUrl) {
+            return ''; // Skip photos without URL
+        }
+        
+        return `
+            <div class="photo-item" onclick="openPhotoModal('${photoUrl}')" data-photo-url="${photoUrl}">
+                <img src="${photoUrl}" alt="Profile Photo ${index + 1}" loading="lazy" 
+                     onerror="this.parentElement.style.display='none'">
+            </div>
+        `;
+    }).filter(html => html !== '').join('');
+    
+    if (photosHTML === '') {
+        console.log('[USER-PROFILE] No valid photo URLs found');
+        photosSection.style.display = 'none';
+        return;
+    }
+    
+    // Display photos
+    photosGrid.innerHTML = photosHTML;
+    photosSection.style.display = 'block';
+    
+    console.log('[USER-PROFILE] ✅ Photo gallery displayed with', photos.length, 'photos');
+}
+
+/**
+ * Get photo URL from photo object
+ */
+function getPhotoUrl(photo) {
+    if (!photo) return null;
+    
+    // Priority order for photo URLs (highest quality first)
+    const urlFields = [
+        'sq_430',      // 430x430 square
+        'real_size',   // Original size
+        'sq_middle',   // Medium square
+        'normal',      // Normal size
+        'sq_small',    // Small square
+        'url_big',     // Big URL
+        'url_middle',  // Middle URL
+        'url_small'    // Small URL
+    ];
+    
+    for (const field of urlFields) {
+        if (photo[field]) {
+            let url = photo[field];
+            
+            // Fix relative URLs
+            if (url && !url.startsWith('http') && !url.startsWith('//')) {
+                if (url.startsWith('/')) {
+                    url = 'https://dev2018.de5a7.com' + url;
+                } else {
+                    url = 'https://dev2018.de5a7.com/' + url;
+                }
+            }
+            
+            return url;
+        }
+    }
+    
+    return null;
+}
+
+/**
+ * Open photo in modal
+ */
+function openPhotoModal(photoUrl) {
+    const modal = document.getElementById('photoModal');
+    const modalPhoto = document.getElementById('modalPhoto');
+    
+    if (modal && modalPhoto && photoUrl) {
+        modalPhoto.src = photoUrl;
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+/**
+ * Close photo modal
+ */
+function closePhotoModal() {
+    const modal = document.getElementById('photoModal');
+    
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+}
+
+/**
  * Show error state
  */
 function showError() {
@@ -673,6 +827,34 @@ function showError() {
     document.getElementById('profileError').style.display = 'block';
 }
 
+// Initialize photo modal event listeners
+document.addEventListener('DOMContentLoaded', () => {
+    // Close modal when clicking close button
+    const closeBtn = document.getElementById('closePhotoModal');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closePhotoModal);
+    }
+    
+    // Close modal when clicking outside
+    const modal = document.getElementById('photoModal');
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closePhotoModal();
+            }
+        });
+    }
+    
+    // Close modal with Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closePhotoModal();
+        }
+    });
+});
+
 // Make functions globally available
 window.initializeUserProfile = initializeUserProfile;
+window.openPhotoModal = openPhotoModal;
+window.closePhotoModal = closePhotoModal;
 

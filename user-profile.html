@@ -282,12 +282,15 @@
                 </div>
             </div>
 
-            <!-- Action Buttons -->
-            <div class="profile-actions fade-in-up">
-                <button class="action-btn primary" id="messageBtn">
-                    Send Message
-                </button>
+            <!-- Photo Gallery -->
+            <div class="profile-photos-section fade-in-up" id="profilePhotosSection" style="display: none;">
+                <h3>Photos</h3>
+                <div class="photos-grid" id="profilePhotosGrid">
+                    <!-- Photos will be loaded here -->
+                </div>
             </div>
+
+            <!-- Action Buttons removed -->
         </div>
 
         <!-- Error State -->
@@ -335,6 +338,14 @@
             </div>
         </div>
     </footer>
+
+    <!-- Photo Modal -->
+    <div class="photo-modal" id="photoModal">
+        <div class="photo-modal-content">
+            <img id="modalPhoto" src="" alt="Profile Photo">
+            <button class="photo-modal-close" id="closePhotoModal">&times;</button>
+        </div>
+    </div>
 
     <!-- Scripts -->
     <script src="js/auth-manager.js?v=1.2"></script>

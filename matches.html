@@ -151,12 +151,10 @@
 
         <!-- Пустое состояние -->
         <div class="no-matches fade-in-up" id="noMatches" style="display: none;">
-            <div class="no-matches-icon">💔</div>
             <h3>No matches yet</h3>
             <p>Don't worry! Keep swiping to find people who are perfect for you.</p>
             <div class="no-matches-actions">
                 <a href="discover.html" class="app-btn app-btn-primary">Start Swiping</a>
-                <a href="search.html" class="app-btn app-btn-secondary">Browse Profiles</a>
             </div>
         </div>
     </main>
@@ -627,9 +625,9 @@
             if (noMatchesElement) {
                 noMatchesElement.style.display = 'block';
             }
-            // Показываем грид (даже если он пустой, чтобы не было белой полосы)
+            // Скрываем грид когда нет матчей, чтобы не было белой полосы
             if (matchesGrid) {
-                matchesGrid.style.display = 'grid';
+                matchesGrid.style.display = 'none';
             }
         }
 

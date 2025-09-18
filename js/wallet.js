@@ -584,9 +584,10 @@ async function loadWalletData() {
 }
 
 // Quick amount selection
-function selectAmount(amount) {
-    walletManager.selectedAmount = amount;
-    openTopUpModal(amount);
+function selectAmount(price, credits) {
+    walletManager.selectedAmount = price;
+    walletManager.selectedCredits = credits;
+    openTopUpModal(price, credits);
 }
 
 function selectCustomAmount() {
@@ -601,7 +602,7 @@ function selectCustomAmount() {
 }
 
 // Top-up modal functions
-async function openTopUpModal(amount = null) {
+async function openTopUpModal(amount = null, credits = null) {
     const modal = document.getElementById('topupModal');
     const amountInput = document.getElementById('topupAmount');
     
@@ -610,6 +611,19 @@ async function openTopUpModal(amount = null) {
         
         if (amount && amountInput) {
             amountInput.value = amount.toFixed(2);
+        }
+        
+        // Update modal title to show credits if provided
+        if (credits) {
+            const modalTitle = document.querySelector('#topupModal .modal-header h2');
+            if (modalTitle) {
+                modalTitle.textContent = `Purchase ${credits} Credits`;
+            }
+        } else {
+            const modalTitle = document.querySelector('#topupModal .modal-header h2');
+            if (modalTitle) {
+                modalTitle.textContent = 'Purchase Credits';
+            }
         }
         
         // Pre-fill email when modal opens
