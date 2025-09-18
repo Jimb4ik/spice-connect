@@ -344,10 +344,7 @@ class WalletManager {
         if (amountInput && creditsDisplay) {
             const updateCredits = () => {
                 const amount = parseFloat(amountInput.value) || 0;
-                const currency = currencySelect ? currencySelect.value : 'EUR';
-                const rate = this.creditRates[currency] || this.creditRates['EUR'];
-                const credits = Math.floor(amount / rate);
-                creditsDisplay.textContent = `${credits} Credits`;
+                updateConversion(amount);
             };
             
             amountInput.addEventListener('input', updateCredits);
@@ -601,7 +598,81 @@ function selectCustomAmount() {
     }, 100);
 }
 
+// Input mode switching
+let currentInputMode = 'money'; // 'money' or 'tokens'
+const EURO_PER_CREDIT = 0.2118; // 10.59 EUR for 50 credits
+
+function switchInputMode(mode) {
+    currentInputMode = mode;
+    
+    const moneyBtn = document.getElementById('moneyModeBtn');
+    const tokenBtn = document.getElementById('tokenModeBtn');
+    const amountLabel = document.getElementById('amountLabel');
+    const amountInput = document.getElementById('topupAmount');
+    const creditsAmount = document.getElementById('creditsAmount');
+    
+    // Update button states
+    if (moneyBtn && tokenBtn) {
+        moneyBtn.classList.toggle('active', mode === 'money');
+        tokenBtn.classList.toggle('active', mode === 'tokens');
+    }
+    
+    // Update label and input
+    if (amountLabel && amountInput) {
+        if (mode === 'money') {
+            amountLabel.textContent = 'Amount (€):';
+            amountInput.placeholder = '0.00';
+            amountInput.step = '0.01';
+            amountInput.min = '1';
+            amountInput.max = '1000';
+        } else {
+            amountLabel.textContent = 'Credits:';
+            amountInput.placeholder = '0';
+            amountInput.step = '1';
+            amountInput.min = '1';
+            amountInput.max = '4720'; // Max credits for 1000 EUR
+        }
+        
+        // Clear current value and update conversion
+        const currentValue = parseFloat(amountInput.value) || 0;
+        if (currentValue > 0) {
+            updateConversion(currentValue);
+        } else {
+            amountInput.value = '';
+            if (creditsAmount) {
+                creditsAmount.textContent = mode === 'money' ? '0 Credits' : '€0.00';
+            }
+        }
+    }
+}
+
+function updateConversion(value) {
+    const creditsAmount = document.getElementById('creditsAmount');
+    if (!creditsAmount || !value) return;
+    
+    if (currentInputMode === 'money') {
+        // Convert EUR to Credits
+        const credits = Math.floor(value / EURO_PER_CREDIT);
+        creditsAmount.textContent = `${credits} Credits`;
+    } else {
+        // Convert Credits to EUR
+        const euros = (value * EURO_PER_CREDIT).toFixed(2);
+        creditsAmount.textContent = `€${euros}`;
+    }
+}
+
 // Top-up modal functions
+function openTopUpModalInMode(mode) {
+    openTopUpModal();
+    setTimeout(() => {
+        switchInputMode(mode);
+        const amountInput = document.getElementById('topupAmount');
+        if (amountInput) {
+            amountInput.focus();
+        }
+    }, 100);
+}
+
 async function openTopUpModal(amount = null, credits = null) {
     const modal = document.getElementById('topupModal');
     const amountInput = document.getElementById('topupAmount');

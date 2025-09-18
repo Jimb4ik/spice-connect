@@ -451,6 +451,47 @@
 }
 
 /* ============ FORM STYLES ============ */
+
+/* Input Mode Toggle */
+.input-mode-toggle {
+    margin-bottom: 25px;
+    text-align: center;
+}
+
+.toggle-buttons {
+    display: inline-flex;
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 4px;
+    gap: 4px;
+}
+
+.toggle-btn {
+    background: transparent;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.5);
+    color: #333;
+}
+
+.toggle-btn.active {
+    background: white;
+    color: #333;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
 .amount-selection {
     margin-bottom: 30px;
 }
