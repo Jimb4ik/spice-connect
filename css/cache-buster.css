@@ -1,0 +1,102 @@
+/* Cache Buster Notification Styles */
+.update-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    z-index: 10000;
+    max-width: 350px;
+    animation: slideInRight 0.3s ease-out;
+    border-left: 4px solid #4CAF50;
+}
+
+.update-content {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.update-icon {
+    font-size: 24px;
+    text-align: center;
+}
+
+.update-text h4 {
+    margin: 0 0 5px 0;
+    color: #333;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.update-text p {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.update-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.update-btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.update-btn.primary {
+    background: #4CAF50;
+    color: white;
+}
+
+.update-btn.primary:hover {
+    background: #45a049;
+}
+
+.update-btn.secondary {
+    background: #f5f5f5;
+    color: #666;
+}
+
+.update-btn.secondary:hover {
+    background: #e0e0e0;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* Мобильная версия */
+@media (max-width: 768px) {
+    .update-notification {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+    }
+    
+    .update-actions {
+        flex-direction: column;
+    }
+    
+    .update-btn {
+        width: 100%;
+    }
+}
