@@ -1,5 +1,5 @@
 // Service Worker для управления кешем
-const CACHE_NAME = 'lavrilo-v1.0.14';
+const CACHE_NAME = 'lavrilo-v1.0.15';
 const CACHE_URLS = [
     '/',
     '/index.html',

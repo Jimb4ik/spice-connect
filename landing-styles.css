@@ -1605,3 +1605,22 @@ body {
   left: 50%;
   transform: translate(-50%, -50%);
 }
+
+/* Company Info Styles */
+.company-info {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.company-info p {
+    color: #aaa;
+    font-size: 12px;
+    line-height: 1.4;
+    margin-bottom: 4px;
+}
+
+.company-info p strong {
+    color: #fff;
+    font-weight: 600;
+}
