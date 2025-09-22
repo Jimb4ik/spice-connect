@@ -1624,3 +1624,11 @@ body {
     color: #fff;
     font-weight: 600;
 }
+
+/* Footer Brand Styles */
+.footer-brand h3 {
+    color: #fff;
+    margin-bottom: 10px;
+    font-size: 24px;
+    font-weight: 700;
+}
