@@ -1,7 +1,7 @@
 // Cache Buster - автоматическое обновление версий файлов
 class CacheBuster {
     constructor() {
-        this.version = '1.0.15'; // Увеличивайте при каждом обновлении
+        this.version = '1.0.16'; // Увеличивайте при каждом обновлении
         this.init();
         this.registerServiceWorker();
     }
