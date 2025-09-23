@@ -35,7 +35,7 @@ class SearchManager {
         }
 
         // Enter key in search inputs
-        const searchInputs = document.querySelectorAll('#searchName, #searchLocation');
+        const searchInputs = document.querySelectorAll('#searchName');
         searchInputs.forEach(input => {
             input.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
@@ -95,23 +95,6 @@ class SearchManager {
             let searchParams = this.getSearchParams();
             console.log('[SEARCH] Initial search params:', searchParams);
             
-            // Обрабатываем поиск по локации если указан
-            if (searchParams._location_name) {
-                const locationName = searchParams._location_name;
-                delete searchParams._location_name; // Удаляем временный параметр
-                
-                console.log('[SEARCH] Resolving location:', locationName);
-                const cityId = await this.getCityId(locationName);
-                if (cityId) {
-                    searchParams.id_ville = cityId;
-                    console.log('[SEARCH] Using city ID:', cityId, 'for location:', locationName);
-                } else {
-                    console.log('[SEARCH] City not found:', locationName);
-                    // Показываем предупреждение пользователю
-                    this.showLocationWarning(locationName);
-                    // Продолжаем поиск без фильтра по городу
-                }
-            }
             
             // Build query string for search API
             const queryParams = new URLSearchParams({
@@ -188,11 +171,6 @@ class SearchManager {
             // НЕ используем nom одновременно с nick - это может конфликтовать
         }
         
-        // Location search - будет обработан асинхронно в performSearch
-        const searchLocation = document.getElementById('searchLocation')?.value?.trim();
-        if (searchLocation) {
-            params._location_name = searchLocation; // Временный параметр для обработки
-        }
         
         // Age range
         const ageMin = document.getElementById('ageMin')?.value;

@@ -117,10 +117,6 @@
                         <label>Name or Username</label>
                         <input type="text" placeholder="Search by name..." class="form-input" id="searchName">
                     </div>
-                    <div class="form-group">
-                        <label>Location</label>
-                        <input type="text" placeholder="City or region..." class="form-input" id="searchLocation">
-                    </div>
                 </div>
                 
                 <div class="form-row">
@@ -143,29 +139,6 @@
                     </div>
                 </div>
                 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Education</label>
-                        <select class="form-input" id="searchEducation">
-                            <option value="">Any</option>
-                            <option value="high_school">High School</option>
-                            <option value="bachelor">Bachelor's Degree</option>
-                            <option value="master">Master's Degree</option>
-                            <option value="phd">PhD/Doctorate</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Profession</label>
-                        <select class="form-input" id="searchProfession">
-                            <option value="">Any</option>
-                            <option value="technology">Technology</option>
-                            <option value="healthcare">Healthcare</option>
-                            <option value="education">Education</option>
-                            <option value="business">Business</option>
-                            <option value="creative">Creative Arts</option>
-                        </select>
-                    </div>
-                </div>
                 
                 <div class="search-actions">
                     <button class="app-btn app-btn-outline" id="clearFilters">Clear All</button>
@@ -263,12 +236,9 @@
         function performSearch() {
             const filters = {
                 name: document.getElementById('searchName').value,
-                location: document.getElementById('searchLocation').value,
                 ageMin: document.getElementById('ageMin').value,
                 ageMax: document.getElementById('ageMax').value,
-                gender: document.getElementById('searchGender').value,
-                education: document.getElementById('searchEducation').value,
-                profession: document.getElementById('searchProfession').value
+                gender: document.getElementById('searchGender').value
             };
             
             console.log('Searching with filters:', filters);
@@ -280,12 +250,9 @@
         
         function clearFilters() {
             document.getElementById('searchName').value = '';
-            document.getElementById('searchLocation').value = '';
             document.getElementById('ageMin').value = '18';
             document.getElementById('ageMax').value = '80';
             document.getElementById('searchGender').value = '';
-            document.getElementById('searchEducation').value = '';
-            document.getElementById('searchProfession').value = '';
             
             document.getElementById('searchGrid').innerHTML = '';
             document.getElementById('resultsCount').textContent = '0 results';
