@@ -6,6 +6,7 @@
     <title>Search - Lavrilo</title>
     <link rel="stylesheet" href="css/app-styles.css">
     <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/modern-search.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -102,66 +103,116 @@
 
     <!-- Основной контент -->
     <main class="app-main">
-        <div class="page-header fade-in-up">
-            <h1 class="page-title">Search People</h1>
-            <p class="page-subtitle">Find specific people using advanced filters</p>
+        <!-- Hero Section -->
+        <div class="search-hero">
+            <div class="hero-content">
+                <h1 class="hero-title">Find Your Perfect Match</h1>
+                <p class="hero-subtitle">Discover amazing people with our smart search filters</p>
+            </div>
+            <div class="hero-decoration">
+                <div class="floating-heart">💕</div>
+                <div class="floating-star">✨</div>
+                <div class="floating-heart">💖</div>
+            </div>
         </div>
 
-        <div class="search-container fade-in-up">
-            <!-- Search Filters -->
-            <div class="search-filters card">
-                <h3 class="mb-2">Search Filters</h3>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Name or Username</label>
-                        <input type="text" placeholder="Search by name..." class="form-input" id="searchName">
-                    </div>
+        <div class="search-container">
+            <!-- Modern Search Card -->
+            <div class="modern-search-card">
+                <div class="search-card-header">
+                    <div class="search-icon">🔍</div>
+                    <h2>Search Filters</h2>
+                    <p>Find exactly who you're looking for</p>
                 </div>
                 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Age Range</label>
-                        <div class="age-range">
-                            <input type="number" min="18" max="80" value="18" class="form-input" id="ageMin" placeholder="Min">
-                            <span>to</span>
-                            <input type="number" min="18" max="80" value="80" class="form-input" id="ageMax" placeholder="Max">
+                <div class="search-form">
+                    <!-- Name Search -->
+                    <div class="search-field full-width">
+                        <label class="field-label">
+                            <span class="label-icon">👤</span>
+                            Name or Username
+                        </label>
+                        <div class="input-wrapper">
+                            <input type="text" placeholder="Search by name..." class="modern-input" id="searchName">
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label>Gender</label>
-                        <select class="form-input" id="searchGender">
-                            <option value="">Any</option>
-                            <option value="male">Men</option>
-                            <option value="female">Women</option>
-                            <option value="couple">Couples</option>
-                        </select>
+                    
+                    <!-- Age and Gender Row -->
+                    <div class="search-row">
+                        <div class="search-field">
+                            <label class="field-label">
+                                <span class="label-icon">🎂</span>
+                                Age Range
+                            </label>
+                            <div class="age-range-modern">
+                                <div class="age-input-group">
+                                    <input type="number" min="18" max="80" value="18" class="modern-input age-input" id="ageMin" placeholder="18">
+                                    <span class="age-separator">to</span>
+                                    <input type="number" min="18" max="80" value="80" class="modern-input age-input" id="ageMax" placeholder="80">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="search-field">
+                            <label class="field-label">
+                                <span class="label-icon">⚧️</span>
+                                Gender
+                            </label>
+                            <div class="select-wrapper">
+                                <select class="modern-select" id="searchGender">
+                                    <option value="">Any Gender</option>
+                                    <option value="male">Men</option>
+                                    <option value="female">Women</option>
+                                    <option value="couple">Couples</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                
-                
-                <div class="search-actions">
-                    <button class="app-btn app-btn-outline" id="clearFilters">Clear All</button>
-                    <button class="app-btn app-btn-primary" id="searchBtn">Search</button>
+                    
+                    <!-- Action Buttons -->
+                    <div class="search-actions-modern">
+                        <button class="btn-clear" id="clearFilters">
+                            <span class="btn-icon">🗑️</span>
+                            Clear All
+                        </button>
+                        <button class="btn-search" id="searchBtn">
+                            <span class="btn-icon">🔍</span>
+                            Search People
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <!-- Search Results -->
             <div class="search-results" id="searchResults">
                 <div class="search-results-header">
-                    <h3>Search Results</h3>
-                    <span class="results-count" id="resultsCount">0 results</span>
+                    <div class="results-header-content">
+                        <h3>✨ Search Results</h3>
+                        <span class="results-count" id="resultsCount">0 results</span>
+                    </div>
                 </div>
                 
-                <div class="search-grid" id="searchGrid">
+                <div class="search-grid modern-grid" id="searchGrid">
                     <!-- Search results will be loaded here -->
                 </div>
                 
-                <div class="no-results" id="noResults" style="display: none;">
-                    <div class="no-results-icon">🔍</div>
-                    <h3>No results found</h3>
-                    <p>Try adjusting your search criteria or browse all profiles.</p>
-                    <a href="discover.html" class="app-btn app-btn-primary">Browse All Profiles</a>
+                <div class="no-results modern-no-results" id="noResults" style="display: none;">
+                    <div class="no-results-animation">
+                        <div class="search-animation">🔍</div>
+                        <div class="hearts-animation">💕✨💖</div>
+                    </div>
+                    <h3>No matches found yet</h3>
+                    <p>Don't worry! Try adjusting your search criteria or discover new people.</p>
+                    <div class="no-results-actions">
+                        <button class="btn-clear" onclick="clearFilters()">
+                            <span class="btn-icon">🔄</span>
+                            Clear Filters
+                        </button>
+                        <a href="discover.html" class="btn-search">
+                            <span class="btn-icon">🌟</span>
+                            Discover People
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
