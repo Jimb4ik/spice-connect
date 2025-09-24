@@ -53,4 +53,51 @@
   font-size: 42px;
 }
 
+/* Friend Button Styles */
+.match-action-btn.friend-btn {
+  background: #10b981;
+  color: white;
+  border: 1px solid #10b981;
+  transition: all 0.3s ease;
+}
+
+.match-action-btn.friend-btn:hover:not(:disabled) {
+  background: #059669;
+  border-color: #059669;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.match-action-btn.friend-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.match-action-btn.friend-added {
+  background: #6b7280;
+  color: white;
+  border-color: #6b7280;
+  cursor: not-allowed;
+}
+
+.match-action-btn.friend-added:hover {
+  background: #6b7280;
+  border-color: #6b7280;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Responsive adjustments for friend button */
+@media (max-width: 768px) {
+  .match-card-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .match-action-btn.friend-btn {
+    font-size: 14px;
+    padding: 8px 12px;
+  }
+}
+
 

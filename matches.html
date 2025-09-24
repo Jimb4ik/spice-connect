@@ -574,6 +574,9 @@
                         <button class="match-action-btn secondary" onclick="viewUserProfile('${match.matched_user_id}', '${name}')">
                             View Profile
                         </button>
+                        <button class="match-action-btn friend-btn" onclick="addToFriends('${match.matched_user_id}', '${name}', this)" data-user-id="${match.matched_user_id}">
+                            👥 Add Friend
+                        </button>
                         <button class="match-action-btn primary" onclick="startChatWithContact('${match.matched_user_id}', '${name}')">
                             Message
                         </button>
@@ -995,6 +998,173 @@
             } catch (error) {
                 console.error('[MATCHES] Error marking match as read:', error);
             }
+        }
+
+        // Функция для добавления в друзья
+        async function addToFriends(userId, userName, buttonElement) {
+            console.log('[MATCHES] Adding to friends:', userId, userName);
+            
+            try {
+                // Обновляем UI кнопки сразу для лучшего UX
+                buttonElement.innerHTML = '⏳ Adding...';
+                buttonElement.disabled = true;
+                
+                const sessionId = window.authManager?.sessionId;
+                if (!sessionId) {
+                    console.error('[FRIENDS] No session ID available');
+                    buttonElement.innerHTML = '❌ Error';
+                    setTimeout(() => {
+                        buttonElement.innerHTML = '👥 Add Friend';
+                        buttonElement.disabled = false;
+                    }, 2000);
+                    return;
+                }
+
+                // Получаем API ключ
+                const apiConfigResponse = await fetch('/api/get-api-key');
+                const apiConfig = await apiConfigResponse.json();
+                
+                if (!apiConfig.apiKey) {
+                    console.error('[FRIENDS] No API key available');
+                    buttonElement.innerHTML = '❌ Error';
+                    setTimeout(() => {
+                        buttonElement.innerHTML = '👥 Add Friend';
+                        buttonElement.disabled = false;
+                    }, 2000);
+                    return;
+                }
+                
+                const params = new URLSearchParams({
+                    api_key: apiConfig.apiKey,
+                    session_id: sessionId,
+                    action: 'add',
+                    target_id: userId
+                });
+                
+                console.log('[FRIENDS] Sending friend request with params:', params.toString());
+                
+                const response = await fetch(`/api/spice-multi-test?endpoint=/ajax_api/setFriend&method=GET&${params}`);
+                const result = await response.json();
+                
+                console.log('[FRIENDS] API Response:', result);
+                
+                if (result.success && result.data && result.data.result === 1) {
+                    // Успешно добавлен в друзья
+                    buttonElement.innerHTML = '✅ Friend Added';
+                    buttonElement.classList.add('friend-added');
+                    buttonElement.disabled = true;
+                    
+                    // Показываем уведомление
+                    showNotification(`${userName} has been added to your friends!`, 'success');
+                    
+                    console.log('[FRIENDS] ✅ Successfully added to friends:', userName);
+                } else {
+                    // Ошибка API
+                    console.error('[FRIENDS] API returned error:', result);
+                    buttonElement.innerHTML = '❌ Failed';
+                    setTimeout(() => {
+                        buttonElement.innerHTML = '👥 Add Friend';
+                        buttonElement.disabled = false;
+                    }, 3000);
+                    
+                    showNotification('Failed to add friend. Please try again.', 'error');
+                }
+                
+            } catch (error) {
+                console.error('[FRIENDS] Error adding friend:', error);
+                buttonElement.innerHTML = '❌ Error';
+                setTimeout(() => {
+                    buttonElement.innerHTML = '👥 Add Friend';
+                    buttonElement.disabled = false;
+                }, 3000);
+                
+                showNotification('Network error. Please try again.', 'error');
+            }
+        }
+
+        // Функция для показа уведомлений
+        function showNotification(message, type = 'info') {
+            // Создаем элемент уведомления
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.innerHTML = `
+                <div class="notification-content">
+                    <span class="notification-message">${message}</span>
+                    <button class="notification-close" onclick="this.parentElement.parentElement.remove()">×</button>
+                </div>
+            `;
+            
+            // Добавляем стили если их еще нет
+            if (!document.getElementById('notification-styles')) {
+                const styles = document.createElement('style');
+                styles.id = 'notification-styles';
+                styles.textContent = `
+                    .notification {
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        z-index: 10000;
+                        max-width: 400px;
+                        padding: 15px;
+                        border-radius: 8px;
+                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                        animation: slideInRight 0.3s ease;
+                    }
+                    
+                    .notification-success {
+                        background: #10b981;
+                        color: white;
+                    }
+                    
+                    .notification-error {
+                        background: #ef4444;
+                        color: white;
+                    }
+                    
+                    .notification-info {
+                        background: #3b82f6;
+                        color: white;
+                    }
+                    
+                    .notification-content {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                    }
+                    
+                    .notification-close {
+                        background: none;
+                        border: none;
+                        color: inherit;
+                        font-size: 20px;
+                        cursor: pointer;
+                        padding: 0;
+                        margin-left: 10px;
+                    }
+                    
+                    @keyframes slideInRight {
+                        from {
+                            transform: translateX(100%);
+                            opacity: 0;
+                        }
+                        to {
+                            transform: translateX(0);
+                            opacity: 1;
+                        }
+                    }
+                `;
+                document.head.appendChild(styles);
+            }
+            
+            // Добавляем уведомление на страницу
+            document.body.appendChild(notification);
+            
+            // Автоматически удаляем через 5 секунд
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
         }
 
         // Функция для открытия страницы профиля пользователя

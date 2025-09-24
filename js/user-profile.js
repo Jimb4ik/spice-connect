@@ -58,6 +58,9 @@ function getOrientationText(sexe) {
     return orientationMap[sexe] || 'Unknown';
 }
 
+// Global variables
+let currentProfile = null;
+
 // Zodiac signs mapping
 const zodiacSigns = {
     'aries': { name: 'Aries', symbol: '♈', dates: '21 Mar - 19 Apr' },
@@ -157,6 +160,9 @@ async function displayUserProfile(profile) {
             showError();
             return;
         }
+        
+        // Store profile globally for photo voting
+        currentProfile = profile;
         
         // Hide main loading, show content
         document.getElementById('profileLoading').style.display = 'none';
@@ -908,9 +914,10 @@ async function displayPhotoGallery(profile) {
         return numA - numB;
     });
     
-    // Create photo gallery HTML
+    // Create photo gallery HTML with voting system
     const photosHTML = photos.map((photo, index) => {
         const photoUrl = getPhotoUrl(photo);
+        const photoNum = photo.num || (index + 1);
         const photoId = `photo-${index}`;
         
         if (!photoUrl) {
@@ -918,9 +925,20 @@ async function displayPhotoGallery(profile) {
         }
         
         return `
-            <div class="photo-item" onclick="openPhotoModal('${photoUrl}')" data-photo-url="${photoUrl}">
+            <div class="photo-item" data-photo-url="${photoUrl}" data-photo-num="${photoNum}">
                 <img src="${photoUrl}" alt="Profile Photo ${index + 1}" loading="lazy" 
+                     onclick="openPhotoModal('${photoUrl}')"
                      onerror="this.parentElement.style.display='none'">
+                
+                <!-- Photo Voting Widget -->
+                <div class="photo-voting-widget">
+                    <div class="voting-stars" data-photo-num="${photoNum}">
+                        ${generateStarRating(10, photoNum)}
+                    </div>
+                    <div class="voting-info">
+                        <span class="current-rating">Rate this photo (1-10)</span>
+                    </div>
+                </div>
             </div>
         `;
     }).filter(html => html !== '').join('');
@@ -1037,8 +1055,217 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
+/**
+ * Generate star rating HTML
+ */
+function generateStarRating(maxStars = 10, photoNum) {
+    let starsHTML = '';
+    for (let i = 1; i <= maxStars; i++) {
+        starsHTML += `<span class="star" data-rating="${i}" data-photo-num="${photoNum}" onclick="voteForPhoto(${i}, ${photoNum})">⭐</span>`;
+    }
+    return starsHTML;
+}
+
+/**
+ * Vote for a photo
+ */
+async function voteForPhoto(rating, photoNum) {
+    console.log('[PHOTO-VOTE] Voting for photo:', photoNum, 'with rating:', rating);
+    
+    try {
+        if (!currentProfile) {
+            console.error('[PHOTO-VOTE] No current profile available');
+            showVotingNotification('Error: Profile not loaded', 'error');
+            return;
+        }
+        
+        const sessionId = window.authManager?.sessionId;
+        if (!sessionId) {
+            console.error('[PHOTO-VOTE] No session ID available');
+            showVotingNotification('Please log in to vote', 'error');
+            return;
+        }
+
+        const ownerId = currentProfile.id || currentProfile.id_membre;
+        if (!ownerId) {
+            console.error('[PHOTO-VOTE] No owner ID found');
+            showVotingNotification('Error: Cannot identify photo owner', 'error');
+            return;
+        }
+
+        // Get API key
+        const apiConfigResponse = await fetch('/api/get-api-key');
+        const apiConfig = await apiConfigResponse.json();
+        
+        if (!apiConfig.apiKey) {
+            console.error('[PHOTO-VOTE] No API key available');
+            showVotingNotification('Configuration error', 'error');
+            return;
+        }
+        
+        const params = new URLSearchParams({
+            api_key: apiConfig.apiKey,
+            session_id: sessionId,
+            id: ownerId,
+            num: photoNum,
+            score: rating
+        });
+        
+        console.log('[PHOTO-VOTE] Sending vote with params:', params.toString());
+        
+        // Show loading state
+        updateVotingUI(photoNum, rating, 'loading');
+        
+        const response = await fetch(`/api/spice-multi-test?endpoint=/ajax_api/gal_vote&method=GET&${params}`);
+        const result = await response.json();
+        
+        console.log('[PHOTO-VOTE] API Response:', result);
+        
+        if (result.success && result.data) {
+            // Success - update UI
+            updateVotingUI(photoNum, rating, 'success');
+            showVotingNotification(`You rated this photo ${rating}/10!`, 'success');
+            console.log('[PHOTO-VOTE] ✅ Vote submitted successfully');
+        } else {
+            // Error from API
+            console.error('[PHOTO-VOTE] API returned error:', result);
+            updateVotingUI(photoNum, rating, 'error');
+            showVotingNotification('Failed to submit vote. Please try again.', 'error');
+        }
+        
+    } catch (error) {
+        console.error('[PHOTO-VOTE] Error voting for photo:', error);
+        updateVotingUI(photoNum, rating, 'error');
+        showVotingNotification('Network error. Please try again.', 'error');
+    }
+}
+
+/**
+ * Update voting UI based on state
+ */
+function updateVotingUI(photoNum, rating, state) {
+    const votingWidget = document.querySelector(`[data-photo-num="${photoNum}"] .photo-voting-widget`);
+    const stars = document.querySelectorAll(`[data-photo-num="${photoNum}"] .star`);
+    const ratingInfo = document.querySelector(`[data-photo-num="${photoNum}"] .current-rating`);
+    
+    if (!votingWidget || !ratingInfo) return;
+    
+    switch (state) {
+        case 'loading':
+            ratingInfo.textContent = 'Submitting vote...';
+            stars.forEach(star => star.style.pointerEvents = 'none');
+            break;
+            
+        case 'success':
+            ratingInfo.textContent = `You rated: ${rating}/10 ⭐`;
+            votingWidget.classList.add('voted');
+            // Highlight voted stars
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('voted');
+                }
+                star.style.pointerEvents = 'none'; // Disable further voting
+            });
+            break;
+            
+        case 'error':
+            ratingInfo.textContent = 'Rate this photo (1-10)';
+            stars.forEach(star => star.style.pointerEvents = 'auto');
+            break;
+    }
+}
+
+/**
+ * Show voting notification
+ */
+function showVotingNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `voting-notification voting-notification-${type}`;
+    notification.innerHTML = `
+        <div class="notification-content">
+            <span class="notification-message">${message}</span>
+            <button class="notification-close" onclick="this.parentElement.parentElement.remove()">×</button>
+        </div>
+    `;
+    
+    // Add styles if not already present
+    if (!document.getElementById('voting-notification-styles')) {
+        const styles = document.createElement('style');
+        styles.id = 'voting-notification-styles';
+        styles.textContent = `
+            .voting-notification {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 10000;
+                max-width: 350px;
+                padding: 12px 16px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                animation: slideInRight 0.3s ease;
+                font-size: 14px;
+            }
+            
+            .voting-notification-success {
+                background: #10b981;
+                color: white;
+            }
+            
+            .voting-notification-error {
+                background: #ef4444;
+                color: white;
+            }
+            
+            .voting-notification-info {
+                background: #3b82f6;
+                color: white;
+            }
+            
+            .voting-notification .notification-content {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+            
+            .voting-notification .notification-close {
+                background: none;
+                border: none;
+                color: inherit;
+                font-size: 18px;
+                cursor: pointer;
+                padding: 0;
+                margin-left: 10px;
+            }
+            
+            @keyframes slideInRight {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+        `;
+        document.head.appendChild(styles);
+    }
+    
+    // Add notification to page
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 4 seconds
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 4000);
+}
+
 // Make functions globally available
 window.initializeUserProfile = initializeUserProfile;
 window.openPhotoModal = openPhotoModal;
 window.closePhotoModal = closePhotoModal;
+window.voteForPhoto = voteForPhoto;
 
