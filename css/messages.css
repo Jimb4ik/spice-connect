@@ -115,6 +115,70 @@
   background: rgba(0, 0, 0, 0.05);
 }
 
+/* Chat Options Menu Styles */
+.chat-options-menu {
+  position: relative;
+  display: inline-block;
+}
+
+.chat-options-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  min-width: 200px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.chat-options-dropdown.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.chat-options-dropdown .dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  text-decoration: none;
+  color: #2d3748;
+  transition: all 0.3s ease;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.chat-options-dropdown .dropdown-item:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.chat-options-dropdown .dropdown-item.delete-option:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: #dc2626;
+}
+
+.dropdown-item-icon {
+  font-size: 1.1rem;
+  width: 20px;
+  text-align: center;
+}
+
+.dropdown-item-text {
+  font-weight: 500;
+}
+
 .dropdown-item.logout:hover {
   background: rgba(239, 68, 68, 0.1);
   color: #dc2626;

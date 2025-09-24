@@ -290,6 +290,12 @@ Object.assign(Dashboard.prototype, {
     const contact = this.contacts.find(c => (c.m_id || c.id || c.user_id) == userId);
     if (contact) {
       this.updateChatHeader(contact);
+      
+      // Set current user for chat options menu
+      const userName = contact.pseudo || contact.nom_complet || 'User';
+      if (window.setChatOptionsUser) {
+        window.setChatOptionsUser(userId, userName);
+      }
     }
 
     // Load chat messages

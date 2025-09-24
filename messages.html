@@ -150,7 +150,20 @@
                         </div>
                         
                         <div class="chat-actions">
-                            <button class="app-btn app-btn-outline btn-sm" id="chatOptionsBtn">⋮</button>
+                            <div class="chat-options-menu">
+                                <button class="app-btn app-btn-outline btn-sm" id="chatOptionsBtn">⋮</button>
+                                <div class="chat-options-dropdown" id="chatOptionsDropdown">
+                                    <button class="dropdown-item" id="viewProfileOption">
+                                        <span class="dropdown-item-icon">👤</span>
+                                        <span class="dropdown-item-text">View Profile</span>
+                                    </button>
+                                    <div class="dropdown-divider"></div>
+                                    <button class="dropdown-item delete-option" id="deleteContactOption">
+                                        <span class="dropdown-item-icon">🗑️</span>
+                                        <span class="dropdown-item-text">Delete Contact</span>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -473,6 +486,137 @@
                         window.authManager.logout();
                     }
                 });
+            }
+        });
+    </script>
+    <script>
+        // Chat options menu functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatOptionsBtn = document.getElementById('chatOptionsBtn');
+            const chatOptionsDropdown = document.getElementById('chatOptionsDropdown');
+            const viewProfileOption = document.getElementById('viewProfileOption');
+            const deleteContactOption = document.getElementById('deleteContactOption');
+            
+            let currentChatUserId = null;
+            let currentChatUserName = null;
+            
+            // Toggle dropdown menu
+            if (chatOptionsBtn) {
+                chatOptionsBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    chatOptionsDropdown.classList.toggle('show');
+                });
+            }
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.chat-options-menu')) {
+                    chatOptionsDropdown.classList.remove('show');
+                }
+            });
+            
+            // View Profile option
+            if (viewProfileOption) {
+                viewProfileOption.addEventListener('click', function() {
+                    if (currentChatUserId) {
+                        const userName = currentChatUserName || 'User';
+                        console.log('[MESSAGES] Opening profile for user:', currentChatUserId, userName);
+                        window.location.href = `user-profile.html?id=${currentChatUserId}&name=${encodeURIComponent(userName)}`;
+                    }
+                    chatOptionsDropdown.classList.remove('show');
+                });
+            }
+            
+            // Delete Contact option
+            if (deleteContactOption) {
+                deleteContactOption.addEventListener('click', function() {
+                    if (currentChatUserId && currentChatUserName) {
+                        showDeleteContactConfirmation(currentChatUserId, currentChatUserName);
+                    }
+                    chatOptionsDropdown.classList.remove('show');
+                });
+            }
+            
+            // Function to set current chat user (called when opening a chat)
+            window.setChatOptionsUser = function(userId, userName) {
+                currentChatUserId = userId;
+                currentChatUserName = userName;
+                console.log('[MESSAGES] Set chat options for user:', userId, userName);
+            };
+            
+            // Delete contact confirmation and API call
+            async function showDeleteContactConfirmation(userId, userName) {
+                const confirmed = confirm(`Are you sure you want to delete ${userName} from your contacts? This will also delete your conversation history.`);
+                
+                if (confirmed) {
+                    try {
+                        await deleteContact(userId);
+                        
+                        // Close chat and refresh contacts list
+                        const chatActive = document.getElementById('chatActive');
+                        const chatEmpty = document.getElementById('chatEmpty');
+                        
+                        if (chatActive) chatActive.style.display = 'none';
+                        if (chatEmpty) chatEmpty.style.display = 'flex';
+                        
+                        // Refresh contacts list
+                        if (window.dashboard && window.dashboard.loadContacts) {
+                            window.dashboard.loadContacts();
+                        }
+                        
+                        alert(`${userName} has been removed from your contacts.`);
+                        
+                    } catch (error) {
+                        console.error('[MESSAGES] Error deleting contact:', error);
+                        alert('Failed to delete contact. Please try again.');
+                    }
+                }
+            }
+            
+            // API call to delete contact using setContact endpoint
+            async function deleteContact(userId) {
+                try {
+                    const sessionId = window.authManager?.sessionId;
+                    if (!sessionId) {
+                        throw new Error('No session ID available');
+                    }
+                    
+                    // Get API key
+                    const apiConfigResponse = await fetch('/api/get-api-key');
+                    const apiConfig = await apiConfigResponse.json();
+                    
+                    if (!apiConfig.success || !apiConfig.apiKey) {
+                        throw new Error('Failed to get API key');
+                    }
+                    
+                    const baseUrl = apiConfig.baseUrl || 'https://dev2018.de5a7.com';
+                    const apiKey = apiConfig.apiKey;
+                    
+                    // Call setContact API to remove contact (this also deletes conversation)
+                    const url = `${baseUrl}/ajax_api/setContact?api_key=${apiKey}&session_id=${sessionId}&target_id=${userId}`;
+                    
+                    console.log('[MESSAGES] Deleting contact with URL:', url);
+                    
+                    const response = await fetch(url, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    const result = await response.json();
+                    console.log('[MESSAGES] Delete contact result:', result);
+                    
+                    if (result.result !== 1) {
+                        throw new Error(result.error || 'Failed to delete contact');
+                    }
+                    
+                    return result;
+                    
+                } catch (error) {
+                    console.error('[MESSAGES] Error in deleteContact:', error);
+                    throw error;
+                }
             }
         });
     </script>
