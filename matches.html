@@ -107,53 +107,7 @@
             <p class="page-subtitle">People who liked you back - start a conversation!</p>
         </div>
 
-        <!-- Фильтры матчей -->
-        <div class="matches-filters fade-in-up">
-            <div class="filter-tabs">
-                <button class="filter-tab active" data-filter="all">All Matches</button>
-                <button class="filter-tab" data-filter="new">New Matches</button>
-                <button class="filter-tab" data-filter="chatting">Chatting</button>
-                <button class="filter-tab" data-filter="recent">Recent Activity</button>
-                <button class="filter-tab" id="ageFilterBtn" data-filter="age">🎯 Age Filter</button>
-            </div>
-        </div>
 
-        <!-- Модальное окно фильтра возраста -->
-        <div id="ageFilterModal" class="modal" style="display: none;">
-            <div class="modal-content modal-small">
-                <div class="modal-header">
-                    <h3>🎯 Age Range Filter</h3>
-                    <button class="modal-close" id="closeAgeFilter">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <div class="age-filter-container">
-                        <div class="age-slider-container">
-                            <label for="matchesAgeMin">Minimum Age:</label>
-                            <div class="slider-wrapper">
-                                <input type="range" id="matchesAgeMin" min="18" max="80" value="18" class="age-slider">
-                                <span id="matchesAgeMinDisplay" class="age-display">18</span>
-                            </div>
-                        </div>
-                        
-                        <div class="age-slider-container">
-                            <label for="matchesAgeMax">Maximum Age:</label>
-                            <div class="slider-wrapper">
-                                <input type="range" id="matchesAgeMax" min="18" max="80" value="80" class="age-slider">
-                                <span id="matchesAgeMaxDisplay" class="age-display">80</span>
-                            </div>
-                        </div>
-                        
-                        <div class="age-summary">
-                            <strong>Selected Range: <span id="matchesAgeSummary">18 - 80 years</span></strong>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="app-btn app-btn-outline" id="cancelAgeFilter">Cancel</button>
-                    <button type="button" class="app-btn app-btn-primary" id="applyAgeFilter">Apply Filter</button>
-                </div>
-            </div>
-        </div>
 
         <!-- Контейнер для центрирования контента -->
         <div class="matches-content-container">
@@ -1229,64 +1183,6 @@
             loadMatchesStatistics(sessionId);
             loadMatches();
             
-            // Обработчики фильтров
-            document.querySelectorAll('.filter-tab').forEach(tab => {
-                tab.addEventListener('click', () => {
-                    // Для фильтра возраста не меняем активное состояние здесь
-                    if (tab.dataset.filter !== 'age') {
-                        document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-                        tab.classList.add('active');
-                        
-                        // Сбрасываем фильтр возраста при выборе другого фильтра
-                        if (currentAgeFilter.active) {
-                            resetAgeFilter();
-                        }
-                    }
-                    
-                    const filter = tab.dataset.filter;
-                    filterMatches(filter);
-                });
-            });
-
-            // Обработчики для модального окна фильтра возраста
-            const ageMinSlider = document.getElementById('matchesAgeMin');
-            const ageMaxSlider = document.getElementById('matchesAgeMax');
-            const closeAgeFilter = document.getElementById('closeAgeFilter');
-            const cancelAgeFilter = document.getElementById('cancelAgeFilter');
-            const applyAgeFilter = document.getElementById('applyAgeFilter');
-
-            if (ageMinSlider) {
-                ageMinSlider.addEventListener('input', updateAgeFilterDisplay);
-            }
-            if (ageMaxSlider) {
-                ageMaxSlider.addEventListener('input', updateAgeFilterDisplay);
-            }
-
-            if (closeAgeFilter) {
-                closeAgeFilter.addEventListener('click', () => {
-                    document.getElementById('ageFilterModal').style.display = 'none';
-                });
-            }
-
-            if (cancelAgeFilter) {
-                cancelAgeFilter.addEventListener('click', () => {
-                    document.getElementById('ageFilterModal').style.display = 'none';
-                });
-            }
-
-            if (applyAgeFilter) {
-                applyAgeFilter.addEventListener('click', async () => {
-                    document.getElementById('ageFilterModal').style.display = 'none';
-                    await applyAgeFilterToMatches();
-                });
-            }
-
-            // Закрытие модального окна по клику вне его
-            document.getElementById('ageFilterModal').addEventListener('click', (e) => {
-                if (e.target.id === 'ageFilterModal') {
-                    document.getElementById('ageFilterModal').style.display = 'none';
-                }
-            });
             
             // Обработчик для кнопки "View Full Profile" в модальном окне
             const viewFullProfileBtn = document.getElementById('viewFullProfileBtn');
