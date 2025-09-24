@@ -140,8 +140,8 @@ class MainDashboard {
                 type: this.getActivityType(activity.action)
             }));
             
-            // Загружаем фотографии для каждого пользователя из wall активностей
-            await this.loadPhotosForWallActivities(allActivities);
+            // Фотографии отключены для избежания проблем с одинаковыми изображениями
+            // await this.loadPhotosForWallActivities(allActivities);
         }
             
             // Добавляем данные из Activities API
@@ -256,22 +256,29 @@ class MainDashboard {
         const userIds = [...new Set(activities.map(activity => activity.id).filter(id => id))];
         const photoCache = {};
         
-        // Загружаем фотографии пользователей параллельно (максимум 5 одновременно)
-        const batchSize = 5;
+        // Загружаем фотографии пользователей параллельно (максимум 3 одновременно для стабильности)
+        const batchSize = 3;
         for (let i = 0; i < userIds.length; i += batchSize) {
             const batch = userIds.slice(i, i + batchSize);
             const promises = batch.map(async (userId) => {
                 try {
-                    const response = await fetch(`/api/spice-multi-test?endpoint=/index_api/search&method=POST&session_id=${this.sessionId}&user_id=${userId}`);
+                    // Используем /index_api/user API с get_picture_430=1 для получения качественных фотографий
+                    const response = await fetch(`/api/spice-multi-test?endpoint=/index_api/user&method=POST&session_id=${this.sessionId}&id=${userId}&get_picture_430=1`);
                     const data = await response.json();
                     
-                    if (data.success && data.data?.result && data.data.result.length > 0) {
-                        const user = data.data.result[0];
+                    console.log(`[MAIN] Photo API response for user ${userId}:`, data);
+                    
+                    if (data.success && data.data?.result) {
+                        const user = data.data.result;
                         const photoUrl = this.getPhotoUrl(user);
                         if (photoUrl) {
                             photoCache[userId] = photoUrl;
-                            console.log(`[MAIN] Loaded photo for user ${userId}:`, photoUrl);
+                            console.log(`[MAIN] ✅ Loaded photo for user ${userId}:`, photoUrl);
+                        } else {
+                            console.log(`[MAIN] ❌ No photo found for user ${userId}`);
                         }
+                    } else {
+                        console.log(`[MAIN] ❌ API failed for user ${userId}:`, data);
                     }
                 } catch (error) {
                     console.warn(`[MAIN] Failed to load photo for user ${userId}:`, error);
@@ -342,33 +349,32 @@ class MainDashboard {
     createEnhancedActivityItem(activity) {
         const timeAgo = this.formatTimeAgo(activity.date_action);
         
-        // Улучшенная логика получения фотографии
-        let photoUrl = null;
-        
-        // Приоритет: загруженная фотография из API > другие источники
-        if (activity.photoUrl) {
-            photoUrl = activity.photoUrl;
-        } else if (activity.matched_user_photos) {
-            // Для матчей используем matched_user_photos
-            photoUrl = this.getPhotoUrl(activity.matched_user_photos);
-        } else if (activity.all_photos) {
-            photoUrl = this.getPhotoUrl(activity.all_photos);
-        } else if (activity.tab_photo) {
-            photoUrl = this.getPhotoUrl(activity.tab_photo);
-        } else if (activity.photos) {
-            photoUrl = this.getPhotoUrl(activity.photos);
-        }
+        // Фотографии отключены - используем только буквенные аватары
+        // let photoUrl = null;
         
         const activityClass = `activity-item ${activity.type}-activity`;
         
         let content = '';
         let avatarContent = '';
         
-        // Создаем аватар с улучшенной обработкой ошибок
-        if (photoUrl) {
-            avatarContent = `<img src="${photoUrl}" alt="${activity.pseudo || 'User'}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">`;
-        }
-        avatarContent += `<div class="avatar-fallback" style="${photoUrl ? 'display: none;' : ''}">${(activity.pseudo || activity.pseudo1 || 'U').charAt(0).toUpperCase()}</div>`;
+        // Создаем аватар - используем только буквенные аватары для надежности
+        // Это решает проблему с одинаковыми фотографиями у разных пользователей
+        const firstLetter = (activity.pseudo || activity.pseudo1 || 'U').charAt(0).toUpperCase();
+        const avatarColors = [
+            'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+            'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+            'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+            'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+            'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+            'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
+            'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)'
+        ];
+        // Выбираем цвет на основе первой буквы имени для консистентности
+        const colorIndex = firstLetter.charCodeAt(0) % avatarColors.length;
+        const avatarColor = avatarColors[colorIndex];
+        
+        avatarContent = `<div class="avatar-fallback" style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: ${avatarColor}; color: white; font-weight: bold; font-size: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">${firstLetter}</div>`;
         
         // Создаем контент в зависимости от типа активности
         switch (activity.type) {
@@ -871,41 +877,44 @@ class MainDashboard {
     getPhotoUrl(user) {
         let photoUrl = null;
         
+        console.log('[MAIN] Getting photo URL for user:', user);
+        
         // Try various photo field formats from different API endpoints
+        // Приоритет: photos_v2 (высокое качество) > photos > другие поля
         if (user.photos_v2) {
-            if (user.photos_v2.public) {
+            console.log('[MAIN] Found photos_v2:', user.photos_v2);
+            
+            if (user.photos_v2.public && typeof user.photos_v2.public === 'object') {
                 const publicPhotos = user.photos_v2.public;
                 const firstPhotoKey = Object.keys(publicPhotos)[0];
                 if (firstPhotoKey && publicPhotos[firstPhotoKey]) {
-                    photoUrl = publicPhotos[firstPhotoKey].sq_430 || 
-                              publicPhotos[firstPhotoKey].normal || 
-                              publicPhotos[firstPhotoKey].sq_middle;
+                    const photo = publicPhotos[firstPhotoKey];
+                    photoUrl = photo.sq_430 || photo.normal || photo.sq_middle || photo.url_big;
+                    console.log('[MAIN] Using photos_v2.public photo:', photoUrl);
                 }
             } else if (Array.isArray(user.photos_v2) && user.photos_v2.length > 0) {
-                const mainPhoto = user.photos_v2.find(p => p.num === 0) || user.photos_v2[0];
-                photoUrl = mainPhoto.sq_430 || mainPhoto.sq_middle || mainPhoto.normal;
+                // Ищем главную фотографию (num === 0) или берем первую
+                const mainPhoto = user.photos_v2.find(p => p.num === 0 || p.is_main === 1) || user.photos_v2[0];
+                photoUrl = mainPhoto.sq_430 || mainPhoto.normal || mainPhoto.sq_middle || mainPhoto.url_big;
+                console.log('[MAIN] Using photos_v2 array photo:', photoUrl);
             }
-        } else if (user.photos && user.photos.length > 0) {
+        } 
+        
+        // Fallback к обычным photos
+        if (!photoUrl && user.photos && Array.isArray(user.photos) && user.photos.length > 0) {
             const firstPhoto = user.photos[0];
-            photoUrl = firstPhoto.url_big || firstPhoto.url_middle || firstPhoto.normal || firstPhoto.sq_430 || firstPhoto.sq_middle;
-        } else if (user.picture_430) {
-            photoUrl = user.picture_430;
-        } else if (user.picture) {
-            photoUrl = user.picture;
-        } else if (user.photo_profil_url) {
-            photoUrl = user.photo_profil_url;
-        } else if (user.photo_profil) {
-            photoUrl = user.photo_profil;
-        } else if (user.photo) {
-            photoUrl = user.photo;
-        } else if (user.avatar) {
-            photoUrl = user.avatar;
-        } else if (user.pic) {
-            photoUrl = user.pic;
-        } else if (user.image) {
-            photoUrl = user.image;
-        } else if (user.main_photo) {
-            photoUrl = user.main_photo;
+            photoUrl = firstPhoto.url_big || firstPhoto.normal || firstPhoto.sq_430 || firstPhoto.sq_middle || firstPhoto.url_middle;
+            console.log('[MAIN] Using photos array photo:', photoUrl);
+        }
+        
+        // Fallback к другим полям фотографий
+        if (!photoUrl) {
+            photoUrl = user.picture_430 || user.picture || user.photo_profil_url || 
+                      user.photo_profil || user.photo || user.avatar || user.pic || 
+                      user.image || user.main_photo;
+            if (photoUrl) {
+                console.log('[MAIN] Using fallback photo field:', photoUrl);
+            }
         }
         
         // Fix URL if relative
@@ -913,10 +922,11 @@ class MainDashboard {
             if (photoUrl.startsWith('/')) {
                 photoUrl = 'https://dev2018.de5a7.com' + photoUrl;
             } else {
-            photoUrl = 'https://dev2018.de5a7.com/' + photoUrl;
+                photoUrl = 'https://dev2018.de5a7.com/' + photoUrl;
             }
         }
         
+        console.log('[MAIN] Final photo URL:', photoUrl);
         return photoUrl;
     }
 

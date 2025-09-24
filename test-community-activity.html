@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Community Activity</title>
+    <link rel="stylesheet" href="css/dashboard.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .test-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .test-title {
+            text-align: center;
+            color: #333;
+            margin-bottom: 24px;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        
+        .activity-feed {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .activity-text {
+            flex: 1;
+        }
+        
+        .activity-text strong {
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .activity-time {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+        
+        .activity-location {
+            font-size: 12px;
+            color: #888;
+            margin-top: 2px;
+        }
+        
+        .birthday-activity {
+            border-left-color: #ff6b6b;
+        }
+        
+        .visit-activity {
+            border-left-color: #4ecdc4;
+        }
+        
+        .connection-activity {
+            border-left-color: #45b7d1;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="test-title">🎉 Community Activity Test</h1>
+        <div class="activity-feed" id="testActivityFeed">
+            <!-- Активности будут добавлены через JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        // Тестовые данные активности
+        const testActivities = [
+            {
+                id: '12345',
+                pseudo: 'myryam14',
+                action: 'ann',
+                date_action: new Date(Date.now() - 3600000).toISOString(), // 1 час назад
+                zone_name: 'Gijon'
+            },
+            {
+                id: '67890',
+                pseudo: 'laducef',
+                action: 'ann',
+                date_action: new Date(Date.now() - 7200000).toISOString(), // 2 часа назад
+                zone_name: 'Huelva'
+            },
+            {
+                id: '11111',
+                pseudo: 'liloue95',
+                action: 'vis',
+                date_action: new Date(Date.now() - 1800000).toISOString(), // 30 минут назад
+                zone_name: 'Valence'
+            },
+            {
+                id: '22222',
+                pseudo: 'alice2',
+                action: 'con',
+                date_action: new Date(Date.now() - 900000).toISOString(), // 15 минут назад
+                zone_name: 'Paris'
+            }
+        ];
+
+        // Упрощенная версия функций из main.js для тестирования
+        class TestDashboard {
+            getActivityType(action) {
+                switch (action) {
+                    case 'ann': return 'birthday';
+                    case 'vis': return 'visit';
+                    case 'con': return 'connection';
+                    default: return 'general';
+                }
+            }
+
+            formatTimeAgo(dateString) {
+                const now = new Date();
+                const date = new Date(dateString);
+                const diffMs = now - date;
+                const diffMins = Math.floor(diffMs / 60000);
+                const diffHours = Math.floor(diffMs / 3600000);
+
+                if (diffMins < 60) {
+                    return `${diffMins}m ago`;
+                } else if (diffHours < 24) {
+                    return `${diffHours}h ago`;
+                } else {
+                    return `${Math.floor(diffHours / 24)}d ago`;
+                }
+            }
+
+            createEnhancedActivityItem(activity) {
+                const timeAgo = this.formatTimeAgo(activity.date_action);
+                
+                // Создаем аватар - используем только буквенные аватары для надежности
+                const firstLetter = (activity.pseudo || 'U').charAt(0).toUpperCase();
+                const avatarColors = [
+                    'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                    'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+                    'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+                    'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+                    'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+                    'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
+                    'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)'
+                ];
+                
+                const colorIndex = firstLetter.charCodeAt(0) % avatarColors.length;
+                const avatarColor = avatarColors[colorIndex];
+                
+                const avatarContent = `<div class="avatar-fallback" style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: ${avatarColor}; color: white; font-weight: bold; font-size: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">${firstLetter}</div>`;
+                
+                const activityClass = `activity-item ${this.getActivityType(activity.action)}-activity`;
+                
+                let content = '';
+                
+                switch (this.getActivityType(activity.action)) {
+                    case 'birthday':
+                        content = `
+                            <div class="activity-text">
+                                <strong>${activity.pseudo}</strong> is celebrating their birthday today!
+                            </div>
+                            <div class="activity-time">${timeAgo}</div>
+                            ${activity.zone_name ? `<div class="activity-location">${activity.zone_name}</div>` : ''}
+                        `;
+                        break;
+                        
+                    case 'visit':
+                        content = `
+                            <div class="activity-text">
+                                <strong>${activity.pseudo}</strong> visited your profile
+                            </div>
+                            <div class="activity-time">${timeAgo}</div>
+                            ${activity.zone_name ? `<div class="activity-location">${activity.zone_name}</div>` : ''}
+                        `;
+                        break;
+                        
+                    case 'connection':
+                        content = `
+                            <div class="activity-text">
+                                <strong>${activity.pseudo}</strong> came online
+                            </div>
+                            <div class="activity-time">${timeAgo}</div>
+                            ${activity.zone_name ? `<div class="activity-location">${activity.zone_name}</div>` : ''}
+                        `;
+                        break;
+                }
+                
+                return `
+                    <div class="${activityClass}">
+                        ${avatarContent}
+                        <div style="flex: 1;">
+                            ${content}
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Инициализация теста
+        document.addEventListener('DOMContentLoaded', function() {
+            const dashboard = new TestDashboard();
+            const feedContainer = document.getElementById('testActivityFeed');
+            
+            // Создаем элементы активности
+            const activityHTML = testActivities.map(activity => 
+                dashboard.createEnhancedActivityItem(activity)
+            ).join('');
+            
+            feedContainer.innerHTML = activityHTML;
+            
+            console.log('✅ Community Activity test loaded with unique letter avatars');
+        });
+    </script>
+</body>
+</html>
