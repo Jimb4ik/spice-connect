@@ -571,9 +571,19 @@
                 
                 // Проверяем есть ли профили в буфере
                 if (profilesBuffer.length === 0 || currentProfileIndex >= profilesBuffer.length) {
-                    console.log(`[DISCOVER] Loading profiles from page ${currentPage}`);
+                    console.log(`[DISCOVER] Loading profiles from page ${currentPage} with age filter: ${ageSettings.min}-${ageSettings.max}`);
                     
-                    const apiUrl = `/api/spice-multi-test?endpoint=/index_api/search&method=POST&session_id=${sessionId}&page=${currentPage}&pas=30&searchAgeMin=${ageSettings.min}&searchAgeMax=${ageSettings.max}&searchSexe=all`;
+                    // Получаем API ключ
+                    const apiConfigResponse = await fetch('/api/get-api-key');
+                    const apiConfig = await apiConfigResponse.json();
+                    
+                    if (!apiConfig.apiKey) {
+                        console.error('[DISCOVER] No API key available');
+                        showNoProfilesState();
+                        return;
+                    }
+                    
+                    const apiUrl = `/api/spice-multi-test?endpoint=/index_api/search&method=POST&api_key=${apiConfig.apiKey}&session_id=${sessionId}&page=${currentPage}&pas=30&age_from=${ageSettings.min}&age_to=${ageSettings.max}`;
                     
                     const response = await fetch(apiUrl);
                     const data = await response.json();
@@ -1717,18 +1727,13 @@
         // Основная функция применения фильтра возраста
         async function applyAgeFilter() {
             try {
-                console.log('[AGE FILTER] Applying age filter:', window.currentAgeMin, '-', window.currentAgeMax);
-                
-                // Обновляем глобальные настройки
-                if (window.ageSettings) {
-                    window.ageSettings.min = window.currentAgeMin || 18;
-                    window.ageSettings.max = window.currentAgeMax || 80;
-                }
+                console.log('[AGE FILTER] Applying age filter:', ageSettings.min, '-', ageSettings.max);
                 
                 // Сбрасываем текущие профили и загружаем новые с учетом фильтра
                 currentProfileIndex = 0;
                 profilesBuffer = [];
                 currentPage = 0;
+                userProgress = null; // Сбрасываем прогресс для загрузки с новыми фильтрами
                 
                 // Загружаем новые профили
                 await loadNextProfile();
@@ -1751,24 +1756,44 @@
             if (!window.ageSettings) {
                 window.ageSettings = { min: 18, max: 80 };
             }
-            window.ageSettings.min = minVal;
-            window.ageSettings.max = maxVal;
+            ageSettings.min = minVal;
+            ageSettings.max = maxVal;
             
             // Сохраняем в localStorage
             try {
-                localStorage.setItem('lavrilo_age_settings', JSON.stringify(window.ageSettings));
+                localStorage.setItem('lavrilo_age_settings', JSON.stringify(ageSettings));
             } catch (error) {
                 console.warn('[AGE FILTER] Error saving settings:', error);
             }
             
             console.log('Age filter applied from modal:', minVal, '-', maxVal);
-            console.log('Updated ageSettings:', window.ageSettings);
+            console.log('Updated ageSettings:', ageSettings);
+            
+            // Обновляем визуальную индикацию кнопки фильтра
+            updateAgeFilterButtonState(minVal, maxVal);
             
             // Применяем фильтр
             applyAgeFilter();
             
             // Закрываем модал
             closeAgeModal();
+        }
+
+        // Функция для обновления состояния кнопки фильтра
+        function updateAgeFilterButtonState(minAge, maxAge) {
+            const ageFilterBtn = document.getElementById('ageFilterBtn');
+            if (ageFilterBtn) {
+                // Проверяем, активен ли фильтр (отличается от дефолтных значений)
+                const isFilterActive = minAge !== 18 || maxAge !== 80;
+                
+                if (isFilterActive) {
+                    ageFilterBtn.classList.add('filter-active');
+                    ageFilterBtn.title = `Age Filter: ${minAge}-${maxAge} years`;
+                } else {
+                    ageFilterBtn.classList.remove('filter-active');
+                    ageFilterBtn.title = 'Age Filter';
+                }
+            }
         }
     </script>
     <script>

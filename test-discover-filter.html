@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Discover Age Filter - Lavrilo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .test-container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+        }
+        
+        .test-section h3 {
+            color: #ff6b9d;
+            margin-top: 0;
+        }
+        
+        .test-button {
+            background: linear-gradient(135deg, #ff6b9d, #ff8a9b);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .test-button:hover {
+            background: linear-gradient(135deg, #ff5a8a, #ff7b8c);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 107, 157, 0.3);
+        }
+        
+        .test-results {
+            background: #f9fafb;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .status {
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+            font-weight: 500;
+        }
+        
+        .status.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        
+        .status.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #ff6b9d;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <a href="discover.html" class="back-link">← Back to Discover</a>
+        
+        <h1>🧪 Discover Age Filter Test</h1>
+        <p>Testing the age filter functionality on the discover page.</p>
+        
+        <div class="test-section">
+            <h3>1. API Connection Test</h3>
+            <p>Test API key and basic connection.</p>
+            <button class="test-button" onclick="testAPIConnection()">Test API Connection</button>
+            <div id="apiResult" class="test-results" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>2. Search API with Age Filter</h3>
+            <p>Test the search API with correct age_from and age_to parameters.</p>
+            <label>Min Age: <input type="number" id="testMinAge" value="25" min="18" max="80"></label>
+            <label>Max Age: <input type="number" id="testMaxAge" value="35" min="18" max="80"></label>
+            <br><br>
+            <button class="test-button" onclick="testSearchWithAgeFilter()">Test Search API</button>
+            <div id="searchResult" class="test-results" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>3. Compare Old vs New Parameters</h3>
+            <p>Compare the old (broken) vs new (fixed) API parameters.</p>
+            <button class="test-button" onclick="compareParameters()">Compare Parameters</button>
+            <div id="compareResult" class="test-results" style="display: none;"></div>
+        </div>
+        
+        <div class="status success">
+            <strong>Fixed Issues:</strong><br>
+            ✅ Changed searchAgeMin → age_from<br>
+            ✅ Changed searchAgeMax → age_to<br>
+            ✅ Added proper API key handling<br>
+            ✅ Added visual filter state indication
+        </div>
+    </div>
+
+    <script>
+        // Mock auth manager
+        window.authManager = {
+            sessionId: localStorage.getItem('lavrilo_session') || 'test_session'
+        };
+
+        function log(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            const timestamp = new Date().toLocaleTimeString();
+            element.textContent += `[${timestamp}] ${message}\n`;
+            element.scrollTop = element.scrollHeight;
+            console.log(`[TEST] ${message}`);
+        }
+
+        function clearLog(elementId) {
+            const element = document.getElementById(elementId);
+            element.textContent = '';
+            element.style.display = 'none';
+        }
+
+        async function testAPIConnection() {
+            clearLog('apiResult');
+            log('apiResult', 'Testing API connection...');
+            
+            try {
+                const response = await fetch('/api/get-api-key');
+                const config = await response.json();
+                
+                if (config.apiKey) {
+                    log('apiResult', `✅ API Key: ${config.apiKey.substring(0, 10)}...`);
+                    log('apiResult', `✅ Base URL: ${config.baseUrl}`);
+                } else {
+                    log('apiResult', '❌ No API key found');
+                }
+            } catch (error) {
+                log('apiResult', `❌ Error: ${error.message}`);
+            }
+        }
+
+        async function testSearchWithAgeFilter() {
+            clearLog('searchResult');
+            const minAge = document.getElementById('testMinAge').value;
+            const maxAge = document.getElementById('testMaxAge').value;
+            
+            log('searchResult', `Testing search with age filter: ${minAge}-${maxAge}`);
+            
+            try {
+                // Get API config
+                const apiConfigResponse = await fetch('/api/get-api-key');
+                const apiConfig = await apiConfigResponse.json();
+                
+                if (!apiConfig.apiKey) {
+                    log('searchResult', '❌ No API key available');
+                    return;
+                }
+                
+                // Test with CORRECT parameters (age_from, age_to)
+                const correctUrl = `/api/spice-multi-test?endpoint=/index_api/search&method=POST&api_key=${apiConfig.apiKey}&session_id=${window.authManager.sessionId}&page=0&pas=10&age_from=${minAge}&age_to=${maxAge}`;
+                
+                log('searchResult', 'Testing with CORRECT parameters:');
+                log('searchResult', `URL: ${correctUrl}`);
+                
+                const response = await fetch(correctUrl);
+                const result = await response.json();
+                
+                log('searchResult', `Response status: ${response.status}`);
+                log('searchResult', `Response: ${JSON.stringify(result, null, 2)}`);
+                
+                if (result.success && result.data) {
+                    let profiles = [];
+                    
+                    if (result.data.result && Array.isArray(result.data.result)) {
+                        profiles = result.data.result;
+                    } else if (result.data.membres && Array.isArray(result.data.membres)) {
+                        profiles = result.data.membres;
+                    }
+                    
+                    log('searchResult', `✅ Found ${profiles.length} profiles with age filter`);
+                    
+                    if (profiles.length > 0) {
+                        const sample = profiles[0];
+                        log('searchResult', `Sample profile: ${sample.pseudo || sample.nom_complet}, age: ${sample.age}`);
+                    }
+                } else {
+                    log('searchResult', '❌ Search failed or no results');
+                }
+                
+            } catch (error) {
+                log('searchResult', `❌ Error: ${error.message}`);
+            }
+        }
+
+        async function compareParameters() {
+            clearLog('compareResult');
+            log('compareResult', 'Comparing old vs new API parameters...');
+            
+            try {
+                const apiConfigResponse = await fetch('/api/get-api-key');
+                const apiConfig = await apiConfigResponse.json();
+                
+                if (!apiConfig.apiKey) {
+                    log('compareResult', '❌ No API key available');
+                    return;
+                }
+                
+                const sessionId = window.authManager.sessionId;
+                const minAge = 25;
+                const maxAge = 35;
+                
+                // OLD (broken) parameters
+                const oldUrl = `/api/spice-multi-test?endpoint=/index_api/search&method=POST&session_id=${sessionId}&page=0&pas=10&searchAgeMin=${minAge}&searchAgeMax=${maxAge}&searchSexe=all`;
+                
+                // NEW (correct) parameters  
+                const newUrl = `/api/spice-multi-test?endpoint=/index_api/search&method=POST&api_key=${apiConfig.apiKey}&session_id=${sessionId}&page=0&pas=10&age_from=${minAge}&age_to=${maxAge}`;
+                
+                log('compareResult', '❌ OLD (broken) URL:');
+                log('compareResult', oldUrl);
+                log('compareResult', '');
+                log('compareResult', '✅ NEW (fixed) URL:');
+                log('compareResult', newUrl);
+                log('compareResult', '');
+                log('compareResult', 'Key differences:');
+                log('compareResult', '- searchAgeMin → age_from');
+                log('compareResult', '- searchAgeMax → age_to');
+                log('compareResult', '- Added api_key parameter');
+                log('compareResult', '- Removed searchSexe parameter');
+                
+                // Test the new URL
+                log('compareResult', '');
+                log('compareResult', 'Testing NEW URL...');
+                
+                const response = await fetch(newUrl);
+                const result = await response.json();
+                
+                if (result.success) {
+                    log('compareResult', '✅ NEW URL works correctly!');
+                } else {
+                    log('compareResult', '❌ NEW URL failed');
+                    log('compareResult', JSON.stringify(result, null, 2));
+                }
+                
+            } catch (error) {
+                log('compareResult', `❌ Error: ${error.message}`);
+            }
+        }
+    </script>
+</body>
+</html>

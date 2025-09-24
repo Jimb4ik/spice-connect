@@ -1,5 +1,36 @@
 /* Стили только для страницы discover.html */
 
+/* Age Filter Button Active State */
+.age-filter-btn {
+    transition: all 0.3s ease;
+}
+
+.age-filter-btn.filter-active {
+    background: linear-gradient(135deg, #ff6b9d, #ff8a9b) !important;
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(255, 107, 157, 0.4) !important;
+    transform: scale(1.05);
+}
+
+.age-filter-btn.filter-active:hover {
+    background: linear-gradient(135deg, #ff5a8a, #ff7b8c) !important;
+    box-shadow: 0 6px 16px rgba(255, 107, 157, 0.5) !important;
+    transform: scale(1.08);
+}
+
+.age-filter-btn.filter-active::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 8px;
+    height: 8px;
+    background: #10b981;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
 /* Исправляем позиционирование боковых кнопок для десктопа */
 .actions-side {
   position: absolute;
