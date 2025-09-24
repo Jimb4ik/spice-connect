@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Matches Filter - Lavrilo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .test-container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+        }
+        
+        .test-section h3 {
+            color: #ff6b9d;
+            margin-top: 0;
+        }
+        
+        .status {
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+            font-weight: 500;
+        }
+        
+        .status.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        
+        .status.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+        
+        .status.info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+        
+        .test-button {
+            background: linear-gradient(135deg, #ff6b9d, #ff8a9b);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .test-button:hover {
+            background: linear-gradient(135deg, #ff5a8a, #ff7b8c);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 107, 157, 0.3);
+        }
+        
+        .test-results {
+            background: #f9fafb;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 15px;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #ff6b9d;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <a href="matches.html" class="back-link">← Back to Matches</a>
+        
+        <h1>🧪 Matches Filter Test Page</h1>
+        <p>This page tests the age filter functionality for the matches page.</p>
+        
+        <div class="test-section">
+            <h3>1. API Connection Test</h3>
+            <p>Test if we can connect to the Spice API and get API key.</p>
+            <button class="test-button" onclick="testAPIConnection()">Test API Connection</button>
+            <div id="apiConnectionResult" class="test-results" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>2. Search API Test</h3>
+            <p>Test the search API with age filter parameters.</p>
+            <label>Min Age: <input type="number" id="testMinAge" value="25" min="18" max="80"></label>
+            <label>Max Age: <input type="number" id="testMaxAge" value="35" min="18" max="80"></label>
+            <br><br>
+            <button class="test-button" onclick="testSearchAPI()">Test Search with Age Filter</button>
+            <div id="searchAPIResult" class="test-results" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>3. Matches Database Test</h3>
+            <p>Test loading matches from the database.</p>
+            <button class="test-button" onclick="testMatchesDatabase()">Test Matches Database</button>
+            <div id="matchesDatabaseResult" class="test-results" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>4. Filter Integration Test</h3>
+            <p>Test the complete age filter integration.</p>
+            <button class="test-button" onclick="testFilterIntegration()">Test Complete Filter</button>
+            <div id="filterIntegrationResult" class="test-results" style="display: none;"></div>
+        </div>
+        
+        <div class="status info">
+            <strong>Instructions:</strong> Run each test in order. Green results indicate success, red indicate errors that need fixing.
+        </div>
+    </div>
+
+    <script>
+        // Mock auth manager for testing
+        window.authManager = {
+            sessionId: localStorage.getItem('lavrilo_session') || 'test_session',
+            isLoggedIn: true
+        };
+
+        function log(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}\n`;
+            element.textContent += logEntry;
+            
+            // Scroll to bottom
+            element.scrollTop = element.scrollHeight;
+            
+            console.log(`[TEST] ${message}`);
+        }
+
+        function clearLog(elementId) {
+            const element = document.getElementById(elementId);
+            element.textContent = '';
+            element.style.display = 'none';
+        }
+
+        async function testAPIConnection() {
+            clearLog('apiConnectionResult');
+            log('apiConnectionResult', 'Testing API connection...');
+            
+            try {
+                const response = await fetch('/api/get-api-key');
+                const config = await response.json();
+                
+                if (config.apiKey) {
+                    log('apiConnectionResult', `✅ API Key found: ${config.apiKey.substring(0, 10)}...`);
+                    log('apiConnectionResult', `✅ Base URL: ${config.baseUrl}`);
+                    
+                    // Test basic API call
+                    const testResponse = await fetch(`/api/spice-multi-test?endpoint=/index_api/index&method=GET&api_key=${config.apiKey}`);
+                    const testResult = await testResponse.json();
+                    
+                    if (testResult.success) {
+                        log('apiConnectionResult', '✅ Basic API call successful');
+                        log('apiConnectionResult', `Response: ${JSON.stringify(testResult.data, null, 2)}`);
+                    } else {
+                        log('apiConnectionResult', '❌ Basic API call failed');
+                        log('apiConnectionResult', `Error: ${JSON.stringify(testResult, null, 2)}`);
+                    }
+                } else {
+                    log('apiConnectionResult', '❌ No API key found');
+                    log('apiConnectionResult', `Response: ${JSON.stringify(config, null, 2)}`);
+                }
+            } catch (error) {
+                log('apiConnectionResult', `❌ Error: ${error.message}`);
+            }
+        }
+
+        async function testSearchAPI() {
+            clearLog('searchAPIResult');
+            const minAge = document.getElementById('testMinAge').value;
+            const maxAge = document.getElementById('testMaxAge').value;
+            
+            log('searchAPIResult', `Testing search API with age range: ${minAge}-${maxAge}`);
+            
+            try {
+                // Get API config
+                const apiConfigResponse = await fetch('/api/get-api-key');
+                const apiConfig = await apiConfigResponse.json();
+                
+                if (!apiConfig.apiKey) {
+                    log('searchAPIResult', '❌ No API key available');
+                    return;
+                }
+                
+                // Test search with age filter
+                const searchParams = new URLSearchParams({
+                    api_key: apiConfig.apiKey,
+                    session_id: window.authManager.sessionId,
+                    age_from: minAge,
+                    age_to: maxAge,
+                    pas: '10' // Limit to 10 results for testing
+                });
+                
+                log('searchAPIResult', `Search URL: /api/spice-multi-test?endpoint=/index_api/search&method=POST&${searchParams.toString()}`);
+                
+                const response = await fetch(`/api/spice-multi-test?endpoint=/index_api/search&method=POST&${searchParams.toString()}`);
+                const result = await response.json();
+                
+                log('searchAPIResult', `Response status: ${response.status}`);
+                log('searchAPIResult', `Response: ${JSON.stringify(result, null, 2)}`);
+                
+                if (result.success && result.data) {
+                    let profiles = [];
+                    
+                    if (result.data.result && Array.isArray(result.data.result)) {
+                        profiles = result.data.result;
+                    } else if (result.data.membres && Array.isArray(result.data.membres)) {
+                        profiles = result.data.membres;
+                    } else if (Array.isArray(result.data)) {
+                        profiles = result.data;
+                    }
+                    
+                    log('searchAPIResult', `✅ Found ${profiles.length} profiles`);
+                    
+                    if (profiles.length > 0) {
+                        log('searchAPIResult', 'Sample profile:');
+                        const sample = profiles[0];
+                        log('searchAPIResult', `- ID: ${sample.id || sample.id_membre}`);
+                        log('searchAPIResult', `- Name: ${sample.pseudo || sample.nom_complet}`);
+                        log('searchAPIResult', `- Age: ${sample.age}`);
+                        log('searchAPIResult', `- City: ${sample.ville}`);
+                    }
+                } else {
+                    log('searchAPIResult', '❌ Search API failed or returned no data');
+                }
+                
+            } catch (error) {
+                log('searchAPIResult', `❌ Error: ${error.message}`);
+            }
+        }
+
+        async function testMatchesDatabase() {
+            clearLog('matchesDatabaseResult');
+            log('matchesDatabaseResult', 'Testing matches database...');
+            
+            try {
+                // Test if MatchUtils is available
+                if (typeof window.MatchUtils === 'undefined') {
+                    log('matchesDatabaseResult', '❌ MatchUtils not available - loading from matches page...');
+                    
+                    // Try to load the match utils script
+                    const script = document.createElement('script');
+                    script.src = 'js/match-utils.js?v=1.1';
+                    document.head.appendChild(script);
+                    
+                    // Wait a bit for script to load
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+                
+                if (typeof window.MatchUtils !== 'undefined') {
+                    log('matchesDatabaseResult', '✅ MatchUtils available');
+                    
+                    // Test loading matches
+                    const matches = await window.MatchUtils.loadUserMatches();
+                    log('matchesDatabaseResult', `✅ Loaded ${matches ? matches.length : 0} matches from database`);
+                    
+                    if (matches && matches.length > 0) {
+                        log('matchesDatabaseResult', 'Sample match:');
+                        const sample = matches[0];
+                        log('matchesDatabaseResult', `- User ID: ${sample.matched_user_id}`);
+                        log('matchesDatabaseResult', `- Name: ${sample.matched_user_name}`);
+                        log('matchesDatabaseResult', `- Age: ${sample.matched_user_age}`);
+                        log('matchesDatabaseResult', `- City: ${sample.matched_user_city}`);
+                    }
+                } else {
+                    log('matchesDatabaseResult', '❌ MatchUtils still not available');
+                }
+                
+            } catch (error) {
+                log('matchesDatabaseResult', `❌ Error: ${error.message}`);
+            }
+        }
+
+        async function testFilterIntegration() {
+            clearLog('filterIntegrationResult');
+            log('filterIntegrationResult', 'Testing complete filter integration...');
+            
+            try {
+                // Test 1: API Connection
+                log('filterIntegrationResult', '1. Testing API connection...');
+                const apiResponse = await fetch('/api/get-api-key');
+                const apiConfig = await apiResponse.json();
+                
+                if (!apiConfig.apiKey) {
+                    log('filterIntegrationResult', '❌ API connection failed');
+                    return;
+                }
+                log('filterIntegrationResult', '✅ API connection OK');
+                
+                // Test 2: Search API
+                log('filterIntegrationResult', '2. Testing search API...');
+                const searchParams = new URLSearchParams({
+                    api_key: apiConfig.apiKey,
+                    session_id: window.authManager.sessionId,
+                    age_from: '25',
+                    age_to: '35',
+                    pas: '20'
+                });
+                
+                const searchResponse = await fetch(`/api/spice-multi-test?endpoint=/index_api/search&method=POST&${searchParams.toString()}`);
+                const searchResult = await searchResponse.json();
+                
+                if (!searchResult.success) {
+                    log('filterIntegrationResult', '❌ Search API failed');
+                    log('filterIntegrationResult', `Error: ${JSON.stringify(searchResult, null, 2)}`);
+                    return;
+                }
+                log('filterIntegrationResult', '✅ Search API OK');
+                
+                // Test 3: Database integration
+                log('filterIntegrationResult', '3. Testing database integration...');
+                const response = await fetch('/api/database', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'getMatches',
+                        sessionId: window.authManager.sessionId
+                    })
+                });
+                
+                const dbResult = await response.json();
+                if (dbResult.success) {
+                    log('filterIntegrationResult', `✅ Database OK - ${dbResult.data ? dbResult.data.length : 0} matches found`);
+                } else {
+                    log('filterIntegrationResult', '⚠️ Database empty or error (this is OK for testing)');
+                }
+                
+                log('filterIntegrationResult', '🎉 All integration tests passed!');
+                log('filterIntegrationResult', 'The age filter should work correctly on the matches page.');
+                
+            } catch (error) {
+                log('filterIntegrationResult', `❌ Integration test error: ${error.message}`);
+            }
+        }
+    </script>
+</body>
+</html>

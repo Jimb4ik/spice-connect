@@ -1061,7 +1061,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function generateStarRating(maxStars = 10, photoNum) {
     let starsHTML = '';
     for (let i = 1; i <= maxStars; i++) {
-        starsHTML += `<span class="star" data-rating="${i}" data-photo-num="${photoNum}" onclick="voteForPhoto(${i}, ${photoNum})">⭐</span>`;
+        starsHTML += `<span class="star" data-rating="${i}" data-photo-num="${photoNum}" onclick="voteForPhoto(${i}, ${photoNum})">${i}</span>`;
     }
     return starsHTML;
 }
@@ -1157,7 +1157,7 @@ function updateVotingUI(photoNum, rating, state) {
             break;
             
         case 'success':
-            ratingInfo.textContent = `You rated: ${rating}/10 ⭐`;
+            ratingInfo.textContent = `You rated: ${rating}/10`;
             votingWidget.classList.add('voted');
             // Highlight voted stars
             stars.forEach((star, index) => {

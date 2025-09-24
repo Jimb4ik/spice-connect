@@ -1,3 +1,179 @@
+/* Matches page styles and image loading enhancements */
+
+/* Age Filter Modal Styles */
+.age-filter-container {
+  padding: 20px 0;
+}
+
+.age-slider-container {
+  margin-bottom: 25px;
+}
+
+.age-slider-container label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #374151;
+  font-size: 14px;
+}
+
+.slider-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.age-slider {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: #e5e7eb;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.age-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #ff6b9d;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.age-slider::-webkit-slider-thumb:hover {
+  background: #ff5a8a;
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.age-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #ff6b9d;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.age-slider::-moz-range-thumb:hover {
+  background: #ff5a8a;
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.age-display {
+  min-width: 35px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 16px;
+  color: #ff6b9d;
+  background: #fef7f0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #fed7d7;
+}
+
+.age-summary {
+  text-align: center;
+  padding: 20px;
+  background: linear-gradient(135deg, #fff5f5, #fef7f0);
+  border-radius: 12px;
+  border: 1px solid #fed7d7;
+  margin-top: 10px;
+}
+
+.age-summary strong {
+  color: #ff6b9d;
+  font-size: 16px;
+}
+
+/* Filter Button Active State */
+.filter-tab.filter-active {
+  background: linear-gradient(135deg, #ff6b9d, #ff8a9b) !important;
+  color: white !important;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(255, 107, 157, 0.3);
+  transform: translateY(-1px);
+}
+
+.filter-tab.filter-active:hover {
+  background: linear-gradient(135deg, #ff5a8a, #ff7b8c) !important;
+  box-shadow: 0 6px 16px rgba(255, 107, 157, 0.4);
+}
+
+/* Enhanced Filter Tabs */
+.filter-tabs {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+
+.filter-tab {
+  padding: 12px 20px;
+  border: 2px solid #e5e7eb;
+  border-radius: 25px;
+  background: white;
+  color: #6b7280;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.filter-tab:hover {
+  border-color: #ff6b9d;
+  color: #ff6b9d;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 107, 157, 0.15);
+}
+
+.filter-tab.active {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .filter-tabs {
+    gap: 8px;
+  }
+  
+  .filter-tab {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+  
+  .age-filter-container {
+    padding: 15px 0;
+  }
+  
+  .age-slider-container {
+    margin-bottom: 20px;
+  }
+  
+  .slider-wrapper {
+    gap: 10px;
+  }
+  
+  .age-display {
+    min-width: 30px;
+    padding: 6px 10px;
+    font-size: 14px;
+  }
+}
+
 /* Matches page image loading enhancements */
 
 .match-card-photo {
@@ -55,17 +231,16 @@
 
 /* Friend Button Styles */
 .match-action-btn.friend-btn {
-  background: #10b981;
+  background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
-  border: 1px solid #10b981;
+  border: 1px solid transparent;
   transition: all 0.3s ease;
 }
 
 .match-action-btn.friend-btn:hover:not(:disabled) {
-  background: #059669;
-  border-color: #059669;
+  background: linear-gradient(135deg, #5a67d8, #6b46c1);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .match-action-btn.friend-btn:disabled {
