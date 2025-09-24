@@ -504,12 +504,28 @@ class MainDashboard {
     }
     
     createRegularActivityItem(activity) {
-        const photoUrl = this.getPhotoUrl(activity);
+        // Фотографии отключены - используем только текст
         const activityText = this.formatActivityText(activity);
         const timeAgo = this.formatTimeAgo(activity.date_action);
         
+        // Создаем буквенный аватар для консистентности
+        const firstLetter = (activity.pseudo || activity.pseudo1 || 'U').charAt(0).toUpperCase();
+        const avatarColors = [
+            'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+            'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+            'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+            'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+            'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+            'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
+            'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)'
+        ];
+        const colorIndex = firstLetter.charCodeAt(0) % avatarColors.length;
+        const avatarColor = avatarColors[colorIndex];
+        
         return `
             <div class="activity-item">
+                <div class="avatar-fallback" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background: ${avatarColor}; color: white; font-weight: bold; font-size: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); margin-right: 12px;">${firstLetter}</div>
                 <div class="activity-content">
                     <div class="activity-text">${activityText}</div>
                     <div class="activity-time">${timeAgo}</div>
