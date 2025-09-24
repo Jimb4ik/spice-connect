@@ -6,16 +6,12 @@
 }
 
 .age-filter-btn.filter-active {
-    background: linear-gradient(135deg, #ff6b9d, #ff8a9b) !important;
-    color: white !important;
-    box-shadow: 0 4px 12px rgba(255, 107, 157, 0.4) !important;
-    transform: scale(1.05);
+    /* Не меняем цвет кнопки, только добавляем зеленый индикатор */
+    position: relative;
 }
 
 .age-filter-btn.filter-active:hover {
-    background: linear-gradient(135deg, #ff5a8a, #ff7b8c) !important;
-    box-shadow: 0 6px 16px rgba(255, 107, 157, 0.5) !important;
-    transform: scale(1.08);
+    /* Оставляем стандартное поведение hover */
 }
 
 .age-filter-btn.filter-active::after {

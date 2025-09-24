@@ -2910,11 +2910,13 @@ select:focus {
 }
 
 .btn-cancel,
-.btn-apply {
+.btn-apply,
+.btn-reset {
   padding: 0.8rem 2rem;
   border-radius: 12px;
   border: none;
   font-weight: 600;
+  font-size: 16px; /* Увеличиваем шрифт */
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -2935,6 +2937,16 @@ select:focus {
 
 .btn-apply:hover {
   background: var(--primary-dark);
+  transform: translateY(-2px);
+}
+
+.btn-reset {
+  background: #ff6b6b;
+  color: white;
+}
+
+.btn-reset:hover {
+  background: #ff5252;
   transform: translateY(-2px);
 }
 
