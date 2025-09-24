@@ -1075,12 +1075,12 @@
                     api_key: apiConfig.apiKey,
                     session_id: sessionId,
                     action: 'add',
-                    target_id: userId
+                    id_user: userId
                 });
                 
                 console.log('[FRIENDS] Sending friend request with params:', params.toString());
                 
-                const response = await fetch(`/api/spice-multi-test?endpoint=/ajax_api/setFriend&method=GET&${params}`);
+                const response = await fetch(`/api/spice-multi-test?endpoint=/ajax_api/setFriend&method=POST&${params}`);
                 const result = await response.json();
                 
                 console.log('[FRIENDS] API Response:', result);
