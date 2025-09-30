@@ -218,14 +218,6 @@
                     <h3 class="mb-2">Discovery Preferences</h3>
                     
                     <div class="form-group">
-                        <label>Maximum Distance</label>
-                        <input type="range" min="1" max="100" value="50" id="maxDistance" class="range-input">
-                        <div class="range-display">
-                            <span id="distanceValue">50</span> km
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
                         <label>Age Range</label>
                         <div class="age-range-inputs">
                             <input type="number" min="18" max="80" value="18" id="prefAgeMin" class="form-input">
@@ -346,13 +338,11 @@
                 return;
             }
             
-            // const userAvatar = document.getElementById('userAvatar');
-            // if (window.authManager.currentUser && window.authManager.currentUser.pseudo) {
-            //     userAvatar.textContent = window.authManager.currentUser.pseudo.charAt(0).toUpperCase();
-            // }
-            
             // Load user settings
             loadUserSettings();
+            
+            // Load discovery preferences
+            loadDiscoveryPreferences();
             
             // Event listeners
             document.getElementById('logoutBtn').addEventListener('click', logout);
@@ -366,10 +356,8 @@
                 confirmBtn.disabled = e.target.value !== 'DELETE';
             });
             
-            // Distance slider
-            document.getElementById('maxDistance').addEventListener('input', (e) => {
-                document.getElementById('distanceValue').textContent = e.target.value;
-            });
+            // Discovery Preferences event listeners
+            setupDiscoveryPreferencesListeners();
         });
         
         function loadUserSettings() {
@@ -400,6 +388,230 @@
             // This would normally call an API to delete the account
             alert('Account deletion is not implemented in this demo.');
             hideDeleteModal();
+        }
+        
+        // Discovery Preferences functionality
+        let currentPreferences = {
+            ageMin: 18,
+            ageMax: 80,
+            showMen: true,
+            showWomen: true,
+            showCouples: false
+        };
+        
+        function setupDiscoveryPreferencesListeners() {
+            // Age range inputs
+            const ageMinInput = document.getElementById('prefAgeMin');
+            const ageMaxInput = document.getElementById('prefAgeMax');
+            
+            if (ageMinInput) {
+                ageMinInput.addEventListener('change', (e) => {
+                    const value = parseInt(e.target.value);
+                    if (value >= 18 && value <= currentPreferences.ageMax) {
+                        currentPreferences.ageMin = value;
+                        saveDiscoveryPreferences();
+                    } else {
+                        e.target.value = currentPreferences.ageMin;
+                    }
+                });
+            }
+            
+            if (ageMaxInput) {
+                ageMaxInput.addEventListener('change', (e) => {
+                    const value = parseInt(e.target.value);
+                    if (value <= 80 && value >= currentPreferences.ageMin) {
+                        currentPreferences.ageMax = value;
+                        saveDiscoveryPreferences();
+                    } else {
+                        e.target.value = currentPreferences.ageMax;
+                    }
+                });
+            }
+            
+            // Gender checkboxes
+            const checkboxes = document.querySelectorAll('.checkbox-group input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', (e) => {
+                    const value = e.target.value;
+                    const checked = e.target.checked;
+                    
+                    switch(value) {
+                        case 'men':
+                            currentPreferences.showMen = checked;
+                            break;
+                        case 'women':
+                            currentPreferences.showWomen = checked;
+                            break;
+                        case 'couples':
+                            currentPreferences.showCouples = checked;
+                            break;
+                    }
+                    
+                    saveDiscoveryPreferences();
+                });
+            });
+        }
+        
+        async function loadDiscoveryPreferences() {
+            try {
+                const sessionId = window.authManager?.sessionId;
+                const userId = window.authManager?.currentUser?.id;
+                
+                if (!sessionId || !userId) {
+                    console.warn('[SETTINGS] Cannot load preferences: missing session or user ID');
+                    return;
+                }
+                
+                console.log('[SETTINGS] Loading discovery preferences...');
+                
+                const response = await fetch(`/api/discovery-preferences?session_id=${sessionId}&user_id=${userId}`);
+                const data = await response.json();
+                
+                if (data.success && data.preferences) {
+                    const prefs = data.preferences;
+                    
+                    // Map API preferences to UI
+                    currentPreferences.ageMin = prefs.age_min || 18;
+                    currentPreferences.ageMax = prefs.age_max || 80;
+                    
+                    // Map cherche1 (gender preference) to checkboxes
+                    const cherche1 = prefs.cherche1;
+                    currentPreferences.showMen = cherche1 === 1 || cherche1 === 3; // Looking for men or couples
+                    currentPreferences.showWomen = cherche1 === 2 || cherche1 === 3; // Looking for women or couples
+                    currentPreferences.showCouples = cherche1 === 3; // Looking for couples
+                    
+                    updateDiscoveryPreferencesUI();
+                    console.log('[SETTINGS] Discovery preferences loaded:', currentPreferences);
+                } else {
+                    console.warn('[SETTINGS] Failed to load preferences:', data.error);
+                    // Use defaults and update UI
+                    updateDiscoveryPreferencesUI();
+                }
+            } catch (error) {
+                console.error('[SETTINGS] Error loading discovery preferences:', error);
+                // Use defaults and update UI
+                updateDiscoveryPreferencesUI();
+            }
+        }
+        
+        function updateDiscoveryPreferencesUI() {
+            // Update age inputs
+            const ageMinInput = document.getElementById('prefAgeMin');
+            const ageMaxInput = document.getElementById('prefAgeMax');
+            if (ageMinInput) ageMinInput.value = currentPreferences.ageMin;
+            if (ageMaxInput) ageMaxInput.value = currentPreferences.ageMax;
+            
+            // Update gender checkboxes
+            const menCheckbox = document.querySelector('input[value="men"]');
+            const womenCheckbox = document.querySelector('input[value="women"]');
+            const couplesCheckbox = document.querySelector('input[value="couples"]');
+            
+            if (menCheckbox) menCheckbox.checked = currentPreferences.showMen;
+            if (womenCheckbox) womenCheckbox.checked = currentPreferences.showWomen;
+            if (couplesCheckbox) couplesCheckbox.checked = currentPreferences.showCouples;
+        }
+        
+        async function saveDiscoveryPreferences() {
+            try {
+                const sessionId = window.authManager?.sessionId;
+                
+                if (!sessionId) {
+                    console.warn('[SETTINGS] Cannot save preferences: missing session ID');
+                    return;
+                }
+                
+                // Map UI preferences to API format
+                let cherche1 = 2; // Default to women
+                if (currentPreferences.showMen && currentPreferences.showWomen) {
+                    cherche1 = 3; // Looking for both (couples)
+                } else if (currentPreferences.showMen) {
+                    cherche1 = 1; // Looking for men
+                } else if (currentPreferences.showWomen) {
+                    cherche1 = 2; // Looking for women
+                }
+                
+                // Create age range array (API expects specific age group IDs)
+                // For now, we'll use a simple mapping
+                const with_age = [];
+                for (let age = currentPreferences.ageMin; age <= currentPreferences.ageMax; age += 5) {
+                    with_age.push(Math.floor(age / 5)); // Simple age group mapping
+                }
+                
+                const requestData = {
+                    session_id: sessionId,
+                    cherche1: cherche1,
+                    with_age: with_age,
+                    pour: 1 // Default dating type
+                };
+                
+                console.log('[SETTINGS] Saving discovery preferences:', requestData);
+                
+                const response = await fetch('/api/discovery-preferences', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    console.log('[SETTINGS] Discovery preferences saved successfully');
+                    showNotification('Discovery preferences saved!', 'success');
+                    
+                    // Уведомляем discover страницу об изменениях (если она открыта)
+                    if (window.updateDiscoverPreferences) {
+                        window.updateDiscoverPreferences();
+                    }
+                    
+                    // Также отправляем событие для других вкладок
+                    window.dispatchEvent(new StorageEvent('storage', {
+                        key: 'lavrilo_discovery_preferences_updated',
+                        newValue: Date.now().toString()
+                    }));
+                } else {
+                    console.error('[SETTINGS] Failed to save preferences:', data.error);
+                    showNotification('Failed to save preferences. Please try again.', 'error');
+                }
+            } catch (error) {
+                console.error('[SETTINGS] Error saving discovery preferences:', error);
+                showNotification('Error saving preferences. Please try again.', 'error');
+            }
+        }
+        
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 12px 20px;
+                border-radius: 8px;
+                color: white;
+                font-weight: 500;
+                z-index: 10000;
+                transition: all 0.3s ease;
+                ${type === 'success' ? 'background-color: #10b981;' : ''}
+                ${type === 'error' ? 'background-color: #ef4444;' : ''}
+                ${type === 'info' ? 'background-color: #3b82f6;' : ''}
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
         }
     </script>
     <script>

@@ -418,8 +418,11 @@
             initializeDiscover();
         });
         
-        function initializeDiscover() {
+        async function initializeDiscover() {
             console.log('[DISCOVER] Initializing discover functionality...');
+            
+            // Сначала загружаем настройки Discovery Preferences
+            await loadAgeSettings();
             
             // Добавляем обработчики кнопок
             const dislikeBtn = document.getElementById('dislikeBtn');
@@ -446,7 +449,7 @@
             if (dislikeBtnSide) dislikeBtnSide.addEventListener('click', () => handleDislike());
             if (likeBtnSide) likeBtnSide.addEventListener('click', () => handleLike());
 
-            // Загружаем первый профиль
+            // Загружаем первый профиль с учетом настроек
             loadNextProfile();
             
             // Инициализируем состояние кнопки фильтра
@@ -460,23 +463,80 @@
         let isLoadingMoreProfiles = false;
         let userProgress = null; // Прогресс пользователя из БД
         
-        // Настройки фильтра возраста
+        // Настройки фильтра возраста и других предпочтений
         let ageSettings = {
             min: 18,
             max: 80
         };
         
-        // Загружаем сохраненные настройки возраста
-        function loadAgeSettings() {
+        let discoveryPreferences = {
+            ageMin: 18,
+            ageMax: 80,
+            showMen: true,
+            showWomen: true,
+            showCouples: false,
+            cherche1: 2 // 1=мужчины, 2=женщины, 3=пары
+        };
+        
+        // Загружаем сохраненные настройки возраста и Discovery Preferences
+        async function loadAgeSettings() {
             try {
+                // Сначала загружаем локальные настройки возраста (для обратной совместимости)
                 const saved = localStorage.getItem('lavrilo_age_settings');
                 if (saved) {
                     const parsedSettings = JSON.parse(saved);
                     ageSettings.min = parsedSettings.min || 18;
                     ageSettings.max = parsedSettings.max || 80;
                 }
+                
+                // Затем пытаемся загрузить Discovery Preferences из API
+                await loadDiscoveryPreferencesFromAPI();
+                
             } catch (error) {
                 console.warn('[AGE FILTER] Error loading saved settings:', error);
+            }
+        }
+        
+        // Загружаем Discovery Preferences из API
+        async function loadDiscoveryPreferencesFromAPI() {
+            try {
+                const sessionId = window.authManager?.sessionId;
+                const userId = window.authManager?.currentUser?.id;
+                
+                if (!sessionId || !userId) {
+                    console.log('[DISCOVER] No session/user ID, using local settings');
+                    return;
+                }
+                
+                console.log('[DISCOVER] Loading Discovery Preferences from API...');
+                
+                const response = await fetch(`/api/discovery-preferences?session_id=${sessionId}&user_id=${userId}`);
+                const data = await response.json();
+                
+                if (data.success && data.preferences) {
+                    const prefs = data.preferences;
+                    console.log('[DISCOVER] Loaded preferences from API:', prefs);
+                    
+                    // Обновляем настройки возраста из API
+                    if (prefs.age_min && prefs.age_max) {
+                        ageSettings.min = prefs.age_min;
+                        ageSettings.max = prefs.age_max;
+                        discoveryPreferences.ageMin = prefs.age_min;
+                        discoveryPreferences.ageMax = prefs.age_max;
+                    }
+                    
+                    // Обновляем гендерные предпочтения
+                    discoveryPreferences.cherche1 = prefs.cherche1 || 2;
+                    discoveryPreferences.showMen = prefs.cherche1 === 1 || prefs.cherche1 === 3;
+                    discoveryPreferences.showWomen = prefs.cherche1 === 2 || prefs.cherche1 === 3;
+                    discoveryPreferences.showCouples = prefs.cherche1 === 3;
+                    
+                    console.log('[DISCOVER] Updated discovery preferences:', discoveryPreferences);
+                } else {
+                    console.log('[DISCOVER] No preferences found in API, using defaults');
+                }
+            } catch (error) {
+                console.warn('[DISCOVER] Error loading Discovery Preferences from API:', error);
             }
         }
         
@@ -488,6 +548,32 @@
                 console.warn('[AGE FILTER] Error saving settings:', error);
             }
         }
+        
+        // Функция для обновления настроек из settings страницы
+        function refreshDiscoveryPreferences() {
+            console.log('[DISCOVER] Refreshing Discovery Preferences...');
+            loadDiscoveryPreferencesFromAPI().then(() => {
+                console.log('[DISCOVER] Preferences refreshed, reloading profiles...');
+                // Сбрасываем профили и загружаем новые с обновленными настройками
+                currentProfileIndex = 0;
+                profilesBuffer = [];
+                currentPage = 0;
+                userProgress = null;
+                loadNextProfile();
+            });
+        }
+        
+        // Слушаем события изменения настроек
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'lavrilo_age_settings' || 
+                e.key === 'lavrilo_discovery_preferences_updated') {
+                console.log('[DISCOVER] Settings changed, refreshing preferences...');
+                refreshDiscoveryPreferences();
+            }
+        });
+        
+        // Глобальная функция для обновления настроек (может быть вызвана из settings)
+        window.updateDiscoverPreferences = refreshDiscoveryPreferences;
         
         // Загружаем прогресс пользователя из БД
         async function loadUserProgress() {
@@ -587,7 +673,29 @@
                         return;
                     }
                     
-                    const apiUrl = `/api/spice-multi-test?endpoint=/index_api/search&method=POST&api_key=${apiConfig.apiKey}&session_id=${sessionId}&page=${currentPage}&pas=30&age_from=${ageSettings.min}&age_to=${ageSettings.max}`;
+                    // Формируем параметры поиска с учетом Discovery Preferences
+                    const searchParams = new URLSearchParams({
+                        api_key: apiConfig.apiKey,
+                        session_id: sessionId,
+                        page: currentPage,
+                        pas: 30,
+                        age_from: ageSettings.min,
+                        age_to: ageSettings.max
+                    });
+                    
+                    // Добавляем гендерные предпочтения
+                    if (discoveryPreferences.cherche1) {
+                        searchParams.append('sexe', discoveryPreferences.cherche1);
+                    }
+                    
+                    console.log('[DISCOVER] Search parameters:', {
+                        page: currentPage,
+                        age_from: ageSettings.min,
+                        age_to: ageSettings.max,
+                        gender_preference: discoveryPreferences.cherche1
+                    });
+                    
+                    const apiUrl = `/api/spice-multi-test?endpoint=/index_api/search&method=POST&${searchParams.toString()}`;
                     
                     const response = await fetch(apiUrl);
                     const data = await response.json();
