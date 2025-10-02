@@ -1478,8 +1478,8 @@ async function monetizeGifts(pool, req) {
 
             const gift = giftResult.rows[0];
             
-            // Рассчитываем стоимость монетизации (30% от стоимости, 1 кредит = 0.1 USD)
-            const usdValue = (gift.price_credits * 0.1 * 0.3);
+            // Рассчитываем стоимость монетизации (10% от стоимости, 1 кредит = 0.1 USD)
+            const usdValue = (gift.price_credits * 0.1 * 0.1);
             totalUsdValue += usdValue;
 
             // Обновляем статус подарка
