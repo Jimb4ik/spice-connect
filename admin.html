@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lavrilo CRM - Admin Panel</title>
+    <link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h2>Lavrilo</h2>
+            <p>Admin Panel</p>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-item active" data-section="dashboard">
+                <span class="icon">📊</span>
+                <span>Dashboard</span>
+            </a>
+            <a href="#" class="nav-item" data-section="users">
+                <span class="icon">👥</span>
+                <span>Users</span>
+            </a>
+            <a href="#" class="nav-item" data-section="transactions">
+                <span class="icon">💳</span>
+                <span>Transactions</span>
+            </a>
+            <a href="#" class="nav-item" data-section="moderation">
+                <span class="icon">✅</span>
+                <span>Moderation</span>
+            </a>
+            <a href="#" class="nav-item" data-section="settings">
+                <span class="icon">⚙️</span>
+                <span>Settings</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="admin-info">
+                <div class="admin-avatar">AD</div>
+                <div class="admin-details">
+                    <strong id="adminName">Admin</strong>
+                    <small>Administrator</small>
+                </div>
+            </div>
+            <button class="btn-logout" onclick="logout()">
+                <span>🚪</span>
+                Logout
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <header class="header">
+            <h1 id="pageTitle">Dashboard</h1>
+            <div class="header-actions">
+                <button class="btn-icon" onclick="refreshData()">
+                    <span>🔄</span>
+                </button>
+                <div class="header-user">
+                    <span class="status-indicator online"></span>
+                    <span id="headerAdminName">Admin</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="content-section active">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">👥</div>
+                    <div class="stat-info">
+                        <h3 id="totalUsers">-</h3>
+                        <p>Total Users</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">🟢</div>
+                    <div class="stat-info">
+                        <h3 id="activeToday">-</h3>
+                        <p>Active Today</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">💰</div>
+                    <div class="stat-info">
+                        <h3 id="totalRevenue">-</h3>
+                        <p>Total Revenue</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">⏳</div>
+                    <div class="stat-info">
+                        <h3 id="pendingModeration">-</h3>
+                        <p>Pending Moderation</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="card">
+                    <h3>Recent Activity</h3>
+                    <div id="recentActivity" class="activity-list">
+                        <div class="loading">Loading...</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>Quick Stats</h3>
+                    <div class="quick-stats">
+                        <div class="quick-stat-item">
+                            <span class="label">New Users (24h)</span>
+                            <span class="value" id="newUsers24h">-</span>
+                        </div>
+                        <div class="quick-stat-item">
+                            <span class="label">Matches Today</span>
+                            <span class="value" id="matchesToday">-</span>
+                        </div>
+                        <div class="quick-stat-item">
+                            <span class="label">Messages Sent</span>
+                            <span class="value" id="messagesToday">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Users Section -->
+        <section id="users" class="content-section">
+            <div class="section-controls">
+                <div class="search-bar">
+                    <input type="text" id="userSearch" placeholder="Search users by name, email, or ID...">
+                    <button onclick="searchUsers()">🔍</button>
+                </div>
+                <div class="filter-group">
+                    <select id="genderFilter">
+                        <option value="">All Genders</option>
+                        <option value="1">Male</option>
+                        <option value="2">Female</option>
+                        <option value="3">Couple</option>
+                    </select>
+                    <select id="statusFilter">
+                        <option value="">All Status</option>
+                        <option value="online">Online</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                    <button class="btn-primary" onclick="searchUsers()">Apply Filters</button>
+                </div>
+            </div>
+
+            <div class="users-table-container">
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Email</th>
+                            <th>Age</th>
+                            <th>Location</th>
+                            <th>Status</th>
+                            <th>Credits</th>
+                            <th>Joined</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <tr>
+                            <td colspan="8" class="loading-cell">Loading users...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination" id="usersPagination">
+                <button onclick="prevPage()" id="prevBtn">Previous</button>
+                <span id="pageInfo">Page 1</span>
+                <button onclick="nextPage()" id="nextBtn">Next</button>
+            </div>
+        </section>
+
+        <!-- Transactions Section -->
+        <section id="transactions" class="content-section">
+            <div class="section-controls">
+                <div class="search-bar">
+                    <input type="text" id="transactionSearch" placeholder="Search transactions by ID or user...">
+                    <button onclick="searchTransactions()">🔍</button>
+                </div>
+                <div class="filter-group">
+                    <select id="transactionTypeFilter">
+                        <option value="">All Types</option>
+                        <option value="deposit">Deposits</option>
+                        <option value="purchase">Purchases</option>
+                        <option value="withdrawal">Withdrawals</option>
+                        <option value="refund">Refunds</option>
+                    </select>
+                    <button class="btn-primary" onclick="searchTransactions()">Apply Filters</button>
+                </div>
+            </div>
+
+            <div class="transactions-table-container">
+                <table class="transactions-table">
+                    <thead>
+                        <tr>
+                            <th>Transaction ID</th>
+                            <th>User</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Credits</th>
+                            <th>Payment Method</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactionsTableBody">
+                        <tr>
+                            <td colspan="8" class="loading-cell">Loading transactions...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Moderation Section -->
+        <section id="moderation" class="content-section">
+            <div class="moderation-queue" id="moderationQueue">
+                <div class="loading">Loading pending items...</div>
+            </div>
+        </section>
+
+        <!-- Settings Section -->
+        <section id="settings" class="content-section">
+            <div class="settings-grid">
+                <div class="settings-card">
+                    <h3>General Settings</h3>
+                    <div class="setting-item">
+                        <label>Site Name</label>
+                        <input type="text" value="Lavrilo">
+                    </div>
+                    <div class="setting-item">
+                        <label>Maintenance Mode</label>
+                        <div class="toggle">
+                            <input type="checkbox" id="maintenanceMode">
+                            <label for="maintenanceMode"></label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-card">
+                    <h3>Payment Settings</h3>
+                    <div class="setting-item">
+                        <label>Credit Price (USD)</label>
+                        <input type="number" value="0.99" step="0.01">
+                    </div>
+                    <div class="setting-item">
+                        <label>Minimum Withdrawal</label>
+                        <input type="number" value="50">
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- User Detail Modal -->
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalUserName">User Details</h2>
+                <button class="modal-close" onclick="closeUserModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modalUserContent">
+                <!-- User details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="js/admin.js"></script>
+</body>
+</html>
+
+
