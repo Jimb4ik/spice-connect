@@ -16,23 +16,23 @@
 
         <nav class="sidebar-nav">
             <a href="#" class="nav-item active" data-section="dashboard">
-                <span class="icon">📊</span>
+                <span class="icon">■</span>
                 <span>Dashboard</span>
             </a>
             <a href="#" class="nav-item" data-section="users">
-                <span class="icon">👥</span>
+                <span class="icon">♦</span>
                 <span>Users</span>
             </a>
             <a href="#" class="nav-item" data-section="transactions">
-                <span class="icon">💳</span>
+                <span class="icon">◆</span>
                 <span>Transactions</span>
             </a>
             <a href="#" class="nav-item" data-section="moderation">
-                <span class="icon">✅</span>
+                <span class="icon">✓</span>
                 <span>Moderation</span>
             </a>
             <a href="#" class="nav-item" data-section="settings">
-                <span class="icon">⚙️</span>
+                <span class="icon">●</span>
                 <span>Settings</span>
             </a>
         </nav>
@@ -46,7 +46,7 @@
                 </div>
             </div>
             <button class="btn-logout" onclick="logout()">
-                <span>🚪</span>
+                <span>×</span>
                 Logout
             </button>
         </div>
@@ -59,7 +59,7 @@
             <h1 id="pageTitle">Dashboard</h1>
             <div class="header-actions">
                 <button class="btn-icon" onclick="refreshData()">
-                    <span>🔄</span>
+                    <span>↻</span>
                 </button>
                 <div class="header-user">
                     <span class="status-indicator online"></span>
@@ -72,28 +72,28 @@
         <section id="dashboard" class="content-section active">
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">👥</div>
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">U</div>
                     <div class="stat-info">
                         <h3 id="totalUsers">-</h3>
                         <p>Total Users</p>
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">🟢</div>
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">●</div>
                     <div class="stat-info">
                         <h3 id="activeToday">-</h3>
                         <p>Active Today</p>
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">💰</div>
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">$</div>
                     <div class="stat-info">
                         <h3 id="totalRevenue">-</h3>
                         <p>Total Revenue</p>
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">⏳</div>
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">!</div>
                     <div class="stat-info">
                         <h3 id="pendingModeration">-</h3>
                         <p>Pending Moderation</p>
@@ -134,7 +134,7 @@
             <div class="section-controls">
                 <div class="search-bar">
                     <input type="text" id="userSearch" placeholder="Search users by name, email, or ID...">
-                    <button onclick="searchUsers()">🔍</button>
+                    <button onclick="searchUsers()">Search</button>
                 </div>
                 <div class="filter-group">
                     <select id="genderFilter">
@@ -187,7 +187,7 @@
             <div class="section-controls">
                 <div class="search-bar">
                     <input type="text" id="transactionSearch" placeholder="Search transactions by ID or user...">
-                    <button onclick="searchTransactions()">🔍</button>
+                    <button onclick="searchTransactions()">Search</button>
                 </div>
                 <div class="filter-group">
                     <select id="transactionTypeFilter">

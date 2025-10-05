@@ -189,7 +189,7 @@
                         placeholder="Enter your password"
                     >
                     <button type="button" class="password-toggle-btn" id="togglePassword">
-                        👁️
+                        ●●●
                     </button>
                 </div>
             </div>
@@ -211,7 +211,7 @@
         togglePassword.addEventListener('click', () => {
             const type = passwordInput.type === 'password' ? 'text' : 'password';
             passwordInput.type = type;
-            togglePassword.textContent = type === 'password' ? '👁️' : '🙈';
+            togglePassword.textContent = type === 'password' ? '●●●' : 'ABC';
         });
 
         // Handle login

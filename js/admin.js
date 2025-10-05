@@ -428,7 +428,7 @@ function loadModeration() {
             <h3>Pending Verification (${pendingItems.length})</h3>
             ${pendingItems.map(item => `
                 <div class="activity-item" style="margin-bottom: 12px;">
-                    <div class="activity-avatar">📄</div>
+                    <div class="activity-avatar">DOC</div>
                     <div class="activity-info">
                         <strong>${item.user}</strong>
                         <small>${item.content} • ${item.submitted}</small>
@@ -457,7 +457,7 @@ function viewUser(userId) {
     modalContent.innerHTML = `
         <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
             <div class="stat-card">
-                <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">👤</div>
+                <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">U</div>
                 <div class="stat-info">
                     <h3>${user.pseudo || 'N/A'}</h3>
                     <p>Username</p>
@@ -465,7 +465,7 @@ function viewUser(userId) {
             </div>
             
             <div class="stat-card">
-                <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">📧</div>
+                <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">@</div>
                 <div class="stat-info">
                     <h3>${user.email || 'N/A'}</h3>
                     <p>Email</p>
@@ -473,7 +473,7 @@ function viewUser(userId) {
             </div>
             
             <div class="stat-card">
-                <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">💰</div>
+                <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">$</div>
                 <div class="stat-info">
                     <h3>${user.credits || 0}</h3>
                     <p>Current Credits</p>
@@ -481,7 +481,7 @@ function viewUser(userId) {
             </div>
             
             <div class="stat-card">
-                <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">📊</div>
+                <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">■</div>
                 <div class="stat-info">
                     <h3>${user.status || 'inactive'}</h3>
                     <p>Account Status</p>
