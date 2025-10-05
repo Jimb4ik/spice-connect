@@ -154,20 +154,54 @@ async function loadUsers() {
     tbody.innerHTML = '<tr><td colspan="8" class="loading-cell">Loading users...</td></tr>';
     
     try {
-        // Call Spice API to search for users
-        const response = await fetch('/api/admin-users?action=search_users&limit=100');
+        // Check if we have API key
+        const apiKeyResponse = await fetch('/api/get-api-key');
+        const apiKeyData = await apiKeyResponse.json();
+        
+        if (!apiKeyData.apiKey) {
+            throw new Error('API key not available');
+        }
+        
+        // Use search API like in search.html to get all users
+        const params = new URLSearchParams({
+            page: 0,
+            pas: 100, // Get 100 users at once
+            is_photo: 1, // Only users with photos
+            get_picture_430: 1 // Get high-res photos
+        });
+        
+        console.log('[ADMIN] Loading users with params:', params.toString());
+        
+        const response = await fetch(`/api/spice-multi-test?endpoint=/index_api/search&method=POST&${params.toString()}`);
         const result = await response.json();
         
-        if (result.success && result.data) {
-            allUsers = result.data;
+        console.log('[ADMIN] Users API response:', result);
+        
+        if (result.success && result.data && result.data.result) {
+            allUsers = result.data.result.map(user => ({
+                id: user.id || user.id_membre,
+                pseudo: user.pseudo,
+                prenom: user.prenom,
+                age: user.age,
+                sexe1: user.sexe1,
+                location: user.zone_name || 'Unknown',
+                status: user.online === 1 ? 'online' : 'active',
+                photoCount: user.photo || 0,
+                rating: user.moyenne || 0,
+                votes: user.vote || 0,
+                photos_v2: user.photos_v2 || [],
+                photos: user.photos || []
+            }));
+            
             filteredUsers = [...allUsers];
             displayUsers();
         } else {
             // Fallback to demo data if API fails
+            console.warn('[ADMIN] Failed to load users from API, using demo data');
             loadDemoUsers();
         }
     } catch (error) {
-        console.error('Error loading users:', error);
+        console.error('[ADMIN] Error loading users:', error);
         loadDemoUsers();
     }
 }
@@ -238,31 +272,46 @@ function displayUsers() {
     const usersToDisplay = filteredUsers.slice(startIndex, endIndex);
     
     if (usersToDisplay.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="loading-cell">No users found</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="loading-cell">No users found</td></tr>';
         return;
     }
     
     tbody.innerHTML = usersToDisplay.map(user => {
-        const avatar = user.pseudo ? user.pseudo.substring(0, 2).toUpperCase() : 'XX';
-        const joinDate = user.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A';
+        // Get photo URL (like in search-page.js)
+        let photoUrl = null;
+        if (user.photos_v2 && user.photos_v2.length > 0) {
+            const photo = user.photos_v2[0];
+            photoUrl = photo.sq_middle || photo.sq_430 || photo.normal || photo.sq_small;
+        } else if (user.photos && user.photos.length > 0) {
+            const photo = user.photos[0];
+            photoUrl = photo.url_middle || photo.url_big || photo.url_small;
+        }
+        
+        const initials = user.pseudo ? user.pseudo.substring(0, 2).toUpperCase() : 'XX';
+        
+        // Gender emoji
+        const genderIcon = user.sexe1 === 1 ? '♂' : user.sexe1 === 2 ? '♀' : '⚥';
         
         return `
             <tr>
                 <td>
                     <div class="user-cell">
-                        <div class="user-avatar">${avatar}</div>
+                        ${photoUrl ? 
+                            `<img src="${photoUrl}" alt="${user.pseudo}" class="user-avatar" style="object-fit: cover;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                             <div class="user-avatar" style="display: none;">${initials}</div>` :
+                            `<div class="user-avatar">${initials}</div>`
+                        }
                         <div class="user-info">
                             <strong>${user.pseudo || 'Unknown'}</strong>
                             <small>#${user.id}</small>
                         </div>
                     </div>
                 </td>
-                <td>${user.email || 'N/A'}</td>
                 <td>${user.age || 'N/A'}</td>
-                <td>${user.city || 'Unknown'}</td>
+                <td>${user.location || 'Unknown'}</td>
+                <td>${genderIcon} ${user.sexe1 === 1 ? 'Male' : user.sexe1 === 2 ? 'Female' : 'Couple'}</td>
                 <td><span class="status-badge ${user.status || 'inactive'}">${user.status || 'inactive'}</span></td>
-                <td>${user.credits || 0}</td>
-                <td>${joinDate}</td>
+                <td>${user.photoCount || 0} photos</td>
                 <td>
                     <div class="action-buttons">
                         <button class="btn-action primary" onclick="viewUser(${user.id})">View</button>
@@ -303,10 +352,12 @@ function searchUsers() {
     const genderFilter = document.getElementById('genderFilter').value;
     const statusFilter = document.getElementById('statusFilter').value;
     
+    console.log('[ADMIN] Searching with:', { searchTerm, genderFilter, statusFilter });
+    
     filteredUsers = allUsers.filter(user => {
         const matchesSearch = !searchTerm || 
             (user.pseudo && user.pseudo.toLowerCase().includes(searchTerm)) ||
-            (user.email && user.email.toLowerCase().includes(searchTerm)) ||
+            (user.prenom && user.prenom.toLowerCase().includes(searchTerm)) ||
             (user.id && user.id.toString().includes(searchTerm));
         
         const matchesGender = !genderFilter || user.sexe1 === parseInt(genderFilter);
@@ -314,6 +365,8 @@ function searchUsers() {
         
         return matchesSearch && matchesGender && matchesStatus;
     });
+    
+    console.log('[ADMIN] Filtered results:', filteredUsers.length);
     
     currentPage = 1;
     displayUsers();
@@ -446,71 +499,255 @@ function loadModeration() {
 }
 
 // View User Details
-function viewUser(userId) {
-    const user = allUsers.find(u => u.id === userId);
-    if (!user) return;
-    
+async function viewUser(userId) {
     const modal = document.getElementById('userModal');
     const modalContent = document.getElementById('modalUserContent');
     const modalTitle = document.getElementById('modalUserName');
     
+    const user = allUsers.find(u => u.id === userId);
+    if (!user) return;
+    
     modalTitle.textContent = user.pseudo || 'User Details';
+    modalContent.innerHTML = '<div class="loading" style="padding: 40px; text-align: center;">Loading detailed profile...</div>';
+    modal.classList.add('active');
+    
+    try {
+        // Load full user profile with credits and other data
+        const profileResponse = await fetch(`/api/spice-multi-test?endpoint=/index_api/user&method=POST&id=${userId}`);
+        const profileResult = await profileResponse.json();
+        
+        console.log('[ADMIN] User profile response:', profileResult);
+        
+        let fullProfile = user; // Fallback to basic user data
+        let credits = 0;
+        let joinDate = 'N/A';
+        
+        if (profileResult.success && profileResult.data && profileResult.data.result) {
+            fullProfile = { ...user, ...profileResult.data.result };
+            credits = fullProfile.credits || fullProfile.credit || 0;
+            joinDate = fullProfile.date || fullProfile.created_at;
+        }
+        
+        // Load wallet and transactions data from our database
+        const walletResponse = await fetch(`/api/wallet-transactions?action=get_wallet_transactions&user_id=${userId}&limit=10`);
+        const walletResult = await walletResponse.json();
+        
+        console.log('[ADMIN] Wallet data:', walletResult);
+        
+        const walletData = walletResult.success ? walletResult.data || [] : [];
+        const walletBalance = walletResult.wallet ? walletResult.wallet.balance : credits;
+        
+        // Load gifts data
+        const giftsResponse = await fetch(`/api/database?action=get_received_gifts&user_id=${userId}&limit=20`);
+        const giftsResult = await giftsResponse.json();
+        
+        console.log('[ADMIN] Gifts data:', giftsResult);
+        
+        const receivedGifts = giftsResult.success && giftsResult.data ? giftsResult.data : [];
+        const monetizableGifts = receivedGifts.filter(g => g.status !== 'monetized');
+        const totalWithdrawable = monetizableGifts.reduce((sum, g) => {
+            const giftValue = g.purchase_price_credits || 0;
+            const withdrawableValue = giftValue * 0.1 * 0.1; // 10% conversion, 1 credit = $0.1
+            return sum + withdrawableValue;
+        }, 0);
+        
+        // Check ID verification status (placeholder - needs implementation)
+        const idVerified = fullProfile.id_verified || 'Not Provided';
+        
+        // Display detailed profile
+        displayDetailedProfile(fullProfile, walletBalance, walletData, receivedGifts, totalWithdrawable, idVerified);
+        
+    } catch (error) {
+        console.error('[ADMIN] Error loading user details:', error);
+        modalContent.innerHTML = `
+            <div class="error" style="padding: 40px; text-align: center; color: #ef4444;">
+                <h3>Error Loading Profile</h3>
+                <p>${error.message}</p>
+                <button class="btn-primary" onclick="viewUser(${userId})">Retry</button>
+            </div>
+        `;
+    }
+}
+
+function displayDetailedProfile(user, credits, transactions, gifts, withdrawable, idStatus) {
+    const modalContent = document.getElementById('modalUserContent');
+    
+    // Photo URL
+    let photoUrl = null;
+    if (user.photos_v2 && user.photos_v2.length > 0) {
+        photoUrl = user.photos_v2[0].sq_430 || user.photos_v2[0].normal;
+    } else if (user.photos && user.photos.length > 0) {
+        photoUrl = user.photos[0].url_big || user.photos[0].url_middle;
+    }
+    
+    const initials = user.pseudo ? user.pseudo.substring(0, 2).toUpperCase() : 'XX';
     
     modalContent.innerHTML = `
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
-            <div class="stat-card">
-                <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
-                    <img src="icons/admin/user-icon.png" alt="User" class="stat-icon-img">
-                </div>
-                <div class="stat-info">
-                    <h3>${user.pseudo || 'N/A'}</h3>
-                    <p>Username</p>
-                </div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
-                    <img src="icons/admin/email.png" alt="Email" class="stat-icon-img">
-                </div>
-                <div class="stat-info">
-                    <h3>${user.email || 'N/A'}</h3>
-                    <p>Email</p>
-                </div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
-                    <img src="icons/admin/credits.png" alt="Credits" class="stat-icon-img">
-                </div>
-                <div class="stat-info">
-                    <h3>${user.credits || 0}</h3>
-                    <p>Current Credits</p>
-                </div>
-            </div>
-            
-            <div class="stat-card">
-                <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
-                    <img src="icons/admin/status.png" alt="Status" class="stat-icon-img">
-                </div>
-                <div class="stat-info">
-                    <h3>${user.status || 'inactive'}</h3>
-                    <p>Account Status</p>
-                </div>
+        <!-- Profile Header -->
+        <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #e5e7eb;">
+            ${photoUrl ? 
+                `<img src="${photoUrl}" alt="${user.pseudo}" style="width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 4px solid #667eea;">` :
+                `<div style="width: 100px; height: 100px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); color: white; display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: bold;">${initials}</div>`
+            }
+            <div style="flex: 1;">
+                <h2 style="margin: 0 0 8px 0;">${user.pseudo || 'Unknown User'}</h2>
+                <p style="margin: 0; color: #6b7280;">ID: #${user.id} • ${user.age || 'N/A'} years • ${user.location || user.zone_name || 'Unknown Location'}</p>
+                <p style="margin: 8px 0 0 0;">
+                    <span class="status-badge ${user.status}">${user.status || 'active'}</span>
+                    <span class="status-badge" style="margin-left: 8px;">${user.sexe1 === 1 ? 'Male' : user.sexe1 === 2 ? 'Female' : 'Couple'}</span>
+                </p>
             </div>
         </div>
         
-        <div style="margin-top: 20px;">
-            <h3>Profile Details</h3>
-            <div style="background: #f9fafb; padding: 16px; border-radius: 8px; margin-top: 12px;">
-                <p><strong>User ID:</strong> #${user.id}</p>
-                <p><strong>Age:</strong> ${user.age || 'N/A'}</p>
-                <p><strong>Location:</strong> ${user.city || 'Unknown'}</p>
-                <p><strong>Joined:</strong> ${user.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}</p>
+        <!-- Stats Grid -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 30px;">
+            <div class="stat-card" style="text-align: center;">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2); margin: 0 auto 12px;">
+                    <img src="icons/admin/credits.png" alt="Credits" class="stat-icon-img">
+                </div>
+                <h3 style="margin: 0; font-size: 32px; color: #667eea;">${credits}</h3>
+                <p style="margin: 4px 0 0; color: #6b7280;">Credits Balance</p>
+            </div>
+            
+            <div class="stat-card" style="text-align: center;">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b, #38f9d7); margin: 0 auto 12px;">
+                    <img src="icons/admin/credits.png" alt="Withdrawable" class="stat-icon-img">
+                </div>
+                <h3 style="margin: 0; font-size: 32px; color: #10b981;">$${withdrawable.toFixed(2)}</h3>
+                <p style="margin: 4px 0 0; color: #6b7280;">Available for Withdrawal</p>
+            </div>
+            
+            <div class="stat-card" style="text-align: center;">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c); margin: 0 auto 12px;">
+                    <img src="icons/admin/status.png" alt="ID" class="stat-icon-img">
+                </div>
+                <h3 style="margin: 0; font-size: 20px; color: #ef4444;">${idStatus}</h3>
+                <p style="margin: 4px 0 0; color: #6b7280;">ID Verification</p>
+            </div>
+        </div>
+        
+        <!-- Tabs -->
+        <div class="profile-tabs" style="border-bottom: 2px solid #e5e7eb; margin-bottom: 20px;">
+            <button class="profile-tab active" onclick="switchProfileTab(event, 'transactions')">Transactions</button>
+            <button class="profile-tab" onclick="switchProfileTab(event, 'gifts')">Gifts Inventory</button>
+            <button class="profile-tab" onclick="switchProfileTab(event, 'details')">Full Details</button>
+        </div>
+        
+        <!-- Tab Content -->
+        <div id="profile-tab-transactions" class="profile-tab-content active">
+            <h3>Recent Transactions</h3>
+            ${transactions.length > 0 ? `
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 12px;">
+                        <thead style="background: #f9fafb;">
+                            <tr>
+                                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e5e7eb;">Type</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e5e7eb;">Amount</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e5e7eb;">Date</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e5e7eb;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${transactions.slice(0, 10).map(txn => `
+                                <tr>
+                                    <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">
+                                        <span class="transaction-type ${txn.transaction_type}">${txn.transaction_type}</span>
+                                    </td>
+                                    <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">
+                                        $${txn.amount} (${txn.amount * 10} credits)
+                                    </td>
+                                    <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">
+                                        ${new Date(txn.created_at).toLocaleDateString()}
+                                    </td>
+                                    <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">
+                                        <span class="status-badge ${txn.status || 'completed'}">${txn.status || 'completed'}</span>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            ` : '<p style="color: #6b7280; text-align: center; padding: 20px;">No transactions found</p>'}
+        </div>
+        
+        <div id="profile-tab-gifts" class="profile-tab-content" style="display: none;">
+            <h3>Received Gifts (${gifts.length})</h3>
+            ${gifts.length > 0 ? `
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px; margin-top: 12px;">
+                    ${gifts.map(gift => `
+                        <div style="padding: 16px; background: ${gift.status === 'monetized' ? '#f3f4f6' : '#f0fdf4'}; border-radius: 12px; text-align: center; border: 2px solid ${gift.status === 'monetized' ? '#e5e7eb' : '#10b981'};">
+                            <img src="${gift.image_url || 'gifts/crown.png'}" alt="${gift.name}" style="width: 64px; height: 64px; margin-bottom: 8px;">
+                            <p style="margin: 0; font-weight: 600; font-size: 14px;">${gift.name || 'Unknown Gift'}</p>
+                            <p style="margin: 4px 0; font-size: 12px; color: #6b7280;">${gift.purchase_price_credits || 0} credits</p>
+                            <span class="status-badge" style="font-size: 11px;">${gift.status || 'sent'}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            ` : '<p style="color: #6b7280; text-align: center; padding: 20px;">No gifts received yet</p>'}
+        </div>
+        
+        <div id="profile-tab-details" class="profile-tab-content" style="display: none;">
+            <h3>Full Profile Details</h3>
+            <div style="background: #f9fafb; padding: 20px; border-radius: 12px; margin-top: 12px;">
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+                    <div>
+                        <p style="margin: 0 0 8px; color: #6b7280; font-size: 14px;">Username</p>
+                        <p style="margin: 0; font-weight: 600;">${user.pseudo || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <p style="margin: 0 0 8px; color: #6b7280; font-size: 14px;">First Name</p>
+                        <p style="margin: 0; font-weight: 600;">${user.prenom || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <p style="margin: 0 0 8px; color: #6b7280; font-size: 14px;">Age</p>
+                        <p style="margin: 0; font-weight: 600;">${user.age || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <p style="margin: 0 0 8px; color: #6b7280; font-size: 14px;">Location</p>
+                        <p style="margin: 0; font-weight: 600;">${user.location || user.zone_name || 'Unknown'}</p>
+                    </div>
+                    <div>
+                        <p style="margin: 0 0 8px; color: #6b7280; font-size: 14px;">Joined</p>
+                        <p style="margin: 0; font-weight: 600;">${user.date ? new Date(user.date).toLocaleDateString() : 'N/A'}</p>
+                    </div>
+                    <div>
+                        <p style="margin: 0 0 8px; color: #6b7280; font-size: 14px;">Last Visit</p>
+                        <p style="margin: 0; font-weight: 600;">${user.visite ? new Date(user.visite).toLocaleDateString() : 'N/A'}</p>
+                    </div>
+                    <div>
+                        <p style="margin: 0 0 8px; color: #6b7280; font-size: 14px;">Photos</p>
+                        <p style="margin: 0; font-weight: 600;">${user.photoCount || user.photo || 0}</p>
+                    </div>
+                    <div>
+                        <p style="margin: 0 0 8px; color: #6b7280; font-size: 14px;">Rating</p>
+                        <p style="margin: 0; font-weight: 600;">${user.rating || user.moyenne || 0}/10 (${user.votes || user.vote || 0} votes)</p>
+                    </div>
+                </div>
+                ${user.description ? `
+                    <div style="margin-top: 20px;">
+                        <p style="margin: 0 0 8px; color: #6b7280; font-size: 14px;">About</p>
+                        <p style="margin: 0; line-height: 1.6;">${user.description}</p>
+                    </div>
+                ` : ''}
             </div>
         </div>
     `;
+}
+
+function switchProfileTab(event, tabName) {
+    // Hide all tab contents
+    document.querySelectorAll('.profile-tab-content').forEach(tab => {
+        tab.style.display = 'none';
+    });
     
-    modal.classList.add('active');
+    // Remove active class from all tabs
+    document.querySelectorAll('.profile-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // Show selected tab
+    document.getElementById(`profile-tab-${tabName}`).style.display = 'block';
+    event.target.classList.add('active');
 }
 
 function closeUserModal() {
