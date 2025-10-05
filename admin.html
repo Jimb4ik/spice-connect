@@ -16,23 +16,23 @@
 
         <nav class="sidebar-nav">
             <a href="#" class="nav-item active" data-section="dashboard">
-                <span class="icon">■</span>
+                <img src="icons/admin/dashboard.png" class="nav-icon" alt="Dashboard">
                 <span>Dashboard</span>
             </a>
             <a href="#" class="nav-item" data-section="users">
-                <span class="icon">♦</span>
+                <img src="icons/admin/users.png" class="nav-icon" alt="Users">
                 <span>Users</span>
             </a>
             <a href="#" class="nav-item" data-section="transactions">
-                <span class="icon">◆</span>
+                <img src="icons/admin/transactions.png" class="nav-icon" alt="Transactions">
                 <span>Transactions</span>
             </a>
             <a href="#" class="nav-item" data-section="moderation">
-                <span class="icon">✓</span>
+                <img src="icons/admin/moderation.png" class="nav-icon" alt="Moderation">
                 <span>Moderation</span>
             </a>
             <a href="#" class="nav-item" data-section="settings">
-                <span class="icon">●</span>
+                <img src="icons/admin/settings.png" class="nav-icon" alt="Settings">
                 <span>Settings</span>
             </a>
         </nav>
@@ -46,7 +46,7 @@
                 </div>
             </div>
             <button class="btn-logout" onclick="logout()">
-                <span>×</span>
+                <img src="icons/admin/logout.png" class="logout-icon" alt="Logout">
                 Logout
             </button>
         </div>
@@ -59,7 +59,7 @@
             <h1 id="pageTitle">Dashboard</h1>
             <div class="header-actions">
                 <button class="btn-icon" onclick="refreshData()">
-                    <span>↻</span>
+                    <img src="icons/admin/refresh.png" alt="Refresh" style="width: 20px; height: 20px;">
                 </button>
                 <div class="header-user">
                     <span class="status-indicator online"></span>
@@ -72,28 +72,36 @@
         <section id="dashboard" class="content-section active">
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">U</div>
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                        <img src="icons/admin/users.png" alt="Users" class="stat-icon-img">
+                    </div>
                     <div class="stat-info">
                         <h3 id="totalUsers">-</h3>
                         <p>Total Users</p>
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">●</div>
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                        <img src="icons/admin/active-users.png" alt="Active" class="stat-icon-img">
+                    </div>
                     <div class="stat-info">
                         <h3 id="activeToday">-</h3>
                         <p>Active Today</p>
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">$</div>
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+                        <img src="icons/admin/credits.png" alt="Revenue" class="stat-icon-img">
+                    </div>
                     <div class="stat-info">
                         <h3 id="totalRevenue">-</h3>
                         <p>Total Revenue</p>
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">!</div>
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b, #38f9d7);">
+                        <img src="icons/admin/alert.png" alt="Pending" class="stat-icon-img">
+                    </div>
                     <div class="stat-info">
                         <h3 id="pendingModeration">-</h3>
                         <p>Pending Moderation</p>
@@ -134,7 +142,9 @@
             <div class="section-controls">
                 <div class="search-bar">
                     <input type="text" id="userSearch" placeholder="Search users by name, email, or ID...">
-                    <button onclick="searchUsers()">Search</button>
+                    <button onclick="searchUsers()">
+                        <img src="icons/admin/search.png" alt="Search" style="width: 18px; height: 18px;">
+                    </button>
                 </div>
                 <div class="filter-group">
                     <select id="genderFilter">
@@ -187,7 +197,9 @@
             <div class="section-controls">
                 <div class="search-bar">
                     <input type="text" id="transactionSearch" placeholder="Search transactions by ID or user...">
-                    <button onclick="searchTransactions()">Search</button>
+                    <button onclick="searchTransactions()">
+                        <img src="icons/admin/search.png" alt="Search" style="width: 18px; height: 18px;">
+                    </button>
                 </div>
                 <div class="filter-group">
                     <select id="transactionTypeFilter">
