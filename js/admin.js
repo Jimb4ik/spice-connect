@@ -798,9 +798,9 @@ function displayDetailedProfile(user, credits, transactions, gifts, withdrawable
                                 if (txn.type === 'purchase') {
                                     amountDisplay = `+${txn.credits || txn.amount * 10} credits`;
                                     withUser = 'System';
-                                    details = txn.payment_method ? \`€\${txn.amount} via \${txn.payment_method}\` : \`€\${txn.amount}\`;
+                                    details = txn.payment_method ? '€' + txn.amount + ' via ' + txn.payment_method : '€' + txn.amount;
                                 } else if (txn.type === 'payout') {
-                                    amountDisplay = \`$\${txn.amount}\`;
+                                    amountDisplay = '$' + txn.amount;
                                     amountColor = '#3b82f6';
                                     withUser = 'Bank (OCT)';
                                     details = 'Gift monetization';
@@ -810,31 +810,31 @@ function displayDetailedProfile(user, credits, transactions, gifts, withdrawable
                                     if (txn.from_user_id === user.id) {
                                         details = '→ ' + details;
                                         amountColor = '#ef4444';
-                                        amountDisplay = \`-\${txn.amount} credits\`;
+                                        amountDisplay = '-' + txn.amount + ' credits';
                                     } else {
                                         details = '← ' + details;
-                                        amountDisplay = \`+\${txn.amount} credits\`;
+                                        amountDisplay = '+' + txn.amount + ' credits';
                                     }
                                 }
-                                return \`
+                                return `
                                     <tr>
                                         <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">
-                                            <span class="transaction-type \${txn.type}">\${txn.type}</span>
+                                            <span class="transaction-type ${txn.type}">${txn.type}</span>
                                         </td>
                                         <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">
-                                            <small>\${withUser}</small>
+                                            <small>${withUser}</small>
                                         </td>
                                         <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">
-                                            <strong style="color: \${amountColor};">\${amountDisplay}</strong>
+                                            <strong style="color: ${amountColor};">${amountDisplay}</strong>
                                         </td>
                                         <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">
-                                            <small>\${details}</small>
+                                            <small>${details}</small>
                                         </td>
                                         <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">
-                                            <small>\${new Date(txn.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</small>
+                                            <small>${new Date(txn.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</small>
                                         </td>
                                     </tr>
-                                \`;
+                                `;
                             }).join('')}
                         </tbody>
                     </table>
