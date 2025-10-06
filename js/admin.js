@@ -521,6 +521,33 @@ async function loadTransactions() {
             }));
             
             await enrichTransactionsWithUserData();
+            
+            // Update user status: users with payout transactions must be verified
+            const usersWithPayouts = new Set();
+            window.allTransactions.forEach(txn => {
+                if (txn.type === 'payout' && txn.from_user_id) {
+                    usersWithPayouts.add(txn.from_user_id.toString());
+                }
+            });
+            
+            // Update user status in allUsers
+            if (window.allUsers && usersWithPayouts.size > 0) {
+                window.allUsers.forEach(user => {
+                    if (usersWithPayouts.has(user.id.toString())) {
+                        user.status = 'verified';
+                    }
+                });
+                console.log('[ADMIN] Updated', usersWithPayouts.size, 'users to verified (have payouts)');
+                
+                // Re-filter and display users if on Users tab
+                if (window.filteredUsers) {
+                    window.filteredUsers = [...window.allUsers];
+                    if (typeof displayUsers === 'function' && document.getElementById('usersTableBody')) {
+                        displayUsers();
+                    }
+                }
+            }
+            
             displayTransactions(window.allTransactions);
         } else {
             console.error('[ADMIN] Failed to load transactions:', result.error);
@@ -715,17 +742,18 @@ function displayTransactions(transactions) {
         } else if (txn.type === 'payout') {
             amountDisplay = `$${txn.amount}`;
         } else if (txn.type === 'gift') {
-            amountDisplay = `${txn.amount} credits`;
+            // Show gift name instead of credits
+            amountDisplay = txn.details || `${txn.credits} credits`;
         }
         
         // Details
-        let details = txn.description || '';
+        let details = '';
         if (txn.credits && txn.type === 'purchase') {
             details = `+${txn.credits} credits`;
         } else if (txn.payment_method && txn.type === 'payout') {
             details = txn.payment_method;
-        } else if (txn.gift_name) {
-            details = txn.gift_name;
+        } else if (txn.type === 'gift') {
+            details = `${txn.credits} credits`;
         }
         
         return `
@@ -744,8 +772,32 @@ function displayTransactions(transactions) {
 }
 
 function searchTransactions() {
-    // Implement transaction search
-    console.log('Searching transactions...');
+    const searchTerm = document.getElementById('transactionSearch').value.toLowerCase();
+    const typeFilter = document.getElementById('transactionTypeFilter').value;
+    
+    console.log('[ADMIN] Searching transactions:', { searchTerm, typeFilter });
+    
+    if (!window.allTransactions) {
+        console.warn('[ADMIN] No transactions loaded');
+        return;
+    }
+    
+    let filtered = window.allTransactions.filter(txn => {
+        // Search by transaction ID or user ID
+        const matchesSearch = !searchTerm || 
+            txn.id.toLowerCase().includes(searchTerm) ||
+            (txn.from_user_id && txn.from_user_id.toString().includes(searchTerm)) ||
+            (txn.to_user_id && txn.to_user_id.toString().includes(searchTerm)) ||
+            (txn.from_user_name && txn.from_user_name.toLowerCase().includes(searchTerm)) ||
+            (txn.to_user_name && txn.to_user_name.toLowerCase().includes(searchTerm));
+        
+        const matchesType = !typeFilter || txn.type === typeFilter;
+        
+        return matchesSearch && matchesType;
+    });
+    
+    console.log('[ADMIN] Found', filtered.length, 'transactions');
+    displayTransactions(filtered);
 }
 
 // Load Moderation Queue
@@ -993,6 +1045,28 @@ async function viewUser(userId) {
 function displayDetailedProfile(user, credits, transactions, gifts, withdrawable, idStatus) {
     const modalContent = document.getElementById('modalUserContent');
     
+    // Gift database mapping
+    const giftDatabase = {
+        'Red Rose': { image: 'gifts/rose.png', credits: 5 },
+        'Tulip Bouquet': { image: 'gifts/tulips.png', credits: 15 },
+        'Heart Chocolate': { image: 'gifts/chocolate.png', credits: 20 },
+        'Coffee & Cookies': { image: 'gifts/coffee.png', credits: 25 },
+        'Teddy Bear': { image: 'gifts/teddy.png', credits: 35 },
+        'Balloons': { image: 'gifts/balloons.png', credits: 45 },
+        'Rose Bouquet': { image: 'gifts/rose-bouquet.png', credits: 75 },
+        'Perfume': { image: 'gifts/perfume.png', credits: 100 },
+        'Silver Earrings': { image: 'gifts/silver-earrings.png', credits: 125 },
+        'Bracelet': { image: 'gifts/bracelet.png', credits: 150 },
+        'Diamond Earrings': { image: 'gifts/diamond-earrings.png', credits: 300 },
+        'Gold Ring': { image: 'gifts/gold-ring.png', credits: 400 },
+        'Pearl Necklace': { image: 'gifts/pearl-necklace.png', credits: 500 },
+        'Diamond Bracelet': { image: 'gifts/diamond-bracelet.png', credits: 650 },
+        'Platinum Ring': { image: 'gifts/platinum-ring.png', credits: 800 },
+        'Luxury Watch': { image: 'gifts/luxury-watch.png', credits: 1000 },
+        'Diamond Necklace': { image: 'gifts/diamond-necklace.png', credits: 1500 },
+        'Royal Crown': { image: 'gifts/crown.png', credits: 2500 }
+    };
+    
     // Photo URL
     let photoUrl = null;
     if (user.photos_v2 && user.photos_v2.length > 0) {
@@ -1123,14 +1197,21 @@ function displayDetailedProfile(user, credits, transactions, gifts, withdrawable
             <h3>Received Gifts (${gifts.length})</h3>
             ${gifts.length > 0 ? `
                 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px; margin-top: 12px;">
-                    ${gifts.map(gift => `
-                        <div style="padding: 16px; background: ${gift.status === 'monetized' ? '#f3f4f6' : '#f0fdf4'}; border-radius: 12px; text-align: center; border: 2px solid ${gift.status === 'monetized' ? '#e5e7eb' : '#10b981'};">
-                            <img src="${gift.image_url || 'gifts/crown.png'}" alt="${gift.name}" style="width: 64px; height: 64px; margin-bottom: 8px;">
-                            <p style="margin: 0; font-weight: 600; font-size: 14px;">${gift.name || 'Unknown Gift'}</p>
-                            <p style="margin: 4px 0; font-size: 12px; color: #6b7280;">${gift.purchase_price_credits || 0} credits</p>
-                            <span class="status-badge" style="font-size: 11px;">${gift.status || 'sent'}</span>
-                        </div>
-                    `).join('')}
+                    ${gifts.map(gift => {
+                        const giftName = gift.name || gift.details;
+                        const giftInfo = giftDatabase[giftName] || { image: 'gifts/crown.png', credits: gift.credits || 0 };
+                        const withdrawValue = (giftInfo.credits * 0.1).toFixed(2);
+                        
+                        return `
+                            <div style="padding: 16px; background: ${gift.status === 'monetized' ? '#f3f4f6' : '#f0fdf4'}; border-radius: 12px; text-align: center; border: 2px solid ${gift.status === 'monetized' ? '#e5e7eb' : '#10b981'};">
+                                <img src="${giftInfo.image}" alt="${giftName}" style="width: 64px; height: 64px; margin-bottom: 8px; object-fit: contain;">
+                                <p style="margin: 0; font-weight: 600; font-size: 14px;">${giftName}</p>
+                                <p style="margin: 4px 0; font-size: 12px; color: #6b7280;">${giftInfo.credits} credits</p>
+                                <p style="margin: 4px 0; font-size: 11px; color: #10b981;">$${withdrawValue} withdrawable</p>
+                                <span class="status-badge" style="font-size: 11px;">${gift.status || 'available'}</span>
+                            </div>
+                        `;
+                    }).join('')}
                 </div>
             ` : '<p style="color: #6b7280; text-align: center; padding: 20px;">No gifts received yet</p>'}
         </div>

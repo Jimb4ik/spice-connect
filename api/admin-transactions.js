@@ -91,8 +91,28 @@ export default async function handler(req, res) {
                 }
                 const transactionTypes = ['purchase', 'payout', 'gift'];
                 const paymentMethods = ['Credit Card', 'PayPal', 'Stripe', 'Bank Transfer'];
-                const giftNames = ['Rose', 'Tulips', 'Chocolate', 'Crown', 'Diamond Ring'];
-                const giftPrices = [10, 20, 30, 50, 100];
+                
+                // Real gifts from database
+                const realGifts = [
+                    { name: 'Red Rose', price: 5 },
+                    { name: 'Tulip Bouquet', price: 15 },
+                    { name: 'Heart Chocolate', price: 20 },
+                    { name: 'Coffee & Cookies', price: 25 },
+                    { name: 'Teddy Bear', price: 35 },
+                    { name: 'Balloons', price: 45 },
+                    { name: 'Rose Bouquet', price: 75 },
+                    { name: 'Perfume', price: 100 },
+                    { name: 'Silver Earrings', price: 125 },
+                    { name: 'Bracelet', price: 150 },
+                    { name: 'Diamond Earrings', price: 300 },
+                    { name: 'Gold Ring', price: 400 },
+                    { name: 'Pearl Necklace', price: 500 },
+                    { name: 'Diamond Bracelet', price: 650 },
+                    { name: 'Platinum Ring', price: 800 },
+                    { name: 'Luxury Watch', price: 1000 },
+                    { name: 'Diamond Necklace', price: 1500 },
+                    { name: 'Royal Crown', price: 2500 }
+                ];
 
                 const transactions = [];
                 const getRandomElement = (arr) => arr[Math.floor(Math.random() * arr.length)];
@@ -140,8 +160,8 @@ export default async function handler(req, res) {
                             details = 'Gift monetization withdrawal';
                             paymentMethod = 'Bank Transfer';
                         } else if (type === 'gift') {
-                            const giftIndex = Math.floor(Math.random() * giftNames.length);
-                            details = `${giftNames[giftIndex]} (${giftPrices[giftIndex]} credits)`;
+                            const gift = getRandomElement(realGifts);
+                            details = gift.name;
                         }
                         
                         transactions.push({
@@ -150,7 +170,7 @@ export default async function handler(req, res) {
                             to_user_id: toUserId,
                             type: type,
                             amount: parseFloat(amount),
-                            credits: type === 'gift' ? giftPrices[giftNames.indexOf(details.split(' ')[0])] : credits,
+                            credits: type === 'gift' ? realGifts.find(g => g.name === details)?.price || 50 : credits,
                             details: details,
                             payment_method: paymentMethod,
                             status: 'completed',
@@ -187,8 +207,8 @@ export default async function handler(req, res) {
                         details = 'Gift monetization withdrawal';
                         paymentMethod = 'Bank Transfer';
                     } else if (type === 'gift') {
-                        const giftIndex = Math.floor(Math.random() * giftNames.length);
-                        details = `${giftNames[giftIndex]} (${giftPrices[giftIndex]} credits)`;
+                        const gift = getRandomElement(realGifts);
+                        details = gift.name;
                     }
 
                     transactions.push({
@@ -197,7 +217,7 @@ export default async function handler(req, res) {
                         to_user_id: toUserId,
                         type: type,
                         amount: parseFloat(amount),
-                        credits: type === 'gift' ? giftPrices[giftNames.indexOf(details.split(' ')[0])] : credits,
+                        credits: type === 'gift' ? realGifts.find(g => g.name === details)?.price || 50 : credits,
                         details: details,
                         payment_method: paymentMethod,
                         status: 'completed',
