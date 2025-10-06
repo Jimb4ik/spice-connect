@@ -475,6 +475,12 @@ async function loadTransactions() {
     tbody.innerHTML = '<tr><td colspan="7" class="loading-cell">Loading transactions...</td></tr>';
 
     try {
+        // Ensure users are loaded first (needed for user display in transactions)
+        if (!window.allUsers || window.allUsers.length === 0) {
+            console.log('[ADMIN] Loading users first for transactions display...');
+            await loadUsers();
+        }
+        
         // First, seed the database with transactions if needed
         const seedResponse = await fetch('/api/admin-transactions', {
             method: 'POST',
