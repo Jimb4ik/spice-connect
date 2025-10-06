@@ -124,13 +124,13 @@ export default async function handler(req, res) {
                     return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
                 });
 
-                // Выбираем 15 активных пользователей
-                const activeUserIds = userIds.sort(() => 0.5 - Math.random()).slice(0, 15);
-                console.log('[ADMIN] Creating transactions for', activeUserIds.length, 'active users');
+                // Выбираем 4 ОЧЕНЬ активных пользователя
+                const activeUserIds = userIds.sort(() => 0.5 - Math.random()).slice(0, 4);
+                console.log('[ADMIN] Creating transactions for', activeUserIds.length, 'SUPER active users');
                 
-                // Создаем МНОГО транзакций для активных пользователей (20-40 на каждого)
+                // Создаем ОЧЕНЬ МНОГО транзакций для супер активных пользователей (60-100 на каждого)
                 activeUserIds.forEach(activeUserId => {
-                    const numTransactions = Math.floor(Math.random() * 21) + 20; // 20-40 транзакций
+                    const numTransactions = Math.floor(Math.random() * 41) + 60; // 60-100 транзакций
                     
                     for (let i = 0; i < numTransactions; i++) {
                         const type = getRandomElement(transactionTypes);
@@ -182,8 +182,8 @@ export default async function handler(req, res) {
                     }
                 });
                 
-                // Генерируем еще 100-150 обычных транзакций для остальных пользователей
-                const numRegularTransactions = Math.floor(Math.random() * 51) + 100; // 100-150 транзакций
+                // Генерируем еще 200-300 обычных транзакций для остальных пользователей
+                const numRegularTransactions = Math.floor(Math.random() * 101) + 200; // 200-300 транзакций
                 for (let i = 0; i < numRegularTransactions; i++) {
                     const type = getRandomElement(transactionTypes);
                     const amount = (Math.random() * 100 + 10).toFixed(2);
