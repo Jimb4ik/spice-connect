@@ -1008,9 +1008,11 @@ async function viewUser(userId) {
         );
         
         // 10% of received gift value can be withdrawn
+        // Formula: gift_credits × €0.21 × 10% = withdrawable in EUR
         const totalWithdrawable = receivedGiftTransactions.reduce((sum, txn) => {
-            const giftValue = parseFloat(txn.amount || 0);
-            const withdrawableValue = giftValue * 0.1 * 0.1; // 10% conversion, 1 credit = $0.1
+            const giftCredits = txn.credits || parseFloat(txn.amount || 0);
+            const giftEuroValue = giftCredits * 0.21; // Convert credits to EUR
+            const withdrawableValue = giftEuroValue * 0.1; // 10% of EUR value
             return sum + withdrawableValue;
         }, 0);
         
@@ -1164,17 +1166,16 @@ function displayDetailedProfile(user, credits, transactions, gifts, withdrawable
                                     withUser = txn.from_user_id === user.id ? txn.to_user_name : txn.from_user_name;
                                     const giftName = txn.details || txn.gift_name || 'Gift';
                                     const giftCredits = txn.credits || parseInt(txn.amount);
-                                    const giftEuroValue = (giftCredits * 0.21).toFixed(2);
                                     
                                     if (txn.from_user_id === user.id) {
                                         // Sent gift
-                                        amountDisplay = `${giftName} (€${giftEuroValue})`;
+                                        amountDisplay = giftName;
                                         details = `-${giftCredits} credits`;
                                         amountColor = '#ef4444';
                                     } else {
                                         // Received gift
-                                        amountDisplay = `${giftName} (€${giftEuroValue})`;
-                                        details = `+${giftCredits} credits`;
+                                        amountDisplay = giftName;
+                                        details = `${giftCredits} credits`;
                                         amountColor = '#10b981';
                                     }
                                 }
@@ -1211,14 +1212,16 @@ function displayDetailedProfile(user, credits, transactions, gifts, withdrawable
                     ${gifts.map(gift => {
                         const giftName = gift.name || gift.details;
                         const giftInfo = giftDatabase[giftName] || { image: 'gifts/crown.png', credits: gift.credits || 0 };
-                        const withdrawValue = (giftInfo.credits * 0.1).toFixed(2);
+                        // Correct monetization: gift_credits × €0.21 × 10%
+                        const giftEuroValue = giftInfo.credits * 0.21;
+                        const withdrawValue = (giftEuroValue * 0.1).toFixed(2);
                         
                         return `
                             <div style="padding: 16px; background: ${gift.status === 'monetized' ? '#f3f4f6' : '#f0fdf4'}; border-radius: 12px; text-align: center; border: 2px solid ${gift.status === 'monetized' ? '#e5e7eb' : '#10b981'};">
                                 <img src="${giftInfo.image}" alt="${giftName}" style="width: 64px; height: 64px; margin-bottom: 8px; object-fit: contain;">
                                 <p style="margin: 0; font-weight: 600; font-size: 14px;">${giftName}</p>
                                 <p style="margin: 4px 0; font-size: 12px; color: #6b7280;">${giftInfo.credits} credits</p>
-                                <p style="margin: 4px 0; font-size: 11px; color: #10b981;">$${withdrawValue} withdrawable</p>
+                                <p style="margin: 4px 0; font-size: 11px; color: #10b981;">€${withdrawValue} withdrawable</p>
                                 <span class="status-badge" style="font-size: 11px;">${gift.status || 'available'}</span>
                             </div>
                         `;

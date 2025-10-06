@@ -1459,7 +1459,7 @@ async function monetizeGifts(pool, req) {
     try {
         await client.query('BEGIN');
 
-        let totalUsdValue = 0;
+        let totalEurValue = 0;
         const monetizedGifts = [];
 
         for (const giftId of gift_ids) {
@@ -1478,9 +1478,10 @@ async function monetizeGifts(pool, req) {
 
             const gift = giftResult.rows[0];
             
-            // Рассчитываем стоимость монетизации (10% от стоимости, 1 кредит = 0.1 USD)
-            const usdValue = (gift.price_credits * 0.1 * 0.1);
-            totalUsdValue += usdValue;
+            // Рассчитываем стоимость монетизации: 10% от стоимости в EUR
+            // Formula: gift_credits × €0.21 × 10%
+            const eurValue = (gift.price_credits * 0.21 * 0.1);
+            totalEurValue += eurValue;
 
             // Обновляем статус подарка
             await client.query(
@@ -1488,7 +1489,7 @@ async function monetizeGifts(pool, req) {
                  SET status = 'monetized', monetized_at = CURRENT_TIMESTAMP, 
                      monetization_value_usd = $1, monetization_currency = $2
                  WHERE id = $3`,
-                [usdValue, currency, giftId]
+                [eurValue, 'EUR', giftId]
             );
 
             // Записываем транзакцию монетизации
@@ -1496,14 +1497,14 @@ async function monetizeGifts(pool, req) {
                 `INSERT INTO gift_transactions 
                  (session_id, user_id, transaction_type, gift_id, user_gift_id, usd_earned, currency, description)
                  VALUES ($1, $2, 'monetize', $3, $4, $5, $6, $7)`,
-                [session_id, user_id, gift.gift_id, giftId, usdValue, currency, `Monetized ${gift.name} for ${usdValue} ${currency}`]
+                [session_id, user_id, gift.gift_id, giftId, eurValue, 'EUR', `Monetized ${gift.name} for €${eurValue.toFixed(2)}`]
             );
 
             monetizedGifts.push({
                 id: giftId,
                 name: gift.name,
                 credits: gift.price_credits,
-                usd_value: usdValue
+                usd_value: eurValue
             });
         }
 
@@ -1513,10 +1514,10 @@ async function monetizeGifts(pool, req) {
             success: true,
             data: {
                 monetized_gifts: monetizedGifts,
-                total_usd_value: totalUsdValue,
-                currency: currency
+                total_usd_value: totalEurValue,
+                currency: 'EUR'
             },
-            message: `Successfully monetized ${monetizedGifts.length} gifts for ${totalUsdValue.toFixed(2)} ${currency}`
+            message: `Successfully monetized ${monetizedGifts.length} gifts for €${totalEurValue.toFixed(2)}`
         };
 
     } catch (error) {
