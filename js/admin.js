@@ -182,7 +182,7 @@ async function loadUsers() {
         
         if (result.success && result.data && result.data.result) {
             console.log('[ADMIN] Mapping', result.data.result.length, 'users...');
-            allUsers = result.data.result.map(user => ({
+            window.allUsers = result.data.result.map(user => ({
                 id: user.id || user.id_membre,
                 pseudo: user.pseudo,
                 prenom: user.prenom,
@@ -197,10 +197,10 @@ async function loadUsers() {
                 photos: user.photos || []
             }));
             
-            console.log('[ADMIN] allUsers populated with', allUsers.length, 'users');
-            console.log('[ADMIN] First user:', allUsers[0]);
+            console.log('[ADMIN] allUsers populated with', window.allUsers.length, 'users');
+            console.log('[ADMIN] First user:', window.allUsers[0]);
             
-            filteredUsers = [...allUsers];
+            window.filteredUsers = [...window.allUsers];
             displayUsers();
         } else {
             // Fallback to demo data if API fails
@@ -677,9 +677,10 @@ async function viewUser(userId) {
     
     console.log('[ADMIN] Modal element:', modal);
     
-    const user = allUsers.find(u => u.id === userId);
+    console.log('[ADMIN] allUsers length:', window.allUsers.length);
+    const user = window.allUsers.find(u => u.id === userId);
     if (!user) {
-        console.error('[ADMIN] User not found:', userId);
+        console.error('[ADMIN] User not found:', userId, 'in', window.allUsers.length, 'users');
         return;
     }
     
