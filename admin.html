@@ -236,6 +236,25 @@
 
         <!-- Moderation Section -->
         <section id="moderation" class="content-section">
+            <div class="section-controls">
+                <div class="search-bar">
+                    <input type="text" id="moderationSearch" placeholder="Search users by name or ID...">
+                    <button onclick="filterModeration()">
+                        <img src="icons/admin/search.png" alt="Search" style="width: 18px; height: 18px;">
+                    </button>
+                </div>
+                <div class="filter-group">
+                    <select id="moderationStatusFilter">
+                        <option value="">All</option>
+                        <option value="pending" selected>Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
+                        <option value="additional_required">Info Requested</option>
+                    </select>
+                    <button class="btn-primary" onclick="filterModeration()">Apply Filters</button>
+                </div>
+            </div>
+            
             <div class="moderation-queue" id="moderationQueue">
                 <div class="loading">Loading pending items...</div>
             </div>

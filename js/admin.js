@@ -655,6 +655,34 @@ function displayTransactions(transactions) {
         return;
     }
     
+    // Helper function to display user with photo and nickname
+    const getUserDisplay = (userId, userName) => {
+        if (!userId) return '—';
+        
+        const user = window.allUsers ? window.allUsers.find(u => u.id == userId) : null;
+        if (user) {
+            const photoUrl = user.photos_v2?.[0]?.sq_430 || user.photos?.[0]?.url_middle || null;
+            const initials = user.pseudo ? user.pseudo.substring(0, 2).toUpperCase() : 'U';
+            
+            return `
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; flex-shrink: 0;">
+                        ${photoUrl ? 
+                            `<img src="${photoUrl}" alt="${user.pseudo}" style="width: 100%; height: 100%; object-fit: cover;">` :
+                            `<div style="width: 100%; height: 100%; background: linear-gradient(135deg, #667eea, #764ba2); color: white; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold;">${initials}</div>`
+                        }
+                    </div>
+                    <div style="min-width: 0;">
+                        <div style="font-weight: 500;">${user.pseudo}</div>
+                        <div style="font-size: 11px; color: #9ca3af;">#${user.id}</div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        return `User #${userId}`;
+    };
+    
     tbody.innerHTML = transactions.slice(0, 50).map(txn => {
         // Format transaction ID (show first 8 characters)
         const shortId = txn.id.length > 16 ? txn.id.substring(0, 16) + '...' : txn.id;
@@ -690,8 +718,8 @@ function displayTransactions(transactions) {
         return `
             <tr>
                 <td><small style="font-family: monospace;">${shortId}</small></td>
-                <td>${txn.from_user_name || '—'}</td>
-                <td>${txn.to_user_name || '—'}</td>
+                <td>${getUserDisplay(txn.from_user_id, txn.from_user_name)}</td>
+                <td>${getUserDisplay(txn.to_user_id, txn.to_user_name)}</td>
                 <td><span class="transaction-type ${txn.type}">${txn.type}</span></td>
                 <td><strong>${amountDisplay}</strong></td>
                 <td><small>${details}</small></td>
@@ -752,22 +780,13 @@ async function loadModeration() {
                 'driver_license': 'Driver License'
             };
             
+            // Save documents globally for filtering
+            window.allModerationDocs = documents;
+            window.userMapForModeration = userMap;
+            
             moderationQueue.innerHTML = `
                 <div class="card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h3>Verification Queue (${documents.length})</h3>
-                        <div style="display: flex; gap: 8px;">
-                            <input type="text" id="moderationSearch" placeholder="Search..." style="padding: 8px; border: 1px solid #ddd; border-radius: 6px; width: 200px;">
-                            <select id="moderationStatusFilter" style="padding: 8px; border: 1px solid #ddd; border-radius: 6px;">
-                                <option value="">All</option>
-                                <option value="pending" selected>Pending</option>
-                                <option value="approved">Approved</option>
-                                <option value="rejected">Rejected</option>
-                                <option value="additional_required">Info Requested</option>
-                            </select>
-                            <button class="btn-primary" onclick="filterModeration()" style="padding: 8px 16px;">Filter</button>
-                        </div>
-                    </div>
+                    <h3>Verification Queue (${documents.length})</h3>
                     <div id="moderationItemsContainer">
                         ${documents.map(doc => {
                             const user = userMap[doc.user_id];
