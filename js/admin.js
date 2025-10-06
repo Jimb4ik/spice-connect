@@ -170,7 +170,9 @@ async function loadUsers() {
             page: 0,
             pas: 100, // Get 100 users at once
             is_photo: 1, // Only users with photos
-            get_picture_430: 1 // Get high-res photos
+            get_picture_430: 1, // Get high-res photos
+            sexe1: '0', // Get all genders (0 = all, 1 = male, 2 = female, 3 = couple)
+            sexe2: '0'  // Looking for all genders
         });
         
         console.log('[ADMIN] Loading users with params:', params.toString());
