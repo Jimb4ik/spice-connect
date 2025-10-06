@@ -15,7 +15,7 @@ export default async function handler(req, res) {
     });
 
     try {
-        const { action, user_id, limit = 100 } = req.method === 'GET' ? req.query : req.body;
+        const { action, user_id, limit = 100, user_ids = [] } = req.method === 'GET' ? req.query : req.body;
 
         switch (action) {
             case 'get_all_transactions': {
@@ -74,10 +74,20 @@ export default async function handler(req, res) {
                     )
                 `);
 
-                // Генерируем реалистичные ID пользователей (диапазон от 1000000 до 1020000)
-                const userIds = [];
-                for (let i = 0; i < 200; i++) {
-                    userIds.push(1000000 + Math.floor(Math.random() * 20000));
+                // Используем переданные ID пользователей или генерируем случайные
+                let userIds = user_ids && user_ids.length > 0 ? user_ids : [];
+                
+                if (userIds.length === 0) {
+                    // Fallback: генерируем случайные ID
+                    for (let i = 0; i < 200; i++) {
+                        userIds.push(1000000 + Math.floor(Math.random() * 20000));
+                    }
+                }
+                
+                // Если переданы user_ids, очистим старые транзакции для свежих данных
+                if (user_ids && user_ids.length > 0) {
+                    await pool.query('DELETE FROM transactions');
+                    console.log('[ADMIN] Cleared old transactions for fresh seed');
                 }
                 const transactionTypes = ['purchase', 'payout', 'gift'];
                 const paymentMethods = ['Credit Card', 'PayPal', 'Stripe', 'Bank Transfer'];

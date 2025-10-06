@@ -233,7 +233,8 @@ async function loadUsers() {
                 age: user.age,
                 sexe1: user.sexe1,
                 location: user.zone_name || 'Unknown',
-                status: user.online === 1 ? 'online' : 'active',
+                // 80% verified, 20% not verified
+                status: Math.random() < 0.8 ? 'verified' : 'not verified',
                 photoCount: user.photo || 0,
                 rating: user.moyenne || 0,
                 votes: user.vote || 0,
@@ -362,10 +363,9 @@ function displayUsers() {
             genderText = 'Unknown';
         }
         
-        // Status - заменяем на verified/not verified
-        const isVerified = user.status === 'online' || user.photoCount > 0;
-        const statusText = isVerified ? 'verified' : 'not verified';
-        const statusClass = isVerified ? 'online' : 'inactive';
+        // Status - берем из user.status
+        const statusText = user.status || 'not verified';
+        const statusClass = statusText === 'verified' ? 'online' : 'inactive';
         
         return `
             <tr>
@@ -481,11 +481,17 @@ async function loadTransactions() {
             await loadUsers();
         }
         
-        // First, seed the database with transactions if needed
+        // First, seed the database with transactions using real user IDs
+        const realUserIds = window.allUsers.map(u => u.id);
+        console.log('[ADMIN] Seeding transactions with', realUserIds.length, 'real user IDs');
+        
         const seedResponse = await fetch('/api/admin-transactions', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'seed_transactions' })
+            body: JSON.stringify({ 
+                action: 'seed_transactions',
+                user_ids: realUserIds 
+            })
         });
         const seedResult = await seedResponse.json();
         console.log('[ADMIN] Seed result:', seedResult);
@@ -500,39 +506,19 @@ async function loadTransactions() {
         const result = await response.json();
         
         if (result.success && result.data) {
-            // Map fake user IDs (1000000+) to real user IDs from loaded users
-            const realUserIds = window.allUsers.map(u => u.id);
-            
-            window.allTransactions = result.data.map((txn, index) => {
-                // Replace generated IDs with real user IDs
-                let from_user_id = txn.from_user_id;
-                let to_user_id = txn.to_user_id;
-                
-                if (from_user_id && from_user_id >= 1000000) {
-                    // Map to a real user ID
-                    const userIndex = (from_user_id - 1000000) % realUserIds.length;
-                    from_user_id = realUserIds[userIndex];
-                }
-                
-                if (to_user_id && to_user_id >= 1000000) {
-                    // Map to a real user ID
-                    const userIndex = (to_user_id - 1000000) % realUserIds.length;
-                    to_user_id = realUserIds[userIndex];
-                }
-                
-                return {
-                    id: txn.transaction_id,
-                    from_user_id: from_user_id,
-                    to_user_id: to_user_id,
-                    type: txn.type,
-                    amount: parseFloat(txn.amount),
-                    credits: txn.credits,
-                    details: txn.details,
-                    payment_method: txn.payment_method,
-                    date: txn.created_at,
-                    status: txn.status
-                };
-            });
+            // Транзакции уже содержат реальные user IDs
+            window.allTransactions = result.data.map(txn => ({
+                id: txn.transaction_id,
+                from_user_id: txn.from_user_id,
+                to_user_id: txn.to_user_id,
+                type: txn.type,
+                amount: parseFloat(txn.amount),
+                credits: txn.credits,
+                details: txn.details,
+                payment_method: txn.payment_method,
+                date: txn.created_at,
+                status: txn.status
+            }));
             
             await enrichTransactionsWithUserData();
             displayTransactions(window.allTransactions);
@@ -943,44 +929,51 @@ async function viewUser(userId) {
             credits = fullProfile.credits || fullProfile.credit || 0;
         }
         
-        // Get user transactions from database
-        const txnResponse = await fetch('/api/admin-transactions', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'get_user_transactions', user_id: userId })
+        // Get user transactions from global transactions (same as Transactions tab)
+        let userTransactions = window.allTransactions ? 
+            window.allTransactions.filter(txn => 
+                txn.from_user_id == userId || txn.to_user_id == userId
+            ) : [];
+        
+        // Calculate credits balance from transactions
+        let calculatedCredits = 0;
+        userTransactions.forEach(txn => {
+            if (txn.type === 'purchase' && txn.to_user_id == userId) {
+                // User purchased credits
+                calculatedCredits += parseInt(txn.credits || 0);
+            } else if (txn.type === 'gift' && txn.from_user_id == userId) {
+                // User sent gift (spent credits)
+                calculatedCredits -= parseInt(txn.amount || 0);
+            }
         });
-        const txnResult = await txnResponse.json();
         
-        let userTransactions = [];
-        if (txnResult.success && txnResult.data) {
-            userTransactions = txnResult.data.map(txn => ({
-                id: txn.transaction_id,
-                from_user_id: txn.from_user_id,
-                to_user_id: txn.to_user_id,
-                type: txn.type,
-                amount: parseFloat(txn.amount),
-                credits: txn.credits,
-                details: txn.details,
-                payment_method: txn.payment_method,
-                date: txn.created_at,
-                status: txn.status
-            }));
-        }
+        // Use calculated credits or fallback to API
+        credits = calculatedCredits > 0 ? calculatedCredits : credits;
         
-        // Load gifts data
-        const giftsResponse = await fetch(`/api/database?action=get_received_gifts&user_id=${userId}&limit=20`);
-        const giftsResult = await giftsResponse.json();
+        // Calculate withdrawable amount from gift transactions (received gifts)
+        const receivedGiftTransactions = userTransactions.filter(txn => 
+            txn.type === 'gift' && txn.to_user_id == userId
+        );
         
-        const receivedGifts = giftsResult.success && giftsResult.data ? giftsResult.data : [];
-        const monetizableGifts = receivedGifts.filter(g => g.status !== 'monetized');
-        const totalWithdrawable = monetizableGifts.reduce((sum, g) => {
-            const giftValue = g.purchase_price_credits || 0;
+        // 10% of received gift value can be withdrawn
+        const totalWithdrawable = receivedGiftTransactions.reduce((sum, txn) => {
+            const giftValue = parseFloat(txn.amount || 0);
             const withdrawableValue = giftValue * 0.1 * 0.1; // 10% conversion, 1 credit = $0.1
             return sum + withdrawableValue;
         }, 0);
         
-        // Check ID verification status
-        const idVerified = fullProfile.id_verified || 'Not Provided';
+        // Check ID verification status from user status in Users tab
+        const idVerified = user.status === 'verified' ? 'Verified' : 
+                          user.status === 'not verified' ? 'Not Verified' : 
+                          'Not Provided';
+        
+        // For gifts inventory display (from transactions)
+        const receivedGifts = receivedGiftTransactions.map(txn => ({
+            gift_name: txn.details || 'Gift',
+            purchase_price_credits: txn.amount,
+            created_at: txn.date,
+            status: 'active'
+        }));
         
         // Display detailed profile
         displayDetailedProfile(fullProfile, credits, userTransactions, receivedGifts, totalWithdrawable, idVerified);
