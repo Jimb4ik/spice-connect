@@ -552,26 +552,22 @@ body {
     border-radius: 12px;
     font-size: 12px;
     font-weight: 500;
+    text-transform: capitalize;
 }
 
-.transaction-type.deposit {
+.transaction-type.purchase {
     background: #d1fae5;
     color: #065f46;
 }
 
-.transaction-type.purchase {
+.transaction-type.payout {
     background: #fef3c7;
     color: #92400e;
 }
 
-.transaction-type.withdrawal {
-    background: #fee2e2;
-    color: #991b1b;
-}
-
-.transaction-type.refund {
-    background: #dbeafe;
-    color: #1e40af;
+.transaction-type.gift {
+    background: #fce7f3;
+    color: #9f1239;
 }
 
 .action-buttons {

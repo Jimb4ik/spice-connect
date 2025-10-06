@@ -203,10 +203,9 @@
                 <div class="filter-group">
                     <select id="transactionTypeFilter">
                         <option value="">All Types</option>
-                        <option value="deposit">Deposits</option>
-                        <option value="purchase">Purchases</option>
-                        <option value="withdrawal">Withdrawals</option>
-                        <option value="refund">Refunds</option>
+                        <option value="purchase">Credit Purchases</option>
+                        <option value="payout">Payouts (OCT)</option>
+                        <option value="gift">Gifts Sent</option>
                     </select>
                     <button class="btn-primary" onclick="searchTransactions()">Apply Filters</button>
                 </div>
@@ -217,11 +216,11 @@
                     <thead>
                         <tr>
                             <th>Transaction ID</th>
-                            <th>User</th>
+                            <th>From User</th>
+                            <th>To User</th>
                             <th>Type</th>
                             <th>Amount</th>
-                            <th>Credits</th>
-                            <th>Payment Method</th>
+                            <th>Details</th>
                             <th>Date</th>
                             <th>Status</th>
                         </tr>

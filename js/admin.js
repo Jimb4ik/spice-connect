@@ -289,8 +289,26 @@ function displayUsers() {
         
         const initials = user.pseudo ? user.pseudo.substring(0, 2).toUpperCase() : 'XX';
         
-        // Gender emoji
-        const genderIcon = user.sexe1 === 1 ? '♂' : user.sexe1 === 2 ? '♀' : '⚥';
+        // Gender icon and text - FIX: проверяем sexe1 правильно
+        let genderIcon, genderText;
+        if (user.sexe1 === 1) {
+            genderIcon = '♂';
+            genderText = 'Male';
+        } else if (user.sexe1 === 2) {
+            genderIcon = '♀';
+            genderText = 'Female';
+        } else if (user.sexe1 === 3) {
+            genderIcon = '⚥';
+            genderText = 'Couple';
+        } else {
+            genderIcon = '?';
+            genderText = 'Unknown';
+        }
+        
+        // Status - заменяем на verified/not verified
+        const isVerified = user.status === 'online' || user.photoCount > 0;
+        const statusText = isVerified ? 'verified' : 'not verified';
+        const statusClass = isVerified ? 'online' : 'inactive';
         
         return `
             <tr>
@@ -309,13 +327,13 @@ function displayUsers() {
                 </td>
                 <td>${user.age || 'N/A'}</td>
                 <td>${user.location || 'Unknown'}</td>
-                <td>${genderIcon} ${user.sexe1 === 1 ? 'Male' : user.sexe1 === 2 ? 'Female' : 'Couple'}</td>
-                <td><span class="status-badge ${user.status || 'inactive'}">${user.status || 'inactive'}</span></td>
+                <td>${genderIcon} ${genderText}</td>
+                <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                 <td>${user.photoCount || 0} photos</td>
                 <td>
                     <div class="action-buttons">
-                        <button class="btn-action primary" onclick="viewUser(${user.id})">View</button>
-                        <button class="btn-action" onclick="editUser(${user.id})">Edit</button>
+                        <button class="btn-action primary" onclick="window.viewUser(${user.id})">View</button>
+                        <button class="btn-action" onclick="window.editUser(${user.id})">Edit</button>
                     </div>
                 </td>
             </tr>
@@ -373,83 +391,125 @@ function searchUsers() {
 }
 
 // Load Transactions
+let allTransactions = [];
+
 async function loadTransactions() {
     const tbody = document.getElementById('transactionsTableBody');
     tbody.innerHTML = '<tr><td colspan="8" class="loading-cell">Loading transactions...</td></tr>';
     
     try {
-        // Call API to get transactions
-        const response = await fetch('/api/wallet-transactions?action=get_all_transactions&limit=50');
-        const result = await response.json();
+        // Load generated transactions data
+        const response = await fetch('generated-transactions-data.js');
+        const scriptText = await response.text();
         
-        if (result.success && result.data) {
-            displayTransactions(result.data);
+        // Extract JSON from the script
+        const match = scriptText.match(/const generatedTransactions = (\[[\s\S]*?\]);/);
+        if (match) {
+            allTransactions = JSON.parse(match[1]);
+            
+            // Get user data to map user IDs to names
+            await enrichTransactionsWithUserData();
+            
+            displayTransactions(allTransactions);
         } else {
-            loadDemoTransactions();
+            throw new Error('Failed to parse transactions data');
         }
     } catch (error) {
-        console.error('Error loading transactions:', error);
+        console.error('[ADMIN] Error loading transactions:', error);
         loadDemoTransactions();
     }
 }
 
+async function enrichTransactionsWithUserData() {
+    // Map user IDs to user names from our loaded users
+    const userMap = {};
+    allUsers.forEach(user => {
+        userMap[user.id] = user.pseudo || `User #${user.id}`;
+    });
+    
+    // Enrich transactions with user names
+    allTransactions.forEach(txn => {
+        txn.from_user_name = txn.from_user_id ? (userMap[txn.from_user_id] || `User #${txn.from_user_id}`) : '—';
+        txn.to_user_name = txn.to_user_id ? (userMap[txn.to_user_id] || `User #${txn.to_user_id}`) : '—';
+    });
+}
+
 function loadDemoTransactions() {
-    const transactions = [
+    // Fallback demo data
+    allTransactions = [
         {
-            id: 'TXN-LAV-2025-0823-4A7B9C',
-            user: 'Alex Johnson',
-            type: 'deposit',
-            amount: '$24.99',
-            credits: 500,
-            method: 'Credit Card',
-            date: '2025-08-23 14:32',
-            status: 'completed'
-        },
-        {
-            id: 'TXN-LAV-2025-0820-3F6E8D',
-            user: 'Emma Wilson',
-            type: 'deposit',
-            amount: '$12.99',
-            credits: 250,
-            method: 'PayPal',
-            date: '2025-08-20 09:15',
-            status: 'completed'
-        },
-        {
-            id: 'TXN-LAV-2025-0815-2A5C7B',
-            user: 'David Brown',
+            id: '804fddf3-d4a8-499f-bd69-0d8a78c41eab',
             type: 'purchase',
-            amount: '$36.99',
-            credits: 1000,
-            method: 'Credit Card',
-            date: '2025-08-15 16:42',
+            from_user_id: null,
+            to_user_id: null,
+            from_user_name: 'System',
+            to_user_name: 'Alex Johnson',
+            amount: 50,
+            currency: 'EUR',
+            credits: 500,
+            payment_method: 'Card',
+            description: 'Credit purchase: 500 credits',
+            date: new Date().toISOString(),
             status: 'completed'
         }
     ];
     
-    displayTransactions(transactions);
+    displayTransactions(allTransactions);
 }
 
 function displayTransactions(transactions) {
     const tbody = document.getElementById('transactionsTableBody');
     
-    if (transactions.length === 0) {
+    if (!transactions || transactions.length === 0) {
         tbody.innerHTML = '<tr><td colspan="8" class="loading-cell">No transactions found</td></tr>';
         return;
     }
     
-    tbody.innerHTML = transactions.map(txn => `
-        <tr>
-            <td><small>${txn.id}</small></td>
-            <td>${txn.user}</td>
-            <td><span class="transaction-type ${txn.type}">${txn.type}</span></td>
-            <td>${txn.amount}</td>
-            <td>+${txn.credits}</td>
-            <td>${txn.method}</td>
-            <td>${txn.date}</td>
-            <td><span class="status-badge ${txn.status}">${txn.status}</span></td>
-        </tr>
-    `).join('');
+    tbody.innerHTML = transactions.slice(0, 50).map(txn => {
+        // Format transaction ID (show first 8 characters)
+        const shortId = txn.id.length > 16 ? txn.id.substring(0, 16) + '...' : txn.id;
+        
+        // Format date
+        const date = new Date(txn.date).toLocaleString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        
+        // Format amount
+        let amountDisplay = '';
+        if (txn.type === 'purchase') {
+            amountDisplay = `€${txn.amount}`;
+        } else if (txn.type === 'payout') {
+            amountDisplay = `$${txn.amount}`;
+        } else if (txn.type === 'gift') {
+            amountDisplay = `${txn.amount} credits`;
+        }
+        
+        // Details
+        let details = txn.description || '';
+        if (txn.credits && txn.type === 'purchase') {
+            details = `+${txn.credits} credits`;
+        } else if (txn.payment_method && txn.type === 'payout') {
+            details = txn.payment_method;
+        } else if (txn.gift_name) {
+            details = txn.gift_name;
+        }
+        
+        return `
+            <tr>
+                <td><small style="font-family: monospace;">${shortId}</small></td>
+                <td>${txn.from_user_name || '—'}</td>
+                <td>${txn.to_user_name || '—'}</td>
+                <td><span class="transaction-type ${txn.type}">${txn.type}</span></td>
+                <td><strong>${amountDisplay}</strong></td>
+                <td><small>${details}</small></td>
+                <td>${date}</td>
+                <td><span class="status-badge ${txn.status}">${txn.status}</span></td>
+            </tr>
+        `;
+    }).join('');
 }
 
 function searchTransactions() {
@@ -528,14 +588,14 @@ async function viewUser(userId) {
             joinDate = fullProfile.date || fullProfile.created_at;
         }
         
-        // Load wallet and transactions data from our database
-        const walletResponse = await fetch(`/api/wallet-transactions?action=get_wallet_transactions&user_id=${userId}&limit=10`);
-        const walletResult = await walletResponse.json();
+        // Get user transactions from allTransactions
+        const userTransactions = allTransactions.filter(txn => 
+            txn.from_user_id === userId || txn.to_user_id === userId
+        );
         
-        console.log('[ADMIN] Wallet data:', walletResult);
+        console.log('[ADMIN] User transactions:', userTransactions);
         
-        const walletData = walletResult.success ? walletResult.data || [] : [];
-        const walletBalance = walletResult.wallet ? walletResult.wallet.balance : credits;
+        const walletBalance = credits;
         
         // Load gifts data
         const giftsResponse = await fetch(`/api/database?action=get_received_gifts&user_id=${userId}&limit=20`);
@@ -555,7 +615,7 @@ async function viewUser(userId) {
         const idVerified = fullProfile.id_verified || 'Not Provided';
         
         // Display detailed profile
-        displayDetailedProfile(fullProfile, walletBalance, walletData, receivedGifts, totalWithdrawable, idVerified);
+        displayDetailedProfile(fullProfile, walletBalance, userTransactions, receivedGifts, totalWithdrawable, idVerified);
         
     } catch (error) {
         console.error('[ADMIN] Error loading user details:', error);
@@ -635,35 +695,63 @@ function displayDetailedProfile(user, credits, transactions, gifts, withdrawable
         
         <!-- Tab Content -->
         <div id="profile-tab-transactions" class="profile-tab-content active">
-            <h3>Recent Transactions</h3>
+            <h3>Transactions History (${transactions.length})</h3>
             ${transactions.length > 0 ? `
                 <div style="overflow-x: auto;">
-                    <table style="width: 100%; border-collapse: collapse; margin-top: 12px;">
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 14px;">
                         <thead style="background: #f9fafb;">
                             <tr>
-                                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e5e7eb;">Type</th>
-                                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e5e7eb;">Amount</th>
-                                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e5e7eb;">Date</th>
-                                <th style="padding: 12px; text-align: left; border-bottom: 1px solid #e5e7eb;">Status</th>
+                                <th style="padding: 10px; text-align: left; border-bottom: 1px solid #e5e7eb; font-size: 12px;">Type</th>
+                                <th style="padding: 10px; text-align: left; border-bottom: 1px solid #e5e7eb; font-size: 12px;">With</th>
+                                <th style="padding: 10px; text-align: left; border-bottom: 1px solid #e5e7eb; font-size: 12px;">Amount</th>
+                                <th style="padding: 10px; text-align: left; border-bottom: 1px solid #e5e7eb; font-size: 12px;">Details</th>
+                                <th style="padding: 10px; text-align: left; border-bottom: 1px solid #e5e7eb; font-size: 12px;">Date</th>
                             </tr>
                         </thead>
                         <tbody>
-                            ${transactions.slice(0, 10).map(txn => `
-                                <tr>
-                                    <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">
-                                        <span class="transaction-type ${txn.transaction_type}">${txn.transaction_type}</span>
-                                    </td>
-                                    <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">
-                                        $${txn.amount} (${txn.amount * 10} credits)
-                                    </td>
-                                    <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">
-                                        ${new Date(txn.created_at).toLocaleDateString()}
-                                    </td>
-                                    <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">
-                                        <span class="status-badge ${txn.status || 'completed'}">${txn.status || 'completed'}</span>
-                                    </td>
-                                </tr>
-                            `).join('')}
+                            ${transactions.map(txn => {
+                                let amountDisplay = '', amountColor = '#10b981', withUser = '', details = '';
+                                if (txn.type === 'purchase') {
+                                    amountDisplay = `+${txn.credits || txn.amount * 10} credits`;
+                                    withUser = 'System';
+                                    details = txn.payment_method ? \`€\${txn.amount} via \${txn.payment_method}\` : \`€\${txn.amount}\`;
+                                } else if (txn.type === 'payout') {
+                                    amountDisplay = \`$\${txn.amount}\`;
+                                    amountColor = '#3b82f6';
+                                    withUser = 'Bank (OCT)';
+                                    details = 'Gift monetization';
+                                } else if (txn.type === 'gift') {
+                                    withUser = txn.from_user_id === user.id ? txn.to_user_name : txn.from_user_name;
+                                    details = txn.gift_name || 'Gift';
+                                    if (txn.from_user_id === user.id) {
+                                        details = '→ ' + details;
+                                        amountColor = '#ef4444';
+                                        amountDisplay = \`-\${txn.amount} credits\`;
+                                    } else {
+                                        details = '← ' + details;
+                                        amountDisplay = \`+\${txn.amount} credits\`;
+                                    }
+                                }
+                                return \`
+                                    <tr>
+                                        <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">
+                                            <span class="transaction-type \${txn.type}">\${txn.type}</span>
+                                        </td>
+                                        <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">
+                                            <small>\${withUser}</small>
+                                        </td>
+                                        <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">
+                                            <strong style="color: \${amountColor};">\${amountDisplay}</strong>
+                                        </td>
+                                        <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">
+                                            <small>\${details}</small>
+                                        </td>
+                                        <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;">
+                                            <small>\${new Date(txn.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</small>
+                                        </td>
+                                    </tr>
+                                \`;
+                            }).join('')}
                         </tbody>
                     </table>
                 </div>
@@ -755,8 +843,22 @@ function closeUserModal() {
 }
 
 function editUser(userId) {
-    alert(`Edit user ${userId} - Feature coming soon`);
+    const user = allUsers.find(u => u.id === userId);
+    if (!user) {
+        alert('User not found');
+        return;
+    }
+    
+    // Open user profile page in new tab
+    const profileUrl = `user-profile.html?id=${userId}`;
+    window.open(profileUrl, '_blank');
 }
+
+// Make functions globally accessible
+window.viewUser = viewUser;
+window.editUser = editUser;
+window.closeUserModal = closeUserModal;
+window.switchProfileTab = switchProfileTab;
 
 function refreshData() {
     const activeSection = document.querySelector('.nav-item.active');
