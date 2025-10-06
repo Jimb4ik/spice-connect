@@ -448,21 +448,23 @@ function searchUsers() {
     
     console.log('[ADMIN] Searching with:', { searchTerm, genderFilter, statusFilter });
     
-    filteredUsers = allUsers.filter(user => {
+    window.filteredUsers = window.allUsers.filter(user => {
         const matchesSearch = !searchTerm || 
             (user.pseudo && user.pseudo.toLowerCase().includes(searchTerm)) ||
             (user.prenom && user.prenom.toLowerCase().includes(searchTerm)) ||
             (user.id && user.id.toString().includes(searchTerm));
         
-        const matchesGender = !genderFilter || user.sexe1 === parseInt(genderFilter);
+        // Convert both to integers for reliable comparison
+        const matchesGender = !genderFilter || parseInt(user.sexe1) === parseInt(genderFilter);
         const matchesStatus = !statusFilter || user.status === statusFilter;
         
         return matchesSearch && matchesGender && matchesStatus;
     });
     
-    console.log('[ADMIN] Filtered results:', filteredUsers.length);
+    console.log('[ADMIN] Filtered results:', window.filteredUsers.length);
+    console.log('[ADMIN] Sample filtered user:', window.filteredUsers[0]);
     
-    currentPage = 1;
+    window.currentPage = 1;
     displayUsers();
 }
 
