@@ -500,18 +500,39 @@ async function loadTransactions() {
         const result = await response.json();
         
         if (result.success && result.data) {
-            window.allTransactions = result.data.map(txn => ({
-                id: txn.transaction_id,
-                from_user_id: txn.from_user_id,
-                to_user_id: txn.to_user_id,
-                type: txn.type,
-                amount: parseFloat(txn.amount),
-                credits: txn.credits,
-                details: txn.details,
-                payment_method: txn.payment_method,
-                date: txn.created_at,
-                status: txn.status
-            }));
+            // Map fake user IDs (1000000+) to real user IDs from loaded users
+            const realUserIds = window.allUsers.map(u => u.id);
+            
+            window.allTransactions = result.data.map((txn, index) => {
+                // Replace generated IDs with real user IDs
+                let from_user_id = txn.from_user_id;
+                let to_user_id = txn.to_user_id;
+                
+                if (from_user_id && from_user_id >= 1000000) {
+                    // Map to a real user ID
+                    const userIndex = (from_user_id - 1000000) % realUserIds.length;
+                    from_user_id = realUserIds[userIndex];
+                }
+                
+                if (to_user_id && to_user_id >= 1000000) {
+                    // Map to a real user ID
+                    const userIndex = (to_user_id - 1000000) % realUserIds.length;
+                    to_user_id = realUserIds[userIndex];
+                }
+                
+                return {
+                    id: txn.transaction_id,
+                    from_user_id: from_user_id,
+                    to_user_id: to_user_id,
+                    type: txn.type,
+                    amount: parseFloat(txn.amount),
+                    credits: txn.credits,
+                    details: txn.details,
+                    payment_method: txn.payment_method,
+                    date: txn.created_at,
+                    status: txn.status
+                };
+            });
             
             await enrichTransactionsWithUserData();
             displayTransactions(window.allTransactions);
