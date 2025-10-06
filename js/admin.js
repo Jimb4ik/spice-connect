@@ -422,16 +422,47 @@ function searchUsers() {
 
 async function loadTransactions() {
     const tbody = document.getElementById('transactionsTableBody');
-    tbody.innerHTML = '<tr><td colspan="8" class="loading-cell">Loading transactions...</td></tr>';
-    
+    tbody.innerHTML = '<tr><td colspan="7" class="loading-cell">Loading transactions...</td></tr>';
+
     try {
-        // Generate transactions data
-        allTransactions = generateDemoTransactions();
+        // First, seed the database with transactions if needed
+        const seedResponse = await fetch('/api/admin-transactions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'seed_transactions' })
+        });
+        const seedResult = await seedResponse.json();
+        console.log('[ADMIN] Seed result:', seedResult);
+
+        // Load transactions from database
+        const response = await fetch('/api/admin-transactions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'get_all_transactions', limit: 200 })
+        });
         
-        // Get user data to map user IDs to names
-        await enrichTransactionsWithUserData();
+        const result = await response.json();
         
-        displayTransactions(allTransactions);
+        if (result.success && result.data) {
+            window.allTransactions = result.data.map(txn => ({
+                id: txn.transaction_id,
+                from_user_id: txn.from_user_id,
+                to_user_id: txn.to_user_id,
+                type: txn.type,
+                amount: parseFloat(txn.amount),
+                credits: txn.credits,
+                details: txn.details,
+                payment_method: txn.payment_method,
+                date: txn.created_at,
+                status: txn.status
+            }));
+            
+            await enrichTransactionsWithUserData();
+            displayTransactions(window.allTransactions);
+        } else {
+            console.error('[ADMIN] Failed to load transactions:', result.error);
+            tbody.innerHTML = '<tr><td colspan="7" class="error-cell">Failed to load transactions</td></tr>';
+        }
     } catch (error) {
         console.error('[ADMIN] Error loading transactions:', error);
         loadDemoTransactions();
@@ -532,12 +563,12 @@ function generateDemoTransactions() {
 async function enrichTransactionsWithUserData() {
     // Map user IDs to user names from our loaded users
     const userMap = {};
-    allUsers.forEach(user => {
+    window.allUsers.forEach(user => {
         userMap[user.id] = user.pseudo || `User #${user.id}`;
     });
     
     // Enrich transactions with user names
-    allTransactions.forEach(txn => {
+    window.allTransactions.forEach(txn => {
         txn.from_user_name = txn.from_user_id ? (userMap[txn.from_user_id] || `User #${txn.from_user_id}`) : '—';
         txn.to_user_name = txn.to_user_id ? (userMap[txn.to_user_id] || `User #${txn.to_user_id}`) : '—';
     });
