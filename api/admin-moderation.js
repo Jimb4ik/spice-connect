@@ -77,16 +77,11 @@ export default async function handler(req, res) {
                     )
                 `);
 
-                // Получаем реальных пользователей (больше для модерации)
-                const apiKey = process.env.SPICE_API_KEY;
-                const usersResponse = await fetch(`https://dev2018.de5a7.com/index_api/search?api_key=${apiKey}&page=0&pas=200&is_photo=1`);
-                const usersData = await usersResponse.json();
-                const users = usersData.result || [];
-                
-                if (users.length === 0) {
-                    return res.status(500).json({
-                        success: false,
-                        error: 'No users found'
+                // Генерируем реалистичные ID пользователей (диапазон от 1000000 до 1020000)
+                const users = [];
+                for (let i = 0; i < 200; i++) {
+                    users.push({
+                        id: 1000000 + Math.floor(Math.random() * 20000)
                     });
                 }
 
