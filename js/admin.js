@@ -400,26 +400,108 @@ async function loadTransactions() {
     tbody.innerHTML = '<tr><td colspan="8" class="loading-cell">Loading transactions...</td></tr>';
     
     try {
-        // Load generated transactions data
-        const response = await fetch('generated-transactions-data.js');
-        const scriptText = await response.text();
+        // Generate transactions data
+        allTransactions = generateDemoTransactions();
         
-        // Extract JSON from the script
-        const match = scriptText.match(/const generatedTransactions = (\[[\s\S]*?\]);/);
-        if (match) {
-            allTransactions = JSON.parse(match[1]);
-            
-            // Get user data to map user IDs to names
-            await enrichTransactionsWithUserData();
-            
-            displayTransactions(allTransactions);
-        } else {
-            throw new Error('Failed to parse transactions data');
-        }
+        // Get user data to map user IDs to names
+        await enrichTransactionsWithUserData();
+        
+        displayTransactions(allTransactions);
     } catch (error) {
         console.error('[ADMIN] Error loading transactions:', error);
         loadDemoTransactions();
     }
+}
+
+function generateDemoTransactions() {
+    // Generate 100 realistic transactions
+    const transactions = [];
+    const now = new Date();
+    const threeMonthsAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+    
+    const gifts = [
+        { name: 'Rose', price: 10 },
+        { name: 'Tulips', price: 20 },
+        { name: 'Chocolate', price: 30 },
+        { name: 'Crown', price: 50 },
+        { name: 'Diamond Ring', price: 100 }
+    ];
+    
+    // Get available user IDs
+    const userIds = allUsers.map(u => u.id);
+    if (userIds.length === 0) {
+        // Fallback IDs if no users loaded
+        userIds.push(214669, 214670, 214668, 214459, 214674, 214667, 214666, 214671, 214678, 214673);
+    }
+    
+    // 40 purchases, 30 payouts, 30 gifts
+    const types = [
+        ...Array(40).fill('purchase'),
+        ...Array(30).fill('payout'),
+        ...Array(30).fill('gift')
+    ];
+    
+    for (let i = 0; i < 100; i++) {
+        const type = types[i];
+        const randomDays = Math.floor(Math.random() * 90);
+        const date = new Date(threeMonthsAgo.getTime() + randomDays * 24 * 60 * 60 * 1000);
+        const userId = userIds[Math.floor(Math.random() * userIds.length)];
+        
+        const uuid = `${Math.random().toString(16).slice(2, 10)}-${Math.random().toString(16).slice(2, 6)}-${Math.random().toString(16).slice(2, 6)}-${Math.random().toString(16).slice(2, 6)}-${Math.random().toString(16).slice(2, 14)}`;
+        
+        let transaction = {
+            id: uuid,
+            type: type,
+            date: date.toISOString(),
+            status: 'completed'
+        };
+        
+        if (type === 'purchase') {
+            const amounts = [10, 20, 50, 100, 200];
+            const eurAmount = amounts[Math.floor(Math.random() * amounts.length)];
+            const credits = eurAmount * 10;
+            
+            transaction.from_user_id = userId;
+            transaction.to_user_id = null;
+            transaction.amount = eurAmount;
+            transaction.currency = 'EUR';
+            transaction.credits = credits;
+            transaction.payment_method = ['Card', 'PayPal', 'Stripe'][Math.floor(Math.random() * 3)];
+            transaction.description = `Credit purchase: ${credits} credits`;
+            
+        } else if (type === 'payout') {
+            const amounts = [50, 75, 100, 150, 200, 300];
+            const usdAmount = amounts[Math.floor(Math.random() * amounts.length)];
+            
+            transaction.from_user_id = null;
+            transaction.to_user_id = userId;
+            transaction.amount = usdAmount;
+            transaction.currency = 'USD';
+            transaction.credits = null;
+            transaction.payment_method = 'Bank Transfer (OCT)';
+            transaction.description = 'Payout from gift monetization';
+            
+        } else if (type === 'gift') {
+            const gift = gifts[Math.floor(Math.random() * gifts.length)];
+            const toUserId = userIds.filter(id => id !== userId)[Math.floor(Math.random() * (userIds.length - 1))];
+            
+            transaction.from_user_id = userId;
+            transaction.to_user_id = toUserId;
+            transaction.amount = gift.price;
+            transaction.currency = 'Credits';
+            transaction.credits = -gift.price;
+            transaction.payment_method = null;
+            transaction.description = `Gift sent: ${gift.name}`;
+            transaction.gift_name = gift.name;
+        }
+        
+        transactions.push(transaction);
+    }
+    
+    // Sort by date descending
+    transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+    
+    return transactions;
 }
 
 async function enrichTransactionsWithUserData() {
