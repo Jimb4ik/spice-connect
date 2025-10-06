@@ -181,6 +181,7 @@ async function loadUsers() {
         console.log('[ADMIN] Users API response:', result);
         
         if (result.success && result.data && result.data.result) {
+            console.log('[ADMIN] Mapping', result.data.result.length, 'users...');
             allUsers = result.data.result.map(user => ({
                 id: user.id || user.id_membre,
                 pseudo: user.pseudo,
@@ -195,6 +196,9 @@ async function loadUsers() {
                 photos_v2: user.photos_v2 || [],
                 photos: user.photos || []
             }));
+            
+            console.log('[ADMIN] allUsers populated with', allUsers.length, 'users');
+            console.log('[ADMIN] First user:', allUsers[0]);
             
             filteredUsers = [...allUsers];
             displayUsers();
