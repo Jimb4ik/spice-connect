@@ -292,15 +292,17 @@ function displayUsers() {
         
         const initials = user.pseudo ? user.pseudo.substring(0, 2).toUpperCase() : 'XX';
         
-        // Gender icon and text - FIX: проверяем sexe1 правильно
+        // Gender icon and text
         let genderIcon, genderText;
-        if (user.sexe1 === 1) {
+        const gender = parseInt(user.sexe1);
+        
+        if (gender === 1) {
             genderIcon = '♂';
             genderText = 'Male';
-        } else if (user.sexe1 === 2) {
+        } else if (gender === 2) {
             genderIcon = '♀';
             genderText = 'Female';
-        } else if (user.sexe1 === 3) {
+        } else if (gender === 3) {
             genderIcon = '⚥';
             genderText = 'Couple';
         } else {
