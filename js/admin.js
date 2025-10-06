@@ -669,31 +669,19 @@ function loadModeration() {
 
 // View User Details
 async function viewUser(userId) {
-    console.log('[ADMIN] viewUser called with userId:', userId);
-    
     const modal = document.getElementById('userModal');
     const modalContent = document.getElementById('modalUserContent');
     const modalTitle = document.getElementById('modalUserName');
     
-    console.log('[ADMIN] Modal element:', modal);
-    
-    console.log('[ADMIN] allUsers length:', window.allUsers.length);
-    const user = window.allUsers.find(u => u.id === userId);
+    const user = window.allUsers.find(u => u.id == userId);
     if (!user) {
-        console.error('[ADMIN] User not found:', userId, 'in', window.allUsers.length, 'users');
+        console.error('[ADMIN] User not found:', userId);
         return;
     }
     
-    console.log('[ADMIN] Found user:', user.pseudo);
-    
     modalTitle.textContent = user.pseudo || 'User Details';
     modalContent.innerHTML = '<div class="loading" style="padding: 40px; text-align: center;">Loading detailed profile...</div>';
-    
-    console.log('[ADMIN] Adding active class to modal...');
     modal.classList.add('active');
-    
-    console.log('[ADMIN] Modal classList:', modal.className);
-    console.log('[ADMIN] Modal display:', window.getComputedStyle(modal).display);
     
     try {
         // Load full user profile with credits and other data
@@ -784,8 +772,8 @@ function displayDetailedProfile(user, credits, transactions, gifts, withdrawable
         </div>
         
         <!-- Stats Grid -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 30px;">
-            <div class="stat-card" style="text-align: center;">
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 30px;">
+            <div class="stat-card" style="text-align: center; min-height: 140px; display: flex; flex-direction: column; justify-content: center;">
                 <div class="stat-icon" style="background: linear-gradient(135deg, #667eea, #764ba2); margin: 0 auto 12px;">
                     <img src="icons/admin/credits.png" alt="Credits" class="stat-icon-img">
                 </div>
@@ -793,7 +781,7 @@ function displayDetailedProfile(user, credits, transactions, gifts, withdrawable
                 <p style="margin: 4px 0 0; color: #6b7280;">Credits Balance</p>
             </div>
             
-            <div class="stat-card" style="text-align: center;">
+            <div class="stat-card" style="text-align: center; min-height: 140px; display: flex; flex-direction: column; justify-content: center;">
                 <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b, #38f9d7); margin: 0 auto 12px;">
                     <img src="icons/admin/credits.png" alt="Withdrawable" class="stat-icon-img">
                 </div>
@@ -801,11 +789,11 @@ function displayDetailedProfile(user, credits, transactions, gifts, withdrawable
                 <p style="margin: 4px 0 0; color: #6b7280;">Available for Withdrawal</p>
             </div>
             
-            <div class="stat-card" style="text-align: center;">
+            <div class="stat-card" style="text-align: center; min-height: 140px; display: flex; flex-direction: column; justify-content: center;">
                 <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb, #f5576c); margin: 0 auto 12px;">
                     <img src="icons/admin/status.png" alt="ID" class="stat-icon-img">
                 </div>
-                <h3 style="margin: 0; font-size: 20px; color: #ef4444;">${idStatus}</h3>
+                <h3 style="margin: 0; font-size: 32px; color: #ef4444;">${idStatus}</h3>
                 <p style="margin: 4px 0 0; color: #6b7280;">ID Verification</p>
             </div>
         </div>
