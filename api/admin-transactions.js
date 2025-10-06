@@ -101,12 +101,71 @@ export default async function handler(req, res) {
                     return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
                 });
 
-                // Генерируем 200 транзакций для большего реализма
-                for (let i = 0; i < 200; i++) {
+                // Выбираем 15 активных пользователей
+                const activeUserIds = userIds.sort(() => 0.5 - Math.random()).slice(0, 15);
+                console.log('[ADMIN] Creating transactions for', activeUserIds.length, 'active users');
+                
+                // Создаем МНОГО транзакций для активных пользователей (20-40 на каждого)
+                activeUserIds.forEach(activeUserId => {
+                    const numTransactions = Math.floor(Math.random() * 21) + 20; // 20-40 транзакций
+                    
+                    for (let i = 0; i < numTransactions; i++) {
+                        const type = getRandomElement(transactionTypes);
+                        const amount = (Math.random() * 150 + 10).toFixed(2);
+                        const credits = Math.floor(amount * 10);
+                        const date = new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000);
+                        
+                        let fromUserId = activeUserId;
+                        let toUserId = null;
+                        
+                        // Для подарков - активный юзер может быть отправителем или получателем
+                        if (type === 'gift') {
+                            if (Math.random() > 0.5) {
+                                // Активный юзер отправляет подарок
+                                toUserId = getRandomElement(userIds.filter(id => id !== activeUserId));
+                            } else {
+                                // Активный юзер получает подарок
+                                toUserId = activeUserId;
+                                fromUserId = getRandomElement(userIds.filter(id => id !== activeUserId));
+                            }
+                        }
+                        
+                        let details = '';
+                        let paymentMethod = null;
+                        
+                        if (type === 'purchase') {
+                            paymentMethod = getRandomElement(paymentMethods);
+                            details = `Credits purchase via ${paymentMethod}`;
+                        } else if (type === 'payout') {
+                            details = 'Gift monetization withdrawal';
+                            paymentMethod = 'Bank Transfer';
+                        } else if (type === 'gift') {
+                            const giftIndex = Math.floor(Math.random() * giftNames.length);
+                            details = `${giftNames[giftIndex]} (${giftPrices[giftIndex]} credits)`;
+                        }
+                        
+                        transactions.push({
+                            transaction_id: `TXN-${generateUUID()}`,
+                            from_user_id: fromUserId,
+                            to_user_id: toUserId,
+                            type: type,
+                            amount: parseFloat(amount),
+                            credits: type === 'gift' ? giftPrices[giftNames.indexOf(details.split(' ')[0])] : credits,
+                            details: details,
+                            payment_method: paymentMethod,
+                            status: 'completed',
+                            created_at: date
+                        });
+                    }
+                });
+                
+                // Генерируем еще 100-150 обычных транзакций для остальных пользователей
+                const numRegularTransactions = Math.floor(Math.random() * 51) + 100; // 100-150 транзакций
+                for (let i = 0; i < numRegularTransactions; i++) {
                     const type = getRandomElement(transactionTypes);
                     const amount = (Math.random() * 100 + 10).toFixed(2);
                     const credits = Math.floor(amount * 10);
-                    const date = new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000); // Last 90 days
+                    const date = new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000);
                     
                     let fromUserId = getRandomElement(userIds);
                     let toUserId = type === 'gift' ? getRandomElement(userIds) : null;
