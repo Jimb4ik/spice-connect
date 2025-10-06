@@ -766,7 +766,7 @@ function displayDetailedProfile(user, credits, transactions, gifts, withdrawable
                 <p style="margin: 0; color: #6b7280;">ID: #${user.id} • ${user.age || 'N/A'} years • ${user.location || user.zone_name || 'Unknown Location'}</p>
                 <p style="margin: 8px 0 0 0;">
                     <span class="status-badge ${user.status}">${user.status || 'active'}</span>
-                    <span class="status-badge" style="margin-left: 8px;">${user.sexe1 === 1 ? 'Male' : user.sexe1 === 2 ? 'Female' : 'Couple'}</span>
+                    <span class="status-badge" style="margin-left: 8px;">${parseInt(user.sexe1) === 1 ? 'Male' : parseInt(user.sexe1) === 2 ? 'Female' : 'Couple'}</span>
                 </p>
             </div>
         </div>
