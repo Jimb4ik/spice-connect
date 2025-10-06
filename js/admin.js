@@ -165,26 +165,68 @@ async function loadUsers() {
             throw new Error('API key not available');
         }
         
-        // Use search API like in search.html to get all users
-        const params = new URLSearchParams({
+        // Need to make 3 separate requests for each gender
+        // because API /index_api/search filters by gender
+        const allUsers = [];
+        
+        // Request 1: Male users (sexe1 = 1)
+        console.log('[ADMIN] Loading MALE users...');
+        const maleParams = new URLSearchParams({
             page: 0,
-            pas: 100, // Get 100 users at once
-            is_photo: 1, // Only users with photos
-            get_picture_430: 1, // Get high-res photos
-            sexe1: '0', // Get all genders (0 = all, 1 = male, 2 = female, 3 = couple)
-            sexe2: '0'  // Looking for all genders
+            pas: 35, // Get 35 of each gender
+            is_photo: 1,
+            get_picture_430: 1,
+            sex: 1 // Male profiles
         });
         
-        console.log('[ADMIN] Loading users with params:', params.toString());
+        const maleResponse = await fetch(`/api/spice-multi-test?endpoint=/index_api/search&method=POST&${maleParams.toString()}`);
+        const maleResult = await maleResponse.json();
         
-        const response = await fetch(`/api/spice-multi-test?endpoint=/index_api/search&method=POST&${params.toString()}`);
-        const result = await response.json();
+        if (maleResult.success && maleResult.data && maleResult.data.result) {
+            console.log('[ADMIN] Got', maleResult.data.result.length, 'male users');
+            allUsers.push(...maleResult.data.result);
+        }
         
-        console.log('[ADMIN] Users API response:', result);
+        // Request 2: Female users (sexe1 = 2)
+        console.log('[ADMIN] Loading FEMALE users...');
+        const femaleParams = new URLSearchParams({
+            page: 0,
+            pas: 35,
+            is_photo: 1,
+            get_picture_430: 1,
+            sex: 2 // Female profiles
+        });
         
-        if (result.success && result.data && result.data.result) {
-            console.log('[ADMIN] Mapping', result.data.result.length, 'users...');
-            window.allUsers = result.data.result.map(user => ({
+        const femaleResponse = await fetch(`/api/spice-multi-test?endpoint=/index_api/search&method=POST&${femaleParams.toString()}`);
+        const femaleResult = await femaleResponse.json();
+        
+        if (femaleResult.success && femaleResult.data && femaleResult.data.result) {
+            console.log('[ADMIN] Got', femaleResult.data.result.length, 'female users');
+            allUsers.push(...femaleResult.data.result);
+        }
+        
+        // Request 3: Couple users (sexe1 = 3)
+        console.log('[ADMIN] Loading COUPLE users...');
+        const coupleParams = new URLSearchParams({
+            page: 0,
+            pas: 30,
+            is_photo: 1,
+            get_picture_430: 1,
+            sex: 3 // Couple profiles
+        });
+        
+        const coupleResponse = await fetch(`/api/spice-multi-test?endpoint=/index_api/search&method=POST&${coupleParams.toString()}`);
+        const coupleResult = await coupleResponse.json();
+        
+        if (coupleResult.success && coupleResult.data && coupleResult.data.result) {
+            console.log('[ADMIN] Got', coupleResult.data.result.length, 'couple users');
+            allUsers.push(...coupleResult.data.result);
+        }
+        
+        console.log('[ADMIN] Total users loaded:', allUsers.length);
+        
+        if (allUsers.length > 0) {
+            window.allUsers = allUsers.map(user => ({
                 id: user.id || user.id_membre,
                 pseudo: user.pseudo,
                 prenom: user.prenom,
@@ -200,7 +242,11 @@ async function loadUsers() {
             }));
             
             console.log('[ADMIN] allUsers populated with', window.allUsers.length, 'users');
-            console.log('[ADMIN] First user:', window.allUsers[0]);
+            console.log('[ADMIN] Gender distribution:', {
+                male: window.allUsers.filter(u => parseInt(u.sexe1) === 1).length,
+                female: window.allUsers.filter(u => parseInt(u.sexe1) === 2).length,
+                couple: window.allUsers.filter(u => parseInt(u.sexe1) === 3).length
+            });
             
             window.filteredUsers = [...window.allUsers];
             displayUsers();
