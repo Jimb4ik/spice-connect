@@ -1,5 +1,12 @@
 // Admin Panel JavaScript - Lavrilo CRM
 
+// Global variables
+window.allUsers = [];
+window.allTransactions = [];
+window.filteredUsers = [];
+window.currentPage = 1;
+window.usersPerPage = 20;
+
 // Check authentication
 function checkAuth() {
     const adminSession = localStorage.getItem('adminSession');
@@ -42,11 +49,7 @@ function logout() {
     }
 }
 
-// Navigation
-let currentPage = 1;
-const usersPerPage = 20;
-let allUsers = [];
-let filteredUsers = [];
+// Navigation (variables already declared globally above)
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -390,8 +393,7 @@ function searchUsers() {
     displayUsers();
 }
 
-// Load Transactions
-let allTransactions = [];
+// Load Transactions (variable already declared globally above)
 
 async function loadTransactions() {
     const tbody = document.getElementById('transactionsTableBody');
@@ -854,11 +856,23 @@ function editUser(userId) {
     window.open(profileUrl, '_blank');
 }
 
-// Make functions globally accessible
+// Make ALL functions globally accessible
+window.checkAuth = checkAuth;
+window.logout = logout;
+window.loadDashboard = loadDashboard;
+window.loadUsers = loadUsers;
+window.loadTransactions = loadTransactions;
+window.loadModeration = loadModeration;
+window.displayUsers = displayUsers;
+window.searchUsers = searchUsers;
 window.viewUser = viewUser;
 window.editUser = editUser;
 window.closeUserModal = closeUserModal;
 window.switchProfileTab = switchProfileTab;
+window.refreshData = refreshData;
+window.prevPage = prevPage;
+window.nextPage = nextPage;
+window.searchTransactions = searchTransactions;
 
 function refreshData() {
     const activeSection = document.querySelector('.nav-item.active');
