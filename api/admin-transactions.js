@@ -92,6 +92,9 @@ export default async function handler(req, res) {
                 const transactionTypes = ['purchase', 'payout', 'gift'];
                 const paymentMethods = ['Credit Card', 'PayPal', 'Stripe', 'Bank Transfer'];
                 
+                // Credit rate from project: 1 credit = €0.21
+                const EURO_PER_CREDIT = 0.21;
+                
                 // Real gifts from database
                 const realGifts = [
                     { name: 'Red Rose', price: 5 },
@@ -132,7 +135,7 @@ export default async function handler(req, res) {
                     for (let i = 0; i < numTransactions; i++) {
                         const type = getRandomElement(transactionTypes);
                         const amount = (Math.random() * 150 + 10).toFixed(2);
-                        const credits = Math.floor(amount * 10);
+                        const credits = Math.floor(amount / EURO_PER_CREDIT);
                         const date = new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000);
                         
                         let fromUserId = activeUserId;
@@ -184,7 +187,7 @@ export default async function handler(req, res) {
                 for (let i = 0; i < numRegularTransactions; i++) {
                     const type = getRandomElement(transactionTypes);
                     const amount = (Math.random() * 100 + 10).toFixed(2);
-                    const credits = Math.floor(amount * 10);
+                    const credits = Math.floor(amount / EURO_PER_CREDIT);
                     const date = new Date(Date.now() - Math.random() * 90 * 24 * 60 * 60 * 1000);
                     
                     let fromUserId = getRandomElement(userIds);

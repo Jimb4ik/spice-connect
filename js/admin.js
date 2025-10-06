@@ -233,8 +233,8 @@ async function loadUsers() {
                 age: user.age,
                 sexe1: user.sexe1,
                 location: user.zone_name || 'Unknown',
-                // 80% verified, 20% not verified
-                status: Math.random() < 0.8 ? 'verified' : 'not verified',
+                // Initial status: 70% verified, 30% not verified (will be updated from transactions)
+                status: Math.random() < 0.7 ? 'verified' : 'not verified',
                 photoCount: user.photo || 0,
                 rating: user.moyenne || 0,
                 votes: user.vote || 0,
@@ -1020,12 +1020,17 @@ async function viewUser(userId) {
                           'Not Provided';
         
         // For gifts inventory display (from transactions)
-        const receivedGifts = receivedGiftTransactions.map(txn => ({
-            gift_name: txn.details || 'Gift',
-            purchase_price_credits: txn.amount,
-            created_at: txn.date,
-            status: 'active'
-        }));
+        const receivedGifts = receivedGiftTransactions.map(txn => {
+            const giftName = txn.details || 'Gift';
+            const giftCredits = txn.credits || parseInt(txn.amount);
+            return {
+                name: giftName,
+                details: giftName,
+                credits: giftCredits,
+                created_at: txn.date,
+                status: 'available'
+            };
+        });
         
         // Display detailed profile
         displayDetailedProfile(fullProfile, credits, userTransactions, receivedGifts, totalWithdrawable, idVerified);
@@ -1157,14 +1162,20 @@ function displayDetailedProfile(user, credits, transactions, gifts, withdrawable
                                     details = 'Gift monetization';
                                 } else if (txn.type === 'gift') {
                                     withUser = txn.from_user_id === user.id ? txn.to_user_name : txn.from_user_name;
-                                    details = txn.gift_name || 'Gift';
+                                    const giftName = txn.details || txn.gift_name || 'Gift';
+                                    const giftCredits = txn.credits || parseInt(txn.amount);
+                                    const giftEuroValue = (giftCredits * 0.21).toFixed(2);
+                                    
                                     if (txn.from_user_id === user.id) {
-                                        details = '→ ' + details;
+                                        // Sent gift
+                                        amountDisplay = `${giftName} (€${giftEuroValue})`;
+                                        details = `-${giftCredits} credits`;
                                         amountColor = '#ef4444';
-                                        amountDisplay = '-' + txn.amount + ' credits';
                                     } else {
-                                        details = '← ' + details;
-                                        amountDisplay = '+' + txn.amount + ' credits';
+                                        // Received gift
+                                        amountDisplay = `${giftName} (€${giftEuroValue})`;
+                                        details = `+${giftCredits} credits`;
+                                        amountColor = '#10b981';
                                     }
                                 }
                                 return `
