@@ -1052,26 +1052,28 @@ async function viewUser(userId) {
 function displayDetailedProfile(user, credits, transactions, gifts, withdrawable, idStatus) {
     const modalContent = document.getElementById('modalUserContent');
     
-    // Gift database mapping
+    // Gift database mapping with emojis (same as in messages/gifts modals)
     const giftDatabase = {
-        'Red Rose': { image: 'gifts/rose.png', credits: 5 },
-        'Tulip Bouquet': { image: 'gifts/tulips.png', credits: 15 },
-        'Heart Chocolate': { image: 'gifts/chocolate.png', credits: 20 },
-        'Coffee & Cookies': { image: 'gifts/coffee.png', credits: 25 },
-        'Teddy Bear': { image: 'gifts/teddy.png', credits: 35 },
-        'Balloons': { image: 'gifts/balloons.png', credits: 45 },
-        'Rose Bouquet': { image: 'gifts/rose-bouquet.png', credits: 75 },
-        'Perfume': { image: 'gifts/perfume.png', credits: 100 },
-        'Silver Earrings': { image: 'gifts/silver-earrings.png', credits: 125 },
-        'Bracelet': { image: 'gifts/bracelet.png', credits: 150 },
-        'Diamond Earrings': { image: 'gifts/diamond-earrings.png', credits: 300 },
-        'Gold Ring': { image: 'gifts/gold-ring.png', credits: 400 },
-        'Pearl Necklace': { image: 'gifts/pearl-necklace.png', credits: 500 },
-        'Diamond Bracelet': { image: 'gifts/diamond-bracelet.png', credits: 650 },
-        'Platinum Ring': { image: 'gifts/platinum-ring.png', credits: 800 },
-        'Luxury Watch': { image: 'gifts/luxury-watch.png', credits: 1000 },
-        'Diamond Necklace': { image: 'gifts/diamond-necklace.png', credits: 1500 },
-        'Royal Crown': { image: 'gifts/crown.png', credits: 2500 }
+        'Red Rose': { emoji: '🌹', credits: 5 },
+        'Tulip Bouquet': { emoji: '🌷', credits: 15 },
+        'Heart Chocolate': { emoji: '🍫', credits: 20 },
+        'Coffee & Cookies': { emoji: '☕', credits: 25 },
+        'Teddy Bear': { emoji: '🧸', credits: 35 },
+        'Balloons': { emoji: '🎈', credits: 45 },
+        'Rose Bouquet': { emoji: '💐', credits: 75 },
+        'Perfume': { emoji: '🌸', credits: 100 },
+        'Silver Earrings': { emoji: '💎', credits: 125 },
+        'Bracelet': { emoji: '📿', credits: 150 },
+        'Watch': { emoji: '⌚', credits: 175 },
+        'Gold Chain': { emoji: '📿', credits: 200 },
+        'Diamond Earrings': { emoji: '💎', credits: 300 },
+        'Gold Ring': { emoji: '💍', credits: 400 },
+        'Pearl Necklace': { emoji: '📿', credits: 500 },
+        'Diamond Bracelet': { emoji: '💎', credits: 650 },
+        'Platinum Ring': { emoji: '💍', credits: 800 },
+        'Luxury Watch': { emoji: '⌚', credits: 1000 },
+        'Diamond Necklace': { emoji: '💎', credits: 1500 },
+        'Royal Crown': { emoji: '👑', credits: 2500 }
     };
     
     // Photo URL
@@ -1211,14 +1213,14 @@ function displayDetailedProfile(user, credits, transactions, gifts, withdrawable
                 <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px; margin-top: 12px;">
                     ${gifts.map(gift => {
                         const giftName = gift.name || gift.details;
-                        const giftInfo = giftDatabase[giftName] || { image: 'gifts/crown.png', credits: gift.credits || 0 };
+                        const giftInfo = giftDatabase[giftName] || { emoji: '👑', credits: gift.credits || 0 };
                         // Correct monetization: gift_credits × €0.21 × 10%
                         const giftEuroValue = giftInfo.credits * 0.21;
                         const withdrawValue = (giftEuroValue * 0.1).toFixed(2);
                         
                         return `
                             <div style="padding: 16px; background: ${gift.status === 'monetized' ? '#f3f4f6' : '#f0fdf4'}; border-radius: 12px; text-align: center; border: 2px solid ${gift.status === 'monetized' ? '#e5e7eb' : '#10b981'};">
-                                <img src="${giftInfo.image}" alt="${giftName}" style="width: 64px; height: 64px; margin-bottom: 8px; object-fit: contain;">
+                                <div style="font-size: 48px; margin-bottom: 8px;">${giftInfo.emoji}</div>
                                 <p style="margin: 0; font-weight: 600; font-size: 14px;">${giftName}</p>
                                 <p style="margin: 4px 0; font-size: 12px; color: #6b7280;">${giftInfo.credits} credits</p>
                                 <p style="margin: 4px 0; font-size: 11px; color: #10b981;">€${withdrawValue} withdrawable</p>
