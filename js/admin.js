@@ -173,7 +173,7 @@ async function loadUsers() {
         console.log('[ADMIN] Loading MALE users...');
         const maleParams = new URLSearchParams({
             page: 0,
-            pas: 35, // Get 35 of each gender
+            pas: 67, // Get 67 of each gender
             is_photo: 1,
             get_picture_430: 1,
             sex: 1 // Male profiles
@@ -191,7 +191,7 @@ async function loadUsers() {
         console.log('[ADMIN] Loading FEMALE users...');
         const femaleParams = new URLSearchParams({
             page: 0,
-            pas: 35,
+            pas: 67,
             is_photo: 1,
             get_picture_430: 1,
             sex: 2 // Female profiles
@@ -209,7 +209,7 @@ async function loadUsers() {
         console.log('[ADMIN] Loading COUPLE users...');
         const coupleParams = new URLSearchParams({
             page: 0,
-            pas: 30,
+            pas: 66,
             is_photo: 1,
             get_picture_430: 1,
             sex: 3 // Couple profiles

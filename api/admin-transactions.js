@@ -74,9 +74,9 @@ export default async function handler(req, res) {
                     )
                 `);
 
-                // Получаем реальных пользователей из API
+                // Получаем реальных пользователей из API (больше для транзакций)
                 const apiKey = process.env.SPICE_API_KEY;
-                const usersResponse = await fetch(`https://dev2018.de5a7.com/index_api/search?api_key=${apiKey}&page=0&pas=100&is_photo=1`);
+                const usersResponse = await fetch(`https://dev2018.de5a7.com/index_api/search?api_key=${apiKey}&page=0&pas=200&is_photo=1`);
                 const usersData = await usersResponse.json();
                 const users = usersData.result || [];
                 

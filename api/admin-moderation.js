@@ -77,9 +77,9 @@ export default async function handler(req, res) {
                     )
                 `);
 
-                // Получаем реальных пользователей
+                // Получаем реальных пользователей (больше для модерации)
                 const apiKey = process.env.SPICE_API_KEY;
-                const usersResponse = await fetch(`https://dev2018.de5a7.com/index_api/search?api_key=${apiKey}&page=0&pas=100&is_photo=1`);
+                const usersResponse = await fetch(`https://dev2018.de5a7.com/index_api/search?api_key=${apiKey}&page=0&pas=200&is_photo=1`);
                 const usersData = await usersResponse.json();
                 const users = usersData.result || [];
                 
@@ -124,8 +124,8 @@ export default async function handler(req, res) {
 
                 const documents = [];
                 
-                // Берем 60 случайных пользователей
-                const selectedUsers = users.sort(() => 0.5 - Math.random()).slice(0, 60);
+                // Берем 150 случайных пользователей
+                const selectedUsers = users.sort(() => 0.5 - Math.random()).slice(0, 150);
                 
                 for (const user of selectedUsers) {
                     const status = getWeightedRandomStatus();
