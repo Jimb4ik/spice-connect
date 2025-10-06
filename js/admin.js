@@ -658,44 +658,164 @@ function searchTransactions() {
 }
 
 // Load Moderation Queue
-function loadModeration() {
+async function loadModeration() {
     const moderationQueue = document.getElementById('moderationQueue');
+    moderationQueue.innerHTML = '<div style="padding: 40px; text-align: center;">Loading moderation queue...</div>';
     
-    const pendingItems = [
-        {
-            type: 'profile_photo',
-            user: 'New User',
-            content: 'Profile photo verification',
-            submitted: '2 hours ago'
-        },
-        {
-            type: 'id_document',
-            user: 'John Doe',
-            content: 'ID verification document',
-            submitted: '5 hours ago'
-        }
-    ];
-    
-    moderationQueue.innerHTML = `
-        <div class="card">
-            <h3>Pending Verification (${pendingItems.length})</h3>
-            ${pendingItems.map(item => `
-                <div class="activity-item" style="margin-bottom: 12px;">
-                    <div class="activity-avatar" style="background: linear-gradient(135deg, #667eea, #764ba2);">
-                        <img src="icons/admin/document.png" alt="Document" style="width: 24px; height: 24px; filter: brightness(0) invert(1);">
+    try {
+        // First seed the database
+        const seedResponse = await fetch('/api/admin-moderation', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'seed_documents' })
+        });
+        await seedResponse.json();
+
+        // Load moderation documents
+        const response = await fetch('/api/admin-moderation', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'get_documents' })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+            const documents = result.data;
+            
+            // Create user map
+            const userMap = {};
+            window.allUsers.forEach(user => {
+                userMap[user.id] = user;
+            });
+            
+            const statusLabels = {
+                'pending': { label: 'Pending', class: 'status-pending', color: '#fbbf24' },
+                'approved': { label: 'Approved', class: 'status-approved', color: '#10b981' },
+                'rejected': { label: 'Rejected', class: 'status-rejected', color: '#ef4444' },
+                'additional_required': { label: 'Info Requested', class: 'status-additional', color: '#3b82f6' }
+            };
+            
+            const docTypeLabels = {
+                'passport': 'Passport',
+                'id_card': 'ID Card',
+                'driver_license': 'Driver License'
+            };
+            
+            moderationQueue.innerHTML = `
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3>Verification Queue (${documents.length})</h3>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" id="moderationSearch" placeholder="Search..." style="padding: 8px; border: 1px solid #ddd; border-radius: 6px; width: 200px;">
+                            <select id="moderationStatusFilter" style="padding: 8px; border: 1px solid #ddd; border-radius: 6px;">
+                                <option value="">All</option>
+                                <option value="pending" selected>Pending</option>
+                                <option value="approved">Approved</option>
+                                <option value="rejected">Rejected</option>
+                                <option value="additional_required">Info Requested</option>
+                            </select>
+                            <button class="btn-primary" onclick="filterModeration()" style="padding: 8px 16px;">Filter</button>
+                        </div>
                     </div>
-                    <div class="activity-info">
-                        <strong>${item.user}</strong>
-                        <small>${item.content} • ${item.submitted}</small>
-                    </div>
-                    <div class="action-buttons">
-                        <button class="btn-action primary">Approve</button>
-                        <button class="btn-action">Reject</button>
+                    <div id="moderationItemsContainer">
+                        ${documents.map(doc => {
+                            const user = userMap[doc.user_id];
+                            if (!user) return '';
+                            
+                            const photoUrl = user.photos_v2?.[0]?.sq_430 || user.photos?.[0]?.url_middle || null;
+                            const initials = user.pseudo ? user.pseudo.substring(0, 2).toUpperCase() : 'XX';
+                            const statusInfo = statusLabels[doc.status] || { label: doc.status, class: '', color: '#9ca3af' };
+                            const docType = docTypeLabels[doc.document_type] || doc.document_type;
+                            const timeAgo = getTimeAgo(new Date(doc.submitted_at));
+                            
+                            return `
+                                <div class="activity-item moderation-item" data-user-name="${user.pseudo.toLowerCase()}" data-user-id="${user.id}" data-status="${doc.status}" style="margin-bottom: 12px;">
+                                    <div class="activity-avatar" style="width: 40px; height: 40px; padding: 0; overflow: hidden; border-radius: 50%;">
+                                        ${photoUrl ?
+                                            `<img src="${photoUrl}" alt="${user.pseudo}" style="width: 100%; height: 100%; object-fit: cover;">` :
+                                            `<div style="width: 100%; height: 100%; background: linear-gradient(135deg, #667eea, #764ba2); color: white; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold;">${initials}</div>`
+                                        }
+                                    </div>
+                                    <div class="activity-info" style="flex: 1;">
+                                        <div style="display: flex; align-items: center; gap: 6px;">
+                                            <strong>${user.pseudo}</strong>
+                                            <span style="color: #9ca3af; font-size: 12px;">#${user.id}</span>
+                                            <span style="background: ${statusInfo.color}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 600;">${statusInfo.label}</span>
+                                        </div>
+                                        <small>${docType} verification • ${timeAgo}</small>
+                                        ${doc.admin_notes ? `<div style="font-size: 11px; color: #9ca3af; margin-top: 2px; font-style: italic;">${doc.admin_notes}</div>` : ''}
+                                    </div>
+                                    <div class="action-buttons">
+                                        ${doc.status !== 'approved' ? `<button class="btn-action primary" onclick="updateDocStatus(${doc.id}, 'approved')">✓</button>` : ''}
+                                        ${doc.status !== 'rejected' ? `<button class="btn-action" onclick="updateDocStatus(${doc.id}, 'rejected')">✗</button>` : ''}
+                                        ${doc.status === 'pending' ? `<button class="btn-action" onclick="updateDocStatus(${doc.id}, 'additional_required')">?</button>` : ''}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
                     </div>
                 </div>
-            `).join('')}
-        </div>
-    `;
+            `;
+            
+            // Apply initial filter (show only pending)
+            filterModeration();
+        } else {
+            moderationQueue.innerHTML = '<div class="card"><p style="text-align: center; color: #ef4444;">Failed to load moderation queue</p></div>';
+        }
+    } catch (error) {
+        console.error('[ADMIN] Error loading moderation:', error);
+        moderationQueue.innerHTML = '<div class="card"><p style="text-align: center; color: #ef4444;">Error loading moderation queue</p></div>';
+    }
+}
+
+function getTimeAgo(date) {
+    const seconds = Math.floor((new Date() - date) / 1000);
+    if (seconds < 60) return 'just now';
+    if (seconds < 3600) return Math.floor(seconds / 60) + ' min ago';
+    if (seconds < 86400) return Math.floor(seconds / 3600) + ' hours ago';
+    return Math.floor(seconds / 86400) + ' days ago';
+}
+
+function filterModeration() {
+    const searchTerm = (document.getElementById('moderationSearch')?.value || '').toLowerCase();
+    const statusFilter = document.getElementById('moderationStatusFilter')?.value || '';
+    
+    const items = document.querySelectorAll('.moderation-item');
+    items.forEach(item => {
+        const userName = item.dataset.userName || '';
+        const userId = item.dataset.userId || '';
+        const status = item.dataset.status || '';
+        
+        const matchesSearch = !searchTerm || userName.includes(searchTerm) || userId.includes(searchTerm);
+        const matchesStatus = !statusFilter || status === statusFilter;
+        
+        item.style.display = (matchesSearch && matchesStatus) ? 'flex' : 'none';
+    });
+}
+
+async function updateDocStatus(documentId, status) {
+    try {
+        const response = await fetch('/api/admin-moderation', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                action: 'update_status', 
+                document_id: documentId, 
+                status: status 
+            })
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+            loadModeration();
+        } else {
+            alert('Failed to update document status');
+        }
+    } catch (error) {
+        console.error('[ADMIN] Error updating document status:', error);
+        alert('Error updating document status');
+    }
 }
 
 // View User Details
@@ -719,32 +839,41 @@ async function viewUser(userId) {
         const profileResponse = await fetch(`/api/spice-multi-test?endpoint=/index_api/user&method=POST&id=${userId}`);
         const profileResult = await profileResponse.json();
         
-        console.log('[ADMIN] User profile response:', profileResult);
-        
         let fullProfile = user; // Fallback to basic user data
         let credits = 0;
-        let joinDate = 'N/A';
         
         if (profileResult.success && profileResult.data && profileResult.data.result) {
             fullProfile = { ...user, ...profileResult.data.result };
             credits = fullProfile.credits || fullProfile.credit || 0;
-            joinDate = fullProfile.date || fullProfile.created_at;
         }
         
-        // Get user transactions from allTransactions
-        const userTransactions = allTransactions.filter(txn => 
-            txn.from_user_id === userId || txn.to_user_id === userId
-        );
+        // Get user transactions from database
+        const txnResponse = await fetch('/api/admin-transactions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'get_user_transactions', user_id: userId })
+        });
+        const txnResult = await txnResponse.json();
         
-        console.log('[ADMIN] User transactions:', userTransactions);
-        
-        const walletBalance = credits;
+        let userTransactions = [];
+        if (txnResult.success && txnResult.data) {
+            userTransactions = txnResult.data.map(txn => ({
+                id: txn.transaction_id,
+                from_user_id: txn.from_user_id,
+                to_user_id: txn.to_user_id,
+                type: txn.type,
+                amount: parseFloat(txn.amount),
+                credits: txn.credits,
+                details: txn.details,
+                payment_method: txn.payment_method,
+                date: txn.created_at,
+                status: txn.status
+            }));
+        }
         
         // Load gifts data
         const giftsResponse = await fetch(`/api/database?action=get_received_gifts&user_id=${userId}&limit=20`);
         const giftsResult = await giftsResponse.json();
-        
-        console.log('[ADMIN] Gifts data:', giftsResult);
         
         const receivedGifts = giftsResult.success && giftsResult.data ? giftsResult.data : [];
         const monetizableGifts = receivedGifts.filter(g => g.status !== 'monetized');
@@ -754,11 +883,11 @@ async function viewUser(userId) {
             return sum + withdrawableValue;
         }, 0);
         
-        // Check ID verification status (placeholder - needs implementation)
+        // Check ID verification status
         const idVerified = fullProfile.id_verified || 'Not Provided';
         
         // Display detailed profile
-        displayDetailedProfile(fullProfile, walletBalance, userTransactions, receivedGifts, totalWithdrawable, idVerified);
+        displayDetailedProfile(fullProfile, credits, userTransactions, receivedGifts, totalWithdrawable, idVerified);
         
     } catch (error) {
         console.error('[ADMIN] Error loading user details:', error);
@@ -1004,6 +1133,9 @@ window.loadDashboard = loadDashboard;
 window.loadUsers = loadUsers;
 window.loadTransactions = loadTransactions;
 window.loadModeration = loadModeration;
+window.filterModeration = filterModeration;
+window.updateDocStatus = updateDocStatus;
+window.getTimeAgo = getTimeAgo;
 window.displayUsers = displayUsers;
 window.searchUsers = searchUsers;
 window.viewUser = viewUser;
