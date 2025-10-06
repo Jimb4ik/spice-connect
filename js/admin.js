@@ -337,13 +337,32 @@ function displayUsers() {
                 <td>${user.photoCount || 0} photos</td>
                 <td>
                     <div class="action-buttons">
-                        <button class="btn-action primary" onclick="window.viewUser(${user.id})">View</button>
-                        <button class="btn-action" onclick="window.editUser(${user.id})">Edit</button>
+                        <button class="btn-action primary btn-view-user" data-user-id="${user.id}">View</button>
+                        <button class="btn-action btn-edit-user" data-user-id="${user.id}">Edit</button>
                     </div>
                 </td>
             </tr>
         `;
     }).join('');
+    
+    // Add event listeners to all View buttons
+    setTimeout(() => {
+        document.querySelectorAll('.btn-view-user').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const userId = parseInt(this.getAttribute('data-user-id'));
+                console.log('[ADMIN] View button clicked for user:', userId);
+                viewUser(userId);
+            });
+        });
+        
+        document.querySelectorAll('.btn-edit-user').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const userId = parseInt(this.getAttribute('data-user-id'));
+                console.log('[ADMIN] Edit button clicked for user:', userId);
+                editUser(userId);
+            });
+        });
+    }, 0);
     
     updatePagination();
 }
@@ -646,16 +665,30 @@ function loadModeration() {
 
 // View User Details
 async function viewUser(userId) {
+    console.log('[ADMIN] viewUser called with userId:', userId);
+    
     const modal = document.getElementById('userModal');
     const modalContent = document.getElementById('modalUserContent');
     const modalTitle = document.getElementById('modalUserName');
     
+    console.log('[ADMIN] Modal element:', modal);
+    
     const user = allUsers.find(u => u.id === userId);
-    if (!user) return;
+    if (!user) {
+        console.error('[ADMIN] User not found:', userId);
+        return;
+    }
+    
+    console.log('[ADMIN] Found user:', user.pseudo);
     
     modalTitle.textContent = user.pseudo || 'User Details';
     modalContent.innerHTML = '<div class="loading" style="padding: 40px; text-align: center;">Loading detailed profile...</div>';
+    
+    console.log('[ADMIN] Adding active class to modal...');
     modal.classList.add('active');
+    
+    console.log('[ADMIN] Modal classList:', modal.className);
+    console.log('[ADMIN] Modal display:', window.getComputedStyle(modal).display);
     
     try {
         // Load full user profile with credits and other data
