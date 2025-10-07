@@ -18,31 +18,8 @@ export default async function handler(req, res) {
         console.log('[ADMIN-PAYOUTS] Request:', { action, payout_id, user_id, status });
 
         if (action === 'get_pending_payouts') {
-            // First, ensure tables exist
-            await query(`
-                CREATE TABLE IF NOT EXISTS gifts (
-                    id SERIAL PRIMARY KEY,
-                    name VARCHAR(255) UNIQUE NOT NULL,
-                    price_credits INTEGER NOT NULL,
-                    image_url TEXT
-                )
-            `);
-            
-            await query(`
-                CREATE TABLE IF NOT EXISTS user_gifts (
-                    id SERIAL PRIMARY KEY,
-                    gift_id INTEGER REFERENCES gifts(id),
-                    sender_user_id INTEGER,
-                    receiver_user_id INTEGER,
-                    purchase_price_credits INTEGER NOT NULL,
-                    status VARCHAR(50) DEFAULT 'available',
-                    sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    monetized_at TIMESTAMP,
-                    rejection_reason TEXT
-                )
-            `);
-            
-            // Получить все pending выплаты
+            // Use existing tables - no need to create them
+            // Get all gifts with status='sent' or 'received' (available for monetization)
             const result = await query(`
                 SELECT 
                     ug.id as gift_id,
@@ -55,8 +32,9 @@ export default async function handler(req, res) {
                     g.price_credits
                 FROM user_gifts ug
                 JOIN gifts g ON ug.gift_id = g.id
-                WHERE ug.status = 'available'
+                WHERE ug.status IN ('sent', 'received')
                   AND ug.receiver_user_id IS NOT NULL
+                  AND ug.receiver_user_id != ''
                 ORDER BY ug.sent_at DESC
                 LIMIT 100
             `);
@@ -114,33 +92,10 @@ export default async function handler(req, res) {
             console.log('[ADMIN-PAYOUTS] Seeding payout users for:', user_ids);
 
             try {
-                // 1. Ensure tables exist
-                await query(`
-                    CREATE TABLE IF NOT EXISTS gifts (
-                        id SERIAL PRIMARY KEY,
-                        name VARCHAR(255) NOT NULL UNIQUE,
-                        image_url TEXT,
-                        price_credits INTEGER NOT NULL,
-                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                    )
-                `);
+                // 1. SKIP creating tables - use existing ones from database.js
+                // Tables already exist with proper structure
 
-                await query(`
-                    CREATE TABLE IF NOT EXISTS user_gifts (
-                        id SERIAL PRIMARY KEY,
-                        gift_id INTEGER REFERENCES gifts(id),
-                        sender_user_id INTEGER NOT NULL,
-                        receiver_user_id INTEGER,
-                        purchase_price_credits INTEGER NOT NULL,
-                        status VARCHAR(50) DEFAULT 'available',
-                        sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                        monetized_at TIMESTAMP,
-                        rejection_reason TEXT,
-                        rejection_date TIMESTAMP
-                    )
-                `);
-
-                // 2. Insert gifts if they don't exist
+                // 2. Insert gifts if they don't exist (use existing table)
                 const realGifts = [
                     { name: 'Red Rose', price: 5 },
                     { name: 'Tulip Bouquet', price: 15 },
@@ -194,10 +149,11 @@ export default async function handler(req, res) {
                         if (giftResult.rows.length > 0) {
                             const giftDbId = giftResult.rows[0].id;
                             
+                            // Insert using existing table structure (VARCHAR user_ids, status='received')
                             await query(`
                                 INSERT INTO user_gifts (gift_id, sender_user_id, receiver_user_id, purchase_price_credits, status, sent_at)
-                                VALUES ($1, $2, $3, $4, 'available', CURRENT_TIMESTAMP - INTERVAL '${daysAgo} days')
-                            `, [giftDbId, randomSenderId, userId, randomGift.price]);
+                                VALUES ($1, $2::text, $3::text, $4, 'received', CURRENT_TIMESTAMP - INTERVAL '${daysAgo} days')
+                            `, [giftDbId, randomSenderId.toString(), userId.toString(), randomGift.price]);
                             
                             // Also add to transactions table
                             await query(`
@@ -248,16 +204,16 @@ export default async function handler(req, res) {
                         UPDATE user_gifts 
                         SET status = 'monetized', 
                             monetized_at = CURRENT_TIMESTAMP - INTERVAL '30 days'
-                        WHERE receiver_user_id = $1 
-                          AND status = 'available'
+                        WHERE receiver_user_id = $1::text
+                          AND status = 'received'
                           AND id IN (
                               SELECT id FROM user_gifts 
-                              WHERE receiver_user_id = $1 
-                                AND status = 'available'
+                              WHERE receiver_user_id = $1::text
+                                AND status = 'received'
                               ORDER BY sent_at ASC
                               LIMIT $2
                           )
-                    `, [userId, numMonetized]);
+                    `, [userId.toString(), numMonetized]);
                 }
 
                 console.log(`[ADMIN-PAYOUTS] Added ${totalGiftsAdded} gifts and ${totalPayoutsAdded} payouts`);
