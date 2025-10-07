@@ -266,9 +266,22 @@
 
         <!-- Payouts Section -->
         <section id="payouts" class="content-section">
-            <div class="section-header">
-                <h2>Payout Requests</h2>
-                <p>Approve or reject user withdrawal requests</p>
+            <div class="section-controls">
+                <div class="search-bar">
+                    <input type="text" id="payoutsSearch" placeholder="Search users by name or ID...">
+                    <button onclick="filterPayouts()">
+                        <img src="icons/admin/search.png" alt="Search" style="width: 18px; height: 18px;">
+                    </button>
+                </div>
+                <div class="filter-group">
+                    <select id="payoutsStatusFilter">
+                        <option value="">All Status</option>
+                        <option value="pending" selected>Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                    <button class="btn-primary" onclick="filterPayouts()">Apply Filters</button>
+                </div>
             </div>
             
             <div class="payouts-grid" id="payoutsGrid">

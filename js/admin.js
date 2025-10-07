@@ -859,7 +859,7 @@ async function loadModeration() {
             
             moderationQueue.innerHTML = `
                 <div class="card">
-                    <h3>Verification Queue (${documents.length})</h3>
+                    <h3>Verification Queue</h3>
                     <div id="moderationItemsContainer">
                         ${documents.map(doc => {
                             const user = userMap[doc.user_id];
@@ -1424,96 +1424,140 @@ async function loadPayouts() {
         if (result.success && result.data) {
             const payouts = result.data;
             
-            if (payouts.length === 0) {
-                payoutsGrid.innerHTML = '<div style="padding: 40px; text-align: center; color: #6b7280;">No pending payout requests</div>';
-                return;
-            }
+            // Store payouts globally for filtering
+            window.allPayouts = payouts;
+            window.filteredPayouts = payouts;
             
-            // Gift database with emojis
-            const giftDatabase = {
-                'Red Rose': { emoji: '🌹', credits: 5 },
-                'Tulip Bouquet': { emoji: '🌷', credits: 15 },
-                'Heart Chocolate': { emoji: '🍫', credits: 20 },
-                'Coffee & Cookies': { emoji: '☕', credits: 25 },
-                'Teddy Bear': { emoji: '🧸', credits: 35 },
-                'Balloons': { emoji: '🎈', credits: 45 },
-                'Rose Bouquet': { emoji: '💐', credits: 75 },
-                'Perfume': { emoji: '🌸', credits: 100 },
-                'Silver Earrings': { emoji: '💎', credits: 125 },
-                'Bracelet': { emoji: '📿', credits: 150 },
-                'Watch': { emoji: '⌚', credits: 175 },
-                'Gold Chain': { emoji: '📿', credits: 200 },
-                'Diamond Earrings': { emoji: '💎', credits: 300 },
-                'Gold Ring': { emoji: '💍', credits: 400 },
-                'Pearl Necklace': { emoji: '📿', credits: 500 },
-                'Diamond Bracelet': { emoji: '💎', credits: 650 },
-                'Platinum Ring': { emoji: '💍', credits: 800 },
-                'Luxury Watch': { emoji: '⌚', credits: 1000 },
-                'Diamond Necklace': { emoji: '💎', credits: 1500 },
-                'Royal Crown': { emoji: '👑', credits: 2500 }
-            };
-            
-            payoutsGrid.innerHTML = payouts.map(payout => {
-                // Get user info
-                const user = window.allUsers?.find(u => u.id == payout.user_id);
-                const photoUrl = user?.photos_v2?.[0]?.sq_430 || user?.photos?.[0]?.url_middle || null;
-                const initials = user?.pseudo ? user.pseudo.substring(0, 2).toUpperCase() : '??';
-                
-                return `
-                    <div class="payout-card">
-                        <div class="payout-header">
-                            ${photoUrl ? 
-                                `<img src="${photoUrl}" alt="${user.pseudo}" class="payout-user-avatar">` :
-                                `<div class="payout-user-avatar" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold;">${initials}</div>`
-                            }
-                            <div class="payout-user-info">
-                                <h4>${user?.pseudo || 'User #' + payout.user_id}</h4>
-                                <p>ID: #${payout.user_id}</p>
-                            </div>
-                        </div>
-                        
-                        <div class="payout-summary">
-                            <h3>€${payout.total_withdrawable.toFixed(2)}</h3>
-                            <p>${payout.gifts.length} gifts • ${payout.total_credits} credits • €${payout.total_eur_value.toFixed(2)} value</p>
-                        </div>
-                        
-                        <div class="gifts-list">
-                            ${payout.gifts.map(gift => {
-                                const giftInfo = giftDatabase[gift.gift_name] || { emoji: '🎁', credits: gift.credits };
-                                return `
-                                    <div class="gift-item">
-                                        <div class="gift-emoji">${giftInfo.emoji}</div>
-                                        <div class="gift-details">
-                                            <strong>${gift.gift_name}</strong>
-                                            <small>Received ${new Date(gift.sent_at).toLocaleDateString()}</small>
-                                        </div>
-                                        <div class="gift-value">
-                                            <div class="credits">${gift.credits} credits</div>
-                                            <div class="eur">€${gift.eur_value.toFixed(2)} • €${gift.withdrawable.toFixed(2)} withdrawable</div>
-                                        </div>
-                                    </div>
-                                `;
-                            }).join('')}
-                        </div>
-                        
-                        <div class="payout-actions">
-                            <button class="btn-approve" onclick="approvePayout(${payout.user_id}, ${JSON.stringify(payout.gifts.map(g => g.gift_id))})">
-                                Approve
-                            </button>
-                            <button class="btn-reject" onclick="rejectPayout(${payout.user_id}, ${JSON.stringify(payout.gifts.map(g => g.gift_id))})">
-                                Reject
-                            </button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
+            displayPayouts(payouts);
         } else {
-            payoutsGrid.innerHTML = '<div style="padding: 40px; text-align: center; color: #ef4444;">Failed to load payouts</div>';
+            console.error('[ADMIN] Failed to load payouts:', result.error);
+            payoutsGrid.innerHTML = '<div style="padding: 40px; text-align: center; color: #ef4444;">Error loading payouts</div>';
         }
     } catch (error) {
         console.error('[ADMIN] Error loading payouts:', error);
         payoutsGrid.innerHTML = '<div style="padding: 40px; text-align: center; color: #ef4444;">Error loading payouts</div>';
     }
+}
+
+// Display payouts
+window.displayPayouts = function(payouts) {
+    const payoutsGrid = document.getElementById('payoutsGrid');
+    
+    if (payouts.length === 0) {
+        payoutsGrid.innerHTML = '<div style="padding: 40px; text-align: center; color: #6b7280;">No pending payout requests</div>';
+        return;
+    }
+    
+    // Gift database with emojis
+    const giftDatabase = {
+        'Red Rose': { emoji: '🌹', credits: 5 },
+        'Tulip Bouquet': { emoji: '🌷', credits: 15 },
+        'Heart Chocolate': { emoji: '🍫', credits: 20 },
+        'Coffee & Cookies': { emoji: '☕', credits: 25 },
+        'Teddy Bear': { emoji: '🧸', credits: 35 },
+        'Balloons': { emoji: '🎈', credits: 45 },
+        'Rose Bouquet': { emoji: '💐', credits: 75 },
+        'Perfume': { emoji: '🌸', credits: 100 },
+        'Silver Earrings': { emoji: '💎', credits: 125 },
+        'Bracelet': { emoji: '📿', credits: 150 },
+        'Watch': { emoji: '⌚', credits: 175 },
+        'Gold Chain': { emoji: '📿', credits: 200 },
+        'Diamond Earrings': { emoji: '💎', credits: 300 },
+        'Gold Ring': { emoji: '💍', credits: 400 },
+        'Pearl Necklace': { emoji: '📿', credits: 500 },
+        'Diamond Bracelet': { emoji: '💎', credits: 650 },
+        'Platinum Ring': { emoji: '💍', credits: 800 },
+        'Luxury Watch': { emoji: '⌚', credits: 1000 },
+        'Diamond Necklace': { emoji: '💎', credits: 1500 },
+        'Royal Crown': { emoji: '👑', credits: 2500 }
+    };
+    
+    payoutsGrid.innerHTML = payouts.map(payout => {
+        // Get user info
+        const user = window.allUsers?.find(u => u.id == payout.user_id);
+        const photoUrl = user?.photos_v2?.[0]?.sq_430 || user?.photos?.[0]?.url_middle || null;
+        const initials = user?.pseudo ? user.pseudo.substring(0, 2).toUpperCase() : '??';
+        
+        return `
+            <div class="payout-card">
+                <div class="payout-header">
+                    ${photoUrl ? 
+                        `<img src="${photoUrl}" alt="${user.pseudo}" class="payout-user-avatar">` :
+                        `<div class="payout-user-avatar" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold;">${initials}</div>`
+                    }
+                    <div class="payout-user-info">
+                        <h4>${user?.pseudo || 'User #' + payout.user_id}</h4>
+                        <p>ID: #${payout.user_id}</p>
+                    </div>
+                </div>
+                
+                <div class="payout-summary">
+                    <h3>€${payout.total_withdrawable.toFixed(2)}</h3>
+                    <p>${payout.gifts.length} gifts • ${payout.total_credits} credits • €${payout.total_eur_value.toFixed(2)} value</p>
+                </div>
+                
+                <div class="gifts-list">
+                    ${payout.gifts.map(gift => {
+                        const giftInfo = giftDatabase[gift.gift_name] || { emoji: '🎁', credits: gift.credits };
+                        return `
+                            <div class="gift-item">
+                                <div class="gift-emoji">${giftInfo.emoji}</div>
+                                <div class="gift-details">
+                                    <strong>${gift.gift_name}</strong>
+                                    <small>Received ${new Date(gift.sent_at).toLocaleDateString()}</small>
+                                </div>
+                                <div class="gift-value">
+                                    <div class="credits">${gift.credits} credits</div>
+                                    <div class="eur">€${gift.eur_value.toFixed(2)} • €${gift.withdrawable.toFixed(2)} withdrawable</div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+                
+                <div class="payout-actions">
+                    <button class="btn-approve" onclick="approvePayout(${payout.user_id}, ${JSON.stringify(payout.gifts.map(g => g.gift_id))})">
+                        Approve
+                    </button>
+                    <button class="btn-reject" onclick="rejectPayout(${payout.user_id}, ${JSON.stringify(payout.gifts.map(g => g.gift_id))})">
+                        Reject
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Filter payouts
+window.filterPayouts = function() {
+    const searchTerm = document.getElementById('payoutsSearch').value.toLowerCase();
+    const statusFilter = document.getElementById('payoutsStatusFilter').value;
+    
+    console.log('[ADMIN] Filtering payouts:', { searchTerm, statusFilter });
+    
+    if (!window.allPayouts) {
+        console.log('[ADMIN] No payouts data to filter');
+        return;
+    }
+    
+    let filtered = window.allPayouts.filter(payout => {
+        // Search by user ID or pseudo
+        const user = window.allUsers?.find(u => u.id == payout.user_id);
+        const matchesSearch = !searchTerm || 
+            payout.user_id.toString().includes(searchTerm) ||
+            (user?.pseudo && user.pseudo.toLowerCase().includes(searchTerm));
+        
+        // Note: Current API only returns pending payouts
+        // Status filter would require backend support for approved/rejected history
+        const matchesStatus = !statusFilter || statusFilter === 'pending';
+        
+        return matchesSearch && matchesStatus;
+    });
+    
+    window.filteredPayouts = filtered;
+    console.log('[ADMIN] Filtered payouts:', filtered.length);
+    
+    displayPayouts(filtered);
 }
 
 async function approvePayout(userId, giftIds) {
