@@ -149,12 +149,8 @@ export default async function handler(req, res) {
                     )
                 `);
 
-                // 2. Clear old demo payouts (only status='received' or 'sent')
-                console.log('[ADMIN-PAYOUTS] Clearing old demo payouts...');
-                await query(`DELETE FROM user_gifts WHERE status IN ('received', 'sent')`);
-                
-                // Also clear related transactions
-                await query(`DELETE FROM transactions WHERE type = 'payout' OR type = 'gift'`);
+                // 2. DON'T clear old data - just add new gifts to existing ones
+                console.log('[ADMIN-PAYOUTS] Adding new demo gifts without clearing existing data...');
 
                 // 3. Insert gifts if they don't exist (use existing table)
                 const realGifts = [
@@ -400,6 +396,33 @@ export default async function handler(req, res) {
             return res.status(200).json({
                 success: true,
                 message: `Rejected ${gift_ids.length} gifts`
+            });
+        }
+
+        // Reset user gifts back to 'received' status (to undo monetization)
+        if (action === 'reset_user_gifts') {
+            const { user_id } = req.body;
+
+            if (!user_id) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'user_id is required'
+                });
+            }
+
+            console.log(`[ADMIN-PAYOUTS] Resetting gifts for user ${user_id} to 'received' status...`);
+
+            await query(`
+                UPDATE user_gifts 
+                SET status = 'received',
+                    monetized_at = NULL
+                WHERE receiver_user_id = $1::text
+                  AND status = 'monetized'
+            `, [user_id]);
+
+            return res.status(200).json({
+                success: true,
+                message: `Reset gifts for user ${user_id}`
             });
         }
 
