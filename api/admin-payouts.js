@@ -191,7 +191,8 @@ export default async function handler(req, res) {
                     
                     for (let i = 0; i < numGifts; i++) {
                         const randomGift = realGifts[Math.floor(Math.random() * realGifts.length)];
-                        const randomSenderId = Math.floor(Math.random() * 900000) + 100000; // Random sender
+                        // Pick sender from EXISTING user_ids (so we have their photo/name)
+                        const randomSenderId = user_ids[Math.floor(Math.random() * user_ids.length)];
                         const daysAgo = Math.floor(Math.random() * 30); // Last 30 days
                         
                         // Get gift ID from database
