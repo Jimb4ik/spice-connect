@@ -18,7 +18,40 @@ export default async function handler(req, res) {
         console.log('[ADMIN-PAYOUTS] Request:', { action, payout_id, user_id, status });
 
         if (action === 'get_pending_payouts') {
-            // Use existing tables - no need to create them
+            // Ensure tables exist with proper structure (from database.js)
+            await query(`
+                CREATE TABLE IF NOT EXISTS gifts (
+                    id SERIAL PRIMARY KEY,
+                    name VARCHAR(255) NOT NULL,
+                    description TEXT,
+                    image_url VARCHAR(255) NOT NULL,
+                    price_credits INTEGER NOT NULL,
+                    category VARCHAR(50) NOT NULL DEFAULT 'budget',
+                    sort_order INTEGER DEFAULT 0,
+                    is_active BOOLEAN DEFAULT true,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            `);
+            
+            await query(`
+                CREATE TABLE IF NOT EXISTS user_gifts (
+                    id SERIAL PRIMARY KEY,
+                    gift_id INTEGER REFERENCES gifts(id),
+                    sender_user_id VARCHAR(255),
+                    sender_session_id VARCHAR(255),
+                    receiver_user_id VARCHAR(255),
+                    receiver_session_id VARCHAR(255),
+                    purchase_price_credits INTEGER NOT NULL,
+                    monetization_value_usd DECIMAL(10,2),
+                    monetization_currency VARCHAR(3) DEFAULT 'USD',
+                    personal_message TEXT,
+                    status VARCHAR(50) DEFAULT 'sent',
+                    sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    received_at TIMESTAMP,
+                    monetized_at TIMESTAMP
+                )
+            `);
+            
             // Get all gifts with status='sent' or 'received' (available for monetization)
             const result = await query(`
                 SELECT 
