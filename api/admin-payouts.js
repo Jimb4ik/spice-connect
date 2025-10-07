@@ -76,6 +76,139 @@ export default async function handler(req, res) {
             });
         }
 
+        if (action === 'seed_payout_users') {
+            // Create active female users with many gifts and payout requests
+            const { user_ids } = req.body;
+            
+            if (!user_ids || user_ids.length === 0) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'user_ids array is required'
+                });
+            }
+
+            console.log('[ADMIN-PAYOUTS] Seeding payout users for:', user_ids);
+
+            // Gift types with credits
+            const realGifts = [
+                { name: 'Red Rose', price: 5 },
+                { name: 'Tulip Bouquet', price: 15 },
+                { name: 'Heart Chocolate', price: 20 },
+                { name: 'Coffee & Cookies', price: 25 },
+                { name: 'Teddy Bear', price: 35 },
+                { name: 'Balloons', price: 45 },
+                { name: 'Rose Bouquet', price: 75 },
+                { name: 'Perfume', price: 100 },
+                { name: 'Silver Earrings', price: 125 },
+                { name: 'Bracelet', price: 150 },
+                { name: 'Watch', price: 175 },
+                { name: 'Gold Chain', price: 200 },
+                { name: 'Diamond Earrings', price: 300 },
+                { name: 'Gold Ring', price: 400 },
+                { name: 'Pearl Necklace', price: 500 },
+                { name: 'Diamond Bracelet', price: 650 },
+                { name: 'Platinum Ring', price: 800 },
+                { name: 'Luxury Watch', price: 1000 },
+                { name: 'Diamond Necklace', price: 1500 },
+                { name: 'Royal Crown', price: 2500 }
+            ];
+
+            let totalGiftsAdded = 0;
+            let totalPayoutsAdded = 0;
+
+            // For each active user
+            for (const userId of user_ids) {
+                // 1. Add 15-30 received gifts (available for payout)
+                const numGifts = Math.floor(Math.random() * 16) + 15; // 15-30 gifts
+                
+                for (let i = 0; i < numGifts; i++) {
+                    const randomGift = realGifts[Math.floor(Math.random() * realGifts.length)];
+                    const randomSenderId = Math.floor(Math.random() * 900000) + 100000; // Random sender
+                    const daysAgo = Math.floor(Math.random() * 60); // Last 60 days
+                    
+                    // Get gift ID from database
+                    const giftResult = await query(
+                        'SELECT id FROM gifts WHERE name = $1 LIMIT 1',
+                        [randomGift.name]
+                    );
+                    
+                    if (giftResult.rows.length > 0) {
+                        const giftDbId = giftResult.rows[0].id;
+                        
+                        await query(`
+                            INSERT INTO user_gifts (gift_id, sender_user_id, receiver_user_id, purchase_price_credits, status, sent_at)
+                            VALUES ($1, $2, $3, $4, 'available', CURRENT_TIMESTAMP - INTERVAL '${daysAgo} days')
+                        `, [giftDbId, randomSenderId, userId, randomGift.price]);
+                        
+                        // Also add to transactions table
+                        await query(`
+                            INSERT INTO transactions (
+                                id, from_user_id, to_user_id, from_user_name, to_user_name,
+                                type, amount, credits, details, status, date
+                            ) VALUES (
+                                gen_random_uuid()::text, $1, $2, 
+                                'User #' || $1,
+                                (SELECT COALESCE(pseudo, 'User') FROM user_profiles WHERE spice_user_id = $2 LIMIT 1),
+                                'gift', $3, $4, $5, 'completed',
+                                CURRENT_TIMESTAMP - INTERVAL '${daysAgo} days'
+                            )
+                        `, [randomSenderId, userId, (randomGift.price * 0.20).toFixed(2), randomGift.price, randomGift.name]);
+                        
+                        totalGiftsAdded++;
+                    }
+                }
+                
+                // 2. Add 5-10 payout transactions (already completed)
+                const numPayouts = Math.floor(Math.random() * 6) + 5; // 5-10 payouts
+                
+                for (let i = 0; i < numPayouts; i++) {
+                    const daysAgo = Math.floor(Math.random() * 90) + 30; // 30-120 days ago
+                    const amount = (Math.random() * 500 + 50).toFixed(2); // €50-€550
+                    const credits = Math.floor(amount / 0.20);
+                    
+                    await query(`
+                        INSERT INTO transactions (
+                            id, from_user_id, to_user_id, from_user_name, to_user_name,
+                            type, amount, credits, status, date, payment_method
+                        ) VALUES (
+                            gen_random_uuid()::text, $1, NULL, 
+                            (SELECT COALESCE(pseudo, 'User') FROM user_profiles WHERE spice_user_id = $1 LIMIT 1),
+                            NULL, 'payout', $2, $3, 'completed',
+                            CURRENT_TIMESTAMP - INTERVAL '${daysAgo} days',
+                            'Bank Transfer (OCT)'
+                        )
+                    `, [userId, amount, credits]);
+                    
+                    totalPayoutsAdded++;
+                }
+                
+                // 3. Mark some gifts as monetized (for completed payouts)
+                const numMonetized = Math.floor(numGifts * 0.3); // 30% already monetized
+                
+                await query(`
+                    UPDATE user_gifts 
+                    SET status = 'monetized', 
+                        monetized_at = CURRENT_TIMESTAMP - INTERVAL '30 days'
+                    WHERE receiver_user_id = $1 
+                      AND status = 'available'
+                      AND id IN (
+                          SELECT id FROM user_gifts 
+                          WHERE receiver_user_id = $1 
+                            AND status = 'available'
+                          ORDER BY sent_at ASC
+                          LIMIT $2
+                      )
+                `, [userId, numMonetized]);
+            }
+
+            console.log(`[ADMIN-PAYOUTS] Added ${totalGiftsAdded} gifts and ${totalPayoutsAdded} payouts`);
+
+            return res.status(200).json({
+                success: true,
+                message: `Created ${totalGiftsAdded} gifts and ${totalPayoutsAdded} payouts for ${user_ids.length} users`
+            });
+        }
+
         if (action === 'approve_payout') {
             // Одобрить выплату
             const { gift_ids } = req.body;

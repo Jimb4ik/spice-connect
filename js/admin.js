@@ -1378,6 +1378,54 @@ async function loadPayouts() {
     payoutsGrid.innerHTML = '<div style="padding: 40px; text-align: center;">Loading payout requests...</div>';
     
     try {
+        // First, check if we need to seed data
+        const checkResponse = await fetch('/api/admin-payouts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'get_pending_payouts' })
+        });
+        
+        const checkResult = await checkResponse.json();
+        
+        // If no payouts exist and we have users, seed some active users
+        if (checkResult.success && checkResult.data && checkResult.data.length === 0 && window.allUsers && window.allUsers.length > 0) {
+            console.log('[ADMIN] No payouts found, seeding active female users...');
+            
+            // Get 5-7 random female users
+            const femaleUsers = window.allUsers.filter(u => parseInt(u.sexe1) === 2);
+            const numActiveUsers = Math.min(7, femaleUsers.length);
+            const selectedUsers = [];
+            
+            for (let i = 0; i < numActiveUsers; i++) {
+                const randomIndex = Math.floor(Math.random() * femaleUsers.length);
+                const user = femaleUsers[randomIndex];
+                if (!selectedUsers.includes(user.id)) {
+                    selectedUsers.push(user.id);
+                }
+            }
+            
+            if (selectedUsers.length > 0) {
+                // Seed payout data for these users
+                const seedResponse = await fetch('/api/admin-payouts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        action: 'seed_payout_users',
+                        user_ids: selectedUsers
+                    })
+                });
+                
+                const seedResult = await seedResponse.json();
+                console.log('[ADMIN] Seed result:', seedResult);
+                
+                // Also reload transactions to include new data
+                if (window.loadTransactions) {
+                    await loadTransactions();
+                }
+            }
+        }
+        
+        // Now load the payouts
         const response = await fetch('/api/admin-payouts', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
