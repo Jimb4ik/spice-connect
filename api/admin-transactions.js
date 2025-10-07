@@ -92,8 +92,8 @@ export default async function handler(req, res) {
                 const transactionTypes = ['purchase', 'payout', 'gift'];
                 const paymentMethods = ['Credit Card', 'PayPal', 'Stripe', 'Bank Transfer'];
                 
-                // Credit rate from project: 1 credit = €0.21
-                const EURO_PER_CREDIT = 0.21;
+                // Credit rate from project: 1 credit = €0.20
+                const EURO_PER_CREDIT = 0.20;
                 
                 // Real gifts from database
                 const realGifts = [

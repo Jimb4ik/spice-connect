@@ -264,8 +264,8 @@ class GiftsManager {
     }
 
     calculateGiftValue(credits) {
-        // 10% от стоимости в EUR: credits × €0.21 × 10%
-        return credits * 0.21 * 0.1;
+        // 10% от стоимости в EUR: credits × €0.20 × 10%
+        return credits * 0.20 * 0.1;
     }
 
     updateMonetizationValue() {

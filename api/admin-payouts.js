@@ -52,7 +52,7 @@ export default async function handler(req, res) {
                 }
                 
                 const giftCredits = gift.price_credits;
-                const giftEurValue = giftCredits * 0.21;
+                const giftEurValue = giftCredits * 0.20;
                 const withdrawable = giftEurValue * 0.1;
                 
                 payoutsByUser[userId].gifts.push({

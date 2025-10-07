@@ -175,7 +175,7 @@ class WalletManager {
             
             // Рассчитываем кредиты на основе суммы и валюты
             const creditRates = {
-                'EUR': 0.21,
+                'EUR': 0.20,
                 'USD': 0.23,
                 'GBP': 0.18,
                 'CAD': 0.31,
@@ -334,7 +334,7 @@ class WalletManager {
         
         // Неровные курсы валют (цена 1 кредита)
         this.creditRates = {
-            'EUR': 0.21,  // 1 кредит = €0.21
+            'EUR': 0.20,  // 1 кредит = €0.20
             'USD': 0.23,  // 1 кредит = $0.23
             'GBP': 0.18,  // 1 кредит = £0.18
             'CAD': 0.31,  // 1 кредит = C$0.31
@@ -600,7 +600,7 @@ function selectCustomAmount() {
 
 // Input mode switching
 let currentInputMode = 'money'; // 'money' or 'credits'
-const EURO_PER_CREDIT = 0.21; // 1 credit = €0.21
+const EURO_PER_CREDIT = 0.20; // 1 credit = €0.20
 
 function switchInputMode(mode) {
     currentInputMode = mode;
@@ -624,13 +624,13 @@ function switchInputMode(mode) {
             amountInput.placeholder = '0.00';
             amountInput.step = '0.01';
             amountInput.min = '1';
-            amountInput.max = '1000';
+            amountInput.max = '20000';
         } else {
             amountLabel.textContent = 'Credits:';
             amountInput.placeholder = '0';
             amountInput.step = '1';
             amountInput.min = '1';
-            amountInput.max = '4761'; // Max credits for 1000 EUR (1000 / 0.21)
+            amountInput.max = '100000'; // Max credits for 20000 EUR (20000 / 0.20)
         }
         
         // Clear current value and update conversion

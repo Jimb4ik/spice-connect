@@ -292,7 +292,7 @@ async function processSuccessfulPayment(webhookData) {
         
         // Рассчитываем кредиты на основе суммы
         const creditRates = {
-            'EUR': 0.21,
+            'EUR': 0.20,
             'USD': 0.23,
             'GBP': 0.18,
             'CAD': 0.31,

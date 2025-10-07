@@ -1008,10 +1008,10 @@ async function viewUser(userId) {
         );
         
         // 10% of received gift value can be withdrawn
-        // Formula: gift_credits × €0.21 × 10% = withdrawable in EUR
+        // Formula: gift_credits × €0.20 × 10% = withdrawable in EUR
         const totalWithdrawable = receivedGiftTransactions.reduce((sum, txn) => {
             const giftCredits = txn.credits || parseFloat(txn.amount || 0);
-            const giftEuroValue = giftCredits * 0.21; // Convert credits to EUR
+            const giftEuroValue = giftCredits * 0.20; // Convert credits to EUR
             const withdrawableValue = giftEuroValue * 0.1; // 10% of EUR value
             return sum + withdrawableValue;
         }, 0);
@@ -1214,8 +1214,8 @@ function displayDetailedProfile(user, credits, transactions, gifts, withdrawable
                     ${gifts.map(gift => {
                         const giftName = gift.name || gift.details;
                         const giftInfo = giftDatabase[giftName] || { emoji: '👑', credits: gift.credits || 0 };
-                        // Correct monetization: gift_credits × €0.21 × 10%
-                        const giftEuroValue = giftInfo.credits * 0.21;
+                        // Correct monetization: gift_credits × €0.20 × 10%
+                        const giftEuroValue = giftInfo.credits * 0.20;
                         const withdrawValue = (giftEuroValue * 0.1).toFixed(2);
                         
                         return `
