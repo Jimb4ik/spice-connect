@@ -18,64 +18,31 @@ export default async function handler(req, res) {
         console.log('[ADMIN-PAYOUTS] Request:', { action, payout_id, user_id, status });
 
         if (action === 'get_pending_payouts') {
-            // Ensure tables exist with proper structure (from database.js)
-            await query(`
-                CREATE TABLE IF NOT EXISTS gifts (
-                    id SERIAL PRIMARY KEY,
-                    name VARCHAR(255) NOT NULL,
-                    description TEXT,
-                    image_url VARCHAR(255) NOT NULL,
-                    price_credits INTEGER NOT NULL,
-                    category VARCHAR(50) NOT NULL DEFAULT 'budget',
-                    sort_order INTEGER DEFAULT 0,
-                    is_active BOOLEAN DEFAULT true,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-                )
-            `);
-            
-            await query(`
-                CREATE TABLE IF NOT EXISTS user_gifts (
-                    id SERIAL PRIMARY KEY,
-                    gift_id INTEGER REFERENCES gifts(id),
-                    sender_user_id VARCHAR(255),
-                    sender_session_id VARCHAR(255),
-                    receiver_user_id VARCHAR(255),
-                    receiver_session_id VARCHAR(255),
-                    purchase_price_credits INTEGER NOT NULL,
-                    monetization_value_usd DECIMAL(10,2),
-                    monetization_currency VARCHAR(3) DEFAULT 'USD',
-                    personal_message TEXT,
-                    status VARCHAR(50) DEFAULT 'sent',
-                    sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    received_at TIMESTAMP,
-                    monetized_at TIMESTAMP
-                )
-            `);
-            
-            // Get all gifts with status='sent' or 'received' (available for monetization)
-            const result = await query(`
-                SELECT 
-                    ug.id as gift_id,
-                    ug.receiver_user_id,
-                    ug.purchase_price_credits,
-                    ug.sent_at,
-                    ug.status as gift_status,
-                    g.name as gift_name,
-                    g.image_url as gift_image,
-                    g.price_credits
-                FROM user_gifts ug
-                JOIN gifts g ON ug.gift_id = g.id
-                WHERE ug.status IN ('sent', 'received')
-                  AND ug.receiver_user_id IS NOT NULL
-                  AND ug.receiver_user_id != ''
-                ORDER BY ug.sent_at DESC
-                LIMIT 100
-            `);
+            // Simply try to query; if tables don't exist, return empty array
+            try {
+                const result = await query(`
+                    SELECT 
+                        ug.id as gift_id,
+                        ug.receiver_user_id,
+                        ug.purchase_price_credits,
+                        ug.sent_at,
+                        ug.status as gift_status,
+                        g.name as gift_name,
+                        g.image_url as gift_image,
+                        g.price_credits
+                    FROM user_gifts ug
+                    JOIN gifts g ON ug.gift_id = g.id
+                    WHERE ug.status IN ('sent', 'received')
+                      AND ug.receiver_user_id IS NOT NULL
+                      AND ug.receiver_user_id != ''
+                    ORDER BY ug.sent_at DESC
+                    LIMIT 100
+                `);
 
-            // Group gifts by user
-            const payoutsByUser = {};
-            result.rows.forEach(gift => {
-                const userId = gift.receiver_user_id;
+                // Group gifts by user
+                const payoutsByUser = {};
+                result.rows.forEach(gift => {
+                    const userId = gift.receiver_user_id;
                 if (!payoutsByUser[userId]) {
                     payoutsByUser[userId] = {
                         user_id: userId,
@@ -109,6 +76,14 @@ export default async function handler(req, res) {
                 success: true,
                 data: Object.values(payoutsByUser)
             });
+            } catch (queryError) {
+                // If tables don't exist, return empty array
+                console.log('[ADMIN-PAYOUTS] Tables may not exist yet:', queryError.message);
+                return res.status(200).json({
+                    success: true,
+                    data: []
+                });
+            }
         }
 
         if (action === 'seed_payout_users') {
@@ -125,8 +100,39 @@ export default async function handler(req, res) {
             console.log('[ADMIN-PAYOUTS] Seeding payout users for:', user_ids);
 
             try {
-                // 1. SKIP creating tables - use existing ones from database.js
-                // Tables already exist with proper structure
+                // 1. Create tables with proper structure from database.js
+                await query(`
+                    CREATE TABLE IF NOT EXISTS gifts (
+                        id SERIAL PRIMARY KEY,
+                        name VARCHAR(255) NOT NULL,
+                        description TEXT,
+                        image_url VARCHAR(255) NOT NULL,
+                        price_credits INTEGER NOT NULL,
+                        category VARCHAR(50) NOT NULL DEFAULT 'budget',
+                        sort_order INTEGER DEFAULT 0,
+                        is_active BOOLEAN DEFAULT true,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                    )
+                `);
+                
+                await query(`
+                    CREATE TABLE IF NOT EXISTS user_gifts (
+                        id SERIAL PRIMARY KEY,
+                        gift_id INTEGER REFERENCES gifts(id),
+                        sender_user_id VARCHAR(255),
+                        sender_session_id VARCHAR(255),
+                        receiver_user_id VARCHAR(255),
+                        receiver_session_id VARCHAR(255),
+                        purchase_price_credits INTEGER NOT NULL,
+                        monetization_value_usd DECIMAL(10,2),
+                        monetization_currency VARCHAR(3) DEFAULT 'USD',
+                        personal_message TEXT,
+                        status VARCHAR(50) DEFAULT 'sent',
+                        sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        received_at TIMESTAMP,
+                        monetized_at TIMESTAMP
+                    )
+                `);
 
                 // 2. Insert gifts if they don't exist (use existing table)
                 const realGifts = [
