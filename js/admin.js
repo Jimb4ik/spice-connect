@@ -1350,6 +1350,9 @@ function refreshData() {
         case 'moderation':
             loadModeration();
             break;
+        case 'payouts':
+            loadPayouts();
+            break;
     }
 }
 
@@ -1360,5 +1363,175 @@ document.addEventListener('click', (e) => {
         closeUserModal();
     }
 });
+
+// Payouts Management
+async function loadPayouts() {
+    const payoutsGrid = document.getElementById('payoutsGrid');
+    payoutsGrid.innerHTML = '<div style="padding: 40px; text-align: center;">Loading payout requests...</div>';
+    
+    try {
+        const response = await fetch('/api/admin-payouts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'get_pending_payouts' })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+            const payouts = result.data;
+            
+            if (payouts.length === 0) {
+                payoutsGrid.innerHTML = '<div style="padding: 40px; text-align: center; color: #6b7280;">No pending payout requests</div>';
+                return;
+            }
+            
+            // Gift database with emojis
+            const giftDatabase = {
+                'Red Rose': { emoji: '🌹', credits: 5 },
+                'Tulip Bouquet': { emoji: '🌷', credits: 15 },
+                'Heart Chocolate': { emoji: '🍫', credits: 20 },
+                'Coffee & Cookies': { emoji: '☕', credits: 25 },
+                'Teddy Bear': { emoji: '🧸', credits: 35 },
+                'Balloons': { emoji: '🎈', credits: 45 },
+                'Rose Bouquet': { emoji: '💐', credits: 75 },
+                'Perfume': { emoji: '🌸', credits: 100 },
+                'Silver Earrings': { emoji: '💎', credits: 125 },
+                'Bracelet': { emoji: '📿', credits: 150 },
+                'Watch': { emoji: '⌚', credits: 175 },
+                'Gold Chain': { emoji: '📿', credits: 200 },
+                'Diamond Earrings': { emoji: '💎', credits: 300 },
+                'Gold Ring': { emoji: '💍', credits: 400 },
+                'Pearl Necklace': { emoji: '📿', credits: 500 },
+                'Diamond Bracelet': { emoji: '💎', credits: 650 },
+                'Platinum Ring': { emoji: '💍', credits: 800 },
+                'Luxury Watch': { emoji: '⌚', credits: 1000 },
+                'Diamond Necklace': { emoji: '💎', credits: 1500 },
+                'Royal Crown': { emoji: '👑', credits: 2500 }
+            };
+            
+            payoutsGrid.innerHTML = payouts.map(payout => {
+                // Get user info
+                const user = window.allUsers?.find(u => u.id == payout.user_id);
+                const photoUrl = user?.photos_v2?.[0]?.sq_430 || user?.photos?.[0]?.url_middle || null;
+                const initials = user?.pseudo ? user.pseudo.substring(0, 2).toUpperCase() : '??';
+                
+                return `
+                    <div class="payout-card">
+                        <div class="payout-header">
+                            ${photoUrl ? 
+                                `<img src="${photoUrl}" alt="${user.pseudo}" class="payout-user-avatar">` :
+                                `<div class="payout-user-avatar" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold;">${initials}</div>`
+                            }
+                            <div class="payout-user-info">
+                                <h4>${user?.pseudo || 'User #' + payout.user_id}</h4>
+                                <p>ID: #${payout.user_id}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="payout-summary">
+                            <h3>€${payout.total_withdrawable.toFixed(2)}</h3>
+                            <p>${payout.gifts.length} gifts • ${payout.total_credits} credits • €${payout.total_eur_value.toFixed(2)} value</p>
+                        </div>
+                        
+                        <div class="gifts-list">
+                            ${payout.gifts.map(gift => {
+                                const giftInfo = giftDatabase[gift.gift_name] || { emoji: '🎁', credits: gift.credits };
+                                return `
+                                    <div class="gift-item">
+                                        <div class="gift-emoji">${giftInfo.emoji}</div>
+                                        <div class="gift-details">
+                                            <strong>${gift.gift_name}</strong>
+                                            <small>Received ${new Date(gift.sent_at).toLocaleDateString()}</small>
+                                        </div>
+                                        <div class="gift-value">
+                                            <div class="credits">${gift.credits} credits</div>
+                                            <div class="eur">€${gift.eur_value.toFixed(2)} • €${gift.withdrawable.toFixed(2)} withdrawable</div>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                        
+                        <div class="payout-actions">
+                            <button class="btn-approve" onclick="approvePayout(${payout.user_id}, ${JSON.stringify(payout.gifts.map(g => g.gift_id))})">
+                                Approve
+                            </button>
+                            <button class="btn-reject" onclick="rejectPayout(${payout.user_id}, ${JSON.stringify(payout.gifts.map(g => g.gift_id))})">
+                                Reject
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } else {
+            payoutsGrid.innerHTML = '<div style="padding: 40px; text-align: center; color: #ef4444;">Failed to load payouts</div>';
+        }
+    } catch (error) {
+        console.error('[ADMIN] Error loading payouts:', error);
+        payoutsGrid.innerHTML = '<div style="padding: 40px; text-align: center; color: #ef4444;">Error loading payouts</div>';
+    }
+}
+
+async function approvePayout(userId, giftIds) {
+    if (!confirm('Are you sure you want to approve this payout?')) return;
+    
+    try {
+        const response = await fetch('/api/admin-payouts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'approve_payout',
+                gift_ids: giftIds
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert('Payout approved successfully!');
+            loadPayouts(); // Reload
+        } else {
+            alert('Failed to approve payout: ' + result.error);
+        }
+    } catch (error) {
+        console.error('[ADMIN] Error approving payout:', error);
+        alert('Error approving payout');
+    }
+}
+
+async function rejectPayout(userId, giftIds) {
+    const reason = prompt('Enter rejection reason:');
+    if (!reason) return;
+    
+    try {
+        const response = await fetch('/api/admin-payouts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'reject_payout',
+                gift_ids: giftIds,
+                reason: reason
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert('Payout rejected');
+            loadPayouts(); // Reload
+        } else {
+            alert('Failed to reject payout: ' + result.error);
+        }
+    } catch (error) {
+        console.error('[ADMIN] Error rejecting payout:', error);
+        alert('Error rejecting payout');
+    }
+}
+
+// Make functions globally accessible
+window.loadPayouts = loadPayouts;
+window.approvePayout = approvePayout;
+window.rejectPayout = rejectPayout;
 
 
