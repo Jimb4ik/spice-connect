@@ -735,25 +735,30 @@ function displayTransactions(transactions) {
             minute: '2-digit'
         });
         
-        // Format amount
+        // Format amount - all in EUR
+        const EURO_PER_CREDIT = 0.20;
         let amountDisplay = '';
         if (txn.type === 'purchase') {
             amountDisplay = `€${txn.amount}`;
         } else if (txn.type === 'payout') {
-            amountDisplay = `$${txn.amount}`;
+            // Convert to EUR if needed
+            const eurAmount = txn.amount;
+            amountDisplay = `€${eurAmount}`;
         } else if (txn.type === 'gift') {
             // Show gift name instead of credits
             amountDisplay = txn.details || `${txn.credits} credits`;
         }
         
-        // Details
+        // Details - show EUR value for all transactions
         let details = '';
         if (txn.credits && txn.type === 'purchase') {
-            details = `+${txn.credits} credits`;
+            details = `+${txn.credits} credits (€${txn.amount})`;
         } else if (txn.payment_method && txn.type === 'payout') {
             details = txn.payment_method;
         } else if (txn.type === 'gift') {
-            details = `${txn.credits} credits`;
+            const giftCredits = txn.credits || 0;
+            const giftEurValue = (giftCredits * EURO_PER_CREDIT).toFixed(2);
+            details = `${giftCredits} credits (€${giftEurValue})`;
         }
         
         return `
@@ -1117,7 +1122,7 @@ function displayDetailedProfile(user, credits, transactions, gifts, withdrawable
                 <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b, #38f9d7); margin: 0 auto 12px;">
                     <img src="icons/admin/credits.png" alt="Withdrawable" class="stat-icon-img">
                 </div>
-                <h3 style="margin: 0; font-size: 32px; color: #10b981;">$${withdrawable.toFixed(2)}</h3>
+                <h3 style="margin: 0; font-size: 32px; color: #10b981;">€${withdrawable.toFixed(2)}</h3>
                 <p style="margin: 4px 0 0; color: #6b7280;">Available for Withdrawal</p>
             </div>
             
@@ -1154,13 +1159,15 @@ function displayDetailedProfile(user, credits, transactions, gifts, withdrawable
                         </thead>
                         <tbody>
                             ${transactions.map(txn => {
+                                const EURO_PER_CREDIT = 0.20;
                                 let amountDisplay = '', amountColor = '#10b981', withUser = '', details = '';
                                 if (txn.type === 'purchase') {
-                                    amountDisplay = `+${txn.credits || txn.amount * 10} credits`;
+                                    const purchaseCredits = txn.credits || Math.floor(txn.amount / EURO_PER_CREDIT);
+                                    amountDisplay = `+${purchaseCredits} credits`;
                                     withUser = 'System';
-                                    details = txn.payment_method ? '€' + txn.amount + ' via ' + txn.payment_method : '€' + txn.amount;
+                                    details = '€' + parseFloat(txn.amount).toFixed(2) + (txn.payment_method ? ' via ' + txn.payment_method : '');
                                 } else if (txn.type === 'payout') {
-                                    amountDisplay = '$' + txn.amount;
+                                    amountDisplay = '€' + parseFloat(txn.amount).toFixed(2);
                                     amountColor = '#3b82f6';
                                     withUser = 'Bank (OCT)';
                                     details = 'Gift monetization';
@@ -1168,16 +1175,17 @@ function displayDetailedProfile(user, credits, transactions, gifts, withdrawable
                                     withUser = txn.from_user_id === user.id ? txn.to_user_name : txn.from_user_name;
                                     const giftName = txn.details || txn.gift_name || 'Gift';
                                     const giftCredits = txn.credits || parseInt(txn.amount);
+                                    const giftEurValue = (giftCredits * EURO_PER_CREDIT).toFixed(2);
                                     
                                     if (txn.from_user_id === user.id) {
                                         // Sent gift
                                         amountDisplay = giftName;
-                                        details = `-${giftCredits} credits`;
+                                        details = `-${giftCredits} credits (€${giftEurValue})`;
                                         amountColor = '#ef4444';
                                     } else {
                                         // Received gift
                                         amountDisplay = giftName;
-                                        details = `${giftCredits} credits`;
+                                        details = `${giftCredits} credits (€${giftEurValue})`;
                                         amountColor = '#10b981';
                                     }
                                 }
