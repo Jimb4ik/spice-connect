@@ -149,7 +149,14 @@ export default async function handler(req, res) {
                     )
                 `);
 
-                // 2. Insert gifts if they don't exist (use existing table)
+                // 2. Clear old demo payouts (only status='received' or 'sent')
+                console.log('[ADMIN-PAYOUTS] Clearing old demo payouts...');
+                await query(`DELETE FROM user_gifts WHERE status IN ('received', 'sent')`);
+                
+                // Also clear related transactions
+                await query(`DELETE FROM transactions WHERE type = 'payout' OR type = 'gift'`);
+
+                // 3. Insert gifts if they don't exist (use existing table)
                 const realGifts = [
                     { name: 'Red Rose', price: 5 },
                     { name: 'Tulip Bouquet', price: 15 },
