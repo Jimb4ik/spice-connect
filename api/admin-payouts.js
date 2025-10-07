@@ -18,6 +18,30 @@ export default async function handler(req, res) {
         console.log('[ADMIN-PAYOUTS] Request:', { action, payout_id, user_id, status });
 
         if (action === 'get_pending_payouts') {
+            // First, ensure tables exist
+            await query(`
+                CREATE TABLE IF NOT EXISTS gifts (
+                    id SERIAL PRIMARY KEY,
+                    name VARCHAR(255) UNIQUE NOT NULL,
+                    price_credits INTEGER NOT NULL,
+                    image_url TEXT
+                )
+            `);
+            
+            await query(`
+                CREATE TABLE IF NOT EXISTS user_gifts (
+                    id SERIAL PRIMARY KEY,
+                    gift_id INTEGER REFERENCES gifts(id),
+                    sender_user_id INTEGER,
+                    receiver_user_id INTEGER,
+                    purchase_price_credits INTEGER NOT NULL,
+                    status VARCHAR(50) DEFAULT 'available',
+                    sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    monetized_at TIMESTAMP,
+                    rejection_reason TEXT
+                )
+            `);
+            
             // Получить все pending выплаты
             const result = await query(`
                 SELECT 
