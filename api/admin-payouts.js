@@ -1,5 +1,4 @@
-import { query } from './database.js';
-
+// API для работы с payouts в админке
 export default async function handler(req, res) {
     // Enable CORS
     res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -11,6 +10,22 @@ export default async function handler(req, res) {
         res.status(200).end();
         return;
     }
+
+    // Create database connection
+    const { Pool } = await import('pg');
+    const pool = new Pool({
+        connectionString: process.env.DATABASE_URL,
+        ssl: { rejectUnauthorized: false }
+    });
+
+    const query = async (text, params) => {
+        const client = await pool.connect();
+        try {
+            return await client.query(text, params);
+        } finally {
+            client.release();
+        }
+    };
 
     try {
         const { action, payout_id, user_id, status } = req.body || req.query;
