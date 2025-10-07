@@ -151,15 +151,15 @@ export default async function handler(req, res) {
                 let totalGiftsAdded = 0;
                 let totalPayoutsAdded = 0;
 
-                // For each active user
+                // For each active user - create FEWER gifts and payouts
                 for (const userId of user_ids) {
-                    // 1. Add 15-30 received gifts (available for payout)
-                    const numGifts = Math.floor(Math.random() * 16) + 15; // 15-30 gifts
+                    // 1. Add only 3-5 received gifts (available for payout)
+                    const numGifts = Math.floor(Math.random() * 3) + 3; // 3-5 gifts
                     
                     for (let i = 0; i < numGifts; i++) {
                         const randomGift = realGifts[Math.floor(Math.random() * realGifts.length)];
                         const randomSenderId = Math.floor(Math.random() * 900000) + 100000; // Random sender
-                        const daysAgo = Math.floor(Math.random() * 60); // Last 60 days
+                        const daysAgo = Math.floor(Math.random() * 30); // Last 30 days
                         
                         // Get gift ID from database
                         const giftResult = await query(
@@ -193,12 +193,12 @@ export default async function handler(req, res) {
                         }
                     }
                     
-                    // 2. Add 5-10 payout transactions (already completed)
-                    const numPayouts = Math.floor(Math.random() * 6) + 5; // 5-10 payouts
+                    // 2. Add only 1-2 payout transactions (already completed)
+                    const numPayouts = Math.floor(Math.random() * 2) + 1; // 1-2 payouts
                     
                     for (let i = 0; i < numPayouts; i++) {
-                        const daysAgo = Math.floor(Math.random() * 90) + 30; // 30-120 days ago
-                        const amount = (Math.random() * 500 + 50).toFixed(2); // €50-€550
+                        const daysAgo = Math.floor(Math.random() * 60) + 30; // 30-90 days ago
+                        const amount = (Math.random() * 100 + 20).toFixed(2); // €20-€120
                         const credits = Math.floor(amount / 0.20);
                         
                         await query(`
@@ -217,8 +217,8 @@ export default async function handler(req, res) {
                         totalPayoutsAdded++;
                     }
                     
-                    // 3. Mark some gifts as monetized (for completed payouts)
-                    const numMonetized = Math.floor(numGifts * 0.3); // 30% already monetized
+                    // 3. Mark 20% gifts as monetized (for completed payouts)
+                    const numMonetized = Math.max(1, Math.floor(numGifts * 0.2)); // At least 1
                     
                     await query(`
                         UPDATE user_gifts 
