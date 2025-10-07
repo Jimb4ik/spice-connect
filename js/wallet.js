@@ -599,8 +599,8 @@ function selectCustomAmount() {
 }
 
 // Input mode switching
-let currentInputMode = 'money'; // 'money' or 'tokens'
-const EURO_PER_CREDIT = 0.2118; // 10.59 EUR for 50 credits
+let currentInputMode = 'money'; // 'money' or 'credits'
+const EURO_PER_CREDIT = 0.21; // 1 credit = €0.21
 
 function switchInputMode(mode) {
     currentInputMode = mode;
@@ -614,7 +614,7 @@ function switchInputMode(mode) {
     // Update button states
     if (moneyBtn && tokenBtn) {
         moneyBtn.classList.toggle('active', mode === 'money');
-        tokenBtn.classList.toggle('active', mode === 'tokens');
+        tokenBtn.classList.toggle('active', mode === 'credits');
     }
     
     // Update label and input
@@ -630,7 +630,7 @@ function switchInputMode(mode) {
             amountInput.placeholder = '0';
             amountInput.step = '1';
             amountInput.min = '1';
-            amountInput.max = '4720'; // Max credits for 1000 EUR
+            amountInput.max = '4761'; // Max credits for 1000 EUR (1000 / 0.21)
         }
         
         // Clear current value and update conversion
