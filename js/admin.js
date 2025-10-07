@@ -100,6 +100,9 @@ function setupNavigation() {
                 case 'moderation':
                     loadModeration();
                     break;
+                case 'payouts':
+                    loadPayouts();
+                    break;
             }
         });
     });
