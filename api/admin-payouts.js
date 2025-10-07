@@ -220,7 +220,60 @@ export default async function handler(req, res) {
                 });
             }
 
-            // Mark gifts as monetized
+            // Get gift details and calculate total
+            const giftsResult = await query(`
+                SELECT 
+                    ug.id as gift_id,
+                    ug.receiver_user_id,
+                    ug.purchase_price_credits,
+                    g.name as gift_name,
+                    g.price_credits
+                FROM user_gifts ug
+                JOIN gifts g ON ug.gift_id = g.id
+                WHERE ug.id = ANY($1)
+            `, [gift_ids]);
+
+            if (giftsResult.rows.length === 0) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'No gifts found'
+                });
+            }
+
+            // Calculate total payout amount
+            const userId = giftsResult.rows[0].receiver_user_id;
+            let totalEurValue = 0;
+            let totalCredits = 0;
+
+            giftsResult.rows.forEach(gift => {
+                const giftEurValue = gift.price_credits * 0.20;
+                const withdrawable = giftEurValue * 0.1;
+                totalEurValue += withdrawable;
+                totalCredits += gift.price_credits;
+            });
+
+            // 1. Create payout transaction in transactions table
+            await query(`
+                INSERT INTO transactions (
+                    id, from_user_id, to_user_id, from_user_name, to_user_name,
+                    type, amount, credits, status, date, payment_method, details
+                ) VALUES (
+                    gen_random_uuid()::text, 
+                    $1, 
+                    NULL,
+                    (SELECT COALESCE(pseudo, 'User') FROM user_profiles WHERE spice_user_id = $1 LIMIT 1),
+                    NULL,
+                    'payout', 
+                    $2, 
+                    $3, 
+                    'completed',
+                    CURRENT_TIMESTAMP,
+                    'Bank Transfer (OCT)',
+                    'Gift monetization - ' || $4 || ' gifts approved'
+                )
+            `, [userId, totalEurValue.toFixed(2), totalCredits, gift_ids.length]);
+
+            // 2. Mark gifts as monetized
             for (const giftId of gift_ids) {
                 await query(
                     `UPDATE user_gifts 
@@ -231,9 +284,17 @@ export default async function handler(req, res) {
                 );
             }
 
+            console.log(`[ADMIN-PAYOUTS] Approved payout for user ${userId}: €${totalEurValue.toFixed(2)} from ${gift_ids.length} gifts`);
+
             return res.status(200).json({
                 success: true,
-                message: `Approved ${gift_ids.length} gifts for payout`
+                message: `Approved ${gift_ids.length} gifts for payout`,
+                data: {
+                    user_id: userId,
+                    amount: totalEurValue.toFixed(2),
+                    credits: totalCredits,
+                    gifts_count: gift_ids.length
+                }
             });
         }
 
