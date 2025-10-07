@@ -210,11 +210,22 @@ export default async function handler(req, res) {
                         if (giftResult.rows.length > 0) {
                             const giftDbId = giftResult.rows[0].id;
                             
-                            // Insert using existing table structure (VARCHAR user_ids, status='received')
+                            // Insert using existing table structure (VARCHAR user_ids, status='received', with session_id)
                             await query(`
-                                INSERT INTO user_gifts (gift_id, sender_user_id, receiver_user_id, purchase_price_credits, status, sent_at)
-                                VALUES ($1, $2::text, $3::text, $4, 'received', CURRENT_TIMESTAMP - INTERVAL '${daysAgo} days')
-                            `, [giftDbId, randomSenderId.toString(), userId.toString(), randomGift.price]);
+                                INSERT INTO user_gifts (
+                                    gift_id, sender_user_id, sender_session_id, 
+                                    receiver_user_id, receiver_session_id, 
+                                    purchase_price_credits, status, sent_at
+                                )
+                                VALUES ($1, $2::text, $3, $4::text, $5, $6, 'received', CURRENT_TIMESTAMP - INTERVAL '${daysAgo} days')
+                            `, [
+                                giftDbId, 
+                                randomSenderId.toString(), 
+                                `session_${randomSenderId}_${Date.now()}`,
+                                userId.toString(), 
+                                `session_${userId}_${Date.now()}`,
+                                randomGift.price
+                            ]);
                             
                             // Also add to transactions table
                             await query(`
