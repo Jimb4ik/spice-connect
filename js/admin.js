@@ -1396,50 +1396,20 @@ async function loadPayouts() {
         
         const checkResult = await checkResponse.json();
         
-        // If no payouts exist and we have users, seed some active users
+        // If no payouts exist and we have users, show seed button
         if (checkResult.success && checkResult.data && checkResult.data.length === 0 && window.allUsers && window.allUsers.length > 0) {
-            console.log('[ADMIN] No payouts found, seeding active female users...');
+            console.log('[ADMIN] No payouts found, showing seed option...');
             
-            // Get 5-7 random female users
-            const femaleUsers = window.allUsers.filter(u => parseInt(u.sexe1) === 2);
-            console.log('[ADMIN] Found', femaleUsers.length, 'female users');
-            
-            const numActiveUsers = Math.min(7, femaleUsers.length);
-            const selectedUsers = [];
-            
-            for (let i = 0; i < numActiveUsers && i < 20; i++) {
-                const randomIndex = Math.floor(Math.random() * femaleUsers.length);
-                const user = femaleUsers[randomIndex];
-                if (user && !selectedUsers.includes(user.id)) {
-                    selectedUsers.push(user.id);
-                    console.log('[ADMIN] Selected user:', user.id, user.pseudo);
-                }
-            }
-            
-            console.log('[ADMIN] Total selected users:', selectedUsers);
-            
-            if (selectedUsers.length > 0) {
-                // Seed payout data for these users
-                console.log('[ADMIN] Calling seed_payout_users with:', selectedUsers);
-                const seedResponse = await fetch('/api/admin-payouts', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        action: 'seed_payout_users',
-                        user_ids: selectedUsers
-                    })
-                });
-                
-                const seedResult = await seedResponse.json();
-                console.log('[ADMIN] Seed result:', seedResult);
-                
-                // Also reload transactions to include new data
-                if (window.loadTransactions) {
-                    await loadTransactions();
-                }
-            } else {
-                console.warn('[ADMIN] No users selected for seeding');
-            }
+            payoutsGrid.innerHTML = `
+                <div style="padding: 60px 40px; text-align: center;">
+                    <h3 style="margin: 0 0 16px 0; color: #6b7280;">No payout requests yet</h3>
+                    <p style="margin: 0 0 24px 0; color: #9ca3af;">Create demo payout data to get started</p>
+                    <button onclick="seedPayoutData()" style="padding: 12px 24px; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 16px;">
+                        Create Demo Payouts
+                    </button>
+                </div>
+            `;
+            return;
         }
         
         // Now load the payouts
@@ -1606,5 +1576,61 @@ async function rejectPayout(userId, giftIds) {
 window.loadPayouts = loadPayouts;
 window.approvePayout = approvePayout;
 window.rejectPayout = rejectPayout;
+
+// Seed payout data function
+async function seedPayoutData() {
+    const button = event.target;
+    button.disabled = true;
+    button.textContent = 'Creating...';
+    
+    try {
+        // Get 5-7 random female users
+        const femaleUsers = window.allUsers.filter(u => parseInt(u.sexe1) === 2);
+        const numActiveUsers = Math.min(7, femaleUsers.length);
+        const selectedUsers = [];
+        
+        for (let i = 0; i < numActiveUsers && i < 20; i++) {
+            const randomIndex = Math.floor(Math.random() * femaleUsers.length);
+            const user = femaleUsers[randomIndex];
+            if (user && !selectedUsers.includes(user.id)) {
+                selectedUsers.push(user.id);
+            }
+        }
+        
+        console.log('[ADMIN] Seeding with users:', selectedUsers);
+        
+        const seedResponse = await fetch('/api/admin-payouts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                action: 'seed_payout_users',
+                user_ids: selectedUsers
+            })
+        });
+        
+        const seedResult = await seedResponse.json();
+        console.log('[ADMIN] Seed result:', seedResult);
+        
+        if (seedResult.success) {
+            // Reload transactions
+            if (window.loadTransactions) {
+                await loadTransactions();
+            }
+            // Reload payouts
+            await loadPayouts();
+        } else {
+            alert('Failed to create demo data: ' + seedResult.error);
+            button.disabled = false;
+            button.textContent = 'Create Demo Payouts';
+        }
+    } catch (error) {
+        console.error('[ADMIN] Error seeding:', error);
+        alert('Error creating demo data');
+        button.disabled = false;
+        button.textContent = 'Create Demo Payouts';
+    }
+}
+
+window.seedPayoutData = seedPayoutData;
 
 
