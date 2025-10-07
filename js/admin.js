@@ -1378,6 +1378,12 @@ async function loadPayouts() {
     payoutsGrid.innerHTML = '<div style="padding: 40px; text-align: center;">Loading payout requests...</div>';
     
     try {
+        // Ensure users are loaded first
+        if (!window.allUsers || window.allUsers.length === 0) {
+            console.log('[ADMIN] Loading users first before checking payouts...');
+            await loadUsers();
+        }
+        
         // First, check if we need to seed data
         const checkResponse = await fetch('/api/admin-payouts', {
             method: 'POST',
@@ -1393,19 +1399,25 @@ async function loadPayouts() {
             
             // Get 5-7 random female users
             const femaleUsers = window.allUsers.filter(u => parseInt(u.sexe1) === 2);
+            console.log('[ADMIN] Found', femaleUsers.length, 'female users');
+            
             const numActiveUsers = Math.min(7, femaleUsers.length);
             const selectedUsers = [];
             
-            for (let i = 0; i < numActiveUsers; i++) {
+            for (let i = 0; i < numActiveUsers && i < 20; i++) {
                 const randomIndex = Math.floor(Math.random() * femaleUsers.length);
                 const user = femaleUsers[randomIndex];
-                if (!selectedUsers.includes(user.id)) {
+                if (user && !selectedUsers.includes(user.id)) {
                     selectedUsers.push(user.id);
+                    console.log('[ADMIN] Selected user:', user.id, user.pseudo);
                 }
             }
             
+            console.log('[ADMIN] Total selected users:', selectedUsers);
+            
             if (selectedUsers.length > 0) {
                 // Seed payout data for these users
+                console.log('[ADMIN] Calling seed_payout_users with:', selectedUsers);
                 const seedResponse = await fetch('/api/admin-payouts', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1422,6 +1434,8 @@ async function loadPayouts() {
                 if (window.loadTransactions) {
                     await loadTransactions();
                 }
+            } else {
+                console.warn('[ADMIN] No users selected for seeding');
             }
         }
         
