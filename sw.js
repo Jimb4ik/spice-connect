@@ -22,15 +22,15 @@ const CACHE_URLS = [
 
 // Установка Service Worker
 self.addEventListener('install', event => {
-    console.log('[SW] Installing Service Worker...');
+    // console.log('[SW] Installing Service Worker...');
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => {
-                console.log('[SW] Caching app shell');
+                // console.log('[SW] Caching app shell');
                 return cache.addAll(CACHE_URLS);
             })
             .then(() => {
-                console.log('[SW] Service Worker installed successfully');
+                // console.log('[SW] Service Worker installed successfully');
                 return self.skipWaiting(); // Активируем новый SW немедленно
             })
     );
@@ -38,19 +38,19 @@ self.addEventListener('install', event => {
 
 // Активация Service Worker
 self.addEventListener('activate', event => {
-    console.log('[SW] Activating Service Worker...');
+    // console.log('[SW] Activating Service Worker...');
     event.waitUntil(
         caches.keys().then(cacheNames => {
             return Promise.all(
                 cacheNames.map(cacheName => {
                     if (cacheName !== CACHE_NAME) {
-                        console.log('[SW] Deleting old cache:', cacheName);
+                        // console.log('[SW] Deleting old cache:', cacheName);
                         return caches.delete(cacheName);
                     }
                 })
             );
         }).then(() => {
-            console.log('[SW] Service Worker activated');
+            // console.log('[SW] Service Worker activated');
             return self.clients.claim(); // Берем контроль над всеми клиентами
         })
     );
@@ -71,12 +71,12 @@ self.addEventListener('fetch', event => {
             .then(response => {
                 // Возвращаем из кеша если есть
                 if (response) {
-                    console.log('[SW] Serving from cache:', event.request.url);
+                    // console.log('[SW] Serving from cache:', event.request.url);
                     return response;
                 }
 
                 // Иначе загружаем из сети
-                console.log('[SW] Fetching from network:', event.request.url);
+                // console.log('[SW] Fetching from network:', event.request.url);
                 return fetch(event.request)
                     .then(response => {
                         // Проверяем что ответ валидный
@@ -107,19 +107,19 @@ self.addEventListener('fetch', event => {
 // Обработка сообщений от клиента
 self.addEventListener('message', event => {
     if (event.data && event.data.type === 'SKIP_WAITING') {
-        console.log('[SW] Received SKIP_WAITING message');
+        // console.log('[SW] Received SKIP_WAITING message');
         self.skipWaiting();
     }
     
     if (event.data && event.data.type === 'CLEAR_CACHE') {
-        console.log('[SW] Clearing cache on request');
+        // console.log('[SW] Clearing cache on request');
         event.waitUntil(
             caches.keys().then(cacheNames => {
                 return Promise.all(
                     cacheNames.map(cacheName => caches.delete(cacheName))
                 );
             }).then(() => {
-                console.log('[SW] All caches cleared');
+                // console.log('[SW] All caches cleared');
                 event.ports[0].postMessage({ success: true });
             })
         );

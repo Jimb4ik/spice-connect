@@ -9,7 +9,7 @@
  */
 async function saveMatchToDatabase(matchedProfile, currentUserId = null) {
     try {
-        console.log('[MATCH-UTILS] Saving match to database:', matchedProfile);
+        // console.log('[MATCH-UTILS] Saving match to database:', matchedProfile);
         
         // Получаем ID текущего пользователя если не передан
         let userId = currentUserId;
@@ -28,7 +28,7 @@ async function saveMatchToDatabase(matchedProfile, currentUserId = null) {
         // УПРОЩАЕМ: Всегда используем пустой массив для совместимости
         let photosForDB = "[]";  // Простая JSON строка пустого массива
         
-        console.log('[MATCH-UTILS] Using simplified photos for DB:', photosForDB);
+        // console.log('[MATCH-UTILS] Using simplified photos for DB:', photosForDB);
         
         const matchData = {
             action: 'save_match',
@@ -46,13 +46,13 @@ async function saveMatchToDatabase(matchedProfile, currentUserId = null) {
             return false;
         }
 
-        console.log('[MATCH-UTILS] Match data to save:', matchData);
-        console.log('[MATCH-UTILS] Profile ID found:', matchedProfile.id || matchedProfile.id_membre);
-        console.log('[MATCH-UTILS] Current user ID:', userId);
-        console.log('[MATCH-UTILS] Photos found:', photos);
+        // console.log('[MATCH-UTILS] Match data to save:', matchData);
+        // console.log('[MATCH-UTILS] Profile ID found:', matchedProfile.id || matchedProfile.id_membre);
+        // console.log('[MATCH-UTILS] Current user ID:', userId);
+        // console.log('[MATCH-UTILS] Photos found:', photos);
         
         try {
-            console.log('[MATCH-UTILS] 🚀 Attempting to save match with data:', matchData);
+            // console.log('[MATCH-UTILS] 🚀 Attempting to save match with data:', matchData);
             
             const response = await fetch('/api/database', {
                 method: 'POST',
@@ -62,7 +62,7 @@ async function saveMatchToDatabase(matchedProfile, currentUserId = null) {
                 body: JSON.stringify(matchData)
             });
             
-            console.log('[MATCH-UTILS] Database response status:', response.status);
+            // console.log('[MATCH-UTILS] Database response status:', response.status);
             
             if (!response.ok) {
                 console.error('[MATCH-UTILS] HTTP error:', response.status, response.statusText);
@@ -77,10 +77,10 @@ async function saveMatchToDatabase(matchedProfile, currentUserId = null) {
             }
             
             const result = await response.json();
-            console.log('[MATCH-UTILS] Match saved result:', result);
+            // console.log('[MATCH-UTILS] Match saved result:', result);
             
             if (result.success) {
-                console.log('✅ Match successfully saved to database!');
+                // console.log('✅ Match successfully saved to database!');
                 return true;
             } else {
                 console.error('❌ Failed to save match:', result.error, result.details);
@@ -109,7 +109,7 @@ async function getCurrentUserId() {
             return null;
         }
         
-        console.log('[MATCH-UTILS] Session ID:', sessionId);
+        // console.log('[MATCH-UTILS] Session ID:', sessionId);
         
         // Проверяем есть ли сохраненный user ID в localStorage
         const userData = localStorage.getItem('lavrilo_user');
@@ -117,11 +117,11 @@ async function getCurrentUserId() {
             try {
                 const user = JSON.parse(userData);
                 if (user.id) {
-                    console.log('[MATCH-UTILS] Using cached user ID:', user.id);
+                    // console.log('[MATCH-UTILS] Using cached user ID:', user.id);
                     return user.id;
                 }
             } catch (e) {
-                console.warn('[MATCH-UTILS] Failed to parse cached user data');
+                // console.warn('[MATCH-UTILS] Failed to parse cached user data');
             }
         }
         
@@ -131,15 +131,15 @@ async function getCurrentUserId() {
         const response = await fetch(`${apiConfig.baseUrl}/index_api/user?api_key=${apiConfig.apiKey}&session_id=${sessionId}`);
         const userApiData = await response.json();
         
-        console.log('[MATCH-UTILS] API user data:', userApiData);
+        // console.log('[MATCH-UTILS] API user data:', userApiData);
         
         if (userApiData && userApiData.result) {
             const userId = userApiData.result.id || userApiData.result.id_membre || sessionId;
-            console.log('[MATCH-UTILS] Extracted user ID:', userId);
+            // console.log('[MATCH-UTILS] Extracted user ID:', userId);
             return userId;
         }
         
-        console.log('[MATCH-UTILS] Using session ID as fallback user ID');
+        // console.log('[MATCH-UTILS] Using session ID as fallback user ID');
         return sessionId; // fallback
     } catch (error) {
         console.error('[MATCH-UTILS] Error getting user ID:', error);
@@ -155,15 +155,15 @@ async function getCurrentUserId() {
 function getProfilePhotos(profile) {
     const photos = [];
     
-    console.log('[MATCH-UTILS] Getting photos from profile:', profile);
+    // console.log('[MATCH-UTILS] Getting photos from profile:', profile);
     
     // Собираем фотографии из разных полей
     if (profile.photos_v2) {
         if (Array.isArray(profile.photos_v2)) {
-            console.log('[MATCH-UTILS] Found photos_v2 array:', profile.photos_v2);
+            // console.log('[MATCH-UTILS] Found photos_v2 array:', profile.photos_v2);
             photos.push(...profile.photos_v2.map(p => p.url || p.src || p.normal || p.sq_430 || p));
         } else if (typeof profile.photos_v2 === 'object') {
-            console.log('[MATCH-UTILS] Found photos_v2 object:', profile.photos_v2);
+            // console.log('[MATCH-UTILS] Found photos_v2 object:', profile.photos_v2);
             Object.values(profile.photos_v2).forEach(photoObj => {
                 if (typeof photoObj === 'object') {
                     photos.push(photoObj.url || photoObj.src || photoObj.normal || photoObj.sq_430);
@@ -176,10 +176,10 @@ function getProfilePhotos(profile) {
     
     if (profile.photos) {
         if (Array.isArray(profile.photos)) {
-            console.log('[MATCH-UTILS] Found photos array:', profile.photos);
+            // console.log('[MATCH-UTILS] Found photos array:', profile.photos);
             photos.push(...profile.photos.map(p => p.url || p.src || p.normal || p.sq_430 || p));
         } else if (typeof profile.photos === 'object') {
-            console.log('[MATCH-UTILS] Found photos object:', profile.photos);
+            // console.log('[MATCH-UTILS] Found photos object:', profile.photos);
             Object.values(profile.photos).forEach(photoObj => {
                 if (typeof photoObj === 'object') {
                     photos.push(photoObj.url || photoObj.src || photoObj.normal || photoObj.sq_430);
@@ -196,7 +196,7 @@ function getProfilePhotos(profile) {
     if (profile.photo) photos.push(profile.photo);
     
     const validPhotos = photos.filter(photo => photo && typeof photo === 'string');
-    console.log('[MATCH-UTILS] Final photos array:', validPhotos);
+    // console.log('[MATCH-UTILS] Final photos array:', validPhotos);
     
     return validPhotos;
 }
@@ -208,19 +208,19 @@ function getProfilePhotos(profile) {
  */
 async function loadUserMatches(userId = null) {
     try {
-        console.log('[MATCH-UTILS] Loading matches from API and database...');
+        // console.log('[MATCH-UTILS] Loading matches from API and database...');
         
         // Загружаем матчи из официального API
         const apiMatches = await loadMatchesFromAPI();
-        console.log('[MATCH-UTILS] API matches:', apiMatches);
+        // console.log('[MATCH-UTILS] API matches:', apiMatches);
         
         // Загружаем матчи из локальной базы данных
         const dbMatches = await loadMatchesFromDatabase(userId);
-        console.log('[MATCH-UTILS] Database matches:', dbMatches);
+        // console.log('[MATCH-UTILS] Database matches:', dbMatches);
         
         // Объединяем матчи, убираем дубликаты
         const allMatches = mergeMatches(apiMatches, dbMatches);
-        console.log('[MATCH-UTILS] Merged matches:', allMatches);
+        // console.log('[MATCH-UTILS] Merged matches:', allMatches);
         
         return allMatches;
         
@@ -238,7 +238,7 @@ async function loadMatchesFromAPI() {
     try {
         const sessionId = window.authManager?.sessionId;
         if (!sessionId) {
-            console.warn('[MATCH-UTILS] No session ID for API matches');
+            // console.warn('[MATCH-UTILS] No session ID for API matches');
             return [];
         }
         
@@ -252,12 +252,12 @@ async function loadMatchesFromAPI() {
         });
         
         const apiUrl = `${apiConfig.baseUrl}/index_api/match?${matchQuery.toString()}`;
-        console.log('[MATCH-UTILS] Loading matches from API:', apiUrl);
+        // console.log('[MATCH-UTILS] Loading matches from API:', apiUrl);
         
         const response = await fetch(apiUrl);
         const data = await response.json();
         
-        console.log('[MATCH-UTILS] API response:', data);
+        // console.log('[MATCH-UTILS] API response:', data);
         
         if (data && data.result && Array.isArray(data.result)) {
             return data.result.map(match => ({
@@ -293,7 +293,7 @@ async function loadMatchesFromDatabase(userId = null) {
         }
         
         if (!userId) {
-            console.warn('[MATCH-UTILS] No user ID for database matches');
+            // console.warn('[MATCH-UTILS] No user ID for database matches');
             return [];
         }
         

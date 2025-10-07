@@ -32,7 +32,7 @@ class MatchingSystem {
   }
 
   init() {
-    console.log('[MATCHING] Initializing matching system...');
+    // console.log('[MATCHING] Initializing matching system...');
     this.loadUserStats(); // Загружаем сохраненную статистику
     this.loadViewedProfiles(); // Загружаем просмотренные профили
     this.setupEventListeners();
@@ -99,7 +99,7 @@ class MatchingSystem {
   // =====================================
 
   switchMode(mode) {
-    console.log(`[MATCHING] Switching to mode: ${mode}`);
+    // console.log(`[MATCHING] Switching to mode: ${mode}`);
     this.currentMode = mode;
 
     // Update tab active states
@@ -129,7 +129,7 @@ class MatchingSystem {
   }
 
   switchGardenMode(gardenMode) {
-    console.log(`[MATCHING] Switching garden mode to: ${gardenMode}`);
+    // console.log(`[MATCHING] Switching garden mode to: ${gardenMode}`);
     this.gardenMode = gardenMode;
 
     // Update garden tab active states
@@ -165,7 +165,7 @@ class MatchingSystem {
   async loadTinderProfiles(forceReload = false) {
     // Предотвращаем дублирующиеся запросы
     if (this.isLoadingProfiles && !forceReload) {
-      console.log('[MATCHING] Already loading profiles, skipping...');
+      // console.log('[MATCHING] Already loading profiles, skipping...');
       return;
     }
     
@@ -176,13 +176,13 @@ class MatchingSystem {
       this.currentProfileIndex = 0;
       this.consecutiveEmptyLoads = 0;
     }
-    console.log('[MATCHING] Loading Tinder profiles...', forceReload ? '(forced reload)' : '');
+    // console.log('[MATCHING] Loading Tinder profiles...', forceReload ? '(forced reload)' : '');
     this.showTinderLoading(true);
 
     try {
       // Use authManager session ID (more reliable than localStorage)
       const sessionId = window.authManager?.sessionId || localStorage.getItem('session_id');
-      console.log('[MATCHING] Using session ID:', sessionId);
+      // console.log('[MATCHING] Using session ID:', sessionId);
       
       // Собираем список уже просмотренных ID, но ограничиваем длину (max 500 последних),
       // чтобы не превысить лимит длины URL у сервера но максимизировать фильтрацию
@@ -190,8 +190,8 @@ class MatchingSystem {
       const viewedArr = Array.from(this.viewedProfiles);
       const limitedExcludeArr = viewedArr.slice(-MAX_EXCLUDE); // берем только последние 500 id
       const excludeIds = limitedExcludeArr.join(',');
-      console.log(`[MATCHING] exclude_ids limited to last ${limitedExcludeArr.length} IDs (out of ${viewedArr.length})`);
-      console.log('[MATCHING] Excluding IDs:', excludeIds.length > 0 ? excludeIds.substring(0, 100) + '...' : 'none');
+      // console.log(`[MATCHING] exclude_ids limited to last ${limitedExcludeArr.length} IDs (out of ${viewedArr.length})`);
+      // console.log('[MATCHING] Excluding IDs:', excludeIds.length > 0 ? excludeIds.substring(0, 100) + '...' : 'none');
 
       // --- 1. Пробуем специализированный эндпоинт /index_api/match ---
       // First, get API config
@@ -208,21 +208,21 @@ class MatchingSystem {
         matchQuery.append('exclude_ids', excludeIds);
       }
 
-      console.log('[MATCHING] Match API URL:', `${apiConfig.baseUrl}/index_api/match?${matchQuery.toString()}`);
+      // console.log('[MATCHING] Match API URL:', `${apiConfig.baseUrl}/index_api/match?${matchQuery.toString()}`);
 
       const response = await fetch(`${apiConfig.baseUrl}/index_api/match?${matchQuery.toString()}`, {
         method: 'GET'
       });
       const data = await response.json();
 
-      console.log('[MATCHING] Tinder profiles response:', data);
+      // console.log('[MATCHING] Tinder profiles response:', data);
 
       let profiles = [];
       
       // Handle new API format: {connected: 1, result: [...]}
       if (data.connected === 1 && data.result && Array.isArray(data.result)) {
         profiles = data.result;
-        console.log('[MATCHING] Found profiles in data.result:', profiles.length);
+        // console.log('[MATCHING] Found profiles in data.result:', profiles.length);
       } else if (data.success && data.data && data.data.profile) {
         profiles = [data.data.profile];
       } else if (data.success && data.data) {
@@ -238,13 +238,13 @@ class MatchingSystem {
       // Если профилей нет через /index_api/match, это означает что больше подходящих профилей нет
       // API должен возвращать новые профили, исключая те что в exclude_ids
 
-      console.log('[MATCHING] Raw profiles from API:', profiles.length);
-      console.log('[MATCHING] Sample profile structure:', profiles[0]);
-      console.log('[MATCHING] Viewed profiles count:', this.viewedProfiles.size);
+      // console.log('[MATCHING] Raw profiles from API:', profiles.length);
+      // console.log('[MATCHING] Sample profile structure:', profiles[0]);
+      // console.log('[MATCHING] Viewed profiles count:', this.viewedProfiles.size);
       
       // Сохраняем количество загруженных профилей до фильтрации
       this.lastLoadedCount = profiles.length;
-      console.log(`[MATCHING] API returned ${this.lastLoadedCount} profiles (requested ${this.profilesPerBatch})`);
+      // console.log(`[MATCHING] API returned ${this.lastLoadedCount} profiles (requested ${this.profilesPerBatch})`);
       
       // Фильтруем уже просмотренные профили на всякий случай
       const originalCount = profiles.length;
@@ -253,33 +253,33 @@ class MatchingSystem {
         return !this.viewedProfiles.has(profileId);
       });
 
-      console.log('[MATCHING] Profiles after filtering:', profiles.length, `(${originalCount - profiles.length} already viewed)`);
+      // console.log('[MATCHING] Profiles after filtering:', profiles.length, `(${originalCount - profiles.length} already viewed)`);
 
       if (profiles.length > 0) {
         // Сбрасываем счетчик пустых загрузок
         this.consecutiveEmptyLoads = 0;
         this.totalProfilesLoaded += profiles.length;
         
-        console.log(`[MATCHING] Successfully loaded ${profiles.length} new profiles`);
-        console.log(`[MATCHING] Total profiles loaded so far: ${this.totalProfilesLoaded}`);
+        // console.log(`[MATCHING] Successfully loaded ${profiles.length} new profiles`);
+        // console.log(`[MATCHING] Total profiles loaded so far: ${this.totalProfilesLoaded}`);
         
         // Если это первая загрузка или нет существующих профилей
         if (!this.tinderProfiles || this.tinderProfiles.length === 0) {
           this.tinderProfiles = profiles;
           this.currentProfileIndex = 0;
-          console.log(`[MATCHING] Initial load: ${profiles.length} profiles`);
+          // console.log(`[MATCHING] Initial load: ${profiles.length} profiles`);
           this.displayCurrentProfile();
         } else {
           // Добавляем новые профили к существующим
           this.tinderProfiles.push(...profiles);
-          console.log(`[MATCHING] Added ${profiles.length} more profiles. Total buffer: ${this.tinderProfiles.length}`);
+          // console.log(`[MATCHING] Added ${profiles.length} more profiles. Total buffer: ${this.tinderProfiles.length}`);
           
           // Очищаем старые профили если буфер стал слишком большим (больше 500 профилей)
           if (this.tinderProfiles.length > 500 && this.currentProfileIndex > 200) {
             const toRemove = this.currentProfileIndex - 100; // Оставляем 100 профилей назад
             this.tinderProfiles.splice(0, toRemove);
             this.currentProfileIndex -= toRemove;
-            console.log(`[MATCHING] Cleaned up ${toRemove} old profiles. New index: ${this.currentProfileIndex}, buffer: ${this.tinderProfiles.length}`);
+            // console.log(`[MATCHING] Cleaned up ${toRemove} old profiles. New index: ${this.currentProfileIndex}, buffer: ${this.tinderProfiles.length}`);
           }
           
           // Если мы на последнем профиле, покажем следующий
@@ -290,17 +290,17 @@ class MatchingSystem {
       } else {
         // Увеличиваем счетчик пустых загрузок
         this.consecutiveEmptyLoads++;
-        console.log(`[MATCHING] No new profiles found (${this.consecutiveEmptyLoads} consecutive empty loads)`);
+        // console.log(`[MATCHING] No new profiles found (${this.consecutiveEmptyLoads} consecutive empty loads)`);
         
         // Если API вернул пустой результат несколько раз подряд, проверим есть ли еще профили в буфере
         if (this.consecutiveEmptyLoads >= 3) {
-          console.log('[MATCHING] Multiple empty loads - API may not have more matching profiles');
+          // console.log('[MATCHING] Multiple empty loads - API may not have more matching profiles');
         }
         
         if (!this.tinderProfiles || this.tinderProfiles.length === 0) {
           // Если это форсированная перезагрузка и все еще нет профилей, очистим исключения
           if (forceReload && this.viewedProfiles.size > 0) {
-            console.log('[MATCHING] Force reload: clearing viewed list to get more profiles...');
+            // console.log('[MATCHING] Force reload: clearing viewed list to get more profiles...');
             this.consecutiveEmptyLoads = 0;
             this.viewedProfiles.clear();
             this.saveViewedProfiles();
@@ -320,19 +320,19 @@ class MatchingSystem {
   }
 
   displayCurrentProfile() {
-    console.log('[MATCHING] displayCurrentProfile called');
-    console.log('[MATCHING] currentProfileIndex:', this.currentProfileIndex);
-    console.log('[MATCHING] tinderProfiles.length:', this.tinderProfiles.length);
+    // console.log('[MATCHING] displayCurrentProfile called');
+    // console.log('[MATCHING] currentProfileIndex:', this.currentProfileIndex);
+    // console.log('[MATCHING] tinderProfiles.length:', this.tinderProfiles.length);
     
     // Проверяем, есть ли профили для показа
     if (!this.tinderProfiles || this.tinderProfiles.length === 0) {
-      console.log('[MATCHING] No profiles array, showing empty state');
+      // console.log('[MATCHING] No profiles array, showing empty state');
       this.showNoProfiles();
       return;
     }
     
     if (this.currentProfileIndex >= this.tinderProfiles.length) {
-      console.log('[MATCHING] Index beyond array length, trying to load more profiles...');
+      // console.log('[MATCHING] Index beyond array length, trying to load more profiles...');
       this.loadTinderProfiles(false);
       return;
     }
@@ -340,13 +340,13 @@ class MatchingSystem {
     // Предзагрузка: если осталось мало профилей в буфере, загружаем еще
     const remainingProfiles = this.tinderProfiles.length - this.currentProfileIndex;
     if (remainingProfiles <= 5 && this.consecutiveEmptyLoads < 3) {
-      console.log(`[MATCHING] Only ${remainingProfiles} profiles left in buffer, preloading more...`);
+      // console.log(`[MATCHING] Only ${remainingProfiles} profiles left in buffer, preloading more...`);
       // Загружаем асинхронно, не блокируя отображение текущего профиля
       setTimeout(() => this.loadTinderProfiles(false), 100);
     }
 
     const profile = this.tinderProfiles[this.currentProfileIndex];
-    console.log('[MATCHING] Displaying profile:', profile);
+    // console.log('[MATCHING] Displaying profile:', profile);
 
     // Show card container
     document.getElementById('swipeCardContainer').style.display = 'block';
@@ -377,7 +377,7 @@ class MatchingSystem {
     }
 
     if (cardMainPhoto) {
-      console.log('[MATCHING] Profile photo data:', {
+      // console.log('[MATCHING] Profile photo data:', {
         photos_v2: profile.photos_v2,
         photos: profile.photos,
         picture_430: profile.picture_430,
@@ -407,12 +407,12 @@ class MatchingSystem {
         photoUrl = profile.picture;
       }
       
-      console.log('[MATCHING] Selected photo URL:', photoUrl);
+      // console.log('[MATCHING] Selected photo URL:', photoUrl);
       
       // Ensure full URL - but most photos_v2 URLs are already complete
       if (photoUrl && !photoUrl.startsWith('http') && !photoUrl.startsWith('/images/')) {
         photoUrl = `https://dev2018.de5a7.com/${photoUrl}`;
-        console.log('[MATCHING] Fixed photo URL:', photoUrl);
+        // console.log('[MATCHING] Fixed photo URL:', photoUrl);
       }
       
       cardMainPhoto.src = photoUrl;
@@ -443,7 +443,7 @@ class MatchingSystem {
     if (!profile) return;
 
     const profileId = profile.id || profile.id_membre;
-    console.log(`[MATCHING] Handling Tinder action: ${action} for user:`, profileId);
+    // console.log(`[MATCHING] Handling Tinder action: ${action} for user:`, profileId);
 
     // Добавляем профиль в просмотренные
     this.viewedProfiles.add(profileId);
@@ -469,7 +469,7 @@ class MatchingSystem {
       const apiConfig = await apiConfigResponse.json();
       
       const sessionId = window.authManager?.sessionId || localStorage.getItem('session_id');
-      console.log('[MATCHING] Action session ID:', sessionId);
+      // console.log('[MATCHING] Action session ID:', sessionId);
       
       // Используем только /index_api/match для лайков и дизлайков
       let apiAction;
@@ -488,18 +488,18 @@ class MatchingSystem {
         });
         
         const apiUrl = `${apiConfig.baseUrl}/index_api/match?${actionQuery.toString()}`;
-        console.log('[MATCHING] Action API URL:', apiUrl);
+        // console.log('[MATCHING] Action API URL:', apiUrl);
         
         const response = await fetch(apiUrl, {
           method: 'GET'
         });
         const data = await response.json();
         
-        console.log(`[MATCHING] ${apiAction} response:`, data);
+        // console.log(`[MATCHING] ${apiAction} response:`, data);
         
         // Проверяем на матч
         if (data.connected === 1 && data.result === 'match') {
-          console.log('[MATCHING] IT\'S A MATCH!');
+          // console.log('[MATCHING] IT\'S A MATCH!');
           this.stats.totalMatches++;
           
           // Создаем контакт для обмена сообщениями
@@ -562,7 +562,7 @@ class MatchingSystem {
   }
 
   async createContactForMatch(profileId) {
-    console.log('[MATCHING] Creating contact for matched user:', profileId);
+    // console.log('[MATCHING] Creating contact for matched user:', profileId);
     
     try {
       const sessionId = window.authManager?.sessionId || localStorage.getItem('session_id');
@@ -577,7 +577,7 @@ class MatchingSystem {
       
       for (const action of contactActions) {
         try {
-          console.log(`[MATCHING] Trying action: ${action}`);
+          // console.log(`[MATCHING] Trying action: ${action}`);
           
           const contactResponse = await fetch('/api/contacts', {
             method: 'POST',
@@ -592,25 +592,25 @@ class MatchingSystem {
           });
           
           const result = await contactResponse.json();
-          console.log(`[MATCHING] Contact API response (${action}):`, result);
+          // console.log(`[MATCHING] Contact API response (${action}):`, result);
           
           // Проверяем успешность создания контакта
           if (result.success && result.data) {
             // Проверяем различные варианты успешного ответа
             const data = result.data;
             if (data.connected === 1 || data.success === true || !data.error || data.error === 0) {
-              console.log('[MATCHING] ✅ Contact created successfully!');
+              // console.log('[MATCHING] ✅ Contact created successfully!');
               return true;
             }
           }
           
         } catch (actionError) {
-          console.log(`[MATCHING] Action ${action} failed:`, actionError.message);
+          // console.log(`[MATCHING] Action ${action} failed:`, actionError.message);
           continue; // Пробуем следующее действие
         }
       }
       
-      console.warn('[MATCHING] ⚠️ Could not create contact with any action');
+      // console.warn('[MATCHING] ⚠️ Could not create contact with any action');
       
       // Даже если создание контакта не удалось, разрешаем матч
       // Пользователь всё равно сможет попробовать написать сообщение
@@ -625,7 +625,7 @@ class MatchingSystem {
 
   sendMessageToMatch() {
     if (this.currentMatch) {
-      console.log('[MATCHING] Opening chat with matched user:', this.currentMatch);
+      // console.log('[MATCHING] Opening chat with matched user:', this.currentMatch);
       
       // Redirect to messages with this user
       if (window.dashboard) {
@@ -665,7 +665,7 @@ class MatchingSystem {
     // Очищаем просмотренные профили (но оставляем лайкнутые)
     this.viewedProfiles.clear();
     this.saveViewedProfiles();
-    console.log('[MATCHING] Reset viewed profiles');
+    // console.log('[MATCHING] Reset viewed profiles');
     
     // Перезагружаем профили
     this.loadTinderProfiles();
@@ -749,20 +749,20 @@ class MatchingSystem {
   // =====================================
 
   async loadSecretGarden() {
-    console.log('[MATCHING] Loading Secret Garden...');
+    // console.log('[MATCHING] Loading Secret Garden...');
     // Default to flash mode
     this.switchGardenMode('flash');
   }
 
   async loadFlashProfiles() {
-    console.log('[MATCHING] Loading flash profiles...');
+    // console.log('[MATCHING] Loading flash profiles...');
     this.showFlashLoading(true);
 
     try {
       const response = await fetch(`/api/spice-multi-test?endpoint=/index_api/secretgarden&method=POST&session_id=${localStorage.getItem('session_id')}&api_key=${encodeURIComponent(localStorage.getItem('api_key') || '')}`);
       const data = await response.json();
 
-      console.log('[MATCHING] Flash profiles response:', data);
+      // console.log('[MATCHING] Flash profiles response:', data);
 
       if (data.success && data.data && data.data.result) {
         this.flashProfiles = data.data.result;
@@ -838,13 +838,13 @@ class MatchingSystem {
   }
 
   async handleFlashAction(userId, isGood) {
-    console.log(`[MATCHING] Flashing user ${userId} with action: ${isGood}`);
+    // console.log(`[MATCHING] Flashing user ${userId} with action: ${isGood}`);
 
     try {
       const response = await fetch(`/api/spice-multi-test?endpoint=/ajax_api/setFlash&method=GET&target_id=${userId}&is_good=${isGood}&session_id=${localStorage.getItem('session_id')}&api_key=${encodeURIComponent(localStorage.getItem('api_key') || '')}`);
       const data = await response.json();
 
-      console.log('[MATCHING] Flash action response:', data);
+      // console.log('[MATCHING] Flash action response:', data);
 
       // Remove the card with animation
       const card = document.querySelector(`[data-user-id="${userId}"]`);
@@ -866,14 +866,14 @@ class MatchingSystem {
   }
 
   async loadGuessingGame() {
-    console.log('[MATCHING] Loading guessing game...');
+    // console.log('[MATCHING] Loading guessing game...');
     this.showGuessLoading(true);
 
     try {
       const response = await fetch(`/api/spice-multi-test?endpoint=/index_api/secretgarden/get/game&method=POST&session_id=${localStorage.getItem('session_id')}&api_key=${encodeURIComponent(localStorage.getItem('api_key') || '')}`);
       const data = await response.json();
 
-      console.log('[MATCHING] Guessing game response:', data);
+      // console.log('[MATCHING] Guessing game response:', data);
 
       if (data.success && data.data && data.data.result && data.data.result.length > 0) {
         this.guessProfiles = data.data.result;
@@ -936,7 +936,7 @@ class MatchingSystem {
   }
 
   async handleGuess(profile) {
-    console.log('[MATCHING] Guessing user:', profile.id);
+    // console.log('[MATCHING] Guessing user:', profile.id);
 
     // Visual feedback
     document.querySelectorAll('.candidate-option').forEach(opt => {
@@ -948,7 +948,7 @@ class MatchingSystem {
       const response = await fetch(`/api/spice-multi-test?endpoint=/ajax_api/setDeviner&method=GET&id=${profile.id}&session_id=${localStorage.getItem('session_id')}&api_key=${encodeURIComponent(localStorage.getItem('api_key') || '')}`);
       const data = await response.json();
 
-      console.log('[MATCHING] Guess response:', data);
+      // console.log('[MATCHING] Guess response:', data);
 
       // Show result after a short delay
       setTimeout(() => {
@@ -1018,7 +1018,7 @@ class MatchingSystem {
   }
 
   async loadGardenResults() {
-    console.log('[MATCHING] Loading garden results...');
+    // console.log('[MATCHING] Loading garden results...');
     // Load both my flashes and found matches
     await this.loadMyFlashes();
     await this.loadFoundMatches();
@@ -1029,7 +1029,7 @@ class MatchingSystem {
       const response = await fetch(`/api/spice-multi-test?endpoint=/index_api/secretgarden/get/my_flashs&method=POST&session_id=${localStorage.getItem('session_id')}&api_key=${encodeURIComponent(localStorage.getItem('api_key') || '')}`);
       const data = await response.json();
 
-      console.log('[MATCHING] My flashes response:', data);
+      // console.log('[MATCHING] My flashes response:', data);
       // Handle the results display
     } catch (error) {
       console.error('[MATCHING] Error loading my flashes:', error);
@@ -1041,7 +1041,7 @@ class MatchingSystem {
       const response = await fetch(`/api/spice-multi-test?endpoint=/index_api/secretgarden/get/finded&method=POST&session_id=${localStorage.getItem('session_id')}&api_key=${encodeURIComponent(localStorage.getItem('api_key') || '')}`);
       const data = await response.json();
 
-      console.log('[MATCHING] Found matches response:', data);
+      // console.log('[MATCHING] Found matches response:', data);
       // Handle the results display
     } catch (error) {
       console.error('[MATCHING] Error loading found matches:', error);
@@ -1053,7 +1053,7 @@ class MatchingSystem {
   // =====================================
 
   async loadMyMatches() {
-    console.log('[MATCHING] Loading my matches...');
+    // console.log('[MATCHING] Loading my matches...');
     this.showMatchesLoading(true);
 
     try {
@@ -1062,7 +1062,7 @@ class MatchingSystem {
       const apiConfig = await apiConfigResponse.json();
       
       const sessionId = window.authManager?.sessionId || localStorage.getItem('session_id');
-      console.log('[MATCHING] Using session ID for matches:', sessionId);
+      // console.log('[MATCHING] Using session ID for matches:', sessionId);
       
       const matchesQuery = new URLSearchParams({
         session_id: sessionId || '',
@@ -1070,7 +1070,7 @@ class MatchingSystem {
         action: 'get_matches'
       });
 
-      console.log('[MATCHING] My matches API URL:', `${apiConfig.baseUrl}/index_api/match?${matchesQuery.toString()}`);
+      // console.log('[MATCHING] My matches API URL:', `${apiConfig.baseUrl}/index_api/match?${matchesQuery.toString()}`);
 
       const response = await fetch(`${apiConfig.baseUrl}/index_api/match?${matchesQuery.toString()}`, {
         method: 'GET'
@@ -1079,25 +1079,25 @@ class MatchingSystem {
       
 
 
-      console.log('[MATCHING] My matches response:', data);
-      console.log('[MATCHING] Response connected:', data.connected);
-      console.log('[MATCHING] Response result:', data.result);
-      console.log('[MATCHING] Response error:', data.error);
+      // console.log('[MATCHING] My matches response:', data);
+      // console.log('[MATCHING] Response connected:', data.connected);
+      // console.log('[MATCHING] Response result:', data.result);
+      // console.log('[MATCHING] Response error:', data.error);
 
       // Handle new API format: {connected: 1, result: {nb_total: X, tab_profils: [...]}}
       if (data.connected === 1 && data.result) {
         if (data.result.tab_profils && Array.isArray(data.result.tab_profils) && data.result.tab_profils.length > 0) {
           this.myMatches = data.result.tab_profils;
-          console.log('[MATCHING] Found matches in tab_profils:', this.myMatches.length);
+          // console.log('[MATCHING] Found matches in tab_profils:', this.myMatches.length);
           this.displayMatches();
         } else if (Array.isArray(data.result) && data.result.length > 0) {
           // Fallback if result is directly an array
           this.myMatches = data.result;
-          console.log('[MATCHING] Found matches in result array:', this.myMatches.length);
+          // console.log('[MATCHING] Found matches in result array:', this.myMatches.length);
           this.displayMatches();
         } else {
-          console.log('[MATCHING] No matches found - nb_total:', data.result.nb_total);
-          console.log('[MATCHING] tab_profils:', data.result.tab_profils);
+          // console.log('[MATCHING] No matches found - nb_total:', data.result.nb_total);
+          // console.log('[MATCHING] tab_profils:', data.result.tab_profils);
           this.showNoMatches();
         }
       } else if (data.success && data.data && data.data.result && data.data.result.length > 0) {
@@ -1105,7 +1105,7 @@ class MatchingSystem {
         this.myMatches = data.data.result;
         this.displayMatches();
       } else {
-        console.log('[MATCHING] No matches found - result:', data.result);
+        // console.log('[MATCHING] No matches found - result:', data.result);
         this.showNoMatches();
       }
     } catch (error) {
@@ -1184,7 +1184,7 @@ class MatchingSystem {
 
   viewMatchProfile(match) {
     // Could open a profile modal or navigate to profile view
-    console.log('[MATCHING] Viewing profile of:', match);
+    // console.log('[MATCHING] Viewing profile of:', match);
   }
 
   // =====================================
@@ -1211,7 +1211,7 @@ class MatchingSystem {
       this.likedProfiles = new Set(JSON.parse(likedData));
     }
     
-    console.log(`[MATCHING] Loaded ${this.viewedProfiles.size} viewed profiles and ${this.likedProfiles.size} liked profiles`);
+    // console.log(`[MATCHING] Loaded ${this.viewedProfiles.size} viewed profiles and ${this.likedProfiles.size} liked profiles`);
   }
   
   saveViewedProfiles() {
@@ -1263,7 +1263,7 @@ class MatchingSystem {
     if (window.dashboard && window.dashboard.showNotification) {
       window.dashboard.showNotification(message, type);
     } else {
-      console.log(`[MATCHING] ${type.toUpperCase()}: ${message}`);
+      // console.log(`[MATCHING] ${type.toUpperCase()}: ${message}`);
     }
   }
 
@@ -1309,7 +1309,7 @@ class MatchingSystem {
 
   openFilters() {
     // Could open a filters modal
-    console.log('[MATCHING] Opening filters...');
+    // console.log('[MATCHING] Opening filters...');
   }
 }
 
@@ -1319,7 +1319,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => {
     if (document.getElementById('matches-section')) {
       window.matchingSystem = new MatchingSystem();
-      console.log('[MATCHING] Matching system initialized');
+      // console.log('[MATCHING] Matching system initialized');
     }
   }, 500);
 });

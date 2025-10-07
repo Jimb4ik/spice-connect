@@ -110,12 +110,12 @@ function generateTransactions() {
 // Generate and output transactions
 const transactions = generateTransactions();
 
-console.log('// Generated transactions for admin panel');
-console.log('const generatedTransactions = ' + JSON.stringify(transactions, null, 2) + ';');
-console.log(`\n// Total: ${transactions.length} transactions`);
-console.log(`// Purchases: ${transactions.filter(t => t.type === 'purchase').length}`);
-console.log(`// Payouts: ${transactions.filter(t => t.type === 'payout').length}`);
-console.log(`// Gifts: ${transactions.filter(t => t.type === 'gift').length}`);
+// console.log('// Generated transactions for admin panel');
+// console.log('const generatedTransactions = ' + JSON.stringify(transactions, null, 2) + ';');
+// console.log(`\n// Total: ${transactions.length} transactions`);
+// console.log(`// Purchases: ${transactions.filter(t => t.type === 'purchase').length}`);
+// console.log(`// Payouts: ${transactions.filter(t => t.type === 'payout').length}`);
+// console.log(`// Gifts: ${transactions.filter(t => t.type === 'gift').length}`);
 
 // Export for use
 if (typeof module !== 'undefined' && module.exports) {

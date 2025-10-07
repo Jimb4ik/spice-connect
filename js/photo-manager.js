@@ -23,7 +23,7 @@ class PhotoManager {
 
   async init() {
     if (!window.authManager?.sessionId) {
-      console.warn('[PHOTO MANAGER] No session ID found, skipping initialization');
+      // console.warn('[PHOTO MANAGER] No session ID found, skipping initialization');
       return;
     }
 
@@ -38,7 +38,7 @@ class PhotoManager {
     try {
       const response = await fetch('/api/get-api-key');
       this.apiConfig = await response.json();
-      console.log('[PHOTO MANAGER] API config loaded securely');
+      // console.log('[PHOTO MANAGER] API config loaded securely');
     } catch (error) {
       console.error('[PHOTO MANAGER] Failed to load API config:', error);
       // Fallback to hardcoded values for development
@@ -82,22 +82,23 @@ class PhotoManager {
 
   async loadExistingPhotos() {
     const sessionId = window.authManager?.sessionId;
-    console.log('[PHOTO MANAGER] Loading existing photos...');
-    console.log('[PHOTO MANAGER] Session ID:', sessionId);
+    // console.log('[PHOTO MANAGER] Loading existing photos...');
+    // Security: Session ID logging removed
+    // console.log('[PHOTO MANAGER] Session ID:', sessionId);
     
     if (!sessionId) {
-      console.log('[PHOTO MANAGER] No session ID, skipping photo load');
+      // console.log('[PHOTO MANAGER] No session ID, skipping photo load');
       return;
     }
 
     try {
       // Get full list of user photos - use spice-multi-test proxy
       const apiUrl = `/api/spice-multi-test?endpoint=/index_api/user_edit_photos&method=POST&session_id=${sessionId}`;
-      console.log('[PHOTO MANAGER] API URL:', apiUrl);
+      // console.log('[PHOTO MANAGER] API URL:', apiUrl);
       const resp = await fetch(apiUrl);
       const result = await resp.json();
       const data = result.success ? result.data : result;
-      console.log('[PHOTO MANAGER] Full user_edit_photos response:', JSON.stringify(data, null, 2));
+      // console.log('[PHOTO MANAGER] Full user_edit_photos response:', JSON.stringify(data, null, 2));
       
       let photosArr = [];
       
@@ -116,11 +117,11 @@ class PhotoManager {
         photosArr = Object.values(data.data).filter(p => p && typeof p === 'object');
       }
       
-      console.log('[PHOTO MANAGER] Raw photos object:', data.photos);
-      console.log('[PHOTO MANAGER] Photos object type:', typeof data.photos);
-      console.log('[PHOTO MANAGER] Photos object keys:', data.photos ? Object.keys(data.photos) : 'none');
-      console.log('[PHOTO MANAGER] Found photos array:', photosArr);
-      console.log('[PHOTO MANAGER] Photos array length:', photosArr.length);
+      // console.log('[PHOTO MANAGER] Raw photos object:', data.photos);
+      // console.log('[PHOTO MANAGER] Photos object type:', typeof data.photos);
+      // console.log('[PHOTO MANAGER] Photos object keys:', data.photos ? Object.keys(data.photos) : 'none');
+      // console.log('[PHOTO MANAGER] Found photos array:', photosArr);
+      // console.log('[PHOTO MANAGER] Photos array length:', photosArr.length);
       
       if (photosArr.length > 0) {
         // Filter out invalid photos (must have numeric id and a URL)
@@ -162,7 +163,7 @@ class PhotoManager {
       }
       
       if (!photosArr.length) {
-        console.warn('[PHOTO MANAGER] user_edit_photos empty, fallback to /user');
+        // console.warn('[PHOTO MANAGER] user_edit_photos empty, fallback to /user');
         const userDataString = localStorage.getItem('lavrilo_user');
         if (!userDataString) return;
         const userId = JSON.parse(userDataString).id;
@@ -215,7 +216,7 @@ class PhotoManager {
   }
 
   handleAddPhoto() {
-    console.log('[PHOTO MANAGER] handleAddPhoto called');
+    // console.log('[PHOTO MANAGER] handleAddPhoto called');
     
     // Show global loading while waiting for file picker
     this.showGlobalLoading('Select a photo...');
@@ -228,7 +229,7 @@ class PhotoManager {
     
     // Add event listener
     fileInput.addEventListener('change', (e) => {
-      console.log('[PHOTO MANAGER] File selected:', e.target.files[0]);
+      // console.log('[PHOTO MANAGER] File selected:', e.target.files[0]);
       // Hide waiting overlay as soon as selection is made
       this.hideGlobalLoading();
       this.handleFileSelect(e);
@@ -258,27 +259,27 @@ class PhotoManager {
   }
 
   async handleFileSelect(event) {
-    console.log('[PHOTO MANAGER] === FILE SELECT START ===');
-    console.log('[PHOTO MANAGER] Event target:', event.target);
-    console.log('[PHOTO MANAGER] Files array:', event.target.files);
+    // console.log('[PHOTO MANAGER] === FILE SELECT START ===');
+    // console.log('[PHOTO MANAGER] Event target:', event.target);
+    // console.log('[PHOTO MANAGER] Files array:', event.target.files);
     
     const file = event.target.files[0];
-    console.log('[PHOTO MANAGER] Selected file:', file);
+    // console.log('[PHOTO MANAGER] Selected file:', file);
     
     if (!file) {
-      console.log('[PHOTO MANAGER] No file selected');
+      // console.log('[PHOTO MANAGER] No file selected');
       return;
     }
 
-    console.log('[PHOTO MANAGER] File details:');
-    console.log('  - Name:', file.name);
-    console.log('  - Size:', file.size, 'bytes');
-    console.log('  - Type:', file.type);
-    console.log('  - Last modified:', new Date(file.lastModified));
+    // console.log('[PHOTO MANAGER] File details:');
+    // console.log('  - Name:', file.name);
+    // console.log('  - Size:', file.size, 'bytes');
+    // console.log('  - Type:', file.type);
+    // console.log('  - Last modified:', new Date(file.lastModified));
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
-      console.log('[PHOTO MANAGER] Invalid file type:', file.type);
+      // console.log('[PHOTO MANAGER] Invalid file type:', file.type);
       this.showNotification('Please select an image file', 'error');
       return;
     }
@@ -292,7 +293,7 @@ class PhotoManager {
       const uploadResult = await this.uploadPhoto(file);
       
       if (uploadResult.success) {
-        console.log('[PHOTO MANAGER] Upload successful, creating temp photo object');
+        // console.log('[PHOTO MANAGER] Upload successful, creating temp photo object');
         // Create temporary photo object
         const tempPhoto = {
           id: `temp-${Date.now()}`,
@@ -304,7 +305,7 @@ class PhotoManager {
           isDemo: uploadResult.isDemo || false
         };
         
-        console.log('[PHOTO MANAGER] Temp photo created:', tempPhoto);
+        // console.log('[PHOTO MANAGER] Temp photo created:', tempPhoto);
         
         // Deduplicate by serverId to avoid double rendering
         const alreadyExists = this.photos.some(p => Number(p.serverId) === Number(tempPhoto.serverId));
@@ -312,16 +313,16 @@ class PhotoManager {
           // Add to photos array
           this.photos.push(tempPhoto);
         } else {
-          console.warn('[PHOTO MANAGER] Skipping temp add, photo with same serverId already exists');
+          // console.warn('[PHOTO MANAGER] Skipping temp add, photo with same serverId already exists');
         }
         
         // Open crop modal for this photo
-        console.log('[PHOTO MANAGER] Calling openCropModal...');
+        // console.log('[PHOTO MANAGER] Calling openCropModal...');
         this.openCropModal(tempPhoto);
         // Hide global loader once modal is opening
         this.hideGlobalLoading();
       } else {
-        console.log('[PHOTO MANAGER] Upload failed:', uploadResult.error);
+        // console.log('[PHOTO MANAGER] Upload failed:', uploadResult.error);
         this.showNotification(uploadResult.error || 'Upload failed', 'error');
         this.hideGlobalLoading();
       }
@@ -338,15 +339,16 @@ class PhotoManager {
   }
 
   async uploadPhoto(file) {
-    console.log('[PHOTO MANAGER] === UPLOAD PHOTO START ===');
-    console.log('[PHOTO MANAGER] Starting upload for file:', file.name, 'size:', file.size);
-    console.log('[PHOTO MANAGER] File object details:');
-    console.log('  - Name:', file.name);
-    console.log('  - Size:', file.size, 'bytes');
-    console.log('  - Type:', file.type);
-    console.log('  - Last modified:', new Date(file.lastModified));
-    console.log('  - File object:', file);
-    console.log('[PHOTO MANAGER] Session ID:', window.authManager.sessionId);
+    // console.log('[PHOTO MANAGER] === UPLOAD PHOTO START ===');
+    // console.log('[PHOTO MANAGER] Starting upload for file:', file.name, 'size:', file.size);
+    // console.log('[PHOTO MANAGER] File object details:');
+    // console.log('  - Name:', file.name);
+    // console.log('  - Size:', file.size, 'bytes');
+    // console.log('  - Type:', file.type);
+    // console.log('  - Last modified:', new Date(file.lastModified));
+    // console.log('  - File object:', file);
+    // Security: Session ID logging removed
+    // console.log('[PHOTO MANAGER] Session ID:', window.authManager.sessionId);
     
     const formData = new FormData();
     formData.append('file', file);
@@ -354,18 +356,18 @@ class PhotoManager {
 
     // Use spice-multi-test proxy for file uploads
     const apiUrl = `/api/spice-multi-test?endpoint=/ajax_api/upload_photo&method=POST&session_id=${window.authManager.sessionId}&is_private=0`;
-    console.log('[PHOTO MANAGER] Upload URL:', apiUrl);
-    console.log('[PHOTO MANAGER] FormData contents:');
+    // console.log('[PHOTO MANAGER] Upload URL:', apiUrl);
+    // console.log('[PHOTO MANAGER] FormData contents:');
     for (let [key, value] of formData.entries()) {
       if (value instanceof File) {
-        console.log(`  ${key}:`, {
+        // console.log(`  ${key}:`, {
           name: value.name,
           size: value.size,
           type: value.type,
           lastModified: new Date(value.lastModified)
         });
       } else {
-        console.log(`  ${key}:`, value);
+        // console.log(`  ${key}:`, value);
       }
     }
     
@@ -373,7 +375,7 @@ class PhotoManager {
       const response = await fetch(apiUrl, { method: 'POST', body: formData });
 
       const result = await response.json();
-      console.log('[PHOTO MANAGER] Full upload response:', JSON.stringify(result, null, 2));
+      // console.log('[PHOTO MANAGER] Full upload response:', JSON.stringify(result, null, 2));
 
       // Check if API returned an error
       // API может вернуть success: true/false или success: 0/1
@@ -422,13 +424,13 @@ class PhotoManager {
       }
       
       if (photoId && photoId > 0) {
-        console.log('[PHOTO MANAGER] Photo uploaded successfully, ID:', photoId);
+        // console.log('[PHOTO MANAGER] Photo uploaded successfully, ID:', photoId);
         return {
           success: true,
           id_photo: photoId
         };
       } else if (photoId === -1) {
-        console.log('[PHOTO MANAGER] Photo upload returned -1 (temporary/error state)');
+        // console.log('[PHOTO MANAGER] Photo upload returned -1 (temporary/error state)');
         return {
           success: false,
           error: 'Photo upload failed - server returned error state (-1)'
@@ -452,22 +454,22 @@ class PhotoManager {
   }
 
   openCropModal(photo) {
-    console.log('[PHOTO MANAGER] === OPENING CROP MODAL ===');
-    console.log('[PHOTO MANAGER] Photo object:', photo);
-    console.log('[PHOTO MANAGER] Photo details:');
-    console.log('  - ID:', photo.id);
-    console.log('  - Server ID:', photo.serverId);
-    console.log('  - Photo Num:', photo.photoNum);
-    console.log('  - Name:', photo.name);
-    console.log('  - Preview URL:', photo.previewUrl);
-    console.log('  - URL:', photo.url);
-    console.log('  - Is new:', photo.isNew);
-    console.log('  - File object:', photo.file);
+    // console.log('[PHOTO MANAGER] === OPENING CROP MODAL ===');
+    // console.log('[PHOTO MANAGER] Photo object:', photo);
+    // console.log('[PHOTO MANAGER] Photo details:');
+    // console.log('  - ID:', photo.id);
+    // console.log('  - Server ID:', photo.serverId);
+    // console.log('  - Photo Num:', photo.photoNum);
+    // console.log('  - Name:', photo.name);
+    // console.log('  - Preview URL:', photo.previewUrl);
+    // console.log('  - URL:', photo.url);
+    // console.log('  - Is new:', photo.isNew);
+    // console.log('  - File object:', photo.file);
     
     if (photo.file) {
-      console.log('  - File name:', photo.file.name);
-      console.log('  - File size:', photo.file.size);
-      console.log('  - File type:', photo.file.type);
+      // console.log('  - File name:', photo.file.name);
+      // console.log('  - File size:', photo.file.size);
+      // console.log('  - File type:', photo.file.type);
     }
     
     // Создаем глубокую копию объекта фото для безопасности
@@ -477,7 +479,7 @@ class PhotoManager {
       photoNum: photo.photoNum || photo.serverId || photo.id
     };
     
-    console.log('[PHOTO MANAGER] Set currentEditingPhoto:', {
+    // console.log('[PHOTO MANAGER] Set currentEditingPhoto:', {
       id: this.currentEditingPhoto.id,
       serverId: this.currentEditingPhoto.serverId,
       photoNum: this.currentEditingPhoto.photoNum
@@ -491,7 +493,7 @@ class PhotoManager {
     // Show modal
     modal.style.display = 'block';
     document.body.style.overflow = 'hidden';
-    console.log('[PHOTO MANAGER] Modal displayed');
+    // console.log('[PHOTO MANAGER] Modal displayed');
     // Ensure any global loading is hidden once modal is visible
     this.hideGlobalLoading();
 
@@ -502,7 +504,7 @@ class PhotoManager {
     const cropImage = document.getElementById('cropImage');
     if (cropImage) {
       const imageUrl = photo.previewUrl || photo.url;
-      console.log('[PHOTO MANAGER] Loading image in crop container, URL:', imageUrl);
+      // console.log('[PHOTO MANAGER] Loading image in crop container, URL:', imageUrl);
       cropImage.src = imageUrl;
       cropImage.onload = () => {
         this.imageWidth = cropImage.naturalWidth;
@@ -745,8 +747,8 @@ class PhotoManager {
     // API requires SQUARE crop (w = h), use the smaller dimension
     const size = Math.min(Math.round(w), Math.round(h));
     
-    console.log('[PHOTO MANAGER] Original crop:', { x: Math.round(x), y: Math.round(y), w: Math.round(w), h: Math.round(h) });
-    console.log('[PHOTO MANAGER] Square crop size:', size);
+    // console.log('[PHOTO MANAGER] Original crop:', { x: Math.round(x), y: Math.round(y), w: Math.round(w), h: Math.round(h) });
+    // console.log('[PHOTO MANAGER] Square crop size:', size);
     
     // Ensure we don't go outside image bounds
     const maxX = this.imageWidth - size;
@@ -754,8 +756,8 @@ class PhotoManager {
     const adjustedX = Math.max(0, Math.min(Math.round(x), maxX));
     const adjustedY = Math.max(0, Math.min(Math.round(y), maxY));
     
-    console.log('[PHOTO MANAGER] Adjusted coords:', { x: adjustedX, y: adjustedY, w: size, h: size });
-    console.log('[PHOTO MANAGER] Image dimensions:', { width: this.imageWidth, height: this.imageHeight });
+    // console.log('[PHOTO MANAGER] Adjusted coords:', { x: adjustedX, y: adjustedY, w: size, h: size });
+    // console.log('[PHOTO MANAGER] Image dimensions:', { width: this.imageWidth, height: this.imageHeight });
     
     return {
       x: adjustedX,
@@ -783,9 +785,9 @@ class PhotoManager {
     
     this.showNotification('Saving photo...', 'info');
     
-    console.log('[PHOTO MANAGER] Validating photo with ID:', photo.serverId);
-    console.log('[PHOTO MANAGER] Crop coordinates:', cropCoords);
-    console.log('[PHOTO MANAGER] Privacy settings - isPrivate:', isPrivate, 'isMain:', isMain);
+    // console.log('[PHOTO MANAGER] Validating photo with ID:', photo.serverId);
+    // console.log('[PHOTO MANAGER] Crop coordinates:', cropCoords);
+    // console.log('[PHOTO MANAGER] Privacy settings - isPrivate:', isPrivate, 'isMain:', isMain);
     
     try {
       // Call modify API to save crop and privacy settings
@@ -806,9 +808,9 @@ class PhotoManager {
         params.append('is_main', '1');
       }
       
-      console.log('[PHOTO MANAGER] Sending modify params:');
+      // console.log('[PHOTO MANAGER] Sending modify params:');
       for (let [key, value] of params.entries()) {
-        console.log(`  ${key}: ${value}`);
+        // console.log(`  ${key}: ${value}`);
       }
       
       // Use spice-multi-test proxy - all params in URL as per API docs
@@ -819,7 +821,7 @@ class PhotoManager {
       });
       
       const result = await response.json();
-      console.log('[PHOTO MANAGER] Full modify response:', JSON.stringify(result, null, 2));
+      // console.log('[PHOTO MANAGER] Full modify response:', JSON.stringify(result, null, 2));
       
       // Check for different success formats
       const isSuccess = result.success || 
@@ -828,7 +830,7 @@ class PhotoManager {
                        (result.modify === "success");
                        
       if (isSuccess) {
-        console.log('[PHOTO MANAGER] Photo modified successfully');
+        // console.log('[PHOTO MANAGER] Photo modified successfully');
         
         // Update photo status
         photo.accepted = 1;
@@ -842,7 +844,7 @@ class PhotoManager {
         this.showNotification('Photo saved successfully!', 'success');
         
         // Simple solution: reload the page to refresh everything
-        console.log('[PHOTO MANAGER] Reloading page to refresh gallery...');
+        // console.log('[PHOTO MANAGER] Reloading page to refresh gallery...');
         window.location.reload();
       } else {
         console.error('[PHOTO MANAGER] Failed to modify photo:', result);
@@ -863,13 +865,13 @@ class PhotoManager {
         method: 'POST'
       });
       const result = await response.json();
-      console.log('[PHOTO MANAGER] Set main photo result:', result);
+      // console.log('[PHOTO MANAGER] Set main photo result:', result);
       
       if (result.success || result.modify === "success") {
         this.showNotification('Main photo updated!', 'success');
         
         // Simple solution: reload the page to refresh everything
-        console.log('[PHOTO MANAGER] Reloading page to refresh gallery...');
+        // console.log('[PHOTO MANAGER] Reloading page to refresh gallery...');
         window.location.reload();
       }
     } catch (error) {
@@ -881,22 +883,22 @@ class PhotoManager {
   async deletePhotoById(photoId) {
     if (!confirm('Are you sure you want to delete this photo?')) return;
     
-    console.log('[PHOTO MANAGER] Deleting photo with ID:', photoId);
-    console.log('[PHOTO MANAGER] Current photos before delete:', this.photos.map(p => ({ id: p.id, serverId: p.serverId, photoNum: p.photoNum })));
+    // console.log('[PHOTO MANAGER] Deleting photo with ID:', photoId);
+    // console.log('[PHOTO MANAGER] Current photos before delete:', this.photos.map(p => ({ id: p.id, serverId: p.serverId, photoNum: p.photoNum })));
     
     try {
       // Use server proxy to ensure JSON and correct auth
       const apiUrl = `/api/spice-multi-test?endpoint=/index_api/user_edit_photos/del&method=GET&session_id=${window.authManager.sessionId}&photo_num=${Number(photoId)}`;
       const response = await fetch(apiUrl);
       const result = await response.json();
-      console.log('[PHOTO MANAGER] Delete result (proxy):', result);
+      // console.log('[PHOTO MANAGER] Delete result (proxy):', result);
       
       const isSuccess = result.success || result.modify === 'success' || result.result?.del === 'success' || result.data?.result?.del === 'success';
       if (isSuccess) {
         this.showNotification('Photo deleted successfully!', 'success');
         
         // Simple solution: reload the page to refresh everything
-        console.log('[PHOTO MANAGER] Reloading page to refresh gallery...');
+        // console.log('[PHOTO MANAGER] Reloading page to refresh gallery...');
         window.location.reload();
       } else {
         this.showNotification('Failed to delete photo', 'error');
@@ -908,8 +910,8 @@ class PhotoManager {
   }
 
   async deleteCurrentPhoto() {
-    console.log('[PHOTO MANAGER] === DELETE CURRENT PHOTO START ===');
-    console.log('[PHOTO MANAGER] Current editing photo:', this.currentEditingPhoto);
+    // console.log('[PHOTO MANAGER] === DELETE CURRENT PHOTO START ===');
+    // console.log('[PHOTO MANAGER] Current editing photo:', this.currentEditingPhoto);
     
     if (!this.currentEditingPhoto) {
       console.error('[PHOTO MANAGER] ERROR: No current editing photo set!');
@@ -923,7 +925,7 @@ class PhotoManager {
       photoNum: this.currentEditingPhoto.photoNum || this.currentEditingPhoto.serverId || this.currentEditingPhoto.id
     };
     
-    console.log('[PHOTO MANAGER] Photo to delete snapshot:', photoToDelete);
+    // console.log('[PHOTO MANAGER] Photo to delete snapshot:', photoToDelete);
     
     if (!photoToDelete.photoNum || photoToDelete.photoNum <= 0) {
       console.error('[PHOTO MANAGER] ERROR: Invalid photoNum for deletion!', photoToDelete);
@@ -931,16 +933,16 @@ class PhotoManager {
       return;
     }
     
-    console.log('[PHOTO MANAGER] Ready to delete photo with photoNum:', photoToDelete.photoNum);
-    console.log('[PHOTO MANAGER] All photos snapshot:', this.photos.map(p => ({ id: p.id, serverId: p.serverId, photoNum: p.photoNum })));
+    // console.log('[PHOTO MANAGER] Ready to delete photo with photoNum:', photoToDelete.photoNum);
+    // console.log('[PHOTO MANAGER] All photos snapshot:', this.photos.map(p => ({ id: p.id, serverId: p.serverId, photoNum: p.photoNum })));
     
     // Use custom confirmation modal instead of system confirm
-    console.log('[PHOTO MANAGER] Showing confirmation modal...');
+    // console.log('[PHOTO MANAGER] Showing confirmation modal...');
     const confirmed = await this.showConfirmation('Are you sure you want to delete this photo?');
-    console.log('[PHOTO MANAGER] Confirmation result:', confirmed);
+    // console.log('[PHOTO MANAGER] Confirmation result:', confirmed);
     
     if (!confirmed) {
-      console.log('[PHOTO MANAGER] User cancelled deletion');
+      // console.log('[PHOTO MANAGER] User cancelled deletion');
       return;
     }
     
@@ -954,33 +956,33 @@ class PhotoManager {
     this.showNotification('Deleting photo...', 'info');
     this.showGlobalLoading('Deleting photo...');
     
-    console.log('[PHOTO MANAGER] Proceeding with deletion, photoNum:', photoNum);
-    console.log('[PHOTO MANAGER] Photos before deletion:', this.photos.length);
+    // console.log('[PHOTO MANAGER] Proceeding with deletion, photoNum:', photoNum);
+    // console.log('[PHOTO MANAGER] Photos before deletion:', this.photos.length);
     
     try {
       // Use server proxy to ensure JSON and correct auth
       const apiUrl = `/api/spice-multi-test?endpoint=/index_api/user_edit_photos/del&method=GET&session_id=${window.authManager.sessionId}&photo_num=${photoNum}`;
-      console.log('[PHOTO MANAGER] API URL (proxy):', apiUrl);
-      console.log('[PHOTO MANAGER] Deleting photo with final photoNum:', photoNum, 'from photoToDelete:', photoToDelete);
+      // console.log('[PHOTO MANAGER] API URL (proxy):', apiUrl);
+      // console.log('[PHOTO MANAGER] Deleting photo with final photoNum:', photoNum, 'from photoToDelete:', photoToDelete);
       const response = await fetch(apiUrl);
       const result = await response.json();
-      console.log('[PHOTO MANAGER] API Delete result (proxy):', result);
+      // console.log('[PHOTO MANAGER] API Delete result (proxy):', result);
       
       const isSuccess = result.success || result.modify === 'success' || result.result?.del === 'success' || result.data?.result?.del === 'success';
       if (isSuccess) {
-        console.log('[PHOTO MANAGER] API deletion successful, updating local data...');
+        // console.log('[PHOTO MANAGER] API deletion successful, updating local data...');
         
         this.showNotification('Photo deleted successfully!', 'success');
         
         // Close crop modal, then reload the page to refresh everything
         this.closeCropModal();
         this.hideGlobalLoading();
-        console.log('[PHOTO MANAGER] Reloading page to refresh gallery...');
+        // console.log('[PHOTO MANAGER] Reloading page to refresh gallery...');
         window.location.reload();
         
-        console.log('[PHOTO MANAGER] === DELETE PROCESS COMPLETED ===');
+        // console.log('[PHOTO MANAGER] === DELETE PROCESS COMPLETED ===');
       } else {
-        console.log('[PHOTO MANAGER] API deletion failed:', result);
+        // console.log('[PHOTO MANAGER] API deletion failed:', result);
         this.showNotification('Failed to delete photo', 'error');
         this.hideGlobalLoading();
       }
@@ -992,15 +994,15 @@ class PhotoManager {
   }
 
   closeCropModal() {
-    console.log('[PHOTO MANAGER] === CLOSING CROP MODAL ===');
+    // console.log('[PHOTO MANAGER] === CLOSING CROP MODAL ===');
     const modal = document.getElementById('photoCropModal');
-    console.log('[PHOTO MANAGER] Modal element found:', !!modal);
-    console.log('[PHOTO MANAGER] Modal current display:', modal ? modal.style.display : 'N/A');
+    // console.log('[PHOTO MANAGER] Modal element found:', !!modal);
+    // console.log('[PHOTO MANAGER] Modal current display:', modal ? modal.style.display : 'N/A');
     
     if (modal) {
       modal.style.display = 'none';
       document.body.style.overflow = '';
-      console.log('[PHOTO MANAGER] Modal hidden and body overflow reset');
+      // console.log('[PHOTO MANAGER] Modal hidden and body overflow reset');
     } else {
       console.error('[PHOTO MANAGER] Could not find photoCropModal element!');
     }
@@ -1008,20 +1010,20 @@ class PhotoManager {
     // Clean up temporary preview URLs only if photo wasn't saved
     if (this.currentEditingPhoto?.previewUrl && !this.currentEditingPhoto.accepted) {
       URL.revokeObjectURL(this.currentEditingPhoto.previewUrl);
-      console.log('[PHOTO MANAGER] Cleaned up preview URL');
+      // console.log('[PHOTO MANAGER] Cleaned up preview URL');
     }
     
-    console.log('[PHOTO MANAGER] === CROP MODAL CLOSE COMPLETED ===');
+    // console.log('[PHOTO MANAGER] === CROP MODAL CLOSE COMPLETED ===');
     // Note: We don't clear currentEditingPhoto here because deleteCurrentPhoto does it
   }
 
   renderPhotoGallery() {
-    console.log('[PHOTO MANAGER] === RENDERING PHOTO GALLERY ===');
-    console.log('[PHOTO MANAGER] Current photos count:', this.photos.length);
-    console.log('[PHOTO MANAGER] Photos array:', this.photos.map(p => ({ photoNum: p.photoNum, isMain: p.isMain })));
+    // console.log('[PHOTO MANAGER] === RENDERING PHOTO GALLERY ===');
+    // console.log('[PHOTO MANAGER] Current photos count:', this.photos.length);
+    // console.log('[PHOTO MANAGER] Photos array:', this.photos.map(p => ({ photoNum: p.photoNum, isMain: p.isMain })));
     
     const gallery = document.getElementById('photoGallery');
-    console.log('[PHOTO MANAGER] Gallery element found:', !!gallery);
+    // console.log('[PHOTO MANAGER] Gallery element found:', !!gallery);
     if (!gallery) {
       console.error('[PHOTO MANAGER] Could not find photoGallery element!');
       return;
@@ -1029,15 +1031,15 @@ class PhotoManager {
 
     // Clear gallery first
     gallery.innerHTML = '';
-    console.log('[PHOTO MANAGER] Gallery cleared');
+    // console.log('[PHOTO MANAGER] Gallery cleared');
     
     // Update photo count (exclude temporary new photos)
     const photoCount = document.getElementById('photoCount');
-    console.log('[PHOTO MANAGER] Photo count element found:', !!photoCount);
+    // console.log('[PHOTO MANAGER] Photo count element found:', !!photoCount);
     if (photoCount) {
       const realCount = this.photos.filter(p => !p.isNew).length;
       photoCount.textContent = `${realCount}/10 photos`;
-      console.log('[PHOTO MANAGER] Photo count updated to:', photoCount.textContent);
+      // console.log('[PHOTO MANAGER] Photo count updated to:', photoCount.textContent);
     } else {
       console.error('[PHOTO MANAGER] Photo count element not found! Looking for #photoCount');
     }
@@ -1125,7 +1127,7 @@ class PhotoManager {
         editBtn.addEventListener('click', (e) => {
           e.preventDefault();
           e.stopPropagation();
-          console.log('[PHOTO MANAGER] Edit button clicked for photo:', photo.id, 'serverId:', photo.serverId, 'photoNum:', photo.photoNum);
+          // console.log('[PHOTO MANAGER] Edit button clicked for photo:', photo.id, 'serverId:', photo.serverId, 'photoNum:', photo.photoNum);
           if (!photo.isNew) {
             this.openCropModal(photo);
           }
@@ -1187,7 +1189,7 @@ class PhotoManager {
       const confirmBtn = document.getElementById('confirmationConfirm');
 
       if (!modal || !messageEl || !cancelBtn || !confirmBtn) {
-        console.warn('[PHOTO MANAGER] Confirmation modal elements not found, using native confirm()');
+        // console.warn('[PHOTO MANAGER] Confirmation modal elements not found, using native confirm()');
         const ok = window.confirm(message || 'Are you sure?');
         resolve(!!ok);
         return;

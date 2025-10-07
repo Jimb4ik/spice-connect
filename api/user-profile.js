@@ -48,7 +48,7 @@ export default async function handler(req, res) {
       
       const apiUrl = `${BASE_URL}/index_api/user?${queryParams}`;
       
-      console.log('[USER-PROFILE] Request to:', apiUrl.replace(API_KEY, 'HIDDEN_KEY'));
+      // console.log('[USER-PROFILE] Request to:', apiUrl.replace(API_KEY, 'HIDDEN_KEY'));
   
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -60,8 +60,8 @@ export default async function handler(req, res) {
   
       const data = await response.json();
       
-      console.log('[USER-PROFILE] Response status:', response.status);
-      console.log('[USER-PROFILE] Response data:', data);
+      // console.log('[USER-PROFILE] Response status:', response.status);
+      // console.log('[USER-PROFILE] Response data:', data);
   
       // Check if request was successful
       const isSuccess = response.ok && data.connected === 1 && data.result;

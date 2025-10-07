@@ -85,31 +85,31 @@ async function addWalletTransaction(pool, req) {
         // Ищем кошелек по всем возможным связям
         let walletResult;
         
-        console.log('[WALLET] Searching for existing wallet...', { user_id, session_id });
+        // console.log('[WALLET] Searching for existing wallet...', { user_id, session_id });
         
         // Сначала ищем по точному совпадению user_id
         if (user_id) {
-            console.log('[WALLET] Looking for wallet by user_id:', user_id);
+            // console.log('[WALLET] Looking for wallet by user_id:', user_id);
             walletResult = await pool.query(
                 'SELECT * FROM user_wallets WHERE user_id = $1',
                 [user_id]
             );
-            console.log('[WALLET] Wallet search result for user_id', user_id, ':', walletResult.rows.length > 0 ? 'found' : 'not found');
+            // console.log('[WALLET] Wallet search result for user_id', user_id, ':', walletResult.rows.length > 0 ? 'found' : 'not found');
         }
         
         // Если не найден по user_id, ищем по session_id
         if ((!walletResult || walletResult.rows.length === 0) && session_id) {
-            console.log('[WALLET] Searching by session_id:', session_id);
+            // console.log('[WALLET] Searching by session_id:', session_id);
             walletResult = await pool.query(
                 'SELECT * FROM user_wallets WHERE session_id = $1 OR user_id = $1',
                 [session_id]
             );
-            console.log('[WALLET] Wallet search result for session_id', session_id, ':', walletResult.rows.length > 0 ? 'found' : 'not found');
+            // console.log('[WALLET] Wallet search result for session_id', session_id, ':', walletResult.rows.length > 0 ? 'found' : 'not found');
         }
         
         // Если все еще не найден, попробуем найти по связи через user_progress
         if ((!walletResult || walletResult.rows.length === 0) && session_id) {
-            console.log('[WALLET] Searching via user_progress table...');
+            // console.log('[WALLET] Searching via user_progress table...');
             const userLookupResult = await pool.query(
                 'SELECT DISTINCT up.user_id FROM user_progress up WHERE up.session_id = $1 LIMIT 1',
                 [session_id]
@@ -117,23 +117,23 @@ async function addWalletTransaction(pool, req) {
             
             if (userLookupResult.rows.length > 0) {
                 const realUserId = userLookupResult.rows[0].user_id;
-                console.log('[WALLET] Found real user_id via user_progress:', realUserId);
+                // console.log('[WALLET] Found real user_id via user_progress:', realUserId);
                 
                 walletResult = await pool.query(
                     'SELECT * FROM user_wallets WHERE user_id = $1',
                     [realUserId]
                 );
-                console.log('[WALLET] Wallet search result for real user_id', realUserId, ':', walletResult.rows.length > 0 ? 'found' : 'not found');
+                // console.log('[WALLET] Wallet search result for real user_id', realUserId, ':', walletResult.rows.length > 0 ? 'found' : 'not found');
             }
         }
 
         if (!walletResult || walletResult.rows.length === 0) {
-            console.log('[WALLET] ❌ NO EXISTING WALLET FOUND!');
-            console.log('[WALLET] Will create new wallet for user_id:', user_id, 'session_id:', session_id);
-            console.log('[WALLET] This means either:');
-            console.log('[WALLET] 1. User has no wallet yet');
-            console.log('[WALLET] 2. user_id/session_id mismatch');
-            console.log('[WALLET] 3. Database connection issue');
+            // console.log('[WALLET] ❌ NO EXISTING WALLET FOUND!');
+            // console.log('[WALLET] Will create new wallet for user_id:', user_id, 'session_id:', session_id);
+            // console.log('[WALLET] This means either:');
+            // console.log('[WALLET] 1. User has no wallet yet');
+            // console.log('[WALLET] 2. user_id/session_id mismatch');
+            // console.log('[WALLET] 3. Database connection issue');
             
             // Создаем новый кошелек если не найден
             if (session_id) {
@@ -146,7 +146,7 @@ async function addWalletTransaction(pool, req) {
                 
                 if (createWalletResult.rows.length > 0) {
                     walletResult = createWalletResult;
-                    console.log('[WALLET] New wallet created:', createWalletResult.rows[0]);
+                    // console.log('[WALLET] New wallet created:', createWalletResult.rows[0]);
                 } else {
                     return {
                         success: false,
@@ -160,8 +160,8 @@ async function addWalletTransaction(pool, req) {
                 };
             }
         } else {
-            console.log('[WALLET] ✅ EXISTING WALLET FOUND!');
-            console.log('[WALLET] Wallet details:', {
+            // console.log('[WALLET] ✅ EXISTING WALLET FOUND!');
+            // console.log('[WALLET] Wallet details:', {
                 id: walletResult.rows[0].id,
                 user_id: walletResult.rows[0].user_id,
                 session_id: walletResult.rows[0].session_id,
@@ -175,7 +175,7 @@ async function addWalletTransaction(pool, req) {
         const creditsAmount = credits ? parseFloat(credits) : transactionAmount; // Кредиты для баланса
         const effectiveUserId = user_id || wallet.user_id; // Используем переданный user_id или из кошелька
 
-        console.log('[WALLET] Adding transaction:', {
+        // console.log('[WALLET] Adding transaction:', {
             wallet_id: wallet.id,
             user_id: effectiveUserId,
             transaction_type,
@@ -209,7 +209,7 @@ async function addWalletTransaction(pool, req) {
             [newBalance, wallet.id]
         );
 
-        console.log('[WALLET] Transaction completed successfully:', {
+        // console.log('[WALLET] Transaction completed successfully:', {
             transaction_id: transactionResult.rows[0].id,
             old_balance: wallet.balance,
             new_balance: newBalance,
@@ -257,7 +257,7 @@ async function getWallet(pool, req) {
     try {
         let walletResult;
         
-        console.log('[WALLET] Getting wallet for user_id:', user_id, 'session_id:', session_id);
+        // console.log('[WALLET] Getting wallet for user_id:', user_id, 'session_id:', session_id);
         
         // Ищем кошелек по user_id
         if (user_id) {

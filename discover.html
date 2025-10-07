@@ -419,7 +419,7 @@
         });
         
         async function initializeDiscover() {
-            console.log('[DISCOVER] Initializing discover functionality...');
+            // console.log('[DISCOVER] Initializing discover functionality...');
             
             // Сначала загружаем настройки Discovery Preferences
             await loadAgeSettings();
@@ -493,7 +493,7 @@
                 await loadDiscoveryPreferencesFromAPI();
                 
             } catch (error) {
-                console.warn('[AGE FILTER] Error loading saved settings:', error);
+                // console.warn('[AGE FILTER] Error loading saved settings:', error);
             }
         }
         
@@ -504,18 +504,18 @@
                 const userId = window.authManager?.currentUser?.id;
                 
                 if (!sessionId || !userId) {
-                    console.log('[DISCOVER] No session/user ID, using local settings');
+                    // console.log('[DISCOVER] No session/user ID, using local settings');
                     return;
                 }
                 
-                console.log('[DISCOVER] Loading Discovery Preferences from API...');
+                // console.log('[DISCOVER] Loading Discovery Preferences from API...');
                 
                 const response = await fetch(`/api/discovery-preferences?session_id=${sessionId}&user_id=${userId}`);
                 const data = await response.json();
                 
                 if (data.success && data.preferences) {
                     const prefs = data.preferences;
-                    console.log('[DISCOVER] Loaded preferences from API:', prefs);
+                    // console.log('[DISCOVER] Loaded preferences from API:', prefs);
                     
                     // Обновляем настройки возраста из API
                     if (prefs.age_min && prefs.age_max) {
@@ -531,12 +531,12 @@
                     discoveryPreferences.showWomen = prefs.cherche1 === 2 || prefs.cherche1 === 3;
                     discoveryPreferences.showCouples = prefs.cherche1 === 3;
                     
-                    console.log('[DISCOVER] Updated discovery preferences:', discoveryPreferences);
+                    // console.log('[DISCOVER] Updated discovery preferences:', discoveryPreferences);
                 } else {
-                    console.log('[DISCOVER] No preferences found in API, using defaults');
+                    // console.log('[DISCOVER] No preferences found in API, using defaults');
                 }
             } catch (error) {
-                console.warn('[DISCOVER] Error loading Discovery Preferences from API:', error);
+                // console.warn('[DISCOVER] Error loading Discovery Preferences from API:', error);
             }
         }
         
@@ -545,15 +545,15 @@
             try {
                 localStorage.setItem('lavrilo_age_settings', JSON.stringify(ageSettings));
             } catch (error) {
-                console.warn('[AGE FILTER] Error saving settings:', error);
+                // console.warn('[AGE FILTER] Error saving settings:', error);
             }
         }
         
         // Функция для обновления настроек из settings страницы
         function refreshDiscoveryPreferences() {
-            console.log('[DISCOVER] Refreshing Discovery Preferences...');
+            // console.log('[DISCOVER] Refreshing Discovery Preferences...');
             loadDiscoveryPreferencesFromAPI().then(() => {
-                console.log('[DISCOVER] Preferences refreshed, reloading profiles...');
+                // console.log('[DISCOVER] Preferences refreshed, reloading profiles...');
                 // Сбрасываем профили и загружаем новые с обновленными настройками
                 currentProfileIndex = 0;
                 profilesBuffer = [];
@@ -567,7 +567,7 @@
         window.addEventListener('storage', (e) => {
             if (e.key === 'lavrilo_age_settings' || 
                 e.key === 'lavrilo_discovery_preferences_updated') {
-                console.log('[DISCOVER] Settings changed, refreshing preferences...');
+                // console.log('[DISCOVER] Settings changed, refreshing preferences...');
                 refreshDiscoveryPreferences();
             }
         });
@@ -598,7 +598,7 @@
                 });
                 
                 const result = await response.json();
-                console.log('[DISCOVER] User progress loaded:', result);
+                // console.log('[DISCOVER] User progress loaded:', result);
                 
                 if (result.success && result.data) {
                     return result.data;
@@ -629,7 +629,7 @@
                 });
                 
                 const result = await response.json();
-                console.log('[DISCOVER] User progress saved:', result);
+                // console.log('[DISCOVER] User progress saved:', result);
                 return result.success;
             } catch (error) {
                 console.error('[DISCOVER] Error saving user progress:', error);
@@ -639,7 +639,7 @@
         
         async function loadNextProfile() {
             try {
-                console.log('[DISCOVER] Loading next profile...');
+                // console.log('[DISCOVER] Loading next profile...');
                 showLoadingState(true);
                 
                 const sessionId = window.authManager?.sessionId;
@@ -655,13 +655,13 @@
                     if (userProgress) {
                         currentPage = userProgress.current_page || 0;
                         currentProfileIndex = userProgress.last_profile_index || 0;
-                        console.log(`[DISCOVER] Restored progress: page=${currentPage}, index=${currentProfileIndex}`);
+                        // console.log(`[DISCOVER] Restored progress: page=${currentPage}, index=${currentProfileIndex}`);
                     }
                 }
                 
                 // Проверяем есть ли профили в буфере
                 if (profilesBuffer.length === 0 || currentProfileIndex >= profilesBuffer.length) {
-                    console.log(`[DISCOVER] Loading profiles from page ${currentPage} with age filter: ${ageSettings.min}-${ageSettings.max}`);
+                    // console.log(`[DISCOVER] Loading profiles from page ${currentPage} with age filter: ${ageSettings.min}-${ageSettings.max}`);
                     
                     // Получаем API ключ
                     const apiConfigResponse = await fetch('/api/get-api-key');
@@ -688,7 +688,7 @@
                         searchParams.append('sexe', discoveryPreferences.cherche1);
                     }
                     
-                    console.log('[DISCOVER] Search parameters:', {
+                    // console.log('[DISCOVER] Search parameters:', {
                         page: currentPage,
                         age_from: ageSettings.min,
                         age_to: ageSettings.max,
@@ -700,11 +700,11 @@
                     const response = await fetch(apiUrl);
                     const data = await response.json();
                     
-                    console.log('[DISCOVER] API Response:', data);
+                    // console.log('[DISCOVER] API Response:', data);
                     
                     if (data.success && data.data?.result?.length > 0) {
                         const newProfiles = data.data.result;
-                        console.log(`[DISCOVER] Loaded ${newProfiles.length} new profiles from page ${currentPage}`);
+                        // console.log(`[DISCOVER] Loaded ${newProfiles.length} new profiles from page ${currentPage}`);
                         
                         // Заменяем буфер новыми профилями при загрузке новой страницы
                         profilesBuffer = newProfiles;
@@ -716,7 +716,7 @@
                         }
                         
                     } else {
-                        console.log('[DISCOVER] No more profiles available');
+                        // console.log('[DISCOVER] No more profiles available');
                         showNoProfilesState();
                         return;
                     }
@@ -729,7 +729,7 @@
                     updateProfileCounter();
                     showLoadingState(false);
                 } else {
-                    console.log('[DISCOVER] No profiles in buffer');
+                    // console.log('[DISCOVER] No profiles in buffer');
                     showNoProfilesState();
                 }
                 
@@ -740,11 +740,11 @@
         }
         
         function displayCurrentProfile(profile) {
-            console.log('[DISCOVER] Displaying profile:', profile);
+            // console.log('[DISCOVER] Displaying profile:', profile);
             
             // Логгируем доступные поля профиля для анализа API
-            console.log('[DISCOVER] Available profile fields:', Object.keys(profile));
-            console.log('[DISCOVER] Profile data sample:', {
+            // console.log('[DISCOVER] Available profile fields:', Object.keys(profile));
+            // console.log('[DISCOVER] Profile data sample:', {
                 id: profile.id,
                 nom_complet: profile.nom_complet,
                 pseudo: profile.pseudo,
@@ -873,11 +873,11 @@
                 photoUrl = 'https://dev2018.de5a7.com/' + photoUrl;
             }
             
-            console.log('[DISCOVER] Setting photo URL:', photoUrl);
+            // console.log('[DISCOVER] Setting photo URL:', photoUrl);
             photoElement.src = photoUrl;
             
             photoElement.onerror = function() {
-                console.warn('[DISCOVER] Failed to load photo, using default');
+                // console.warn('[DISCOVER] Failed to load photo, using default');
                 this.style.display = 'none';
             };
         }
@@ -934,7 +934,7 @@
         
         // Обработчики действий
         async function handleLike() {
-            console.log('[DISCOVER] Like action');
+            // console.log('[DISCOVER] Like action');
             if (currentProfile) {
                 await performMatchAction('like', currentProfile.id);
                 moveToNextProfile();
@@ -942,7 +942,7 @@
         }
         
         async function handleDislike() {
-            console.log('[DISCOVER] Dislike action');
+            // console.log('[DISCOVER] Dislike action');
             if (currentProfile) {
                 await performMatchAction('dislike', currentProfile.id);
                 moveToNextProfile();
@@ -950,7 +950,7 @@
         }
         
         async function handleSuperLike() {
-            console.log('[DISCOVER] Super like action');
+            // console.log('[DISCOVER] Super like action');
             if (currentProfile) {
                 await performMatchAction('super_like', currentProfile.id);
                 moveToNextProfile();
@@ -958,7 +958,7 @@
         }
         
         async function handleReset() {
-            console.log('[DISCOVER] Reset profiles');
+            // console.log('[DISCOVER] Reset profiles');
             currentProfileIndex = 0;
             profilesBuffer = [];
             currentPage = 1; // Сбрасываем на первую страницу
@@ -989,7 +989,7 @@
             
             // Проверяем, нужно ли загрузить следующую страницу
             if (currentProfileIndex >= profilesBuffer.length) {
-                console.log(`[DISCOVER] Moving to next page (${currentPage + 1})`);
+                // console.log(`[DISCOVER] Moving to next page (${currentPage + 1})`);
                 currentPage++;
                 currentProfileIndex = 0;
                 await loadNextProfile();
@@ -1039,25 +1039,25 @@
                     });
                     
                     const apiUrl = `${apiConfig.baseUrl}/index_api/match?${actionQuery.toString()}`;
-                    console.log('[DISCOVER] Action API URL:', apiUrl);
+                    // console.log('[DISCOVER] Action API URL:', apiUrl);
                     
                     const response = await fetch(apiUrl, {
                         method: 'GET'
                     });
                     const data = await response.json();
                     
-                    console.log(`[DISCOVER] ${action} result:`, data);
+                    // console.log(`[DISCOVER] ${action} result:`, data);
                     
                     // Проверяем на матч (точно такой же формат как в matching-system.js)
                     if (data.result === 'match') {
-                        console.log('🎉 IT\'S A MATCH!');
-                        console.log('[DISCOVER] Current profile for match:', currentProfile);
-                        console.log('[DISCOVER] API match response:', data);
+                        // console.log('🎉 IT\'S A MATCH!');
+                        // console.log('[DISCOVER] Current profile for match:', currentProfile);
+                        // console.log('[DISCOVER] API match response:', data);
                         
                         // ОБЯЗАТЕЛЬНО сохраняем каждый матч в локальную базу данных
                         try {
-                            console.log('[DISCOVER] 🔍 Starting match save process...');
-                            console.log('[DISCOVER] Current session data:', {
+                            // console.log('[DISCOVER] 🔍 Starting match save process...');
+                            // console.log('[DISCOVER] Current session data:', {
                                 authManager: !!window.authManager,
                                 sessionId: window.authManager?.sessionId,
                                 isLoggedIn: window.authManager?.isLoggedIn
@@ -1069,18 +1069,18 @@
                                 throw new Error('MatchUtils not loaded');
                             }
                             
-                            console.log('[DISCOVER] MatchUtils available:', Object.keys(window.MatchUtils));
+                            // console.log('[DISCOVER] MatchUtils available:', Object.keys(window.MatchUtils));
                             
                             // КРИТИЧЕСКИ ВАЖНО: Сохраняем каждый матч в нашу БД для гарантированного отображения
                             const matchSaved = await window.MatchUtils.saveMatchToDatabase(currentProfile);
-                            console.log('[DISCOVER] Match save result:', matchSaved);
+                            // console.log('[DISCOVER] Match save result:', matchSaved);
                             
                             if (!matchSaved) {
                                 console.error('[DISCOVER] ❌ CRITICAL: Failed to save match to database!');
                                 console.error('[DISCOVER] 🚨 Match will be lost if not saved to local database!');
                                 console.error('[DISCOVER] Profile data for failed save:', currentProfile);
                             } else {
-                                console.log('[DISCOVER] ✅ Match successfully saved to local database');
+                                // console.log('[DISCOVER] ✅ Match successfully saved to local database');
                             }
                         } catch (saveError) {
                             console.error('[DISCOVER] 🚨 CRITICAL ERROR saving match:', saveError);
@@ -1098,7 +1098,7 @@
         }
         
         function showMatchModal(matchedProfile) {
-            console.log('[DISCOVER] Match found!', matchedProfile);
+            // console.log('[DISCOVER] Match found!', matchedProfile);
             
             const modal = document.getElementById('matchModal');
             const theirPhoto = document.getElementById('matchTheirPhoto');
@@ -1112,40 +1112,40 @@
             
             // Заполняем данные матча
             if (theirPhoto && matchedProfile) {
-                console.log('[MATCH] Setting their photo...', matchedProfile);
+                // console.log('[MATCH] Setting their photo...', matchedProfile);
                 
                 // ПРОСТОЕ РЕШЕНИЕ: Попробуем прямо установить фото из основных полей
                 let photoUrl = null;
                 
                 // ИСПРАВЛЯЕМ: Пробуем разные поля фото из профиля 
-                console.log('[MATCH] 🔍 Profile structure:', JSON.stringify(matchedProfile, null, 2));
+                // console.log('[MATCH] 🔍 Profile structure:', JSON.stringify(matchedProfile, null, 2));
                 
                 // Сначала пробуем взять фото из отображаемого профиля на странице (наиболее надежно)
                 const currentPhotoImg = document.getElementById('cardMainPhoto');
                 if (currentPhotoImg && currentPhotoImg.src && currentPhotoImg.src.startsWith('http')) {
                     photoUrl = currentPhotoImg.src;
-                    console.log('[MATCH] 📸 Using current displayed photo:', photoUrl);
+                    // console.log('[MATCH] 📸 Using current displayed photo:', photoUrl);
                 } else if (matchedProfile.photo && typeof matchedProfile.photo === 'string' && matchedProfile.photo.startsWith('http')) {
                     photoUrl = matchedProfile.photo;
-                    console.log('[MATCH] 📸 Using profile.photo:', photoUrl);
+                    // console.log('[MATCH] 📸 Using profile.photo:', photoUrl);
                 } else if (matchedProfile.picture_430 && typeof matchedProfile.picture_430 === 'string' && matchedProfile.picture_430.startsWith('http')) {
                     photoUrl = matchedProfile.picture_430;
-                    console.log('[MATCH] 📸 Using profile.picture_430:', photoUrl);
+                    // console.log('[MATCH] 📸 Using profile.picture_430:', photoUrl);
                 } else if (matchedProfile.picture && typeof matchedProfile.picture === 'string' && matchedProfile.picture.startsWith('http')) {
                     photoUrl = matchedProfile.picture;
-                    console.log('[MATCH] 📸 Using profile.picture:', photoUrl);
+                    // console.log('[MATCH] 📸 Using profile.picture:', photoUrl);
                 } else {
-                    console.log('[MATCH] ❌ No valid photo URL found in any field');
+                    // console.log('[MATCH] ❌ No valid photo URL found in any field');
                 }
                 
-                console.log('[MATCH] 🎯 Direct photo URL found:', photoUrl);
+                // console.log('[MATCH] 🎯 Direct photo URL found:', photoUrl);
                 
                 if (photoUrl) {
                     theirPhoto.src = photoUrl;
                     theirPhoto.style.display = 'block';
-                    console.log('[MATCH] ✅ Their photo set successfully');
+                    // console.log('[MATCH] ✅ Their photo set successfully');
                 } else {
-                    console.log('[MATCH] ❌ No photo found, using placeholder...');
+                    // console.log('[MATCH] ❌ No photo found, using placeholder...');
                     // Используем placeholder с первой буквой имени
                     const name = matchedProfile.pseudo || matchedProfile.nom_complet || 'User';
                     const firstLetter = name.charAt(0).toUpperCase();
@@ -1173,7 +1173,7 @@
                     theirPhoto.src = canvas.toDataURL();
                     theirPhoto.style.display = 'block';
                     theirPhoto.style.borderRadius = '50%';
-                    console.log('[MATCH] ✅ Placeholder photo created with letter:', firstLetter);
+                    // console.log('[MATCH] ✅ Placeholder photo created with letter:', firstLetter);
                 }
             }
             
@@ -1183,7 +1183,7 @@
             
             // Загружаем фото текущего пользователя ПРОСТЫМ СПОСОБОМ
             if (yourPhoto && window.authManager) {
-                console.log('[MATCH] Loading current user photo...');
+                // console.log('[MATCH] Loading current user photo...');
                 
                 // Попробуем получить фото из localStorage
                 const userData = localStorage.getItem('lavrilo_user');
@@ -1193,31 +1193,31 @@
                         if (user.photo) {
                             yourPhoto.src = user.photo;
                             yourPhoto.style.display = 'block';
-                            console.log('[MATCH] ✅ Your photo set from localStorage');
+                            // console.log('[MATCH] ✅ Your photo set from localStorage');
                         } else {
-                            console.log('[MATCH] No photo in localStorage, trying header avatar...');
+                            // console.log('[MATCH] No photo in localStorage, trying header avatar...');
                             // Попробуем получить фото из аватара в хедере
                             const headerAvatar = document.querySelector('.user-avatar img, #userAvatar, .header-avatar img');
                             if (headerAvatar && headerAvatar.src) {
                                 yourPhoto.src = headerAvatar.src;
                                 yourPhoto.style.display = 'block';
-                                console.log('[MATCH] ✅ Your photo set from header avatar');
+                                // console.log('[MATCH] ✅ Your photo set from header avatar');
                                                     } else {
-                            console.log('[MATCH] No header avatar, trying API...');
+                            // console.log('[MATCH] No header avatar, trying API...');
                             // Попробуем API, но с fallback на placeholder
                             loadCurrentUserPhoto(yourPhoto).then(success => {
                                 if (!success) {
-                                    console.log('[MATCH] API failed, creating user placeholder...');
+                                    // console.log('[MATCH] API failed, creating user placeholder...');
                                     createUserPlaceholder(yourPhoto);
                                 }
                             });
                         }
                         }
                     } catch (e) {
-                        console.log('[MATCH] Failed to parse localStorage, trying API...');
+                        // console.log('[MATCH] Failed to parse localStorage, trying API...');
                         loadCurrentUserPhoto(yourPhoto).then(success => {
                             if (!success) {
-                                console.log('[MATCH] API failed after localStorage error, creating placeholder...');
+                                // console.log('[MATCH] API failed after localStorage error, creating placeholder...');
                                 createUserPlaceholder(yourPhoto);
                             }
                         });
@@ -1225,7 +1225,7 @@
                 } else {
                     loadCurrentUserPhoto(yourPhoto).then(success => {
                         if (!success) {
-                            console.log('[MATCH] API failed as final fallback, creating placeholder...');
+                            // console.log('[MATCH] API failed as final fallback, creating placeholder...');
                             createUserPlaceholder(yourPhoto);
                         }
                     });
@@ -1239,24 +1239,24 @@
             // Обработчики кнопок
             if (sendMessageBtn) {
                 sendMessageBtn.onclick = async () => {
-                    console.log('[MATCH] Creating contact and sending message...');
+                    // console.log('[MATCH] Creating contact and sending message...');
                     
                     const sessionId = window.authManager?.sessionId;
                     if (!sessionId || !matchedProfile) {
                         console.error('[MATCH] No session ID or matched profile for contact creation');
-                        console.log('[MATCH] sessionId:', sessionId, 'matchedProfile:', matchedProfile);
+                        // console.log('[MATCH] sessionId:', sessionId, 'matchedProfile:', matchedProfile);
                         closeMatchModalFunc();
                         return;
                     }
                     
-                    console.log('[MATCH] 🎯 Creating contact with CORRECT matched profile:', matchedProfile.pseudo || matchedProfile.nom_complet);
+                    // console.log('[MATCH] 🎯 Creating contact with CORRECT matched profile:', matchedProfile.pseudo || matchedProfile.nom_complet);
                     
                     try {
                         // Создаем контакт через API с ПРАВИЛЬНЫМ профилем
                         const contactResult = await createContact(sessionId, matchedProfile);
                         
                         if (contactResult.success) {
-                            console.log('[MATCH] ✅ Contact created successfully:', contactResult);
+                            // console.log('[MATCH] ✅ Contact created successfully:', contactResult);
                             
                             // Закрываем модальное окно
                             closeMatchModalFunc();
@@ -1301,56 +1301,56 @@
         
         function setModalProfilePhoto(imgElement, profile) {
             if (!imgElement || !profile) {
-                console.warn('[MATCH] Missing imgElement or profile for photo setting');
-                console.log('[MATCH] imgElement:', imgElement);
-                console.log('[MATCH] profile:', profile);
+                // console.warn('[MATCH] Missing imgElement or profile for photo setting');
+                // console.log('[MATCH] imgElement:', imgElement);
+                // console.log('[MATCH] profile:', profile);
                 return;
             }
             
-            console.log('[MATCH] 🔍 Analyzing profile for photos:', profile);
+            // console.log('[MATCH] 🔍 Analyzing profile for photos:', profile);
             
             let photoUrl = null;
             
             // Детальная диагностика всех возможных источников фото
-            console.log('[MATCH] Profile photo sources:');
-            console.log('- photos_v2:', profile.photos_v2);
-            console.log('- photos:', profile.photos);
-            console.log('- picture_430:', profile.picture_430);
-            console.log('- picture:', profile.picture);
-            console.log('- main_photo:', profile.main_photo);
+            // console.log('[MATCH] Profile photo sources:');
+            // console.log('- photos_v2:', profile.photos_v2);
+            // console.log('- photos:', profile.photos);
+            // console.log('- picture_430:', profile.picture_430);
+            // console.log('- picture:', profile.picture);
+            // console.log('- main_photo:', profile.main_photo);
             
             // Пробуем разные источники фотографий с расширенной диагностикой
             if (profile.photos_v2) {
-                console.log('[MATCH] 📸 Found photos_v2, analyzing...');
+                // console.log('[MATCH] 📸 Found photos_v2, analyzing...');
                 
                 if (profile.photos_v2.public) {
-                    console.log('[MATCH] 📸 Found public photos:', profile.photos_v2.public);
+                    // console.log('[MATCH] 📸 Found public photos:', profile.photos_v2.public);
                     const publicPhotos = profile.photos_v2.public;
                     const firstPhotoKey = Object.keys(publicPhotos)[0];
                     if (firstPhotoKey && publicPhotos[firstPhotoKey]) {
                         const photo = publicPhotos[firstPhotoKey];
-                        console.log('[MATCH] 📸 Photo object:', photo);
+                        // console.log('[MATCH] 📸 Photo object:', photo);
                         photoUrl = photo.sq_430 || photo.normal || photo.sq_middle;
                     }
                 } else if (Array.isArray(profile.photos_v2) && profile.photos_v2.length > 0) {
-                    console.log('[MATCH] 📸 Found photos_v2 array:', profile.photos_v2);
+                    // console.log('[MATCH] 📸 Found photos_v2 array:', profile.photos_v2);
                     const mainPhoto = profile.photos_v2.find(p => p.main_photo === '1') || profile.photos_v2[0];
-                    console.log('[MATCH] 📸 Selected photo:', mainPhoto);
+                    // console.log('[MATCH] 📸 Selected photo:', mainPhoto);
                     photoUrl = mainPhoto.sq_430 || mainPhoto.normal || mainPhoto.sq_middle;
                 }
             } else if (profile.photos && profile.photos.length > 0) {
-                console.log('[MATCH] 📸 Found photos array:', profile.photos);
+                // console.log('[MATCH] 📸 Found photos array:', profile.photos);
                 const mainPhoto = profile.photos.find(p => p.main_photo === '1') || profile.photos[0];
-                console.log('[MATCH] 📸 Selected photo:', mainPhoto);
+                // console.log('[MATCH] 📸 Selected photo:', mainPhoto);
                 photoUrl = mainPhoto.sq_430 || mainPhoto.normal || mainPhoto.sq_middle;
             } else if (profile.picture_430) {
-                console.log('[MATCH] 📸 Found picture_430');
+                // console.log('[MATCH] 📸 Found picture_430');
                 photoUrl = profile.picture_430;
             } else if (profile.picture) {
-                console.log('[MATCH] 📸 Found picture');
+                // console.log('[MATCH] 📸 Found picture');
                 photoUrl = profile.picture;
             } else if (profile.main_photo) {
-                console.log('[MATCH] 📸 Found main_photo:', profile.main_photo);
+                // console.log('[MATCH] 📸 Found main_photo:', profile.main_photo);
                 // Если main_photo это объект с URL'ами
                 if (typeof profile.main_photo === 'object') {
                     photoUrl = profile.main_photo.sq_430 || profile.main_photo.normal || profile.main_photo.sq_middle;
@@ -1359,86 +1359,86 @@
                 }
             }
             
-            console.log('[MATCH] 🎯 Final photo URL:', photoUrl);
+            // console.log('[MATCH] 🎯 Final photo URL:', photoUrl);
             
             if (photoUrl) {
-                console.log('[MATCH] ✅ Setting photo src:', photoUrl);
+                // console.log('[MATCH] ✅ Setting photo src:', photoUrl);
                 imgElement.src = photoUrl;
                 imgElement.style.display = 'block';
                 imgElement.onload = function() {
-                    console.log('[MATCH] ✅ Photo loaded successfully:', photoUrl);
+                    // console.log('[MATCH] ✅ Photo loaded successfully:', photoUrl);
                 };
                 imgElement.onerror = function() {
                     console.error('[MATCH] ❌ Failed to load photo:', photoUrl);
                     imgElement.style.display = 'none';
                 };
             } else {
-                console.warn('[MATCH] ❌ No photo URL found, hiding image');
-                console.log('[MATCH] Full profile object for debugging:', JSON.stringify(profile, null, 2));
+                // console.warn('[MATCH] ❌ No photo URL found, hiding image');
+                // console.log('[MATCH] Full profile object for debugging:', JSON.stringify(profile, null, 2));
                 imgElement.style.display = 'none';
             }
         }
         
         async function loadCurrentUserPhoto(imgElement) {
             try {
-                console.log('[MATCH] 🔍 Loading current user photo using WORKING method from header-avatar.js...');
+                // console.log('[MATCH] 🔍 Loading current user photo using WORKING method from header-avatar.js...');
                 
                 const sessionId = window.authManager?.sessionId;
                 if (!sessionId) {
-                    console.warn('[MATCH] ❌ No session ID for loading user photo');
+                    // console.warn('[MATCH] ❌ No session ID for loading user photo');
                     return false;
                 }
                 
                 // Получаем userId из localStorage как в header-avatar.js
                 const userDataString = localStorage.getItem('lavrilo_user');
                 if (!userDataString) {
-                    console.log('[MATCH] ❌ No user data in localStorage');
+                    // console.log('[MATCH] ❌ No user data in localStorage');
                     return false;
                 }
                 
                 const userData = JSON.parse(userDataString);
                 const userId = userData.id;
-                console.log('[MATCH] ✅ Using sessionId:', sessionId, 'userId:', userId);
+                // console.log('[MATCH] ✅ Using sessionId:', sessionId, 'userId:', userId);
                 
                 if (!userId) {
-                    console.log('[MATCH] ❌ No userId found');
+                    // console.log('[MATCH] ❌ No userId found');
                     return false;
                 }
                 
                 let photoUrl = null;
                 
                 // МЕТОД 1: user_edit_photos (как в header-avatar.js)
-                console.log('[MATCH] 🎯 Trying user_edit_photos endpoint...');
+                // console.log('[MATCH] 🎯 Trying user_edit_photos endpoint...');
                 try {
                     const apiUrl = `/api/spice-multi-test?endpoint=/index_api/user_edit_photos&method=POST&session_id=${sessionId}`;
                     const response = await fetch(apiUrl);
                     
                     if (response.ok) {
                         const apiData = await response.json();
-                        console.log('[MATCH] user_edit_photos response:', apiData);
+                        // console.log('[MATCH] user_edit_photos response:', apiData);
                         
                         if (apiData && apiData.success && apiData.data) {
                             const photos = apiData.data || [];
                             if (Array.isArray(photos) && photos.length > 0) {
                                 const mainPhoto = photos.find(p => p.num === 0) || photos[0];
                                 photoUrl = mainPhoto.sq_430 || mainPhoto.sq_middle || mainPhoto.normal || mainPhoto.sq_small;
-                                console.log('[MATCH] ✅ Found photo in user_edit_photos:', photoUrl);
+                                // console.log('[MATCH] ✅ Found photo in user_edit_photos:', photoUrl);
                             }
                         }
                 }
             } catch (error) {
-                    console.warn('[MATCH] user_edit_photos failed:', error);
+                    // console.warn('[MATCH] user_edit_photos failed:', error);
                 }
                 
                 // МЕТОД 2: /index_api/user fallback (как в header-avatar.js)
                 if (!photoUrl) {
-                    console.log('[MATCH] 🎯 Trying /index_api/user fallback...');
+                    // console.log('[MATCH] 🎯 Trying /index_api/user fallback...');
                     try {
                         const apiUrl2 = `/api/spice-multi-test?endpoint=/index_api/user&method=POST&session_id=${sessionId}&id=${userId}&get_picture_430=1`;
                         const response2 = await fetch(apiUrl2);
                         const apiData2 = await response2.json();
                         
-                        console.log('[MATCH] /index_api/user response:', apiData2);
+                        // console.log('[MATCH] /index_api/user response:', apiData2);
                         
                         if (apiData2 && apiData2.success && apiData2.data?.result) {
                             const user = apiData2.data.result;
@@ -1462,10 +1462,10 @@
                                     photoUrl = user.picture;
                                 }
                             }
-                            console.log('[MATCH] ✅ Found photo in /index_api/user:', photoUrl);
+                            // console.log('[MATCH] ✅ Found photo in /index_api/user:', photoUrl);
                         }
                     } catch (error) {
-                        console.warn('[MATCH] /index_api/user fallback failed:', error);
+                        // console.warn('[MATCH] /index_api/user fallback failed:', error);
                     }
                 }
                 
@@ -1475,20 +1475,20 @@
                 }
                 
                 if (photoUrl) {
-                    console.log('[MATCH] 🎉 SUCCESS! Found photo URL:', photoUrl);
+                    // console.log('[MATCH] 🎉 SUCCESS! Found photo URL:', photoUrl);
                     imgElement.src = photoUrl;
                     imgElement.style.display = 'block';
                     imgElement.style.borderRadius = '50%';
                     
                     // Обработка ошибок загрузки фото (как в header-avatar.js)
                     imgElement.onerror = function() {
-                        console.warn('[MATCH] Failed to load user photo, will use placeholder');
+                        // console.warn('[MATCH] Failed to load user photo, will use placeholder');
                         createUserPlaceholder(imgElement);
                     };
                     
                     return true;
                 } else {
-                    console.warn('[MATCH] ❌ No photo URL found after trying both methods');
+                    // console.warn('[MATCH] ❌ No photo URL found after trying both methods');
                     return false;
                 }
                 
@@ -1500,7 +1500,7 @@
         
         // Создание placeholder для пользователя
         function createUserPlaceholder(imgElement) {
-            console.log('[MATCH] Creating user placeholder...');
+            // console.log('[MATCH] Creating user placeholder...');
             
             const canvas = document.createElement('canvas');
             canvas.width = 100;
@@ -1524,7 +1524,7 @@
             imgElement.src = canvas.toDataURL();
             imgElement.style.display = 'block';
             imgElement.style.borderRadius = '50%';
-            console.log('[MATCH] ✅ User placeholder photo created');
+            // console.log('[MATCH] ✅ User placeholder photo created');
         }
         
         // Функции для работы с матчами перенесены в js/match-utils.js
@@ -1532,7 +1532,7 @@
         // Создание контакта через API
         async function createContact(sessionId, profile) {
             try {
-                console.log('[CONTACT] Creating contact for profile:', profile);
+                // console.log('[CONTACT] Creating contact for profile:', profile);
                 
                 const profileId = profile.id || profile.id_membre;
                 if (!profileId) {
@@ -1557,7 +1557,7 @@
                     target_id: profileId
                 });
                 
-                console.log('[CONTACT] Contact params:', contactParams.toString());
+                // console.log('[CONTACT] Contact params:', contactParams.toString());
                 
                 // Пробуем через spice-multi-test proxy с GET методом
                 const apiUrl = `/api/spice-multi-test?endpoint=/ajax_api/setContact&method=GET&${contactParams.toString()}`;
@@ -1565,11 +1565,11 @@
                 const response = await fetch(apiUrl);
                 const result = await response.json();
                 
-                console.log('[CONTACT] API Response:', result);
+                // console.log('[CONTACT] API Response:', result);
                 
                 // Проверяем успех согласно документации API: result.data.result должно быть 1
                 if (result.success && result.data && result.data.result === 1) {
-                    console.log('[CONTACT] ✅ Contact created successfully - result:', result.data.result);
+                    // console.log('[CONTACT] ✅ Contact created successfully - result:', result.data.result);
                     return { success: true, data: result.data };
                 } else {
                     console.error('[CONTACT] ❌ API returned error or result !== 1:', result);
@@ -1615,18 +1615,18 @@
         // Функция для анализа полей профиля (для отладки)
         window.analyzeProfileFields = function() {
             if (currentProfile) {
-                console.log('=== АНАЛИЗ ПОЛЕЙ ПРОФИЛЯ ===');
-                console.log('Текущий профиль:', currentProfile);
-                console.log('Доступные поля:', Object.keys(currentProfile));
-                console.log('Примеры значений:');
+                // console.log('=== АНАЛИЗ ПОЛЕЙ ПРОФИЛЯ ===');
+                // console.log('Текущий профиль:', currentProfile);
+                // console.log('Доступные поля:', Object.keys(currentProfile));
+                // console.log('Примеры значений:');
                 for (const [key, value] of Object.entries(currentProfile)) {
                     if (value !== null && value !== undefined && value !== '') {
-                        console.log(`  ${key}:`, typeof value === 'string' && value.length > 50 
+                        // console.log(`  ${key}:`, typeof value === 'string' && value.length > 50 
                             ? value.substring(0, 50) + '...' 
                             : value);
                     }
                 }
-                console.log('=== КОНЕЦ АНАЛИЗА ===');
+                // console.log('=== КОНЕЦ АНАЛИЗА ===');
                 
                 // Предлагаем дополнительные поля для отображения
                 const suggestedFields = [];
@@ -1649,9 +1649,9 @@
                     suggestedFields.push('Семейное положение');
                 }
                 
-                console.log('Предлагаемые дополнительные поля для отображения:', suggestedFields);
+                // console.log('Предлагаемые дополнительные поля для отображения:', suggestedFields);
             } else {
-                console.log('Нет текущего профиля для анализа');
+                // console.log('Нет текущего профиля для анализа');
             }
         };
         
@@ -1709,7 +1709,7 @@
             // Обработчик кнопки применения фильтра
             if (applyFilterBtn) {
                 applyFilterBtn.addEventListener('click', async () => {
-                    console.log('[AGE FILTER] Applying age filter:', ageSettings);
+                    // console.log('[AGE FILTER] Applying age filter:', ageSettings);
                     
                     // Показываем индикатор загрузки на кнопке
                     const originalText = applyFilterBtn.innerHTML;
@@ -1728,7 +1728,7 @@
                         applyFilterBtn.innerHTML = originalText;
                         applyFilterBtn.disabled = false;
                         
-                        console.log('[AGE FILTER] Filter applied successfully');
+                        // console.log('[AGE FILTER] Filter applied successfully');
                     } catch (error) {
                         console.error('[AGE FILTER] Error applying filter:', error);
                         applyFilterBtn.innerHTML = '❌ Error';
@@ -1793,7 +1793,7 @@
             const currentMin = ageSettings.min || 18;
             const currentMax = ageSettings.max || 80;
             
-            console.log('[MODAL] Syncing modal values:', currentMin, '-', currentMax);
+            // console.log('[MODAL] Syncing modal values:', currentMin, '-', currentMax);
             
             const minSlider = document.getElementById('ageMinModal');
             const maxSlider = document.getElementById('ageMaxModal');
@@ -1849,7 +1849,7 @@
         // Основная функция применения фильтра возраста
         async function applyAgeFilter() {
             try {
-                console.log('[AGE FILTER] Applying age filter:', ageSettings.min, '-', ageSettings.max);
+                // console.log('[AGE FILTER] Applying age filter:', ageSettings.min, '-', ageSettings.max);
                 
                 // Сбрасываем текущие профили и загружаем новые с учетом фильтра
                 currentProfileIndex = 0;
@@ -1860,7 +1860,7 @@
                 // Загружаем новые профили
                 await loadNextProfile();
                 
-                console.log('[AGE FILTER] Filter applied successfully');
+                // console.log('[AGE FILTER] Filter applied successfully');
             } catch (error) {
                 console.error('[AGE FILTER] Error applying filter:', error);
             }
@@ -1885,11 +1885,11 @@
             try {
                 localStorage.setItem('lavrilo_age_settings', JSON.stringify(ageSettings));
             } catch (error) {
-                console.warn('[AGE FILTER] Error saving settings:', error);
+                // console.warn('[AGE FILTER] Error saving settings:', error);
             }
             
-            console.log('Age filter applied from modal:', minVal, '-', maxVal);
-            console.log('Updated ageSettings:', ageSettings);
+            // console.log('Age filter applied from modal:', minVal, '-', maxVal);
+            // console.log('Updated ageSettings:', ageSettings);
             
             // Обновляем визуальную индикацию кнопки фильтра
             updateAgeFilterButtonState(minVal, maxVal);
@@ -1920,7 +1920,7 @@
 
         // Функция для сброса фильтра возраста
         function resetAgeFilter() {
-            console.log('[FILTER] Resetting age filter to default values');
+            // console.log('[FILTER] Resetting age filter to default values');
             
             // Сбрасываем настройки на дефолтные значения
             ageSettings.min = 18;
@@ -1930,7 +1930,7 @@
             try {
                 localStorage.setItem('lavrilo_age_settings', JSON.stringify(ageSettings));
             } catch (error) {
-                console.warn('[FILTER] Error saving reset settings:', error);
+                // console.warn('[FILTER] Error saving reset settings:', error);
             }
             
             // Обновляем значения в модальном окне
@@ -1963,7 +1963,7 @@
             // Закрываем модальное окно
             closeAgeModal();
             
-            console.log('[FILTER] Age filter reset completed');
+            // console.log('[FILTER] Age filter reset completed');
         }
     </script>
     <script>

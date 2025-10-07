@@ -25,7 +25,7 @@ export default async function handler(req, res) {
         // Получаем параметры из запроса
         const { force_pays } = req.body || {};
         
-        console.log('🚀 Отправляем запрос к Spice API...');
+        // console.log('🚀 Отправляем запрос к Spice API...');
         
         // Строим URL с query parameters согласно документации
         let apiUrl = `${BASE_URL}/index_api/landing_module/profils_global`;
@@ -40,7 +40,7 @@ export default async function handler(req, res) {
         }
         
         const finalUrl = `${apiUrl}?${queryParams.toString()}`;
-        console.log('📡 URL запроса:', finalUrl);
+        // console.log('📡 URL запроса:', finalUrl);
         
         // Используем РАБОЧИЙ метод авторизации: Query только api_key
         // (Диагностика показала, что Basic auth НЕ работает, а Query api_key работает!)
@@ -49,9 +49,9 @@ export default async function handler(req, res) {
             'Content-Type': 'application/json'
         };
         
-        console.log('🔑 Используем РАБОЧИЙ метод: Query только api_key');
-        console.log('🔧 Headers:', headers);
-        console.log('📋 API ключ передается только через query параметры');
+        // console.log('🔑 Используем РАБОЧИЙ метод: Query только api_key');
+        // console.log('🔧 Headers:', headers);
+        // console.log('📋 API ключ передается только через query параметры');
         
         // Делаем запрос к реальному API (API ключ в query параметрах)
         const apiResponse = await fetch(finalUrl, {
@@ -59,7 +59,7 @@ export default async function handler(req, res) {
             headers: headers
         });
 
-        console.log(`📡 API ответил со статусом: ${apiResponse.status}`);
+        // console.log(`📡 API ответил со статусом: ${apiResponse.status}`);
         
         const data = await apiResponse.json();
         
@@ -73,7 +73,7 @@ export default async function handler(req, res) {
             });
         }
 
-        console.log('✅ API запрос успешен!');
+        // console.log('✅ API запрос успешен!');
         
         // Возвращаем успешный результат
         res.status(200).json({

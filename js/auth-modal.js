@@ -351,10 +351,11 @@ class AuthModal {
       }
     }
     
-    console.log('Password value length:', passwordValue.length);
-    console.log('Confirm password value length:', confirmPasswordValue.length);
-    console.log('Password value:', passwordValue ? '[HIDDEN]' : 'EMPTY');
-    console.log('Confirm password value:', confirmPasswordValue ? '[HIDDEN]' : 'EMPTY');
+    // Security: Password logging removed
+    // console.log('Password value length:', passwordValue.length);
+    // console.log('Confirm password value length:', confirmPasswordValue.length);
+    // console.log('Password value:', passwordValue ? '[HIDDEN]' : 'EMPTY');
+    // console.log('Confirm password value:', confirmPasswordValue ? '[HIDDEN]' : 'EMPTY');
     
     // More lenient validation - check if fields exist and have content
     if (!passwordField || !confirmPasswordField) {
@@ -394,7 +395,8 @@ class AuthModal {
     
     // If we still don't have password values, try to trigger focus/blur events to get them
     if (!passwordValue || !confirmPasswordValue) {
-      console.log('Attempting to retrieve password values via events...');
+      // Security: Password debug logging removed
+      // console.log('Attempting to retrieve password values via events...');
       
       // Focus and blur to trigger any value updates
       if (passwordField && !passwordValue) {
@@ -409,8 +411,9 @@ class AuthModal {
         confirmPasswordValue = confirmPasswordField.value || '';
       }
       
-      console.log('After events - Password length:', passwordValue.length);
-      console.log('After events - Confirm password length:', confirmPasswordValue.length);
+      // Security: Password debug logging removed
+      // console.log('After events - Password length:', passwordValue.length);
+      // console.log('After events - Confirm password length:', confirmPasswordValue.length);
     }
     
     // Check if either field is empty (without trim to avoid issues)
@@ -422,11 +425,12 @@ class AuthModal {
         const altPassword = htmlFormData.get('regPassword') || '';
         const altConfirmPassword = htmlFormData.get('regConfirmPassword') || '';
         
-        console.log('Alternative password length:', altPassword.length);
-        console.log('Alternative confirm password length:', altConfirmPassword.length);
+        // Security: Password debug logging removed
+        // console.log('Alternative password length:', altPassword.length);
+        // console.log('Alternative confirm password length:', altConfirmPassword.length);
         
         if (altPassword && altConfirmPassword) {
-          console.log('Using alternative FormData method');
+          // Security: Using alternative FormData method (logging removed)
           // Use alternative values
           if (altPassword !== altConfirmPassword) {
             this.showError('Passwords do not match.');
@@ -601,7 +605,7 @@ class AuthModal {
         return errorMessage;
       }
       
-      console.log('[AUTH MODAL] Translating error message:', errorMessage);
+      // console.log('[AUTH MODAL] Translating error message:', errorMessage);
       
       const response = await fetch('/api/translate-text', {
         method: 'POST',
@@ -615,20 +619,20 @@ class AuthModal {
       });
       
       if (!response.ok) {
-        console.warn('[AUTH MODAL] Translation API failed, using original message');
+        // console.warn('[AUTH MODAL] Translation API failed, using original message');
         return errorMessage;
       }
       
       const data = await response.json();
       
       if (data.success && data.translatedText) {
-        console.log('[AUTH MODAL] Translation successful:', errorMessage, '->', data.translatedText);
+        // console.log('[AUTH MODAL] Translation successful:', errorMessage, '->', data.translatedText);
         return data.translatedText;
       }
       
       return errorMessage;
     } catch (error) {
-      console.warn('[AUTH MODAL] Translation failed, using original message:', error);
+      // console.warn('[AUTH MODAL] Translation failed, using original message:', error);
       return errorMessage;
     }
   }
@@ -748,7 +752,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loginBtn.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      console.log('[AUTH MODAL] Login button clicked');
+      // console.log('[AUTH MODAL] Login button clicked');
       if (window.authModal) {
         window.authModal.showLogin();
         window.authModal.show();
@@ -762,7 +766,7 @@ document.addEventListener('DOMContentLoaded', () => {
     signupBtn.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      console.log('[AUTH MODAL] Signup button clicked');
+      // console.log('[AUTH MODAL] Signup button clicked');
       if (window.authModal) {
         window.authModal.showRegister();
         window.authModal.show();
@@ -771,4 +775,4 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-console.log('[AUTH MODAL] Authentication modal initialized');
+// console.log('[AUTH MODAL] Authentication modal initialized');

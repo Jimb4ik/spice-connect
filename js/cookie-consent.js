@@ -231,19 +231,19 @@ class CookieConsent {
 
     loadAnalyticsCookies() {
         // Example: Google Analytics
-        console.log('Loading analytics cookies...');
+        // console.log('Loading analytics cookies...');
         // gtag('config', 'GA_MEASUREMENT_ID');
     }
 
     loadMarketingCookies() {
         // Example: Facebook Pixel
-        console.log('Loading marketing cookies...');
+        // console.log('Loading marketing cookies...');
         // fbq('init', 'FACEBOOK_PIXEL_ID');
     }
 
     loadPreferenceCookies() {
         // Example: Language preferences, theme preferences
-        console.log('Loading preference cookies...');
+        // console.log('Loading preference cookies...');
     }
 
     // Method to show cookie settings (can be called from footer link)

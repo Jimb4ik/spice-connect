@@ -15,7 +15,7 @@ class WalletManager {
     }
     
     async init() {
-        console.log('[WALLET] Initializing wallet manager...');
+        // console.log('[WALLET] Initializing wallet manager...');
         
         // Check authentication
         if (!window.authManager || !window.authManager.isLoggedIn) {
@@ -28,11 +28,13 @@ class WalletManager {
         this.sessionId = window.authManager.sessionId;
         
         if (!this.userId || !this.sessionId) {
-            console.error('[WALLET] No user ID or session ID');
+            // Security: Sensitive IDs not logged
+            console.error('[WALLET] Authentication required');
             return;
         }
         
-        console.log('[WALLET] User ID:', this.userId, 'Session ID:', this.sessionId);
+        // Security: User/Session ID logging removed
+        // console.log('[WALLET] User ID:', this.userId, 'Session ID:', this.sessionId);
         
         // Load wallet data
         await this.loadWalletData();
@@ -56,7 +58,7 @@ class WalletManager {
                 }
             }
         } catch (error) {
-            console.warn('[WALLET] Could not preload email:', error);
+            // console.warn('[WALLET] Could not preload email:', error);
         }
     }
     
@@ -67,22 +69,24 @@ class WalletManager {
     async getCurrentUserEmail() {
         // Return cached email if available
         if (this.userEmail) {
-            console.log('[WALLET] Using cached email:', this.userEmail);
+            // Security: Email logging removed
+            // console.log('[WALLET] Using cached email:', this.userEmail);
             return this.userEmail;
         }
         
         try {
-            console.log('[WALLET] Fetching user email via AuthManager...');
+            // console.log('[WALLET] Fetching user email via AuthManager...');
             
             // Use AuthManager to get email
             const email = await window.authManager.getCurrentUserEmail();
             
             if (email) {
                 this.userEmail = email; // Cache the email
-                console.log('[WALLET] User email retrieved and cached:', email);
+                // Security: Email logging removed
+                // console.log('[WALLET] User email retrieved and cached:', email);
                 return email;
             } else {
-                console.warn('[WALLET] No email found in user profile');
+                // console.warn('[WALLET] No email found in user profile');
                 return null;
             }
         } catch (error) {
@@ -93,7 +97,7 @@ class WalletManager {
     
     async loadWalletData() {
         try {
-            console.log('[WALLET] Loading wallet data...');
+            // console.log('[WALLET] Loading wallet data...');
             
             const response = await fetch('/api/wallet-transactions', {
                 method: 'POST',
@@ -106,7 +110,7 @@ class WalletManager {
             });
             
             const result = await response.json();
-            console.log('[WALLET] Wallet data response:', result);
+            // console.log('[WALLET] Wallet data response:', result);
             
             if (result.success && result.data) {
                 this.currentWallet = result.data;
@@ -123,7 +127,7 @@ class WalletManager {
     
     async loadRecentTransactions(limit = 5) {
         try {
-            console.log('[WALLET] Loading recent transactions...');
+            // console.log('[WALLET] Loading recent transactions...');
             
             const response = await fetch('/api/wallet-transactions', {
                 method: 'POST',
@@ -137,7 +141,7 @@ class WalletManager {
             });
             
             const result = await response.json();
-            console.log('[WALLET] Transactions response:', result);
+            // console.log('[WALLET] Transactions response:', result);
             
             if (result.success && result.data) {
                 this.displayTransactions(result.data);
@@ -417,7 +421,7 @@ class WalletManager {
                 user_agent: navigator.userAgent
             };
             
-            console.log('[WALLET] Saving user consent:', consentData);
+            // console.log('[WALLET] Saving user consent:', consentData);
             
             const response = await fetch('/api/database', {
                 method: 'POST',
@@ -430,7 +434,7 @@ class WalletManager {
             const result = await response.json();
             
             if (result.success) {
-                console.log('[WALLET] User consent saved successfully');
+                // console.log('[WALLET] User consent saved successfully');
                 return true;
             } else {
                 console.error('[WALLET] Error saving consent:', result.error);
@@ -444,7 +448,7 @@ class WalletManager {
     
     async addTransaction(type, amount, description, paymentMethod = null, paymentReference = null) {
         try {
-            console.log('[WALLET] Adding transaction:', { type, amount, description });
+            // console.log('[WALLET] Adding transaction:', { type, amount, description });
             
             const response = await fetch('/api/database', {
                 method: 'POST',
@@ -461,7 +465,7 @@ class WalletManager {
             });
             
             const result = await response.json();
-            console.log('[WALLET] Transaction result:', result);
+            // console.log('[WALLET] Transaction result:', result);
             
             if (result.success) {
                 // Update displayed balance
@@ -485,7 +489,7 @@ class WalletManager {
     
     async initializePayment(amount, currency, credits) {
         try {
-            console.log('[WALLET] Initializing payment...', { amount, currency, credits });
+            // console.log('[WALLET] Initializing payment...', { amount, currency, credits });
             
             // Получаем email пользователя из API
             const userEmail = await this.getCurrentUserEmail();
@@ -520,13 +524,14 @@ class WalletManager {
             const result = await response.json();
             
             if (result.success) {
-                console.log('[WALLET] Payment token created:', result.data.token);
+                // console.log('[WALLET] Payment token created:', result.data.token);
                 
                 // Перенаправляем на платежную страницу
                 window.location.href = result.data.payment_url;
                 
             } else {
-                console.error('[WALLET] Error creating payment token:', result.error);
+                // Security: Error details not logged
+                console.error('[WALLET] Payment initialization failed');
                 this.showErrorMessage('Failed to initialize payment: ' + result.error);
             }
             
@@ -715,7 +720,7 @@ async function openTopUpModal(amount = null, credits = null) {
                     }
                 }
             } catch (error) {
-                console.warn('[WALLET] Could not preload email in modal:', error);
+                // console.warn('[WALLET] Could not preload email in modal:', error);
             }
         }
     }
@@ -897,4 +902,4 @@ function logout() {
     }
 }
 
-console.log('[WALLET] Wallet.js loaded');
+// console.log('[WALLET] Wallet.js loaded');

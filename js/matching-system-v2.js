@@ -55,7 +55,7 @@ class MatchingSystemV2 {
   }
 
   async init() {
-    console.log('[MATCHING-V2] Initializing new matching system...');
+    // console.log('[MATCHING-V2] Initializing new matching system...');
     
     // Получаем данные пользователя
     this.userId = this.getUserId();
@@ -66,7 +66,7 @@ class MatchingSystemV2 {
       return;
     }
     
-    console.log('[MATCHING-V2] User ID:', this.userId, 'Session ID:', this.sessionId);
+    // console.log('[MATCHING-V2] User ID:', this.userId, 'Session ID:', this.sessionId);
     
     // Инициализируем базу данных
     await this.initDatabase();
@@ -86,7 +86,7 @@ class MatchingSystemV2 {
 
   async initDatabase() {
     try {
-      console.log('[MATCHING-V2] Initializing database...');
+      // console.log('[MATCHING-V2] Initializing database...');
       const response = await fetch('/api/database', {
         method: 'POST',
         headers: {
@@ -97,7 +97,7 @@ class MatchingSystemV2 {
       
       const result = await response.json();
       if (result.success) {
-        console.log('[MATCHING-V2] Database initialized successfully');
+        // console.log('[MATCHING-V2] Database initialized successfully');
       } else {
         console.error('[MATCHING-V2] Database initialization failed:', result.error);
       }
@@ -108,7 +108,7 @@ class MatchingSystemV2 {
 
   async loadUserProgress() {
     try {
-      console.log('[MATCHING-V2] Loading user progress...');
+      // console.log('[MATCHING-V2] Loading user progress...');
       const response = await fetch('/api/database?action=get_progress&user_id=' + this.userId + '&session_id=' + this.sessionId);
       const result = await response.json();
       
@@ -118,7 +118,7 @@ class MatchingSystemV2 {
         this.profilesPerPage = progress.profiles_per_page || 30;
         this.currentProfileIndex = progress.last_profile_index || 0;
         
-        console.log('[MATCHING-V2] Progress loaded:', {
+        // console.log('[MATCHING-V2] Progress loaded:', {
           currentPage: this.currentPage,
           profilesPerPage: this.profilesPerPage,
           lastProfileIndex: this.currentProfileIndex,
@@ -149,7 +149,7 @@ class MatchingSystemV2 {
       
       const result = await response.json();
       if (result.success) {
-        console.log('[MATCHING-V2] Progress saved successfully');
+        // console.log('[MATCHING-V2] Progress saved successfully');
       }
     } catch (error) {
       console.error('[MATCHING-V2] Error saving progress:', error);
@@ -185,23 +185,23 @@ class MatchingSystemV2 {
   }
 
   async loadInitialData() {
-    console.log('[MATCHING-V2] Loading initial data...');
+    // console.log('[MATCHING-V2] Loading initial data...');
     await this.loadTinderProfiles();
   }
 
   async loadTinderProfiles(forceReload = false) {
     if (this.isLoadingProfiles && !forceReload) {
-      console.log('[MATCHING-V2] Already loading profiles, skipping...');
+      // console.log('[MATCHING-V2] Already loading profiles, skipping...');
       return;
     }
 
     if (!this.hasMoreProfiles && !forceReload) {
-      console.log('[MATCHING-V2] No more profiles available');
+      // console.log('[MATCHING-V2] No more profiles available');
       return;
     }
 
     this.isLoadingProfiles = true;
-    console.log(`[MATCHING-V2] Loading profiles from page ${this.currentPage}...`);
+    // console.log(`[MATCHING-V2] Loading profiles from page ${this.currentPage}...`);
     this.showTinderLoading(true);
 
     try {
@@ -222,7 +222,7 @@ class MatchingSystemV2 {
       });
 
       const data = await response.json();
-      console.log('[MATCHING-V2] Search API response:', data);
+      // console.log('[MATCHING-V2] Search API response:', data);
 
       let profiles = [];
       
@@ -237,11 +237,11 @@ class MatchingSystemV2 {
         }
       }
 
-      console.log(`[MATCHING-V2] Loaded ${profiles.length} profiles from page ${this.currentPage}`);
+      // console.log(`[MATCHING-V2] Loaded ${profiles.length} profiles from page ${this.currentPage}`);
 
       if (profiles.length === 0) {
         this.hasMoreProfiles = false;
-        console.log('[MATCHING-V2] No more profiles available');
+        // console.log('[MATCHING-V2] No more profiles available');
         
         if (this.tinderProfiles.length === 0) {
           this.showNoProfiles();
@@ -258,12 +258,12 @@ class MatchingSystemV2 {
         return !viewedIds.has(profileId);
       });
 
-      console.log(`[MATCHING-V2] After filtering: ${newProfiles.length} new profiles (${profiles.length - newProfiles.length} already viewed)`);
+      // console.log(`[MATCHING-V2] After filtering: ${newProfiles.length} new profiles (${profiles.length - newProfiles.length} already viewed)`);
 
       if (newProfiles.length > 0) {
         // Добавляем новые профили к буферу
         this.tinderProfiles.push(...newProfiles);
-        console.log(`[MATCHING-V2] Buffer now contains ${this.tinderProfiles.length} profiles`);
+        // console.log(`[MATCHING-V2] Buffer now contains ${this.tinderProfiles.length} profiles`);
         
         // Если это первая загрузка, показываем профиль
         if (this.currentProfileIndex === 0 && this.tinderProfiles.length > 0) {
@@ -316,13 +316,13 @@ class MatchingSystemV2 {
 
   async saveMatch(profileData) {
     try {
-      console.log('[MATCHING-V2] Saving match via MatchUtils...');
+      // console.log('[MATCHING-V2] Saving match via MatchUtils...');
       
       // Используем общую функцию из match-utils.js
       const success = await window.MatchUtils.saveMatchToDatabase(profileData, this.userId);
       
       if (success) {
-        console.log('[MATCHING-V2] Match saved successfully');
+        // console.log('[MATCHING-V2] Match saved successfully');
         this.stats.totalMatches++;
         this.updateStats();
       } else {
@@ -338,7 +338,7 @@ class MatchingSystemV2 {
     if (!currentProfile) return;
 
     const profileId = currentProfile.id || currentProfile.id_membre;
-    console.log('[MATCHING-V2] Liking profile:', profileId);
+    // console.log('[MATCHING-V2] Liking profile:', profileId);
 
     // Отмечаем как лайкнутый в базе данных
     await this.markProfileAsViewed(profileId, 'like');
@@ -360,11 +360,11 @@ class MatchingSystemV2 {
       });
 
       const data = await response.json();
-      console.log('[MATCHING-V2] Like response:', data);
+      // console.log('[MATCHING-V2] Like response:', data);
 
       // Проверяем на матч
       if (data.result === 'match') {
-        console.log('🎉 IT\'S A MATCH!');
+        // console.log('🎉 IT\'S A MATCH!');
         await this.saveMatch(currentProfile);
         this.showMatchModal(currentProfile);
       }
@@ -386,7 +386,7 @@ class MatchingSystemV2 {
     if (!currentProfile) return;
 
     const profileId = currentProfile.id || currentProfile.id_membre;
-    console.log('[MATCHING-V2] Disliking profile:', profileId);
+    // console.log('[MATCHING-V2] Disliking profile:', profileId);
 
     // Отмечаем как дизлайкнутый в базе данных
     await this.markProfileAsViewed(profileId, 'dislike');
@@ -424,7 +424,7 @@ class MatchingSystemV2 {
     // Проверяем, нужно ли загрузить больше профилей
     const remainingProfiles = this.tinderProfiles.length - this.currentProfileIndex;
     if (remainingProfiles <= this.preloadThreshold && this.hasMoreProfiles && !this.isLoadingProfiles) {
-      console.log(`[MATCHING-V2] ${remainingProfiles} profiles remaining, loading more...`);
+      // console.log(`[MATCHING-V2] ${remainingProfiles} profiles remaining, loading more...`);
       this.loadTinderProfiles();
     }
 
@@ -615,7 +615,7 @@ class MatchingSystemV2 {
   }
 
   switchMode(mode) {
-    console.log('[MATCHING-V2] Switching to mode:', mode);
+    // console.log('[MATCHING-V2] Switching to mode:', mode);
     this.currentMode = mode;
     
     // Обновляем активные табы
@@ -734,17 +734,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const initMatching = () => {
     if (window.authManager) {
       if (typeof window.authManager.isAuthenticated === 'function' && window.authManager.isAuthenticated()) {
-        console.log('[MATCHING-V2] Initializing new matching system...');
+        // console.log('[MATCHING-V2] Initializing new matching system...');
         window.matchingSystem = new MatchingSystemV2();
       } else if (window.authManager.isLoggedIn && window.authManager.sessionId) {
-        console.log('[MATCHING-V2] Initializing new matching system (fallback check)...');
+        // console.log('[MATCHING-V2] Initializing new matching system (fallback check)...');
         window.matchingSystem = new MatchingSystemV2();
       } else {
-        console.log('[MATCHING-V2] User not authenticated, retrying...');
+        // console.log('[MATCHING-V2] User not authenticated, retrying...');
         setTimeout(initMatching, 1000);
       }
     } else {
-      console.log('[MATCHING-V2] AuthManager not ready, retrying...');
+      // console.log('[MATCHING-V2] AuthManager not ready, retrying...');
       setTimeout(initMatching, 500);
     }
   };

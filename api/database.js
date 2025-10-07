@@ -13,7 +13,7 @@ module.exports = async function handler(req, res) {
     // Перенаправляем ТОЛЬКО запросы кошелька на отдельный API
     const { action } = req.method === 'GET' ? req.query : req.body;
     
-    console.log('[DATABASE] Processing action:', action);
+    // console.log('[DATABASE] Processing action:', action);
     
     // ТОЛЬКО для кошелька используем отдельный API
     if (action === 'get_wallet' || action === 'get_wallet_transactions' || action === 'add_transaction') {
@@ -338,11 +338,11 @@ async function initGiftsCatalog(pool) {
         // Проверяем, есть ли уже подарки в каталоге
         const existingGifts = await pool.query('SELECT COUNT(*) FROM gifts');
         if (parseInt(existingGifts.rows[0].count) > 0) {
-            console.log('[DB] Gifts catalog already initialized');
+            // console.log('[DB] Gifts catalog already initialized');
             return;
         }
 
-        console.log('[DB] Initializing gifts catalog...');
+        // console.log('[DB] Initializing gifts catalog...');
 
         const gifts = [
             // Budget gifts (5-50 credits)
@@ -383,7 +383,7 @@ async function initGiftsCatalog(pool) {
             );
         }
 
-        console.log('[DB] Gifts catalog initialized with', gifts.length, 'items');
+        // console.log('[DB] Gifts catalog initialized with', gifts.length, 'items');
     } catch (error) {
         console.error('[DB] Error initializing gifts catalog:', error);
     }
@@ -490,7 +490,7 @@ async function getViewedProfiles(pool, req) {
         
         // Если таблица не существует, возвращаем пустой результат
         if (error.code === '42P01') { // relation does not exist
-            console.log('[DB] viewed_profiles table does not exist, returning empty result');
+            // console.log('[DB] viewed_profiles table does not exist, returning empty result');
             return {
                 success: true,
                 data: [],
@@ -578,7 +578,7 @@ async function getMatches(pool, req) {
         query += ' ORDER BY match_date DESC LIMIT $2 OFFSET $3';
         params.push(parseInt(limit), parseInt(offset));
 
-        console.log('[DB] Getting matches for user:', user_id, 'query:', query);
+        // console.log('[DB] Getting matches for user:', user_id, 'query:', query);
         const result = await pool.query(query, params);
         
         let countQuery = 'SELECT COUNT(*) FROM matches WHERE user_id = $1';
@@ -590,7 +590,7 @@ async function getMatches(pool, req) {
         
         const countResult = await pool.query(countQuery, countParams);
         
-        console.log('[DB] Found', result.rows.length, 'matches for user', user_id);
+        // console.log('[DB] Found', result.rows.length, 'matches for user', user_id);
         
         return {
             success: true,
@@ -605,7 +605,7 @@ async function getMatches(pool, req) {
         
         // Если таблица не существует, возвращаем пустой результат
         if (error.code === '42P01') { // relation does not exist
-            console.log('[DB] matches table does not exist, returning empty result');
+            // console.log('[DB] matches table does not exist, returning empty result');
             return {
                 success: true,
                 data: [],
@@ -641,7 +641,7 @@ async function saveMatch(pool, req) {
     }
 
     try {
-        console.log('[DB] Saving match (WITHOUT PHOTOS):', { user_id, matched_user_id, matched_user_name, matched_user_age, matched_user_city });
+        // console.log('[DB] Saving match (WITHOUT PHOTOS):', { user_id, matched_user_id, matched_user_name, matched_user_age, matched_user_city });
 
         const result = await pool.query(
             `INSERT INTO matches (
@@ -659,7 +659,7 @@ async function saveMatch(pool, req) {
             [user_id, matched_user_id, matched_user_name, matched_user_age, matched_user_city, null]
         );
 
-        console.log('[DB] Match saved successfully:', result.rows[0]);
+        // console.log('[DB] Match saved successfully:', result.rows[0]);
 
         return {
             success: true,
@@ -826,17 +826,17 @@ async function addWalletTransaction(pool, req) {
         let walletResult;
         
         if (user_id) {
-            console.log('[DB] Looking for wallet by user_id:', user_id);
+            // console.log('[DB] Looking for wallet by user_id:', user_id);
             walletResult = await pool.query(
                 'SELECT * FROM user_wallets WHERE user_id = $1',
                 [user_id]
             );
-            console.log('[DB] Wallet search result for user_id', user_id, ':', walletResult.rows.length > 0 ? 'found' : 'not found');
+            // console.log('[DB] Wallet search result for user_id', user_id, ':', walletResult.rows.length > 0 ? 'found' : 'not found');
         }
         
         // Если не найден по user_id или user_id не передан, ищем по session_id
         if ((!walletResult || walletResult.rows.length === 0) && session_id) {
-            console.log('[DB] Fallback: searching wallet by session_id:', session_id);
+            // console.log('[DB] Fallback: searching wallet by session_id:', session_id);
             walletResult = await pool.query(
                 'SELECT * FROM user_wallets WHERE session_id = $1',
                 [session_id]
@@ -844,7 +844,7 @@ async function addWalletTransaction(pool, req) {
         }
 
         if (!walletResult || walletResult.rows.length === 0) {
-            console.log('[DB] Wallet not found, creating new wallet for user_id:', user_id, 'session_id:', session_id);
+            // console.log('[DB] Wallet not found, creating new wallet for user_id:', user_id, 'session_id:', session_id);
             
             // Создаем новый кошелек если не найден
             if (session_id) {
@@ -857,7 +857,7 @@ async function addWalletTransaction(pool, req) {
                 
                 if (createWalletResult.rows.length > 0) {
                     walletResult = createWalletResult;
-                    console.log('[DB] New wallet created:', createWalletResult.rows[0]);
+                    // console.log('[DB] New wallet created:', createWalletResult.rows[0]);
                 } else {
                     console.error('[DB] Failed to create wallet');
                     return {
@@ -879,7 +879,7 @@ async function addWalletTransaction(pool, req) {
         const creditsAmount = credits ? parseFloat(credits) : transactionAmount; // Кредиты для баланса
         const effectiveUserId = user_id || wallet.user_id; // Используем переданный user_id или из кошелька
 
-        console.log('[DB] Adding transaction:', {
+        // console.log('[DB] Adding transaction:', {
             wallet_id: wallet.id,
             user_id: effectiveUserId,
             transaction_type,
@@ -913,7 +913,7 @@ async function addWalletTransaction(pool, req) {
             [newBalance, wallet.id]
         );
 
-        console.log('[DB] Transaction completed successfully:', {
+        // console.log('[DB] Transaction completed successfully:', {
             transaction_id: transactionResult.rows[0].id,
             old_balance: wallet.balance,
             new_balance: newBalance,
@@ -1096,7 +1096,7 @@ async function saveUserConsent(pool, req) {
             ]
         );
 
-        console.log('[DB] User consent saved:', result.rows[0]);
+        // console.log('[DB] User consent saved:', result.rows[0]);
 
         return {
             success: true,
@@ -1198,7 +1198,7 @@ async function purchaseGift(pool, req) {
                 [gift.price_credits, wallet.id]
             );
         } else {
-            console.log('[DB] System gift - skipping wallet check and credit deduction');
+            // console.log('[DB] System gift - skipping wallet check and credit deduction');
         }
 
         // Создаем запись о подарке

@@ -234,10 +234,10 @@
                     formData.append('force_pays', country);
                 }
 
-                console.log('🚀 Отправляем запрос к Spice API...');
-                console.log('URL:', baseUrl);
-                console.log('API Key:', apiKey);
-                console.log('Country:', country || 'Все страны');
+                // console.log('🚀 Отправляем запрос к Spice API...');
+                // console.log('URL:', baseUrl);
+                // console.log('API Key:', apiKey);
+                // console.log('Country:', country || 'Все страны');
 
                 // Выполняем POST запрос
                 const response = await fetch(baseUrl, {
@@ -245,10 +245,10 @@
                     body: formData
                 });
 
-                console.log('📋 Статус ответа:', response.status);
+                // console.log('📋 Статус ответа:', response.status);
                 
                 const data = await response.json();
-                console.log('📋 Данные ответа:', data);
+                // console.log('📋 Данные ответа:', data);
 
                 if (response.ok) {
                     displayProfiles(data);

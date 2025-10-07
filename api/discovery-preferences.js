@@ -80,8 +80,8 @@ async function saveDiscoveryPreferences(req, res, BASE_URL, API_KEY) {
     
     const apiUrl = `${BASE_URL}/index_api/user/modify/wanttomeet?${queryParams}`;
     
-    console.log('[DISCOVERY-PREFERENCES] Saving preferences to:', apiUrl.replace(API_KEY, 'HIDDEN_KEY'));
-    console.log('[DISCOVERY-PREFERENCES] Parameters:', { cherche1, with_age, pour });
+    // console.log('[DISCOVERY-PREFERENCES] Saving preferences to:', apiUrl.replace(API_KEY, 'HIDDEN_KEY'));
+    // console.log('[DISCOVERY-PREFERENCES] Parameters:', { cherche1, with_age, pour });
 
     const response = await fetch(apiUrl, {
         method: 'POST',
@@ -93,7 +93,7 @@ async function saveDiscoveryPreferences(req, res, BASE_URL, API_KEY) {
 
     const data = await response.json();
     
-    console.log('[DISCOVERY-PREFERENCES] Save response:', data);
+    // console.log('[DISCOVERY-PREFERENCES] Save response:', data);
 
     const isSuccess = response.ok && (data.result === 'success' || data.success === true);
     
@@ -125,7 +125,7 @@ async function loadDiscoveryPreferences(req, res, BASE_URL, API_KEY) {
     
     const apiUrl = `${BASE_URL}/index_api/user?${queryParams}`;
     
-    console.log('[DISCOVERY-PREFERENCES] Loading preferences from:', apiUrl.replace(API_KEY, 'HIDDEN_KEY'));
+    // console.log('[DISCOVERY-PREFERENCES] Loading preferences from:', apiUrl.replace(API_KEY, 'HIDDEN_KEY'));
 
     const response = await fetch(apiUrl, {
         method: 'POST',
@@ -137,7 +137,7 @@ async function loadDiscoveryPreferences(req, res, BASE_URL, API_KEY) {
 
     const data = await response.json();
     
-    console.log('[DISCOVERY-PREFERENCES] Load response:', data);
+    // console.log('[DISCOVERY-PREFERENCES] Load response:', data);
 
     const isSuccess = response.ok && data.connected === 1 && data.result;
     

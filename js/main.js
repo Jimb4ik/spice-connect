@@ -9,11 +9,11 @@ class MainDashboard {
         this.currentUser = null;
         this.refreshInterval = null;
         
-        console.log('[MAIN] MainDashboard initialized');
+        // console.log('[MAIN] MainDashboard initialized');
     }
 
     async init() {
-        console.log('[MAIN] Initializing MainDashboard...');
+        // console.log('[MAIN] Initializing MainDashboard...');
         
         // Check authentication
         if (!window.authManager || !window.authManager.isLoggedIn) {
@@ -30,7 +30,8 @@ class MainDashboard {
             return;
         }
 
-        console.log('[MAIN] Session ID:', this.sessionId);
+        // Security: Session ID logging removed
+        // console.log('[MAIN] Session ID:', this.sessionId);
         
         // Initialize all sections
         await this.loadAllSections();
@@ -41,11 +42,11 @@ class MainDashboard {
         // Set up auto-refresh for online status
         this.startAutoRefresh();
         
-        console.log('[MAIN] MainDashboard initialization complete');
+        // console.log('[MAIN] MainDashboard initialization complete');
     }
 
     async loadAllSections() {
-        console.log('[MAIN] Loading all sections...');
+        // console.log('[MAIN] Loading all sections...');
         
         // Load sections in parallel for better performance
                     const promises = [
@@ -60,21 +61,21 @@ class MainDashboard {
 
         try {
             await Promise.allSettled(promises);
-            console.log('[MAIN] All sections loaded');
+            // console.log('[MAIN] All sections loaded');
         } catch (error) {
             console.error('[MAIN] Error loading sections:', error);
         }
     }
 
     async loadQuickStats() {
-        console.log('[MAIN] Loading quick stats...');
+        // console.log('[MAIN] Loading quick stats...');
         
         try {
             // Get online status and message count
             const onlineResponse = await fetch(`/api/spice-multi-test?endpoint=/ajax_api/online&method=GET&session_id=${this.sessionId}`);
             const onlineData = await onlineResponse.json();
             
-            console.log('[MAIN] Online API response:', onlineData);
+            // console.log('[MAIN] Online API response:', onlineData);
             
             if (onlineData.success && onlineData.data?.result) {
                 const result = onlineData.data.result;
@@ -110,7 +111,7 @@ class MainDashboard {
     }
 
     async loadActivityFeed() {
-        console.log('[MAIN] Loading enhanced activity feed...');
+        // console.log('[MAIN] Loading enhanced activity feed...');
         
         try {
             // Загружаем все источники данных
@@ -123,9 +124,9 @@ class MainDashboard {
             
             const wallData = await wallResponse.json();
             const activitiesData = await activitiesResponse.json();
-            console.log('[MAIN] Wall API response:', wallData);
-            console.log('[MAIN] Activities API response:', activitiesData);
-            console.log('[MAIN] Recent matches:', matches);
+            // console.log('[MAIN] Wall API response:', wallData);
+            // console.log('[MAIN] Activities API response:', activitiesData);
+            // console.log('[MAIN] Recent matches:', matches);
             
             const feedContainer = document.getElementById('activityFeed');
             
@@ -250,7 +251,7 @@ class MainDashboard {
 
     // Загружаем фотографии для пользователей из wall активностей
     async loadPhotosForWallActivities(activities) {
-        console.log('[MAIN] Loading photos for wall activities...');
+        // console.log('[MAIN] Loading photos for wall activities...');
         
         // Группируем активности по user ID чтобы не загружать фото одного пользователя несколько раз
         const userIds = [...new Set(activities.map(activity => activity.id).filter(id => id))];
@@ -266,22 +267,22 @@ class MainDashboard {
                     const response = await fetch(`/api/spice-multi-test?endpoint=/index_api/user&method=POST&session_id=${this.sessionId}&id=${userId}&get_picture_430=1`);
                     const data = await response.json();
                     
-                    console.log(`[MAIN] Photo API response for user ${userId}:`, data);
+                    // console.log(`[MAIN] Photo API response for user ${userId}:`, data);
                     
                     if (data.success && data.data?.result) {
                         const user = data.data.result;
                         const photoUrl = this.getPhotoUrl(user);
                         if (photoUrl) {
                             photoCache[userId] = photoUrl;
-                            console.log(`[MAIN] ✅ Loaded photo for user ${userId}:`, photoUrl);
+                            // console.log(`[MAIN] ✅ Loaded photo for user ${userId}:`, photoUrl);
                         } else {
-                            console.log(`[MAIN] ❌ No photo found for user ${userId}`);
+                            // console.log(`[MAIN] ❌ No photo found for user ${userId}`);
                         }
                     } else {
-                        console.log(`[MAIN] ❌ API failed for user ${userId}:`, data);
+                        // console.log(`[MAIN] ❌ API failed for user ${userId}:`, data);
                     }
                 } catch (error) {
-                    console.warn(`[MAIN] Failed to load photo for user ${userId}:`, error);
+                    // console.warn(`[MAIN] Failed to load photo for user ${userId}:`, error);
                 }
             });
             
@@ -295,7 +296,7 @@ class MainDashboard {
             }
         });
         
-        console.log('[MAIN] Photo loading completed. Cache:', photoCache);
+        // console.log('[MAIN] Photo loading completed. Cache:', photoCache);
     }
 
     // Получаем URL фотографии из различных источников
@@ -535,13 +536,13 @@ class MainDashboard {
     }
 
     async loadTopMembers(gender = 2) {
-        console.log('[MAIN] Loading top members for gender:', gender);
+        // console.log('[MAIN] Loading top members for gender:', gender);
         
         try {
             const response = await fetch(`/api/spice-multi-test?endpoint=/index_api/topmembers&method=POST&session_id=${this.sessionId}&sex=${gender}&age_range=18-65&page=0&is_photo=1`);
             const data = await response.json();
             
-            console.log('[MAIN] Top members API response:', data);
+            // console.log('[MAIN] Top members API response:', data);
             
             const listContainer = document.getElementById('topMembersList');
             
@@ -590,14 +591,14 @@ class MainDashboard {
     }
 
     async loadOnlineFriends() {
-        console.log('[MAIN] Loading friends list...');
+        // console.log('[MAIN] Loading friends list...');
         
         try {
             // Load friends list using load_contacts API with filter=3 (friends)
             const response = await fetch(`/api/spice-multi-test?endpoint=/ajax_api/load_contacts&method=GET&session_id=${this.sessionId}&filter=3`);
             const data = await response.json();
             
-            console.log('[MAIN] Friends API response:', data);
+            // console.log('[MAIN] Friends API response:', data);
             
             const listContainer = document.getElementById('onlineFriendsList');
             
@@ -675,14 +676,14 @@ class MainDashboard {
     }
 
     async loadRecentVisitors() {
-        console.log('[MAIN] Loading recent visitors...');
+        // console.log('[MAIN] Loading recent visitors...');
         
         try {
             // Use proper visits API to get real visitors
             const response = await fetch(`/api/spice-multi-test?endpoint=/index_api/guest/get/visites&method=POST&session_id=${this.sessionId}&page=0`);
             const data = await response.json();
             
-            console.log('[MAIN] Recent visitors API response:', data);
+            // console.log('[MAIN] Recent visitors API response:', data);
             
             const listContainer = document.getElementById('visitorsList');
             
@@ -697,7 +698,7 @@ class MainDashboard {
                 });
                 
                 if (visitors.length === 0) {
-                    console.log('[MAIN] No visitors from API, using fallback search');
+                    // console.log('[MAIN] No visitors from API, using fallback search');
                     await this.loadRecentVisitorsFallback();
                     return;
                 }
@@ -725,7 +726,7 @@ class MainDashboard {
                 listContainer.innerHTML = visitorsHTML;
                 
             } else {
-                console.log('[MAIN] No visitors from API, using fallback search');
+                // console.log('[MAIN] No visitors from API, using fallback search');
                 await this.loadRecentVisitorsFallback();
             }
             
@@ -782,14 +783,14 @@ class MainDashboard {
     }
 
     async loadPhotoVotes() {
-        console.log('[MAIN] Loading photo votes...');
+        // console.log('[MAIN] Loading photo votes...');
         
         try {
             // Get user's photos
             const response = await fetch(`/api/spice-multi-test?endpoint=/index_api/user_edit_photos&method=POST&session_id=${this.sessionId}`);
             const data = await response.json();
             
-            console.log('[MAIN] Photo votes API response:', data);
+            // console.log('[MAIN] Photo votes API response:', data);
             
             const listContainer = document.getElementById('photoVotesList');
             
@@ -837,7 +838,7 @@ class MainDashboard {
     }
 
     setupEventListeners() {
-        console.log('[MAIN] Setting up event listeners...');
+        // console.log('[MAIN] Setting up event listeners...');
         
         // Refresh activity button
         const refreshBtn = document.getElementById('refreshActivityBtn');
@@ -878,14 +879,14 @@ class MainDashboard {
             this.loadQuickStats();
         }, 30000);
         
-        console.log('[MAIN] Auto-refresh started');
+        // console.log('[MAIN] Auto-refresh started');
     }
 
     stopAutoRefresh() {
         if (this.refreshInterval) {
             clearInterval(this.refreshInterval);
             this.refreshInterval = null;
-            console.log('[MAIN] Auto-refresh stopped');
+            // console.log('[MAIN] Auto-refresh stopped');
         }
     }
 
@@ -893,12 +894,12 @@ class MainDashboard {
     getPhotoUrl(user) {
         let photoUrl = null;
         
-        console.log('[MAIN] Getting photo URL for user:', user);
+        // console.log('[MAIN] Getting photo URL for user:', user);
         
         // Try various photo field formats from different API endpoints
         // Приоритет: photos_v2 (высокое качество) > photos > другие поля
         if (user.photos_v2) {
-            console.log('[MAIN] Found photos_v2:', user.photos_v2);
+            // console.log('[MAIN] Found photos_v2:', user.photos_v2);
             
             if (user.photos_v2.public && typeof user.photos_v2.public === 'object') {
                 const publicPhotos = user.photos_v2.public;
@@ -906,13 +907,13 @@ class MainDashboard {
                 if (firstPhotoKey && publicPhotos[firstPhotoKey]) {
                     const photo = publicPhotos[firstPhotoKey];
                     photoUrl = photo.sq_430 || photo.normal || photo.sq_middle || photo.url_big;
-                    console.log('[MAIN] Using photos_v2.public photo:', photoUrl);
+                    // console.log('[MAIN] Using photos_v2.public photo:', photoUrl);
                 }
             } else if (Array.isArray(user.photos_v2) && user.photos_v2.length > 0) {
                 // Ищем главную фотографию (num === 0) или берем первую
                 const mainPhoto = user.photos_v2.find(p => p.num === 0 || p.is_main === 1) || user.photos_v2[0];
                 photoUrl = mainPhoto.sq_430 || mainPhoto.normal || mainPhoto.sq_middle || mainPhoto.url_big;
-                console.log('[MAIN] Using photos_v2 array photo:', photoUrl);
+                // console.log('[MAIN] Using photos_v2 array photo:', photoUrl);
             }
         } 
         
@@ -920,7 +921,7 @@ class MainDashboard {
         if (!photoUrl && user.photos && Array.isArray(user.photos) && user.photos.length > 0) {
             const firstPhoto = user.photos[0];
             photoUrl = firstPhoto.url_big || firstPhoto.normal || firstPhoto.sq_430 || firstPhoto.sq_middle || firstPhoto.url_middle;
-            console.log('[MAIN] Using photos array photo:', photoUrl);
+            // console.log('[MAIN] Using photos array photo:', photoUrl);
         }
         
         // Fallback к другим полям фотографий
@@ -929,7 +930,7 @@ class MainDashboard {
                       user.photo_profil || user.photo || user.avatar || user.pic || 
                       user.image || user.main_photo;
             if (photoUrl) {
-                console.log('[MAIN] Using fallback photo field:', photoUrl);
+                // console.log('[MAIN] Using fallback photo field:', photoUrl);
             }
         }
         
@@ -942,7 +943,7 @@ class MainDashboard {
             }
         }
         
-        console.log('[MAIN] Final photo URL:', photoUrl);
+        // console.log('[MAIN] Final photo URL:', photoUrl);
         return photoUrl;
     }
 
@@ -1019,14 +1020,14 @@ class MainDashboard {
     // ============ GIFTS NOTIFICATIONS METHODS ============
     
     async loadGiftNotifications() {
-        console.log('[MAIN] Loading gift notifications...');
+        // console.log('[MAIN] Loading gift notifications...');
         // This method is called from loadAllSections but doesn't need separate UI rendering
         // Notifications are integrated into activity feed via loadActivityFeed
     }
 
     async loadGiftNotificationsData() {
         try {
-            console.log('[MAIN] Loading gift notifications data...');
+            // console.log('[MAIN] Loading gift notifications data...');
             
             const response = await fetch('/api/database', {
                 method: 'POST',
@@ -1040,7 +1041,7 @@ class MainDashboard {
             
             const result = await response.json();
             if (result.success) {
-                console.log('[MAIN] Loaded gift notifications:', result.data.length);
+                // console.log('[MAIN] Loaded gift notifications:', result.data.length);
                 return result.data || [];
             } else {
                 console.error('[MAIN] Error loading gift notifications:', result.error);
@@ -1171,16 +1172,16 @@ class MainDashboard {
 
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('[MAIN] DOM loaded, initializing MainDashboard...');
+    // console.log('[MAIN] DOM loaded, initializing MainDashboard...');
     
     // Wait for auth manager to be ready
     function initMainDashboard(attempt = 1, maxAttempts = 20) {
         if (window.authManager && window.authManager.isLoggedIn) {
-            console.log('[MAIN] AuthManager ready, creating MainDashboard instance');
+            // console.log('[MAIN] AuthManager ready, creating MainDashboard instance');
             window.mainDashboard = new MainDashboard();
             window.mainDashboard.init();
         } else if (attempt < maxAttempts) {
-            console.log(`[MAIN] AuthManager not ready, retrying... (${attempt}/${maxAttempts})`);
+            // console.log(`[MAIN] AuthManager not ready, retrying... (${attempt}/${maxAttempts})`);
             setTimeout(() => initMainDashboard(attempt + 1, maxAttempts), 1000);
         } else {
             console.error('[MAIN] Failed to initialize MainDashboard - AuthManager not ready');

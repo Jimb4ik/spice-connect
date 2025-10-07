@@ -30,7 +30,7 @@ export default async function handler(req, res) {
     try {
         const { action, payout_id, user_id, status } = req.body || req.query;
 
-        console.log('[ADMIN-PAYOUTS] Request:', { action, payout_id, user_id, status });
+        // console.log('[ADMIN-PAYOUTS] Request:', { action, payout_id, user_id, status });
 
         if (action === 'get_pending_payouts') {
             // Simply try to query; if tables don't exist, return empty array
@@ -93,7 +93,7 @@ export default async function handler(req, res) {
             });
             } catch (queryError) {
                 // If tables don't exist, return empty array
-                console.log('[ADMIN-PAYOUTS] Tables may not exist yet:', queryError.message);
+                // console.log('[ADMIN-PAYOUTS] Tables may not exist yet:', queryError.message);
                 return res.status(200).json({
                     success: true,
                     data: []
@@ -112,7 +112,7 @@ export default async function handler(req, res) {
                 });
             }
 
-            console.log('[ADMIN-PAYOUTS] Seeding payout users for:', user_ids);
+            // console.log('[ADMIN-PAYOUTS] Seeding payout users for:', user_ids);
 
             try {
                 // 1. Create tables with proper structure from database.js
@@ -150,7 +150,7 @@ export default async function handler(req, res) {
                 `);
 
                 // 2. DON'T clear old data - just add new gifts to existing ones
-                console.log('[ADMIN-PAYOUTS] Adding new demo gifts without clearing existing data...');
+                // console.log('[ADMIN-PAYOUTS] Adding new demo gifts without clearing existing data...');
 
                 // 3. Insert gifts if they don't exist (check first to avoid constraint errors)
                 const realGifts = [
@@ -283,7 +283,7 @@ export default async function handler(req, res) {
                     `, [userId.toString(), numMonetized]);
                 }
 
-                console.log(`[ADMIN-PAYOUTS] Added ${totalGiftsAdded} gifts and ${totalPayoutsAdded} payouts`);
+                // console.log(`[ADMIN-PAYOUTS] Added ${totalGiftsAdded} gifts and ${totalPayoutsAdded} payouts`);
 
                 return res.status(200).json({
                     success: true,
@@ -370,7 +370,7 @@ export default async function handler(req, res) {
                 );
             }
 
-            console.log(`[ADMIN-PAYOUTS] Approved payout for user ${userId}: €${totalEurValue.toFixed(2)} from ${gift_ids.length} gifts`);
+            // console.log(`[ADMIN-PAYOUTS] Approved payout for user ${userId}: €${totalEurValue.toFixed(2)} from ${gift_ids.length} gifts`);
 
             return res.status(200).json({
                 success: true,
@@ -424,7 +424,7 @@ export default async function handler(req, res) {
                 });
             }
 
-            console.log(`[ADMIN-PAYOUTS] Resetting gifts for user ${user_id} to 'received' status...`);
+            // console.log(`[ADMIN-PAYOUTS] Resetting gifts for user ${user_id} to 'received' status...`);
 
             await query(`
                 UPDATE user_gifts 

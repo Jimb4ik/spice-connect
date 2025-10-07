@@ -46,26 +46,28 @@ async function handleWebhook(req, res) {
         const webhookData = req.body;
         const secretKey = process.env.NETWORX_SECRET_KEY;
 
-        console.log('[NETWORX] Webhook received:', {
-            transaction_uid: webhookData.transaction?.uid,
-            status: webhookData.transaction?.status,
-            amount: webhookData.transaction?.amount,
-            currency: webhookData.transaction?.currency,
-            tracking_id: webhookData.transaction?.tracking_id
-        });
+        // Security: Logging removed to prevent payment data leaks
+        // console.log('[NETWORX] Webhook received:', {
+        //     transaction_uid: webhookData.transaction?.uid,
+        //     status: webhookData.transaction?.status,
+        //     amount: webhookData.transaction?.amount,
+        //     currency: webhookData.transaction?.currency,
+        //     tracking_id: webhookData.transaction?.tracking_id
+        // });
         
-        // Детальное логирование для отладки
-        console.log('[NETWORX] Full webhook data:', JSON.stringify(webhookData, null, 2));
+        // Security: Full webhook data logging removed
 
         // Verify webhook signature using Content-Signature header (RSA signature)
         const contentSignature = req.headers['content-signature'];
         
         if (contentSignature) {
-            console.log('[NETWORX] Content-Signature header found:', contentSignature);
+            // Security: Signature logging removed
+            // console.log('[NETWORX] Content-Signature header found:', contentSignature);
             // TODO: Implement RSA signature verification when we have the public key
             // For now, we'll process the webhook without signature verification
         } else {
-            console.log('[NETWORX] No Content-Signature header found, processing webhook anyway');
+            // Security: Logging removed
+            // console.log('[NETWORX] No Content-Signature header found, processing webhook anyway');
         }
 
         // Process payment based on status
@@ -75,7 +77,8 @@ async function handleWebhook(req, res) {
         } else if (webhookData.transaction?.status === 'declined' || webhookData.transaction?.status === 'failed') {
             await processDeclinedPayment(webhookData);
         } else if (webhookData.expired === true) {
-            console.log('[NETWORX] Payment token expired:', webhookData.token);
+            // Security: Token logging removed
+            // console.log('[NETWORX] Payment token expired:', webhookData.token);
         }
 
         return res.status(200).json({
@@ -162,12 +165,13 @@ async function createPaymentToken(req, res) {
             }
         };
 
-        console.log('[NETWORX] Creating payment token:', {
-            orderId,
-            amount: checkoutData.checkout.order.amount,
-            currency,
-            credits
-        });
+        // Security: Payment token logging removed for production
+        // console.log('[NETWORX] Creating payment token:', {
+        //     orderId,
+        //     amount: checkoutData.checkout.order.amount,
+        //     currency,
+        //     credits
+        // });
 
         // Создаем HTTP Basic Auth заголовок согласно документации
         const basicAuth = Buffer.from(`${shopId}:${secretKey}`).toString('base64');
@@ -191,7 +195,8 @@ async function createPaymentToken(req, res) {
             throw new Error(`Networx API error: ${networxResult.message || JSON.stringify(networxResult.errors || {})}`);
         }
 
-        console.log('[NETWORX] Payment token created successfully:', networxResult.checkout.token);
+        // Security: Token logging removed
+        // console.log('[NETWORX] Payment token created successfully:', networxResult.checkout.token);
 
         return res.status(200).json({
             success: true,
@@ -232,7 +237,7 @@ async function verifyPayment(req, res) {
             });
         }
 
-        console.log('[NETWORX] Webhook received:', {
+        // console.log('[NETWORX] Webhook received:', {
             orderId: webhookData.order_id,
             status: webhookData.status,
             amount: webhookData.amount
@@ -275,14 +280,14 @@ async function processSuccessfulPayment(webhookData) {
         // Пытаемся извлечь данные из tracking_id (наш order_id)
         // Формат: credits_USER_ID_TIMESTAMP
         if (transaction.tracking_id) {
-            console.log('[NETWORX] Parsing tracking_id:', transaction.tracking_id);
+            // console.log('[NETWORX] Parsing tracking_id:', transaction.tracking_id);
             const orderIdParts = transaction.tracking_id.split('_');
-            console.log('[NETWORX] Order ID parts:', orderIdParts);
+            // console.log('[NETWORX] Order ID parts:', orderIdParts);
             
             if (orderIdParts.length >= 3 && orderIdParts[0] === 'credits') {
                 // Берем все части между 'credits' и последним timestamp
                 sessionId = orderIdParts.slice(1, -1).join('_');
-                console.log('[NETWORX] Extracted user_id from tracking_id:', sessionId);
+                // console.log('[NETWORX] Extracted user_id from tracking_id:', sessionId);
             }
         }
         
@@ -306,7 +311,7 @@ async function processSuccessfulPayment(webhookData) {
             throw new Error('Cannot extract session_id from webhook data');
         }
 
-        console.log('[NETWORX] Processing successful payment:', {
+        // console.log('[NETWORX] Processing successful payment:', {
             transaction_uid: transaction.uid,
             sessionId,
             credits,
@@ -332,7 +337,7 @@ async function processSuccessfulPayment(webhookData) {
             status: 'completed'
         };
         
-        console.log('[NETWORX] Sending transaction data to database:', transactionData);
+        // console.log('[NETWORX] Sending transaction data to database:', transactionData);
         
         const walletResponse = await fetch(`${baseUrl}/api/wallet-transactions`, {
             method: 'POST',
@@ -344,14 +349,14 @@ async function processSuccessfulPayment(webhookData) {
 
         const walletResult = await walletResponse.json();
         
-        console.log('[NETWORX] Wallet API response:', walletResult);
+        // console.log('[NETWORX] Wallet API response:', walletResult);
         
         if (!walletResult.success) {
             console.error('[NETWORX] Failed to add credits to wallet:', walletResult.error);
             throw new Error(`Failed to add credits to wallet: ${walletResult.error}`);
         }
 
-        console.log('[NETWORX] Credits added successfully:', credits, 'New balance:', walletResult.data?.new_balance);
+        // console.log('[NETWORX] Credits added successfully:', credits, 'New balance:', walletResult.data?.new_balance);
 
     } catch (error) {
         console.error('[NETWORX] Error processing successful payment:', error);
@@ -363,7 +368,7 @@ async function processSuccessfulPayment(webhookData) {
 async function processDeclinedPayment(webhookData) {
     const transaction = webhookData.transaction;
     
-    console.log('[NETWORX] Payment declined:', {
+    // console.log('[NETWORX] Payment declined:', {
         transaction_uid: transaction?.uid,
         tracking_id: transaction?.tracking_id,
         status: transaction?.status,
@@ -392,7 +397,7 @@ function generateSignature(data, secretKey) {
 function generateWebhookSignature(data, secretKey) {
     // Согласно документации Networx, подпись формируется из определенных полей
     // Проверяем разные варианты формирования подписи
-    console.log('[NETWORX] Webhook data for signature:', {
+    // console.log('[NETWORX] Webhook data for signature:', {
         shop_id: data.shop_id,
         order_id: data.order_id,
         status: data.status,
@@ -433,7 +438,7 @@ function generateWebhookSignature(data, secretKey) {
     const signature2 = crypto.createHash('sha256').update(signatureString2).digest('hex');
     const signature3 = crypto.createHash('sha256').update(signatureString3).digest('hex');
 
-    console.log('[NETWORX] Generated signatures:', {
+    // console.log('[NETWORX] Generated signatures:', {
         received: data.signature,
         variant1: signature1,
         variant2: signature2,

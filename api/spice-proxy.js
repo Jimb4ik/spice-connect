@@ -61,7 +61,7 @@ export default async function handler(req, res) {
             requestOptions.url = `${apiUrl}${separator}${urlParams.toString()}`;
         }
 
-        console.log(`🔗 Spice API Request: ${method} ${apiUrl}`, requestParams);
+        // console.log(`🔗 Spice API Request: ${method} ${apiUrl}`, requestParams);
 
         // Отправляем запрос к Spice API
         const response = await fetch(method === 'GET' ? requestOptions.url : apiUrl, requestOptions);
@@ -72,7 +72,7 @@ export default async function handler(req, res) {
 
         const data = await response.json();
         
-        console.log('✅ Spice API Response:', data);
+        // console.log('✅ Spice API Response:', data);
         
         // Возвращаем данные клиенту
         res.status(200).json(data);

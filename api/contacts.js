@@ -73,7 +73,7 @@ export default async function handler(req, res) {
   
       const apiUrl = `${BASE_URL}${endpoint}?${queryParams}`;
       
-      console.log(`[CONTACTS API] ${action.toUpperCase()} request to:`, apiUrl.replace(API_KEY, 'HIDDEN_KEY'));
+      // console.log(`[CONTACTS API] ${action.toUpperCase()} request to:`, apiUrl.replace(API_KEY, 'HIDDEN_KEY'));
   
       const response = await fetch(apiUrl, {
         method: method,
@@ -85,7 +85,7 @@ export default async function handler(req, res) {
   
       const data = await response.json();
       
-      console.log(`[CONTACTS API] ${action.toUpperCase()} response:`, data);
+      // console.log(`[CONTACTS API] ${action.toUpperCase()} response:`, data);
   
       // Return the response
       return res.status(200).json({

@@ -24,7 +24,7 @@ async function initMessagesTable() {
       CREATE INDEX IF NOT EXISTS idx_user_messages_recipient ON user_messages(recipient_id);
       CREATE INDEX IF NOT EXISTS idx_user_messages_created ON user_messages(created_at);
     `);
-    console.log('[MESSAGES-DB] Таблица user_messages инициализирована');
+    // console.log('[MESSAGES-DB] Таблица user_messages инициализирована');
   } catch (error) {
     console.error('[MESSAGES-DB] Ошибка инициализации таблицы:', error);
   } finally {
@@ -42,7 +42,7 @@ async function saveMessage(senderUserId, recipientUserId, messageText, sessionId
       RETURNING *
     `, [senderUserId, recipientUserId, messageText, sessionId]);
     
-    console.log('[MESSAGES-DB] Сообщение сохранено:', result.rows[0]);
+    // console.log('[MESSAGES-DB] Сообщение сохранено:', result.rows[0]);
     return result.rows[0];
   } catch (error) {
     console.error('[MESSAGES-DB] Ошибка сохранения сообщения:', error);
@@ -66,7 +66,7 @@ async function getMessages(userId, contactId, sessionId) {
       ORDER BY created_at ASC
     `, [userId, contactId]);
     
-    console.log(`[MESSAGES-DB] Найдено ${result.rows.length} сообщений между ${userId} и ${contactId} (любые сессии)`);
+    // console.log(`[MESSAGES-DB] Найдено ${result.rows.length} сообщений между ${userId} и ${contactId} (любые сессии)`);
     return result.rows;
   } catch (error) {
     console.error('[MESSAGES-DB] Ошибка получения сообщений:', error);
@@ -80,7 +80,7 @@ async function getMessages(userId, contactId, sessionId) {
 async function getGiftMessages(userId, contactId, sessionId) {
   const client = await pool.connect();
   try {
-    console.log('[MESSAGES-DB] Ищем подарки между:', { userId, contactId, sessionId });
+    // console.log('[MESSAGES-DB] Ищем подарки между:', { userId, contactId, sessionId });
     
     // Сначала попробуем найти подарки отправленные текущим пользователем
     const sentGiftsResult = await client.query(`
@@ -95,9 +95,9 @@ async function getGiftMessages(userId, contactId, sessionId) {
       ORDER BY gt.created_at ASC
     `, [userId, contactId, sessionId]);
     
-    console.log('[MESSAGES-DB] Найдено отправленных подарков:', sentGiftsResult.rows.length);
+    // console.log('[MESSAGES-DB] Найдено отправленных подарков:', sentGiftsResult.rows.length);
     if (sentGiftsResult.rows.length > 0) {
-      console.log('[MESSAGES-DB] Отправленные подарки:', sentGiftsResult.rows);
+      // console.log('[MESSAGES-DB] Отправленные подарки:', sentGiftsResult.rows);
     }
     
     // Теперь найдем подарки полученные от контакта
@@ -113,9 +113,9 @@ async function getGiftMessages(userId, contactId, sessionId) {
       ORDER BY gt.created_at ASC
     `, [userId, contactId, sessionId]);
     
-    console.log('[MESSAGES-DB] Найдено полученных подарков:', receivedGiftsResult.rows.length);
+    // console.log('[MESSAGES-DB] Найдено полученных подарков:', receivedGiftsResult.rows.length);
     if (receivedGiftsResult.rows.length > 0) {
-      console.log('[MESSAGES-DB] Полученные подарки:', receivedGiftsResult.rows);
+      // console.log('[MESSAGES-DB] Полученные подарки:', receivedGiftsResult.rows);
     }
 
     // Преобразуем транзакции в формат сообщений
@@ -140,7 +140,7 @@ async function getGiftMessages(userId, contactId, sessionId) {
     }));
     
     const allGiftMessages = [...sentMessages, ...receivedMessages];
-    console.log('[MESSAGES-DB] Всего сообщений-подарков:', allGiftMessages.length);
+    // console.log('[MESSAGES-DB] Всего сообщений-подарков:', allGiftMessages.length);
     
     return allGiftMessages;
   } catch (error) {
@@ -225,7 +225,7 @@ export default async function handler(req, res) {
             LIMIT 10
           `, [user_id, contact_id, session_id]);
           
-          console.log('[MESSAGES-DB] DEBUG: Все подарки связанные с пользователями:', debugGifts.rows);
+          // console.log('[MESSAGES-DB] DEBUG: Все подарки связанные с пользователями:', debugGifts.rows);
         } catch (err) {
           console.error('[MESSAGES-DB] DEBUG ERROR:', err);
         } finally {
@@ -237,7 +237,7 @@ export default async function handler(req, res) {
           return new Date(a.created_at) - new Date(b.created_at);
         });
         
-        console.log('[MESSAGES-DB] Итоговое количество сообщений:', {
+        // console.log('[MESSAGES-DB] Итоговое количество сообщений:', {
           regular: messages.length,
           gifts: giftMessages.length,
           total: combined.length

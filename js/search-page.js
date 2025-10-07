@@ -9,11 +9,11 @@ class SearchManager {
     }
 
     async init() {
-        console.log('[SEARCH] Initializing search manager');
+        // console.log('[SEARCH] Initializing search manager');
         
         // Check authentication
         if (!window.authManager || !window.authManager.isLoggedIn) {
-            console.log('[SEARCH] User not logged in, redirecting');
+            // console.log('[SEARCH] User not logged in, redirecting');
             window.location.href = 'index.html';
             return;
         }
@@ -46,7 +46,7 @@ class SearchManager {
     }
 
     async loadInitialResults() {
-        console.log('[SEARCH] Loading initial results');
+        // console.log('[SEARCH] Loading initial results');
         // Сначала попробуем поиск без фильтров для тестирования
         await this.testBasicSearch();
         // Затем выполним обычный поиск
@@ -54,7 +54,7 @@ class SearchManager {
     }
     
     async testBasicSearch() {
-        console.log('[SEARCH] Testing basic search without filters...');
+        // console.log('[SEARCH] Testing basic search without filters...');
         
         try {
             const basicParams = new URLSearchParams({
@@ -63,12 +63,12 @@ class SearchManager {
             });
             
             const testUrl = `/api/spice-multi-test?endpoint=/index_api/search&method=POST&${basicParams.toString()}`;
-            console.log('[SEARCH] Basic test URL:', testUrl);
+            // console.log('[SEARCH] Basic test URL:', testUrl);
             
             const response = await fetch(testUrl);
             const result = await response.json();
             
-            console.log('[SEARCH] Basic test result:', {
+            // console.log('[SEARCH] Basic test result:', {
                 success: result.success,
                 dataExists: !!result.data,
                 resultCount: result.data?.result?.length || 0,
@@ -93,7 +93,7 @@ class SearchManager {
         
         try {
             let searchParams = this.getSearchParams();
-            console.log('[SEARCH] Initial search params:', searchParams);
+            // console.log('[SEARCH] Initial search params:', searchParams);
             
             
             // Build query string for search API
@@ -104,21 +104,21 @@ class SearchManager {
             });
             
             const fullUrl = `/api/spice-multi-test?endpoint=/index_api/search&method=POST&${queryParams.toString()}`;
-            console.log('[SEARCH] Full request URL:', fullUrl);
-            console.log('[SEARCH] Query params object:', Object.fromEntries(queryParams.entries()));
+            // console.log('[SEARCH] Full request URL:', fullUrl);
+            // console.log('[SEARCH] Query params object:', Object.fromEntries(queryParams.entries()));
             
             // Специальное логирование для поиска по городу
             if (searchParams.id_ville) {
-                console.log('[SEARCH] 🏙️ CITY SEARCH - Using city ID:', searchParams.id_ville);
+                // console.log('[SEARCH] 🏙️ CITY SEARCH - Using city ID:', searchParams.id_ville);
             }
             
             const response = await fetch(fullUrl);
 
             const result = await response.json();
-            console.log('[SEARCH] Full search result:', JSON.stringify(result, null, 2));
+            // console.log('[SEARCH] Full search result:', JSON.stringify(result, null, 2));
             
             // Детальная диагностика ответа
-            console.log('[SEARCH] Response analysis:', {
+            // console.log('[SEARCH] Response analysis:', {
                 success: result.success,
                 hasData: !!result.data,
                 hasResult: !!(result.data && result.data.result),
@@ -133,7 +133,7 @@ class SearchManager {
                 const total = result.data.total || result.data.nb_total || searchResults.length || 0;
                 const totalPages = result.data.nb_pages || Math.ceil(total / 30) || 1;
                 
-                console.log('[SEARCH] Extracted results:', { 
+                // console.log('[SEARCH] Extracted results:', { 
                     searchResults, 
                     total, 
                     totalPages,
@@ -219,10 +219,10 @@ class SearchManager {
     }
 
     displayResults(results, total) {
-        console.log('[SEARCH] displayResults called with:', { results, total, resultsLength: results?.length });
+        // console.log('[SEARCH] displayResults called with:', { results, total, resultsLength: results?.length });
         
         // Диагностика DOM элементов
-        console.log('[SEARCH] Available elements:', {
+        // console.log('[SEARCH] Available elements:', {
             searchGrid: !!document.getElementById('searchGrid'),
             searchResults: !!document.getElementById('searchResults'),
             resultsCount: !!document.getElementById('resultsCount'),
@@ -235,15 +235,15 @@ class SearchManager {
         
         if (!container) {
             console.error('[SEARCH] Container not found!');
-            console.log('[SEARCH] All elements with class search-results:', document.querySelectorAll('.search-results'));
-            console.log('[SEARCH] All elements with id containing "search":', document.querySelectorAll('[id*="search"]'));
+            // console.log('[SEARCH] All elements with class search-results:', document.querySelectorAll('.search-results'));
+            // console.log('[SEARCH] All elements with id containing "search":', document.querySelectorAll('[id*="search"]'));
             return;
         }
         
-        console.log('[SEARCH] Using container:', container.id || container.className);
+        // console.log('[SEARCH] Using container:', container.id || container.className);
         
         if (!results || results.length === 0) {
-            console.log('[SEARCH] No results to display');
+            // console.log('[SEARCH] No results to display');
             container.innerHTML = '';
             if (resultsCountEl) resultsCountEl.textContent = '0 results';
             
@@ -255,7 +255,7 @@ class SearchManager {
             return;
         }
         
-        console.log('[SEARCH] Displaying results:', results.length);
+        // console.log('[SEARCH] Displaying results:', results.length);
         
         // Скрываем блок "No results"
         const noResultsDiv = document.getElementById('noResults');
@@ -287,7 +287,7 @@ class SearchManager {
             resultsContainer.appendChild(userCard);
         });
         
-        console.log('[SEARCH] Results displayed successfully in:', resultsContainer.className);
+        // console.log('[SEARCH] Results displayed successfully in:', resultsContainer.className);
     }
 
     createUserCard(user) {
@@ -310,7 +310,7 @@ class SearchManager {
             photoUrl = photo.url_middle || photo.url_big || photo.url_small;
         }
         
-        console.log('[SEARCH] User photo data:', {
+        // console.log('[SEARCH] User photo data:', {
             pseudo: user.pseudo,
             photos_v2: user.photos_v2,
             photos: user.photos,
@@ -358,12 +358,12 @@ class SearchManager {
     }
 
     async viewProfile(userId) {
-        console.log('[SEARCH] Viewing profile:', userId);
+        // console.log('[SEARCH] Viewing profile:', userId);
         window.location.href = `user-profile.html?id=${userId}`;
     }
 
     async sendMessage(userId) {
-        console.log('[SEARCH] Sending message to:', userId);
+        // console.log('[SEARCH] Sending message to:', userId);
         
         try {
             // Add contact first
@@ -441,7 +441,7 @@ class SearchManager {
 
     hideLoading() {
         // Индикатор загрузки будет заменен результатами в displayResults()
-        console.log('[SEARCH] Hiding loading indicator');
+        // console.log('[SEARCH] Hiding loading indicator');
     }
 
     showError(message) {
@@ -545,12 +545,12 @@ class SearchManager {
             });
             
             const fullUrl = `/api/spice-multi-test?endpoint=/ajax_api/getRegionsAutocomp&method=GET&${queryParams.toString()}`;
-            console.log('[SEARCH] Getting city ID for:', cityName, fullUrl);
+            // console.log('[SEARCH] Getting city ID for:', cityName, fullUrl);
             
             const response = await fetch(fullUrl);
             const result = await response.json();
             
-            console.log('[SEARCH] City lookup result:', result);
+            // console.log('[SEARCH] City lookup result:', result);
             
             // Проверяем правильную структуру ответа API
             if (result.success && result.data && result.data.result && result.data.result.length > 0) {
@@ -558,7 +558,7 @@ class SearchManager {
                 // API возвращает ID_city, не id_ville
                 const cityId = firstCity.ID_city || firstCity.id_ville || firstCity.id;
                 const cityName = firstCity.zone_name || firstCity.nom_ville || firstCity.name;
-                console.log('[SEARCH] Found city ID:', cityId, 'for', cityName);
+                // console.log('[SEARCH] Found city ID:', cityId, 'for', cityName);
                 return cityId;
             }
             // Если наш прокси не работает, попробуем прямой формат ответа
@@ -566,11 +566,11 @@ class SearchManager {
                 const firstCity = result.result[0];
                 const cityId = firstCity.ID_city || firstCity.id_ville || firstCity.id;
                 const cityName = firstCity.zone_name || firstCity.nom_ville || firstCity.name;
-                console.log('[SEARCH] Found city ID (direct):', cityId, 'for', cityName);
+                // console.log('[SEARCH] Found city ID (direct):', cityId, 'for', cityName);
                 return cityId;
             }
             
-            console.log('[SEARCH] No cities found for:', cityName);
+            // console.log('[SEARCH] No cities found for:', cityName);
             return null;
         } catch (error) {
             console.error('[SEARCH] Error getting city ID:', error);
@@ -624,10 +624,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Wait for auth manager to be ready
     function initSearchManager(attempt = 1, maxAttempts = 10) {
         if (window.authManager && window.authManager.isLoggedIn) {
-            console.log('[SEARCH] AuthManager ready, creating SearchManager instance');
+            // console.log('[SEARCH] AuthManager ready, creating SearchManager instance');
             searchManager = new SearchManager();
         } else if (attempt < maxAttempts) {
-            console.log(`[SEARCH] AuthManager not ready, retrying... (${attempt}/${maxAttempts})`);
+            // console.log(`[SEARCH] AuthManager not ready, retrying... (${attempt}/${maxAttempts})`);
             setTimeout(() => initSearchManager(attempt + 1, maxAttempts), 500);
         } else {
             console.error('[SEARCH] Failed to initialize SearchManager - AuthManager not ready');

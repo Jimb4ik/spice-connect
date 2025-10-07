@@ -173,7 +173,7 @@ async function loadUsers() {
         const allUsers = [];
         
         // Request 1: Male users (sexe1 = 1)
-        console.log('[ADMIN] Loading MALE users...');
+        // console.log('[ADMIN] Loading MALE users...');
         const maleParams = new URLSearchParams({
             page: 0,
             pas: 100, // Get 100 of each gender
@@ -186,12 +186,12 @@ async function loadUsers() {
         const maleResult = await maleResponse.json();
         
         if (maleResult.success && maleResult.data && maleResult.data.result) {
-            console.log('[ADMIN] Got', maleResult.data.result.length, 'male users');
+            // console.log('[ADMIN] Got', maleResult.data.result.length, 'male users');
             allUsers.push(...maleResult.data.result);
         }
         
         // Request 2: Female users (sexe1 = 2)
-        console.log('[ADMIN] Loading FEMALE users...');
+        // console.log('[ADMIN] Loading FEMALE users...');
         const femaleParams = new URLSearchParams({
             page: 0,
             pas: 100,
@@ -204,12 +204,12 @@ async function loadUsers() {
         const femaleResult = await femaleResponse.json();
         
         if (femaleResult.success && femaleResult.data && femaleResult.data.result) {
-            console.log('[ADMIN] Got', femaleResult.data.result.length, 'female users');
+            // console.log('[ADMIN] Got', femaleResult.data.result.length, 'female users');
             allUsers.push(...femaleResult.data.result);
         }
         
         // Request 3: Couple users (sexe1 = 3)
-        console.log('[ADMIN] Loading COUPLE users...');
+        // console.log('[ADMIN] Loading COUPLE users...');
         const coupleParams = new URLSearchParams({
             page: 0,
             pas: 100,
@@ -222,11 +222,11 @@ async function loadUsers() {
         const coupleResult = await coupleResponse.json();
         
         if (coupleResult.success && coupleResult.data && coupleResult.data.result) {
-            console.log('[ADMIN] Got', coupleResult.data.result.length, 'couple users');
+            // console.log('[ADMIN] Got', coupleResult.data.result.length, 'couple users');
             allUsers.push(...coupleResult.data.result);
         }
         
-        console.log('[ADMIN] Total users loaded:', allUsers.length);
+        // console.log('[ADMIN] Total users loaded:', allUsers.length);
         
         if (allUsers.length > 0) {
             window.allUsers = allUsers.map(user => ({
@@ -245,8 +245,8 @@ async function loadUsers() {
                 photos: user.photos || []
             }));
             
-            console.log('[ADMIN] allUsers populated with', window.allUsers.length, 'users');
-            console.log('[ADMIN] Gender distribution:', {
+            // console.log('[ADMIN] allUsers populated with', window.allUsers.length, 'users');
+            // console.log('[ADMIN] Gender distribution:', {
                 male: window.allUsers.filter(u => parseInt(u.sexe1) === 1).length,
                 female: window.allUsers.filter(u => parseInt(u.sexe1) === 2).length,
                 couple: window.allUsers.filter(u => parseInt(u.sexe1) === 3).length
@@ -256,7 +256,7 @@ async function loadUsers() {
             displayUsers();
         } else {
             // Fallback to demo data if API fails
-            console.warn('[ADMIN] Failed to load users from API, using demo data');
+            // console.warn('[ADMIN] Failed to load users from API, using demo data');
             loadDemoUsers();
         }
     } catch (error) {
@@ -405,7 +405,7 @@ function displayUsers() {
         document.querySelectorAll('.btn-view-user').forEach(btn => {
             btn.addEventListener('click', function() {
                 const userId = parseInt(this.getAttribute('data-user-id'));
-                console.log('[ADMIN] View button clicked for user:', userId);
+                // console.log('[ADMIN] View button clicked for user:', userId);
                 viewUser(userId);
             });
         });
@@ -413,7 +413,7 @@ function displayUsers() {
         document.querySelectorAll('.btn-edit-user').forEach(btn => {
             btn.addEventListener('click', function() {
                 const userId = parseInt(this.getAttribute('data-user-id'));
-                console.log('[ADMIN] Edit button clicked for user:', userId);
+                // console.log('[ADMIN] Edit button clicked for user:', userId);
                 editUser(userId);
             });
         });
@@ -449,7 +449,7 @@ function searchUsers() {
     const genderFilter = document.getElementById('genderFilter').value;
     const statusFilter = document.getElementById('statusFilter').value;
     
-    console.log('[ADMIN] Searching with:', { searchTerm, genderFilter, statusFilter });
+    // console.log('[ADMIN] Searching with:', { searchTerm, genderFilter, statusFilter });
     
     window.filteredUsers = window.allUsers.filter(user => {
         const matchesSearch = !searchTerm || 
@@ -464,8 +464,8 @@ function searchUsers() {
         return matchesSearch && matchesGender && matchesStatus;
     });
     
-    console.log('[ADMIN] Filtered results:', window.filteredUsers.length);
-    console.log('[ADMIN] Sample filtered user:', window.filteredUsers[0]);
+    // console.log('[ADMIN] Filtered results:', window.filteredUsers.length);
+    // console.log('[ADMIN] Sample filtered user:', window.filteredUsers[0]);
     
     window.currentPage = 1;
     displayUsers();
@@ -480,13 +480,13 @@ async function loadTransactions() {
     try {
         // Ensure users are loaded first (needed for user display in transactions)
         if (!window.allUsers || window.allUsers.length === 0) {
-            console.log('[ADMIN] Loading users first for transactions display...');
+            // console.log('[ADMIN] Loading users first for transactions display...');
             await loadUsers();
         }
         
         // First, seed the database with transactions using real user IDs
         const realUserIds = window.allUsers.map(u => u.id);
-        console.log('[ADMIN] Seeding transactions with', realUserIds.length, 'real user IDs');
+        // console.log('[ADMIN] Seeding transactions with', realUserIds.length, 'real user IDs');
         
         const seedResponse = await fetch('/api/admin-transactions', {
             method: 'POST',
@@ -497,7 +497,7 @@ async function loadTransactions() {
             })
         });
         const seedResult = await seedResponse.json();
-        console.log('[ADMIN] Seed result:', seedResult);
+        // console.log('[ADMIN] Seed result:', seedResult);
 
         // Load transactions from database
         const response = await fetch('/api/admin-transactions', {
@@ -540,7 +540,7 @@ async function loadTransactions() {
                         user.status = 'verified';
                     }
                 });
-                console.log('[ADMIN] Updated', usersWithPayouts.size, 'users to verified (have payouts)');
+                // console.log('[ADMIN] Updated', usersWithPayouts.size, 'users to verified (have payouts)');
                 
                 // Re-filter and display users if on Users tab
                 if (window.filteredUsers) {
@@ -783,10 +783,10 @@ function searchTransactions() {
     const searchTerm = document.getElementById('transactionSearch').value.toLowerCase();
     const typeFilter = document.getElementById('transactionTypeFilter').value;
     
-    console.log('[ADMIN] Searching transactions:', { searchTerm, typeFilter });
+    // console.log('[ADMIN] Searching transactions:', { searchTerm, typeFilter });
     
     if (!window.allTransactions) {
-        console.warn('[ADMIN] No transactions loaded');
+        // console.warn('[ADMIN] No transactions loaded');
         return;
     }
     
@@ -804,7 +804,7 @@ function searchTransactions() {
         return matchesSearch && matchesType;
     });
     
-    console.log('[ADMIN] Found', filtered.length, 'transactions');
+    // console.log('[ADMIN] Found', filtered.length, 'transactions');
     displayTransactions(filtered);
 }
 
@@ -1383,7 +1383,7 @@ async function loadPayouts() {
     try {
         // Ensure users are loaded first
         if (!window.allUsers || window.allUsers.length === 0) {
-            console.log('[ADMIN] Loading users first before checking payouts...');
+            // console.log('[ADMIN] Loading users first before checking payouts...');
             await loadUsers();
         }
         
@@ -1398,7 +1398,7 @@ async function loadPayouts() {
         
         // If no payouts exist and we have users, show seed button
         if (checkResult.success && checkResult.data && checkResult.data.length === 0 && window.allUsers && window.allUsers.length > 0) {
-            console.log('[ADMIN] No payouts found, showing seed option...');
+            // console.log('[ADMIN] No payouts found, showing seed option...');
             
             payoutsGrid.innerHTML = `
                 <div style="padding: 60px 40px; text-align: center;">
@@ -1533,10 +1533,10 @@ window.filterPayouts = function() {
     const searchTerm = document.getElementById('payoutsSearch').value.toLowerCase();
     const statusFilter = document.getElementById('payoutsStatusFilter').value;
     
-    console.log('[ADMIN] Filtering payouts:', { searchTerm, statusFilter });
+    // console.log('[ADMIN] Filtering payouts:', { searchTerm, statusFilter });
     
     if (!window.allPayouts) {
-        console.log('[ADMIN] No payouts data to filter');
+        // console.log('[ADMIN] No payouts data to filter');
         return;
     }
     
@@ -1555,7 +1555,7 @@ window.filterPayouts = function() {
     });
     
     window.filteredPayouts = filtered;
-    console.log('[ADMIN] Filtered payouts:', filtered.length);
+    // console.log('[ADMIN] Filtered payouts:', filtered.length);
     
     displayPayouts(filtered);
 }
@@ -1641,7 +1641,7 @@ async function seedPayoutData() {
             }
         }
         
-        console.log('[ADMIN] Seeding with users:', selectedUsers);
+        // console.log('[ADMIN] Seeding with users:', selectedUsers);
         
         const seedResponse = await fetch('/api/admin-payouts', {
             method: 'POST',
@@ -1653,7 +1653,7 @@ async function seedPayoutData() {
         });
         
         const seedResult = await seedResponse.json();
-        console.log('[ADMIN] Seed result:', seedResult);
+        // console.log('[ADMIN] Seed result:', seedResult);
         
         if (seedResult.success) {
             // Reload transactions

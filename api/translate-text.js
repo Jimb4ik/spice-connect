@@ -49,7 +49,7 @@ export default async function handler(req, res) {
             });
         }
 
-        console.log('[TRANSLATE] Translating text:', text.substring(0, 100) + '...');
+        // console.log('[TRANSLATE] Translating text:', text.substring(0, 100) + '...');
 
         // Call OpenAI API for translation
         const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -97,7 +97,7 @@ export default async function handler(req, res) {
 
         const translatedText = openaiData.choices[0].message.content.trim();
 
-        console.log('[TRANSLATE] Translation successful');
+        // console.log('[TRANSLATE] Translation successful');
 
         res.status(200).json({
             success: true,

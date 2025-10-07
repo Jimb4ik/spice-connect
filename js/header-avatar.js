@@ -67,7 +67,7 @@ async function updateDropdownUserInfo(user) {
                         }
                     }
                 } catch (error) {
-                    console.warn('[HEADER-AVATAR] Error loading photos for dropdown:', error);
+                    // console.warn('[HEADER-AVATAR] Error loading photos for dropdown:', error);
                 }
             }
             
@@ -99,16 +99,16 @@ async function updateDropdownUserInfo(user) {
  */
 async function loadUserAvatar() {
     try {
-        console.log('[HEADER-AVATAR] Starting loadUserAvatar');
+        // console.log('[HEADER-AVATAR] Starting loadUserAvatar');
         
         if (!window.authManager) {
-            console.log('[HEADER-AVATAR] authManager not found, retrying in 1s');
+            // console.log('[HEADER-AVATAR] authManager not found, retrying in 1s');
             setTimeout(loadUserAvatar, 1000);
             return;
         }
         
         if (!window.authManager.sessionId) {
-            console.log('[HEADER-AVATAR] No sessionId found');
+            // console.log('[HEADER-AVATAR] No sessionId found');
             return;
         }
         
@@ -117,16 +117,16 @@ async function loadUserAvatar() {
         // Получаем userId из localStorage как в profile.html
         const userDataString = localStorage.getItem('lavrilo_user');
         if (!userDataString) {
-            console.log('[HEADER-AVATAR] No user data in localStorage');
+            // console.log('[HEADER-AVATAR] No user data in localStorage');
             return;
         }
         
         const userData = JSON.parse(userDataString);
         const userId = userData.id;
-        console.log('[HEADER-AVATAR] Using sessionId:', sessionId, 'userId:', userId);
+        // console.log('[HEADER-AVATAR] Using sessionId:', sessionId, 'userId:', userId);
         
         if (!userId) {
-            console.log('[HEADER-AVATAR] No userId found');
+            // console.log('[HEADER-AVATAR] No userId found');
             return;
         }
         
@@ -135,37 +135,37 @@ async function loadUserAvatar() {
         
         const response = await fetch(apiUrl);
         if (!response.ok) {
-            console.warn('[HEADER-AVATAR] API request failed:', response.status, response.statusText);
+            // console.warn('[HEADER-AVATAR] API request failed:', response.status, response.statusText);
             showInitials();
             return;
         }
         
         const apiData = await response.json();
         
-        console.log('[HEADER-AVATAR] API response:', apiData);
+        // console.log('[HEADER-AVATAR] API response:', apiData);
         
         if (apiData && apiData.success && apiData.data) {
             const photos = apiData.data || [];
             let photoUrl = null;
             
-            console.log('[HEADER-AVATAR] user_edit_photos data:', photos);
+            // console.log('[HEADER-AVATAR] user_edit_photos data:', photos);
             
             // Проверяем, есть ли фотографии в user_edit_photos
             if (Array.isArray(photos) && photos.length > 0) {
                 const mainPhoto = photos.find(p => p.num === 0) || photos[0];
                 photoUrl = mainPhoto.sq_430 || mainPhoto.sq_middle || mainPhoto.normal || mainPhoto.sq_small;
-                console.log('[HEADER-AVATAR] Found photo in user_edit_photos:', photoUrl);
+                // console.log('[HEADER-AVATAR] Found photo in user_edit_photos:', photoUrl);
             }
             
             // Если фотографий нет, пробуем fallback на /index_api/user
             if (!photoUrl) {
-                console.log('[HEADER-AVATAR] No photos in user_edit_photos, trying fallback to /index_api/user');
+                // console.log('[HEADER-AVATAR] No photos in user_edit_photos, trying fallback to /index_api/user');
                 try {
                     const apiUrl2 = `/api/spice-multi-test?endpoint=/index_api/user&method=POST&session_id=${sessionId}&id=${userId}&get_picture_430=1`;
                     const response2 = await fetch(apiUrl2);
                     const apiData2 = await response2.json();
                     
-                    console.log('[HEADER-AVATAR] Fallback API response:', apiData2);
+                    // console.log('[HEADER-AVATAR] Fallback API response:', apiData2);
                     
                     if (apiData2 && apiData2.success && apiData2.data?.result) {
                         const user = apiData2.data.result;
@@ -191,7 +191,7 @@ async function loadUserAvatar() {
                         }
                     }
                 } catch (error) {
-                    console.warn('[HEADER-AVATAR] Fallback API failed:', error);
+                    // console.warn('[HEADER-AVATAR] Fallback API failed:', error);
                 }
             }
             
@@ -205,7 +205,7 @@ async function loadUserAvatar() {
             
             if (avatarImg && avatarText) {
                 if (photoUrl) {
-                    console.log('[HEADER-AVATAR] Found photo URL:', photoUrl);
+                    // console.log('[HEADER-AVATAR] Found photo URL:', photoUrl);
                     // Показываем фото
                     avatarImg.src = photoUrl;
                     avatarImg.style.display = 'block';
@@ -213,7 +213,7 @@ async function loadUserAvatar() {
                     
                     // Обработка ошибок загрузки фото
                     avatarImg.onerror = function() {
-                        console.warn('[HEADER-AVATAR] Failed to load user photo, showing initials');
+                        // console.warn('[HEADER-AVATAR] Failed to load user photo, showing initials');
                         avatarImg.style.display = 'none';
                         avatarText.style.display = 'flex';
                         const firstName = userData.nom_complet || userData.pseudo || userData.login || 'D';
@@ -256,13 +256,13 @@ function initHeaderAvatar() {
 
 // Функция для проверки и повторного вызова
 function tryInitHeaderAvatar(attempt = 1, maxAttempts = 10) {
-    console.log(`[HEADER-AVATAR] Attempt ${attempt}/${maxAttempts} to init header avatar`);
+    // console.log(`[HEADER-AVATAR] Attempt ${attempt}/${maxAttempts} to init header avatar`);
     
     if (window.authManager && window.authManager.sessionId) {
-        console.log('[HEADER-AVATAR] AuthManager ready, initializing...');
+        // console.log('[HEADER-AVATAR] AuthManager ready, initializing...');
         initHeaderAvatar();
     } else if (attempt < maxAttempts) {
-        console.log('[HEADER-AVATAR] AuthManager not ready, retrying in 500ms...');
+        // console.log('[HEADER-AVATAR] AuthManager not ready, retrying in 500ms...');
         setTimeout(() => tryInitHeaderAvatar(attempt + 1, maxAttempts), 500);
     } else {
         console.error('[HEADER-AVATAR] Failed to initialize after', maxAttempts, 'attempts');
@@ -287,12 +287,12 @@ function tryInitHeaderAvatar(attempt = 1, maxAttempts = 10) {
 // Автоматически инициализируем когда DOM готов
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
-        console.log('[HEADER-AVATAR] DOM loaded, starting initialization...');
+        // console.log('[HEADER-AVATAR] DOM loaded, starting initialization...');
         setTimeout(() => tryInitHeaderAvatar(), 500);
     });
 } else {
     // DOM уже готов
-    console.log('[HEADER-AVATAR] DOM already ready, starting initialization...');
+    // console.log('[HEADER-AVATAR] DOM already ready, starting initialization...');
     setTimeout(() => tryInitHeaderAvatar(), 500);
 }
 

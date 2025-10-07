@@ -12,7 +12,7 @@ class Dashboard {
     init() {
       // Check if user is logged in
       if (!window.authManager || !window.authManager.isLoggedIn) {
-        console.log('[DASHBOARD] User not logged in, redirecting to home');
+        // console.log('[DASHBOARD] User not logged in, redirecting to home');
         window.location.href = '/';
         return;
       }
@@ -27,10 +27,10 @@ class Dashboard {
       // Initialize photo manager
       if (window.photoManager) {
         window.photoManager.init();
-        console.log('[DASHBOARD] Photo manager initialized');
+        // console.log('[DASHBOARD] Photo manager initialized');
       }
       
-      console.log('[DASHBOARD] Dashboard initialized for user:', window.authManager.currentUser.pseudo);
+      // console.log('[DASHBOARD] Dashboard initialized for user:', window.authManager.currentUser.pseudo);
     }
   
     createUserMenu() {
@@ -161,7 +161,7 @@ class Dashboard {
         // Get user ID from localStorage
         const userDataString = localStorage.getItem('lavrilo_user');
         if (!userDataString) {
-          console.log('[DASHBOARD] No user data found in localStorage');
+          // console.log('[DASHBOARD] No user data found in localStorage');
           return;
         }
         
@@ -169,7 +169,7 @@ class Dashboard {
         const userId = userData.id;
         
         if (!userId) {
-          console.log('[DASHBOARD] No user ID found in user data');
+          // console.log('[DASHBOARD] No user ID found in user data');
           return;
         }
         
@@ -182,7 +182,7 @@ class Dashboard {
         if ((data.data?.connected === 1 || data.data?.connected === "1") && data.data?.result) {
           this.updateProfileDisplay(data.data.result);
         } else {
-          console.log('[DASHBOARD] Could not load profile data:', data);
+          // console.log('[DASHBOARD] Could not load profile data:', data);
         }
         
       } catch (error) {
@@ -242,7 +242,7 @@ class Dashboard {
     }
   
     async loadMessages() {
-      console.log('[DASHBOARD] Loading messages system...');
+      // console.log('[DASHBOARD] Loading messages system...');
       this.setupMessagesEventListeners();
       this.initializeMessagesSystem();
       await this.loadContacts();
@@ -250,12 +250,12 @@ class Dashboard {
     }
   
     async loadMatches() {
-      console.log('[DASHBOARD] Loading matches functionality...');
+      // console.log('[DASHBOARD] Loading matches functionality...');
       
       // Initialize matching system if not already done
       if (!window.matchingSystem) {
         // The matching system will initialize itself when the script loads
-        console.log('[DASHBOARD] Waiting for matching system to initialize...');
+        // console.log('[DASHBOARD] Waiting for matching system to initialize...');
         
         // Wait a moment for the matching system to load
         let attempts = 0;
@@ -267,21 +267,21 @@ class Dashboard {
         }
         
         if (!window.matchingSystem) {
-          console.warn('[DASHBOARD] Matching system failed to initialize');
+          // console.warn('[DASHBOARD] Matching system failed to initialize');
           return;
         }
       }
       
-      console.log('[DASHBOARD] Matching system ready');
+      // console.log('[DASHBOARD] Matching system ready');
     }
   
     async loadVisitors() {
       // Placeholder for visitors functionality
-      console.log('[DASHBOARD] Loading visitors...');
+      // console.log('[DASHBOARD] Loading visitors...');
     }
   
     async loadSearch() {
-      console.log('[DASHBOARD] Loading search functionality...');
+      // console.log('[DASHBOARD] Loading search functionality...');
       this.setupSearchEventListeners();
       this.resetSearchResults();
     }
@@ -350,7 +350,7 @@ class Dashboard {
         // Collect filter values
         const filters = this.collectSearchFilters();
         
-        console.log('[SEARCH] Performing search with filters:', filters);
+        // console.log('[SEARCH] Performing search with filters:', filters);
   
         // Show loading state
         if (searchBtn) {
@@ -436,7 +436,7 @@ class Dashboard {
       params.append('profile_complete', '1'); // Полная информация
       params.append('get_picture_430', '1'); // Фото высокого разрешения
   
-      console.log('[SEARCH] API call with params:', params.toString());
+      // console.log('[SEARCH] API call with params:', params.toString());
   
       const response = await fetch(`${apiUrl}&${params.toString()}`, {
         method: 'POST',
@@ -446,7 +446,7 @@ class Dashboard {
       });
   
       const result = await response.json();
-      console.log('[SEARCH] API Response:', result);
+      // console.log('[SEARCH] API Response:', result);
   
       // Check for success according to API documentation
       if (result.success && result.data) {
@@ -587,13 +587,13 @@ class Dashboard {
   
     // User interaction methods (placeholders for now)
     async viewUserProfile(userId) {
-      console.log('[SEARCH] Viewing user profile:', userId);
+      // console.log('[SEARCH] Viewing user profile:', userId);
       this.showNotification(`Opening profile for user ${userId}`, 'info');
       // TODO: Implement profile viewing logic
     }
   
     async sendMessage(userId) {
-      console.log('[SEARCH] Sending message to user:', userId);
+      // console.log('[SEARCH] Sending message to user:', userId);
       this.showNotification(`Opening chat with user ${userId}`, 'info');
       // TODO: Implement messaging logic
     }
@@ -805,7 +805,7 @@ class Dashboard {
           throw new Error('Full name is required');
         }
   
-        console.log('[PROFILE] Saving profile data:', profileData);
+        // console.log('[PROFILE] Saving profile data:', profileData);
   
         // Save basic information
         await this.saveProfileInformation(profileData);
@@ -847,14 +847,14 @@ class Dashboard {
         }
       });
       
-      console.log('[PROFILE] API URL:', `${apiUrl}&${params.toString()}`);
+      // console.log('[PROFILE] API URL:', `${apiUrl}&${params.toString()}`);
       
       const response = await fetch(`${apiUrl}&${params.toString()}`, {
         method: 'POST'
       });
       
       const result = await response.json();
-      console.log('[PROFILE] API Response:', result);
+      // console.log('[PROFILE] API Response:', result);
       
       // Check API proxy response first
       if (!result.success) {
@@ -865,7 +865,7 @@ class Dashboard {
       if (result.data) {
         // If connected = 0, it means session issues, but accepted = 1 means profile update worked
         if (result.data.accepted && result.data.accepted === 1) {
-          console.log('[PROFILE] Profile update accepted by API');
+          // console.log('[PROFILE] Profile update accepted by API');
           return result;
         }
         
@@ -876,7 +876,7 @@ class Dashboard {
         
         // For some APIs, connected = 0 is not necessarily an error for updates
         if (result.data.connected === 0) {
-          console.log('[PROFILE] Session may be expired, but checking if update was processed...');
+          // console.log('[PROFILE] Session may be expired, but checking if update was processed...');
           // Don't throw error immediately, let it continue
         }
       }
@@ -887,14 +887,14 @@ class Dashboard {
     async saveProfileDescription(description) {
       const apiUrl = `/api/spice-multi-test?endpoint=/index_api/user/modify/description&method=POST&session_id=${window.authManager.sessionId}&description=${encodeURIComponent(description)}`;
       
-      console.log('[PROFILE] Description API URL:', apiUrl);
+      // console.log('[PROFILE] Description API URL:', apiUrl);
       
       const response = await fetch(apiUrl, {
         method: 'POST'
       });
       
       const result = await response.json();
-      console.log('[PROFILE] Description API Response:', result);
+      // console.log('[PROFILE] Description API Response:', result);
       
       // Check API proxy response first
       if (!result.success) {
@@ -905,7 +905,7 @@ class Dashboard {
       if (result.data) {
         // If accepted = 1, update was successful
         if (result.data.accepted && result.data.accepted === 1) {
-          console.log('[PROFILE] Description update accepted by API');
+          // console.log('[PROFILE] Description update accepted by API');
           return result;
         }
         
@@ -916,7 +916,7 @@ class Dashboard {
         
         // For some APIs, connected = 0 is not necessarily an error for updates
         if (result.data.connected === 0) {
-          console.log('[PROFILE] Session may be expired, but checking if description was processed...');
+          // console.log('[PROFILE] Session may be expired, but checking if description was processed...');
           // Don't throw error immediately, let it continue
         }
       }
@@ -1032,4 +1032,4 @@ class Dashboard {
     }, 100);
   });
   
-  console.log('[DASHBOARD] Dashboard script loaded');
+  // console.log('[DASHBOARD] Dashboard script loaded');

@@ -33,7 +33,7 @@ export default async function handler(req, res) {
             return res.status(400).json({ error: 'Endpoint не указан' });
         }
 
-        console.log(`🧪 Тестируем endpoint: ${method} ${endpoint}`);
+        // console.log(`🧪 Тестируем endpoint: ${method} ${endpoint}`);
         
         // Строим URL с query parameters
         let apiUrl = `${BASE_URL}${endpoint}`;
@@ -50,16 +50,16 @@ export default async function handler(req, res) {
         });
         
         const finalUrl = `${apiUrl}?${queryParams.toString()}`;
-        console.log('📡 URL запроса:', finalUrl.replace(API_KEY, 'HIDDEN_KEY'));
+        // console.log('📡 URL запроса:', finalUrl.replace(API_KEY, 'HIDDEN_KEY'));
         
         // Определяем тип контента
         const incomingType = req.headers['content-type'] || '';
         const isMultipart = incomingType.startsWith('multipart/form-data');
         
-        console.log('🔑 Используем рабочий метод: Query только api_key');
-        console.log('🔑 API Key:', API_KEY.substring(0, 8) + '...' + API_KEY.slice(-4));
-        console.log('📋 Content-Type:', incomingType);
-        console.log('📋 Is Multipart:', isMultipart);
+        // console.log('🔑 Используем рабочий метод: Query только api_key');
+        // console.log('🔑 API Key:', API_KEY.substring(0, 8) + '...' + API_KEY.slice(-4));
+        // console.log('📋 Content-Type:', incomingType);
+        // console.log('📋 Is Multipart:', isMultipart);
         
         // Настраиваем fetch options
         let fetchOptions = {
@@ -69,7 +69,7 @@ export default async function handler(req, res) {
         
         // Для POST/PUT запросов обрабатываем тело
         if ((method === 'POST' || method === 'PUT') && req.method === 'POST') {
-            console.log('📤 Обрабатываем тело запроса');
+            // console.log('📤 Обрабатываем тело запроса');
             
             // Читаем raw body как Buffer
             const chunks = [];
@@ -80,12 +80,12 @@ export default async function handler(req, res) {
             
             if (isMultipart) {
                 // Для multipart/form-data передаем raw buffer и сохраняем Content-Type
-                console.log('📤 Передаем multipart/form-data как Buffer, размер:', bodyBuffer.length);
+                // console.log('📤 Передаем multipart/form-data как Buffer, размер:', bodyBuffer.length);
                 fetchOptions.body = bodyBuffer;
                 fetchOptions.headers['Content-Type'] = incomingType;
             } else {
                 // Для других типов контента
-                console.log('📤 Передаем как текст/JSON');
+                // console.log('📤 Передаем как текст/JSON');
                 const bodyText = bodyBuffer.toString('utf8');
                 
                 if (bodyText) {
@@ -104,7 +104,7 @@ export default async function handler(req, res) {
         // Выполняем запрос
         const apiResponse = await fetch(finalUrl, fetchOptions);
 
-        console.log(`📊 API ответил со статусом: ${apiResponse.status}`);
+        // console.log(`📊 API ответил со статусом: ${apiResponse.status}`);
         
         const data = await apiResponse.json();
         
@@ -136,8 +136,8 @@ export default async function handler(req, res) {
         }
 
         // Успешный ответ
-        console.log('✅ Успешный ответ от API');
-        console.log('📊 Response data:', data);
+        // console.log('✅ Успешный ответ от API');
+        // console.log('📊 Response data:', data);
         
         res.status(200).json({
             success: true,

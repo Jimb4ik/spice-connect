@@ -61,7 +61,7 @@ export default async function handler(req, res) {
 
             case 'seed_documents': {
                 // Наполнить БД документами на модерацию
-                console.log('[ADMIN] Seeding verification documents...');
+                // console.log('[ADMIN] Seeding verification documents...');
                 
                 // Создаем таблицу если её нет
                 await pool.query(`
@@ -174,7 +174,7 @@ export default async function handler(req, res) {
                     }
                 }
 
-                console.log('[ADMIN] Seeded', documents.length, 'verification documents');
+                // console.log('[ADMIN] Seeded', documents.length, 'verification documents');
                 
                 return res.json({
                     success: true,

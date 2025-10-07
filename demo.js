@@ -86,9 +86,10 @@ const LavriloDemo = {
 
     // Функции для демонстрации API
     async login(email = 'demo@example.com', password = 'demo123') {
-        console.log('🔐 Демонстрация авторизации');
-        console.log(`Email: ${email}`);
-        console.log(`Password: ${password}`);
+        // Production: logging removed for security
+        // console.log('🔐 Демонстрация авторизации');
+        // console.log(`Email: ${email}`);
+        // console.log(`Password: ${password}`);
         
         // Имитация API запроса
         const response = await this.simulateAPICall('login', {

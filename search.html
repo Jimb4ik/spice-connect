@@ -241,7 +241,7 @@
                 gender: document.getElementById('searchGender').value
             };
             
-            console.log('Searching with filters:', filters);
+            // console.log('Searching with filters:', filters);
             
             if (window.dashboard && typeof window.dashboard.performSearch === 'function') {
                 window.dashboard.performSearch(filters);

@@ -21,12 +21,12 @@ async function getConfigArray(arrayName) {
         
         // Use direct API URL as specified in documentation
         const apiUrl = `https://dev2018.de5a7.com/index_api/array/get/${arrayName}?api_key=${apiKeyData.apiKey}`;
-        console.log(`[USER-PROFILE] Loading ${arrayName} from:`, apiUrl);
+        // console.log(`[USER-PROFILE] Loading ${arrayName} from:`, apiUrl);
         
         const response = await fetch(`/api/spice-proxy-simple?url=${encodeURIComponent(apiUrl)}`);
         const result = await response.json();
         
-        console.log(`[USER-PROFILE] ${arrayName} response:`, result);
+        // console.log(`[USER-PROFILE] ${arrayName} response:`, result);
         
         if (result.success && result.data) {
             configArrays[arrayName] = result.data;
@@ -81,7 +81,7 @@ const zodiacSigns = {
  * Initialize user profile page
  */
 async function initializeUserProfile() {
-    console.log('[USER-PROFILE] Initializing user profile page...');
+    // console.log('[USER-PROFILE] Initializing user profile page...');
     
     try {
         // Get URL parameters
@@ -95,7 +95,7 @@ async function initializeUserProfile() {
             return;
         }
         
-        console.log('[USER-PROFILE] Loading profile for user:', userId, userName);
+        // console.log('[USER-PROFILE] Loading profile for user:', userId, userName);
         
         // Update page title with URL parameter if available
         if (userName) {
@@ -116,23 +116,24 @@ async function initializeUserProfile() {
  */
 async function loadUserProfile(userId) {
     try {
-        console.log('[USER-PROFILE] Loading profile data for user:', userId);
+        // console.log('[USER-PROFILE] Loading profile data for user:', userId);
         
         const sessionId = window.authManager?.sessionId;
         if (!sessionId) {
-            console.error('[USER-PROFILE] No session ID available');
+            // Security: Session info not logged
+            console.error('[USER-PROFILE] Authentication required');
             showError();
             return;
         }
         
         // Call user API using the correct endpoint with get_picture_430=1 to get photos_v2
         const apiUrl = `/api/spice-multi-test?endpoint=/index_api/user&method=POST&session_id=${sessionId}&id=${userId}&get_picture_430=1`;
-        console.log('[USER-PROFILE] API request:', apiUrl);
+        // console.log('[USER-PROFILE] API request:', apiUrl);
         
         const response = await fetch(apiUrl);
         const result = await response.json();
         
-        console.log('[USER-PROFILE] API response:', result);
+        // console.log('[USER-PROFILE] API response:', result);
         
         // API возвращает данные в поле data.result согласно документации
         if (result.success && result.data && result.data.connected === 1 && result.data.result) {
@@ -153,7 +154,7 @@ async function loadUserProfile(userId) {
  */
 async function displayUserProfile(profile) {
     try {
-        console.log('[USER-PROFILE] Displaying profile data:', profile);
+        // console.log('[USER-PROFILE] Displaying profile data:', profile);
         
         if (!profile) {
             console.error('[USER-PROFILE] No profile data provided');
@@ -175,45 +176,45 @@ async function displayUserProfile(profile) {
         try {
             await displayBasicInfo(profile);
         } catch (error) {
-            console.warn('[USER-PROFILE] Error displaying basic info:', error);
+            // console.warn('[USER-PROFILE] Error displaying basic info:', error);
         }
         
         // Profile photo
         try {
             await displayProfilePhoto(profile);
         } catch (error) {
-            console.warn('[USER-PROFILE] Error displaying photo:', error);
+            // console.warn('[USER-PROFILE] Error displaying photo:', error);
         }
         
         // Description
         try {
             await displayDescription(profile);
         } catch (error) {
-            console.warn('[USER-PROFILE] Error displaying description:', error);
+            // console.warn('[USER-PROFILE] Error displaying description:', error);
         }
         
         // Personal details
         try {
             await displayPersonalDetails(profile);
         } catch (error) {
-            console.warn('[USER-PROFILE] Error displaying personal details:', error);
+            // console.warn('[USER-PROFILE] Error displaying personal details:', error);
         }
         
         // Photo gallery
         try {
             await displayPhotoGallery(profile);
         } catch (error) {
-            console.warn('[USER-PROFILE] Error displaying photo gallery:', error);
+            // console.warn('[USER-PROFILE] Error displaying photo gallery:', error);
         }
         
         // Setup action buttons
         try {
             setupActionButtons(profile);
         } catch (error) {
-            console.warn('[USER-PROFILE] Error setting up action buttons:', error);
+            // console.warn('[USER-PROFILE] Error setting up action buttons:', error);
         }
         
-        console.log('[USER-PROFILE] ✅ Profile displayed successfully');
+        // console.log('[USER-PROFILE] ✅ Profile displayed successfully');
         
     } catch (error) {
         console.error('[USER-PROFILE] Error displaying profile:', error);
@@ -421,24 +422,24 @@ async function displayProfilePhoto(profile) {
             }
         }
         
-        console.log('[USER-PROFILE] Loading photo:', photoUrl);
+        // console.log('[USER-PROFILE] Loading photo:', photoUrl);
         
         // Set up error handling before setting src
         photoElement.onerror = function() {
-            console.warn('[USER-PROFILE] Photo failed to load, showing placeholder');
+            // console.warn('[USER-PROFILE] Photo failed to load, showing placeholder');
             this.style.display = 'none';
             placeholderElement.style.display = 'flex';
         };
         
         photoElement.onload = function() {
-            console.log('[USER-PROFILE] Photo loaded successfully');
+            // console.log('[USER-PROFILE] Photo loaded successfully');
             this.style.display = 'block';
             placeholderElement.style.display = 'none';
         };
         
         photoElement.src = photoUrl;
     } else {
-        console.log('[USER-PROFILE] No photo URL found, showing placeholder');
+        // console.log('[USER-PROFILE] No photo URL found, showing placeholder');
         photoElement.style.display = 'none';
         placeholderElement.style.display = 'flex';
     }
@@ -461,7 +462,7 @@ async function displayDescription(profile) {
                 description = translatedDescription;
             }
         } catch (error) {
-            console.warn('[USER-PROFILE] Translation failed, using original:', error);
+            // console.warn('[USER-PROFILE] Translation failed, using original:', error);
         }
         
         descriptionElement.textContent = description;
@@ -647,7 +648,7 @@ function displayRating(rating, votes) {
     const ratingVotes = document.getElementById('ratingVotes');
     
     if (!ratingStars || !ratingValue || !ratingVotes) {
-        console.warn('[USER-PROFILE] Rating elements not found');
+        // console.warn('[USER-PROFILE] Rating elements not found');
         return;
     }
     
@@ -700,12 +701,12 @@ function setupActionButtons(profile) {
     const messageBtn = document.getElementById('messageBtn');
     
     if (!messageBtn) {
-        console.warn('[USER-PROFILE] Message button not found');
+        // console.warn('[USER-PROFILE] Message button not found');
         return;
     }
     
     if (!profile) {
-        console.warn('[USER-PROFILE] No profile data for action buttons');
+        // console.warn('[USER-PROFILE] No profile data for action buttons');
         return;
     }
     
@@ -739,10 +740,10 @@ async function loadConfigArrays(arrayNames) {
                 // Для массивов конфигурации API возвращает данные напрямую в result.data
                 if (result.success && result.data && typeof result.data === 'object') {
                     configArrays[arrayName] = result.data;
-                    console.log(`[USER-PROFILE] Loaded config array ${arrayName}:`, result.data);
+                    // console.log(`[USER-PROFILE] Loaded config array ${arrayName}:`, result.data);
                 }
             } catch (error) {
-                console.warn(`[USER-PROFILE] Failed to load config array ${arrayName}:`, error);
+                // console.warn(`[USER-PROFILE] Failed to load config array ${arrayName}:`, error);
             }
         }
     } catch (error) {
@@ -783,7 +784,7 @@ async function translateToEnglish(text) {
             return text;
         }
         
-        console.log('[USER-PROFILE] Attempting to translate text:', text);
+        // console.log('[USER-PROFILE] Attempting to translate text:', text);
         
         // Используем OpenAI API для перевода
         const response = await fetch('/api/translate-text', {
@@ -798,21 +799,21 @@ async function translateToEnglish(text) {
         });
         
         if (!response.ok) {
-            console.warn('[USER-PROFILE] Translation API error:', response.status);
+            // console.warn('[USER-PROFILE] Translation API error:', response.status);
             return text;
         }
         
         const data = await response.json();
         
         if (data.success && data.translatedText) {
-            console.log('[USER-PROFILE] Translation successful:', text, '->', data.translatedText);
+            // console.log('[USER-PROFILE] Translation successful:', text, '->', data.translatedText);
             return data.translatedText;
         }
         
-        console.warn('[USER-PROFILE] Translation API returned no result');
+        // console.warn('[USER-PROFILE] Translation API returned no result');
         return text;
     } catch (error) {
-        console.warn('[USER-PROFILE] Translation failed:', error);
+        // console.warn('[USER-PROFILE] Translation failed:', error);
         return text;
     }
 }
@@ -864,13 +865,13 @@ function hideSectionLoading(sectionName, hasContent = true) {
  * Display photo gallery
  */
 async function displayPhotoGallery(profile) {
-    console.log('[USER-PROFILE] Displaying photo gallery...');
+    // console.log('[USER-PROFILE] Displaying photo gallery...');
     
     const photosSection = document.getElementById('profilePhotosSection');
     const photosGrid = document.getElementById('profilePhotosGrid');
     
     if (!photosSection || !photosGrid) {
-        console.warn('[USER-PROFILE] Photo gallery elements not found');
+        // console.warn('[USER-PROFILE] Photo gallery elements not found');
         return;
     }
     
@@ -879,12 +880,12 @@ async function displayPhotoGallery(profile) {
     
     // First check public_album (from API logs)
     if (profile.public_album && typeof profile.public_album === 'object') {
-        console.log('[USER-PROFILE] Found public_album:', profile.public_album);
+        // console.log('[USER-PROFILE] Found public_album:', profile.public_album);
         photos = Object.values(profile.public_album);
     }
     // Then check photos_v2 field (returned when get_picture_430=1)
     else if (profile.photos_v2) {
-        console.log('[USER-PROFILE] Found photos_v2:', profile.photos_v2);
+        // console.log('[USER-PROFILE] Found photos_v2:', profile.photos_v2);
         
         if (profile.photos_v2.public && typeof profile.photos_v2.public === 'object') {
             photos = Object.values(profile.photos_v2.public);
@@ -899,10 +900,10 @@ async function displayPhotoGallery(profile) {
         photos = Object.values(profile.all_photos);
     }
     
-    console.log('[USER-PROFILE] Extracted photos:', photos);
+    // console.log('[USER-PROFILE] Extracted photos:', photos);
     
     if (photos.length === 0) {
-        console.log('[USER-PROFILE] No photos found');
+        // console.log('[USER-PROFILE] No photos found');
         photosSection.style.display = 'none';
         return;
     }
@@ -944,7 +945,7 @@ async function displayPhotoGallery(profile) {
     }).filter(html => html !== '').join('');
     
     if (photosHTML === '') {
-        console.log('[USER-PROFILE] No valid photo URLs found');
+        // console.log('[USER-PROFILE] No valid photo URLs found');
         photosSection.style.display = 'none';
         return;
     }
@@ -953,7 +954,7 @@ async function displayPhotoGallery(profile) {
     photosGrid.innerHTML = photosHTML;
     photosSection.style.display = 'block';
     
-    console.log('[USER-PROFILE] ✅ Photo gallery displayed with', photos.length, 'photos');
+    // console.log('[USER-PROFILE] ✅ Photo gallery displayed with', photos.length, 'photos');
 }
 
 /**
@@ -1070,7 +1071,7 @@ function generateStarRating(maxStars = 10, photoNum) {
  * Vote for a photo
  */
 async function voteForPhoto(rating, photoNum) {
-    console.log('[PHOTO-VOTE] Voting for photo:', photoNum, 'with rating:', rating);
+    // console.log('[PHOTO-VOTE] Voting for photo:', photoNum, 'with rating:', rating);
     
     try {
         if (!currentProfile) {
@@ -1081,7 +1082,8 @@ async function voteForPhoto(rating, photoNum) {
         
         const sessionId = window.authManager?.sessionId;
         if (!sessionId) {
-            console.error('[PHOTO-VOTE] No session ID available');
+            // Security: Session info not logged
+            console.error('[PHOTO-VOTE] Authentication required');
             showVotingNotification('Please log in to vote', 'error');
             return;
         }
@@ -1111,7 +1113,7 @@ async function voteForPhoto(rating, photoNum) {
             score: rating
         });
         
-        console.log('[PHOTO-VOTE] Sending vote with params:', params.toString());
+        // console.log('[PHOTO-VOTE] Sending vote with params:', params.toString());
         
         // Show loading state
         updateVotingUI(photoNum, rating, 'loading');
@@ -1119,13 +1121,13 @@ async function voteForPhoto(rating, photoNum) {
         const response = await fetch(`/api/spice-multi-test?endpoint=/ajax_api/gal_vote&method=GET&${params}`);
         const result = await response.json();
         
-        console.log('[PHOTO-VOTE] API Response:', result);
+        // console.log('[PHOTO-VOTE] API Response:', result);
         
         if (result.success && result.data) {
             // Success - update UI
             updateVotingUI(photoNum, rating, 'success');
             showVotingNotification(`You rated this photo ${rating}/10!`, 'success');
-            console.log('[PHOTO-VOTE] ✅ Vote submitted successfully');
+            // console.log('[PHOTO-VOTE] ✅ Vote submitted successfully');
         } else {
             // Error from API
             console.error('[PHOTO-VOTE] API returned error:', result);

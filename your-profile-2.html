@@ -513,16 +513,16 @@
             
             // Инициализируем Dashboard для функциональности профиля
             if (window.Dashboard) {
-                console.log('[PROFILE] Initializing Dashboard...');
+                // console.log('[PROFILE] Initializing Dashboard...');
                 window.dashboard = new Dashboard();
                 
                 // Переопределяем openProfileEditor после полной инициализации Dashboard
                 setTimeout(() => {
-                    console.log('[PROFILE] Setting up profile editor override...');
+                    // console.log('[PROFILE] Setting up profile editor override...');
                     const originalOpenProfileEditor = window.dashboard.openProfileEditor;
                     window.dashboard.openProfileEditor = function() {
-                        console.log('[PROFILE] Opening profile editor...');
-                        console.log('[PROFILE] Current profile data:', currentProfileData);
+                        // console.log('[PROFILE] Opening profile editor...');
+                        // console.log('[PROFILE] Current profile data:', currentProfileData);
                         
                         const modal = document.getElementById('profileEditModal');
                         if (modal) {
@@ -533,7 +533,7 @@
                             modal.classList.add('active');
                             document.body.style.overflow = 'hidden';
                             
-                            console.log('[PROFILE] Modal opened and data loaded');
+                            // console.log('[PROFILE] Modal opened and data loaded');
                         } else {
                             console.error('[PROFILE] Modal not found!');
                         }
@@ -548,22 +548,22 @@
             
             // Функция для инициализации PhotoManager с проверками
             function initPhotoManager(attempt = 1, maxAttempts = 3) {
-                console.log(`[PROFILE] Initializing PhotoManager, attempt ${attempt}/${maxAttempts}`);
+                // console.log(`[PROFILE] Initializing PhotoManager, attempt ${attempt}/${maxAttempts}`);
                 
                 if (window.PhotoManager && window.authManager?.sessionId) {
-                    console.log('[PROFILE] PhotoManager and AuthManager ready, initializing...');
+                    // console.log('[PROFILE] PhotoManager and AuthManager ready, initializing...');
                     // Use singleton instance created in photo-manager.js
                     if (!window.photoManager) {
                         window.photoManager = new PhotoManager();
                     }
                     
                     window.photoManager.init().then(() => {
-                        console.log('[PROFILE] PhotoManager initialized successfully');
+                        // console.log('[PROFILE] PhotoManager initialized successfully');
                         
                         // Рендерим галерею после успешной инициализации
                         setTimeout(() => {
                             if (window.photoManager?.renderPhotoGallery) {
-                                console.log('[PROFILE] Rendering photo gallery...');
+                                // console.log('[PROFILE] Rendering photo gallery...');
                                 window.photoManager.renderPhotoGallery();
                             }
                         }, 500);
@@ -572,13 +572,13 @@
                     });
                     
                 } else if (attempt < maxAttempts) {
-                    console.log('[PROFILE] PhotoManager or AuthManager not ready, retrying...');
+                    // console.log('[PROFILE] PhotoManager or AuthManager not ready, retrying...');
                     setTimeout(() => initPhotoManager(attempt + 1, maxAttempts), 1500);
                 } else {
                     console.error('[PROFILE] Failed to initialize PhotoManager after', maxAttempts, 'attempts');
-                    console.log('[PROFILE] PhotoManager available:', !!window.PhotoManager);
-                    console.log('[PROFILE] AuthManager available:', !!window.authManager);
-                    console.log('[PROFILE] AuthManager sessionId:', window.authManager?.sessionId);
+                    // console.log('[PROFILE] PhotoManager available:', !!window.PhotoManager);
+                    // console.log('[PROFILE] AuthManager available:', !!window.authManager);
+                    // console.log('[PROFILE] AuthManager sessionId:', window.authManager?.sessionId);
                 }
             }
             
@@ -615,7 +615,7 @@
                 const response = await fetch(apiUrl);
                 const data = await response.json();
                 
-                console.log('[PROFILE] API Response:', data);
+                // console.log('[PROFILE] API Response:', data);
                 
                 if (data.success && data.data?.result) {
                     const profile = data.data.result;
@@ -643,7 +643,7 @@
         
         function updateMainProfilePhoto(profile) {
             const mainPhotoElement = document.getElementById('profileMainPhoto');
-            console.log('[PROFILE] updateMainProfilePhoto called, element found:', !!mainPhotoElement);
+            // console.log('[PROFILE] updateMainProfilePhoto called, element found:', !!mainPhotoElement);
             
             if (!mainPhotoElement) {
                 console.error('[PROFILE] profileMainPhoto element not found!');
@@ -652,7 +652,7 @@
             
             let photoUrl = null;
             
-            console.log('[PROFILE] Photo data:', {
+            // console.log('[PROFILE] Photo data:', {
                 photos_v2: profile.photos_v2,
                 photos: profile.photos,
                 picture_430: profile.picture_430,
@@ -680,7 +680,7 @@
                     }
                     
                     if (mainPhotoKey && publicPhotos[mainPhotoKey]) {
-                        console.log('[PROFILE] Found main photo with key:', mainPhotoKey, publicPhotos[mainPhotoKey]);
+                        // console.log('[PROFILE] Found main photo with key:', mainPhotoKey, publicPhotos[mainPhotoKey]);
                         photoUrl = publicPhotos[mainPhotoKey].sq_430 || 
                                   publicPhotos[mainPhotoKey].normal || 
                                   publicPhotos[mainPhotoKey].sq_middle;
@@ -688,13 +688,13 @@
                 } else if (Array.isArray(profile.photos_v2) && profile.photos_v2.length > 0) {
                     // Массив фотографий - ищем главное
                     const mainPhoto = profile.photos_v2.find(p => p.main_photo === '1' || p.isMain === true || p.num === 0) || profile.photos_v2[0];
-                    console.log('[PROFILE] Found main photo in array:', mainPhoto);
+                    // console.log('[PROFILE] Found main photo in array:', mainPhoto);
                     photoUrl = mainPhoto.sq_430 || mainPhoto.normal || mainPhoto.sq_middle;
                 }
             } else if (profile.photos && profile.photos.length > 0) {
                 // Ищем главное фото в старом формате
                 const mainPhoto = profile.photos.find(p => p.main_photo === '1' || p.isMain === true) || profile.photos[0];
-                console.log('[PROFILE] Found main photo in photos:', mainPhoto);
+                // console.log('[PROFILE] Found main photo in photos:', mainPhoto);
                 photoUrl = mainPhoto.url_big || mainPhoto.url_middle;
             } else if (profile.picture_430) {
                 photoUrl = profile.picture_430;
@@ -707,7 +707,7 @@
                 photoUrl = 'https://dev2018.de5a7.com/' + photoUrl;
             }
             
-            console.log('[PROFILE] Setting main photo URL:', photoUrl);
+            // console.log('[PROFILE] Setting main photo URL:', photoUrl);
             
             if (photoUrl) {
                 mainPhotoElement.src = photoUrl;
@@ -715,34 +715,34 @@
                 
                 // Добавляем обработчик успешной загрузки
                 mainPhotoElement.onload = function() {
-                    console.log('[PROFILE] ✅ Main photo loaded successfully:', photoUrl);
+                    // console.log('[PROFILE] ✅ Main photo loaded successfully:', photoUrl);
                     this.style.display = 'block';
                 };
                 
                 // Добавляем обработчик ошибок для фото
                 mainPhotoElement.onerror = function() {
-                    console.warn('[PROFILE] ❌ Failed to load photo:', photoUrl);
+                    // console.warn('[PROFILE] ❌ Failed to load photo:', photoUrl);
                     this.style.display = 'none';
                 };
             } else {
-                console.warn('[PROFILE] ❌ No photo URL found, hiding main photo');
+                // console.warn('[PROFILE] ❌ No photo URL found, hiding main photo');
                 mainPhotoElement.style.display = 'none';
             }
         }
         
         // Функции для загрузки данных в форму редактирования (из dashboard.js)
         function loadProfileDataIntoForm() {
-            console.log('[PROFILE] loadProfileDataIntoForm called');
-            console.log('[PROFILE] currentProfileData:', currentProfileData);
+            // console.log('[PROFILE] loadProfileDataIntoForm called');
+            // console.log('[PROFILE] currentProfileData:', currentProfileData);
             
             if (!currentProfileData) {
-                console.warn('[PROFILE] No profile data available for form');
+                // console.warn('[PROFILE] No profile data available for form');
                 // Попробуем загрузить данные если их нет
                 if (window.authManager?.sessionId) {
-                    console.log('[PROFILE] Trying to reload profile data...');
+                    // console.log('[PROFILE] Trying to reload profile data...');
                     loadUserProfile().then(() => {
                         if (currentProfileData) {
-                            console.log('[PROFILE] Profile data reloaded, trying again...');
+                            // console.log('[PROFILE] Profile data reloaded, trying again...');
                             loadProfileDataIntoForm();
                         }
                     });
@@ -751,7 +751,7 @@
             }
 
             const data = currentProfileData;
-            console.log('[PROFILE] Loading data into form:', data);
+            // console.log('[PROFILE] Loading data into form:', data);
             
             // Basic Information
             setFormValue('fullName', data.nom_complet || '');
@@ -783,13 +783,13 @@
         }
 
         function setFormValue(fieldId, value) {
-            console.log(`[PROFILE] Setting ${fieldId} = ${value}`);
+            // console.log(`[PROFILE] Setting ${fieldId} = ${value}`);
             const field = document.getElementById(fieldId);
             if (field) {
                 field.value = value;
-                console.log(`[PROFILE] ✅ ${fieldId} set successfully`);
+                // console.log(`[PROFILE] ✅ ${fieldId} set successfully`);
             } else {
-                console.warn(`[PROFILE] ❌ Field ${fieldId} not found`);
+                // console.warn(`[PROFILE] ❌ Field ${fieldId} not found`);
             }
         }
         

@@ -17,11 +17,11 @@ class GiftsManager {
     }
 
     async init() {
-        console.log('[GIFTS] Initializing gifts page...');
+        // console.log('[GIFTS] Initializing gifts page...');
         
         // Проверяем авторизацию
         if (!window.authManager || !window.authManager.isLoggedIn) {
-            console.log('[GIFTS] User not logged in, redirecting...');
+            // console.log('[GIFTS] User not logged in, redirecting...');
             window.location.href = 'auth.html';
             return;
         }
@@ -67,7 +67,7 @@ class GiftsManager {
         const sessionId = window.authManager.sessionId;
         
         try {
-            console.log('[GIFTS] Loading gifts data...');
+            // console.log('[GIFTS] Loading gifts data...');
             
             // Загружаем полученные подарки
             const receivedResponse = await fetch('/api/database', {
@@ -83,7 +83,7 @@ class GiftsManager {
             const receivedResult = await receivedResponse.json();
             if (receivedResult.success) {
                 this.receivedGifts = receivedResult.data;
-                console.log('[GIFTS] Loaded received gifts:', this.receivedGifts.length);
+                // console.log('[GIFTS] Loaded received gifts:', this.receivedGifts.length);
             }
 
             // Загружаем отправленные подарки
@@ -100,7 +100,7 @@ class GiftsManager {
             const sentResult = await sentResponse.json();
             if (sentResult.success) {
                 this.sentGifts = sentResult.data;
-                console.log('[GIFTS] Loaded sent gifts:', this.sentGifts.length);
+                // console.log('[GIFTS] Loaded sent gifts:', this.sentGifts.length);
             }
 
             // Загружаем транзакции
@@ -133,7 +133,7 @@ class GiftsManager {
             const result = await response.json();
             if (result.success) {
                 this.transactions = result.data;
-                console.log('[GIFTS] Loaded transactions:', this.transactions.length);
+                // console.log('[GIFTS] Loaded transactions:', this.transactions.length);
             }
         } catch (error) {
             console.error('[GIFTS] Error loading transactions:', error);
@@ -405,7 +405,7 @@ class GiftsManager {
         const userId = window.authManager.userId;
         
         try {
-            console.log('[GIFTS] Monetizing gifts:', selectedGiftIds);
+            // console.log('[GIFTS] Monetizing gifts:', selectedGiftIds);
             
             const response = await fetch('/api/database', {
                 method: 'POST',
@@ -422,7 +422,7 @@ class GiftsManager {
             const result = await response.json();
             
             if (result.success) {
-                console.log('[GIFTS] Monetization successful:', result.data);
+                // console.log('[GIFTS] Monetization successful:', result.data);
                 
                 // Показываем уведомление
                 this.showSuccessMessage(`Successfully monetized ${result.data.monetized_gifts.length} gifts for ${result.data.total_usd_value.toFixed(2)} ${currency}`);

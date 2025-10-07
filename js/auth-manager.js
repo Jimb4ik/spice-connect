@@ -43,7 +43,7 @@ class AuthManager {
         this.sessionId = savedSession;
         this.isLoggedIn = true;
         
-        console.log('[AUTH] Loaded saved session for user:', this.currentUser.pseudo);
+        // console.log('[AUTH] Loaded saved session for user:', this.currentUser.pseudo);
         
         // Update UI for logged in user
         this.updateUIForLoggedInUser();
@@ -51,7 +51,7 @@ class AuthManager {
         // Verify session is still valid (non-blocking)
         this.verifySession().then(valid => {
           if (!valid) {
-            console.log('[AUTH] Session verification failed, but allowing user to stay logged in for now');
+            // console.log('[AUTH] Session verification failed, but allowing user to stay logged in for now');
           }
         });
       }
@@ -70,7 +70,7 @@ class AuthManager {
         localStorage.setItem('lavrilo_user', JSON.stringify(this.currentUser));
         localStorage.setItem('lavrilo_token', this.tokenLogin);
         localStorage.setItem('lavrilo_session', this.sessionId);
-        console.log('[AUTH] Session saved to localStorage');
+        // console.log('[AUTH] Session saved to localStorage');
       }
     } catch (error) {
       console.error('[AUTH] Error saving session:', error);
@@ -90,7 +90,7 @@ class AuthManager {
     this.tokenLogin = null;
     this.isLoggedIn = false;
     
-    console.log('[AUTH] Session cleared');
+    // console.log('[AUTH] Session cleared');
   }
 
   /**
@@ -98,7 +98,7 @@ class AuthManager {
    */
   async login(username, password, rememberMe = true) {
     try {
-      console.log('[AUTH] Attempting login for:', username);
+      // console.log('[AUTH] Attempting login for:', username);
       
       const response = await fetch('/api/auth', {
         method: 'POST',
@@ -130,13 +130,13 @@ class AuthManager {
           this.saveSession();
         }
         
-        console.log('[AUTH] Login successful for:', username);
-        console.log('[AUTH] About to call onLoginSuccess()');
+        // console.log('[AUTH] Login successful for:', username);
+        // console.log('[AUTH] About to call onLoginSuccess()');
         this.onLoginSuccess();
         
         return { success: true, user: this.currentUser };
       } else {
-        console.log('[AUTH] Login failed:', data);
+        // console.log('[AUTH] Login failed:', data);
         return { success: false, error: data.error || 'Invalid credentials' };
       }
       
@@ -153,16 +153,16 @@ class AuthManager {
     if (!this.tokenLogin) return false;
     
     try {
-      console.log('[AUTH] Attempting auto-login with token');
+      // console.log('[AUTH] Attempting auto-login with token');
       
       // Use token as password for auto-login
       const result = await this.login(this.currentUser.pseudo, this.tokenLogin, true);
       
       if (result.success) {
-        console.log('[AUTH] Auto-login successful');
+        // console.log('[AUTH] Auto-login successful');
         return true;
       } else {
-        console.log('[AUTH] Auto-login failed, clearing session');
+        // console.log('[AUTH] Auto-login failed, clearing session');
         this.clearSession();
         return false;
       }
@@ -179,7 +179,7 @@ class AuthManager {
    */
   async register(userData) {
     try {
-      console.log('[AUTH] Attempting registration for:', userData.login);
+      // console.log('[AUTH] Attempting registration for:', userData.login);
       
       // Get user IP for registration
       const userIP = await this.getUserIP();
@@ -210,7 +210,7 @@ class AuthManager {
       const data = await response.json();
       
       if (data.success && data.session_id) {
-        console.log('[AUTH] Registration successful for:', userData.login);
+        // console.log('[AUTH] Registration successful for:', userData.login);
         
         // Auto-login after successful registration
         this.currentUser = {
@@ -222,7 +222,7 @@ class AuthManager {
         this.tokenLogin = data.token_login || data.session_id; // Use session_id as fallback
         this.isLoggedIn = true;
         
-        console.log('[AUTH] User data set:', {
+        // console.log('[AUTH] User data set:', {
           id: this.currentUser.id,
           pseudo: this.currentUser.pseudo,
           sessionId: this.sessionId,
@@ -235,7 +235,7 @@ class AuthManager {
         
         return { success: true, user: this.currentUser };
       } else {
-        console.log('[AUTH] Registration failed:', data);
+        // console.log('[AUTH] Registration failed:', data);
         return { success: false, error: data.error || 'Registration failed' };
       }
       
@@ -263,7 +263,7 @@ class AuthManager {
         });
       }
       
-      console.log('[AUTH] Logout successful');
+      // console.log('[AUTH] Logout successful');
       this.clearSession();
       this.onLogout();
       
@@ -281,12 +281,12 @@ class AuthManager {
    */
   async getCurrentUserEmail() {
     if (!this.isLoggedIn || !this.sessionId || !this.currentUser?.id) {
-      console.warn('[AUTH] Cannot get email: user not logged in');
+      // console.warn('[AUTH] Cannot get email: user not logged in');
       return null;
     }
 
     try {
-      console.log('[AUTH] Fetching user email from API...');
+      // console.log('[AUTH] Fetching user email from API...');
       
       const response = await fetch('/api/user-profile', {
         method: 'POST',
@@ -302,10 +302,10 @@ class AuthManager {
       if (result.success && result.result) {
         const email = result.result.email;
         if (email) {
-          console.log('[AUTH] User email retrieved successfully');
+          // console.log('[AUTH] User email retrieved successfully');
           return email;
         } else {
-          console.warn('[AUTH] No email found in user profile');
+          // console.warn('[AUTH] No email found in user profile');
           return null;
         }
       } else {
@@ -330,10 +330,10 @@ class AuthManager {
       const data = await response.json();
       
       if (data.data?.connected === "1" || data.data?.connected === 1) {
-        console.log('[AUTH] Session verified as valid');
+        // console.log('[AUTH] Session verified as valid');
         return true;
       } else {
-        console.log('[AUTH] Session invalid, but keeping user logged in');
+        // console.log('[AUTH] Session invalid, but keeping user logged in');
         return false;
       }
       
@@ -361,7 +361,7 @@ class AuthManager {
    * Called after successful login
    */
   onLoginSuccess() {
-    console.log('[AUTH] onLoginSuccess() called - starting post-login process');
+    // console.log('[AUTH] onLoginSuccess() called - starting post-login process');
     
     // Update UI elements
     this.updateUIForLoggedInUser();
@@ -371,7 +371,7 @@ class AuthManager {
       detail: { user: this.currentUser }
     }));
     
-    console.log('[AUTH] About to call redirectToProfile()');
+    // console.log('[AUTH] About to call redirectToProfile()');
     // Redirect to profile after successful authentication
     this.redirectToProfile();
   }
@@ -380,10 +380,10 @@ class AuthManager {
    * Redirect user to profile
    */
   redirectToProfile() {
-    console.log('[AUTH] redirectToProfile() called, scheduling redirect in 1200ms');
+    // console.log('[AUTH] redirectToProfile() called, scheduling redirect in 1200ms');
     // Longer delay to ensure auth state is properly saved
     setTimeout(() => {
-      console.log('[AUTH] Executing redirect to main.html NOW');
+      // console.log('[AUTH] Executing redirect to main.html NOW');
       window.location.href = 'main.html';
     }, 1200);
   }
@@ -408,7 +408,7 @@ class AuthManager {
   redirectToHome() {
     // Small delay to ensure UI updates are complete
     setTimeout(() => {
-      console.log('[AUTH] Redirecting to home page...');
+      // console.log('[AUTH] Redirecting to home page...');
       window.location.href = '/';
     }, 500);
   }
@@ -495,4 +495,4 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-console.log('[AUTH] AuthManager initialized');
+// console.log('[AUTH] AuthManager initialized');

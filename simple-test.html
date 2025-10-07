@@ -201,7 +201,7 @@
             results.innerHTML = '';
             
             try {
-                console.log('🚀 Отправляем запрос через Vercel proxy...');
+                // console.log('🚀 Отправляем запрос через Vercel proxy...');
                 
                 const response = await fetch('/api/spice-proxy-simple', {
                     method: 'POST',
@@ -214,7 +214,7 @@
                 });
                 
                 const data = await response.json();
-                console.log('📋 Ответ от API:', data);
+                // console.log('📋 Ответ от API:', data);
                 
                 if (data.success) {
                     displaySuccessResults(data);
@@ -244,7 +244,7 @@
             results.innerHTML = '';
             
             try {
-                console.log('⚠️ Попытка прямого обращения к API (будет CORS ошибка)...');
+                // console.log('⚠️ Попытка прямого обращения к API (будет CORS ошибка)...');
                 
                 const response = await fetch('https://api.jetsetrdv.com/index_api/landing_module/profils_global', {
                     method: 'POST',

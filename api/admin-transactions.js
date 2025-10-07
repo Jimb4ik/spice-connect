@@ -55,7 +55,7 @@ export default async function handler(req, res) {
 
             case 'seed_transactions': {
                 // Наполнить БД реалистичными транзакциями
-                console.log('[ADMIN] Seeding transactions...');
+                // console.log('[ADMIN] Seeding transactions...');
                 
                 // Создаем таблицу если её нет
                 await pool.query(`
@@ -87,7 +87,7 @@ export default async function handler(req, res) {
                 // Если переданы user_ids, очистим старые транзакции для свежих данных
                 if (user_ids && user_ids.length > 0) {
                     await pool.query('DELETE FROM transactions');
-                    console.log('[ADMIN] Cleared old transactions for fresh seed');
+                    // console.log('[ADMIN] Cleared old transactions for fresh seed');
                 }
                 const transactionTypes = ['purchase', 'payout', 'gift'];
                 const paymentMethods = ['Credit Card', 'PayPal', 'Stripe', 'Bank Transfer'];
@@ -126,7 +126,7 @@ export default async function handler(req, res) {
 
                 // Выбираем 4 ОЧЕНЬ активных пользователя
                 const activeUserIds = userIds.sort(() => 0.5 - Math.random()).slice(0, 4);
-                console.log('[ADMIN] Creating transactions for', activeUserIds.length, 'SUPER active users');
+                // console.log('[ADMIN] Creating transactions for', activeUserIds.length, 'SUPER active users');
                 
                 // Создаем ОЧЕНЬ МНОГО транзакций для супер активных пользователей (60-100 на каждого)
                 activeUserIds.forEach(activeUserId => {
@@ -253,7 +253,7 @@ export default async function handler(req, res) {
                     }
                 }
 
-                console.log('[ADMIN] Seeded', transactions.length, 'transactions');
+                // console.log('[ADMIN] Seeded', transactions.length, 'transactions');
                 
                 return res.json({
                     success: true,

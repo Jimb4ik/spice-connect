@@ -11,7 +11,7 @@ class CacheBuster {
         const storedVersion = localStorage.getItem('app_version');
         
         if (storedVersion !== this.version) {
-            console.log(`🔄 Обновление с версии ${storedVersion} до ${this.version}`);
+            // console.log(`🔄 Обновление с версии ${storedVersion} до ${this.version}`);
             this.clearCache();
             this.updateVersion();
             this.reloadIfNeeded();
@@ -35,7 +35,7 @@ class CacheBuster {
         // Очищаем sessionStorage
         sessionStorage.clear();
         
-        console.log('🧹 Кеш очищен');
+        // console.log('🧹 Кеш очищен');
     }
 
     updateVersion() {
@@ -45,7 +45,7 @@ class CacheBuster {
 
     reloadIfNeeded() {
         // Автоматически обновляем через 2 секунды
-        console.log('🔄 Автоматическое обновление через 2 секунды...');
+        // console.log('🔄 Автоматическое обновление через 2 секунды...');
         setTimeout(() => {
             this.forceReload();
         }, 2000);
@@ -62,21 +62,21 @@ class CacheBuster {
         if ('serviceWorker' in navigator) {
             try {
                 const registration = await navigator.serviceWorker.register('/sw.js');
-                console.log('[SW] Service Worker registered successfully:', registration);
+                // console.log('[SW] Service Worker registered successfully:', registration);
                 
                 // Слушаем обновления
                 registration.addEventListener('updatefound', () => {
                     const newWorker = registration.installing;
                     newWorker.addEventListener('statechange', () => {
                         if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                            console.log('[SW] New Service Worker available');
+                            // console.log('[SW] New Service Worker available');
                             // Автоматически обновляем без уведомлений
                             setTimeout(() => this.forceReload(), 1000);
                         }
                     });
                 });
             } catch (error) {
-                console.log('[SW] Service Worker registration failed:', error);
+                // console.log('[SW] Service Worker registration failed:', error);
             }
         }
     }
@@ -89,7 +89,7 @@ class CacheBuster {
             const versionParts = currentVersion.split('.');
             versionParts[2] = (parseInt(versionParts[2]) + 1).toString();
             const newVersion = versionParts.join('.');
-            console.log(`Обновите версию в cache-buster.js с ${currentVersion} на ${newVersion}`);
+            // console.log(`Обновите версию в cache-buster.js с ${currentVersion} на ${newVersion}`);
         }
     }
 }

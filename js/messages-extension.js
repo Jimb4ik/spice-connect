@@ -11,7 +11,7 @@ Object.assign(Dashboard.prototype, {
     const contactsList = document.getElementById('contactsList');
     const contactsLoading = document.getElementById('contactsLoading');
     
-    console.log('[MESSAGES] Loading contacts...');
+    // console.log('[MESSAGES] Loading contacts...');
     
     try {
       // Show loading
@@ -24,7 +24,7 @@ Object.assign(Dashboard.prototype, {
       if (result.success && result.contacts) {
         this.contacts = result.contacts;
         this.displayContacts(result.contacts);
-        console.log(`[MESSAGES] Loaded ${result.contacts.length} contacts`);
+        // console.log(`[MESSAGES] Loaded ${result.contacts.length} contacts`);
       } else {
         this.showContactsError(result.error || 'Failed to load contacts');
       }
@@ -63,17 +63,17 @@ Object.assign(Dashboard.prototype, {
     
     const apiUrl = `/api/spice-multi-test?endpoint=/ajax_api/load_contacts&method=GET&${contactParams.toString()}`;
     
-    console.log('[MESSAGES] API call for contacts:', apiUrl);
+    // console.log('[MESSAGES] API call for contacts:', apiUrl);
 
     const response = await fetch(apiUrl);
     const result = await response.json();
-    console.log('[MESSAGES] Contacts API Response:', result);
-    console.log('[MESSAGES] Raw API data structure:', result.data);
+    // console.log('[MESSAGES] Contacts API Response:', result);
+    // console.log('[MESSAGES] Raw API data structure:', result.data);
 
     if (result.success && result.data) {
       // Согласно документации API возвращает контакты в поле "contacts"
       const contacts = result.data.contacts || result.data.result || [];
-      console.log('[MESSAGES] Parsed contacts count:', contacts.length);
+      // console.log('[MESSAGES] Parsed contacts count:', contacts.length);
       return {
         success: true,
         contacts: Array.isArray(contacts) ? contacts : []
@@ -121,7 +121,7 @@ Object.assign(Dashboard.prototype, {
       return bTime - aTime;
     });
 
-    console.log('[MESSAGES] Sorted contacts:', sortedContacts.map(c => ({name: c.pseudo, lastTime: c.last_time, lastMessage: c.last_message})));
+    // console.log('[MESSAGES] Sorted contacts:', sortedContacts.map(c => ({name: c.pseudo, lastTime: c.last_time, lastMessage: c.last_message})));
 
     const contactsHTML = sortedContacts.map(contact => this.createContactItem(contact)).join('');
     contactsList.innerHTML = contactsHTML;
@@ -140,7 +140,7 @@ Object.assign(Dashboard.prototype, {
 
     // Префетчим превью последнего сообщения для первых контактов
     this.prefetchLastPreviews(sortedContacts).catch(err => {
-      console.warn('[MESSAGES] Prefetch previews error:', err);
+      // console.warn('[MESSAGES] Prefetch previews error:', err);
     });
   },
 
@@ -151,7 +151,7 @@ Object.assign(Dashboard.prototype, {
       const contactParam = urlParams.get('contact');
       
       if (contactParam) {
-        console.log('[MESSAGES] Auto-selecting contact from URL:', contactParam);
+        // console.log('[MESSAGES] Auto-selecting contact from URL:', contactParam);
         
         // Ищем контакт по ID
         const targetContact = contacts.find(contact => {
@@ -161,14 +161,14 @@ Object.assign(Dashboard.prototype, {
         
         if (targetContact) {
           const contactId = targetContact.m_id || targetContact.id || targetContact.user_id;
-          console.log('[MESSAGES] Found target contact:', targetContact.pseudo);
+          // console.log('[MESSAGES] Found target contact:', targetContact.pseudo);
           
           // Автоматически выбираем чат через небольшую задержку
           setTimeout(() => {
             this.selectChat(contactId);
           }, 500);
         } else {
-          console.warn('[MESSAGES] Contact not found in list:', contactParam);
+          // console.warn('[MESSAGES] Contact not found in list:', contactParam);
         }
         
         // Очищаем URL от параметров чтобы не мешались при дальнейшей навигации
@@ -209,7 +209,7 @@ Object.assign(Dashboard.prototype, {
             return; // превью обновлено
           }
         } catch (e) {
-          console.warn('[MESSAGES] DB preview fetch failed for', contactId, e);
+          // console.warn('[MESSAGES] DB preview fetch failed for', contactId, e);
         }
 
         // 2) Фоллбэк: берём последнее сообщение с внешнего API (для контактов без локальных записей)
@@ -222,11 +222,11 @@ Object.assign(Dashboard.prototype, {
             this.updateContactPreview(String(contactId), text, time);
           }
         } catch (e) {
-          console.warn('[MESSAGES] External preview fetch failed for', contactId, e);
+          // console.warn('[MESSAGES] External preview fetch failed for', contactId, e);
         }
       }));
     } catch (error) {
-      console.warn('[MESSAGES] prefetchLastPreviews error root:', error);
+      // console.warn('[MESSAGES] prefetchLastPreviews error root:', error);
     }
   },
 
@@ -275,7 +275,7 @@ Object.assign(Dashboard.prototype, {
   },
 
   async selectChat(userId) {
-    console.log('[MESSAGES] Selecting chat with user:', userId);
+    // console.log('[MESSAGES] Selecting chat with user:', userId);
     
     // Update active contact
     const contactItems = document.querySelectorAll('.contact-item');
@@ -322,7 +322,7 @@ Object.assign(Dashboard.prototype, {
       }
       
       if (messageText && messageText.trim() !== '') {
-        console.log('[MESSAGES] Updating contact preview for:', userId, 'with message:', messageText);
+        // console.log('[MESSAGES] Updating contact preview for:', userId, 'with message:', messageText);
         lastMessageElement.textContent = messageText;
         
         // Также обновляем время если передано
@@ -387,7 +387,7 @@ Object.assign(Dashboard.prototype, {
   async loadChatMessages(userId) {
     const chatMessages = document.getElementById('chatMessages');
     
-    console.log(`[MESSAGES] Loading messages for user: ${userId}`);
+    // console.log(`[MESSAGES] Loading messages for user: ${userId}`);
     
     try {
       // Загружаем сообщения из нашей БД
@@ -409,16 +409,16 @@ Object.assign(Dashboard.prototype, {
           created_at: msg.created_at
         }));
         allMessages = [...formattedDbMessages];
-        console.log(`[MESSAGES] Loaded ${dbMessages.length} messages from DB`);
-        console.log('[MESSAGES] Formatted DB messages:', formattedDbMessages);
+        // console.log(`[MESSAGES] Loaded ${dbMessages.length} messages from DB`);
+        // console.log('[MESSAGES] Formatted DB messages:', formattedDbMessages);
       } else {
-        console.log('[MESSAGES] ⚠️ No messages found in DB for this conversation');
+        // console.log('[MESSAGES] ⚠️ No messages found in DB for this conversation');
       }
       
       // Объединяем с внешними сообщениями
       if (result.success && result.messages) {
         allMessages = [...allMessages, ...result.messages];
-        console.log(`[MESSAGES] Added ${result.messages.length} messages from external API`);
+        // console.log(`[MESSAGES] Added ${result.messages.length} messages from external API`);
       }
       
       // Сортируем по времени
@@ -436,10 +436,10 @@ Object.assign(Dashboard.prototype, {
         isOwn: msg.from_me || msg.is_own || false
       }));
       
-      console.log('[MESSAGES] Cached messages for user:', userId, this.messagesCache[userId]);
+      // console.log('[MESSAGES] Cached messages for user:', userId, this.messagesCache[userId]);
       
       this.displayChatMessages(allMessages);
-      console.log(`[MESSAGES] Total displayed: ${allMessages.length} messages`);
+      // console.log(`[MESSAGES] Total displayed: ${allMessages.length} messages`);
 
       // Обновляем превью последнего сообщения в списке контактов
       if (allMessages.length > 0) {
@@ -464,9 +464,9 @@ Object.assign(Dashboard.prototype, {
       
       if (!sessionId || !userId) {
         console.error('[MESSAGES] Нет данных сессии для получения сообщений');
-        console.log('[MESSAGES] authManager:', authManager);
-        console.log('[MESSAGES] sessionId:', sessionId, 'userId:', userId);
-        console.log('[MESSAGES] currentUser:', authManager?.currentUser);
+        // console.log('[MESSAGES] authManager:', authManager);
+        // console.log('[MESSAGES] sessionId:', sessionId, 'userId:', userId);
+        // console.log('[MESSAGES] currentUser:', authManager?.currentUser);
         
         // Попробуем альтернативные поля для userId
         const alternativeUserId = authManager?.currentUser?.m_id || 
@@ -474,7 +474,7 @@ Object.assign(Dashboard.prototype, {
                                   authManager?.currentUser?.pseudo;
         
         if (sessionId && alternativeUserId) {
-          console.log('[MESSAGES] Используем альтернативный userId:', alternativeUserId);
+          // console.log('[MESSAGES] Используем альтернативный userId:', alternativeUserId);
           // Продолжаем с альтернативным ID
         } else {
           return [];
@@ -493,24 +493,24 @@ Object.assign(Dashboard.prototype, {
         session_id: sessionId
       });
       
-      console.log('[MESSAGES] Запрос к БД:', `/api/messages?${params.toString()}`);
+      // console.log('[MESSAGES] Запрос к БД:', `/api/messages?${params.toString()}`);
       
       const response = await fetch(`/api/messages?${params.toString()}`);
       const result = await response.json();
       
-      console.log('[MESSAGES] ========== ДЕТАЛЬНЫЙ ОТВЕТ БД ==========');
-      console.log('[MESSAGES] Response status:', response.status);
-      console.log('[MESSAGES] Response ok:', response.ok);
-      console.log('[MESSAGES] Result:', result);
-      console.log('[MESSAGES] Result.success:', result.success);
-      console.log('[MESSAGES] Result.data:', result.data);
+      // console.log('[MESSAGES] ========== ДЕТАЛЬНЫЙ ОТВЕТ БД ==========');
+      // console.log('[MESSAGES] Response status:', response.status);
+      // console.log('[MESSAGES] Response ok:', response.ok);
+      // console.log('[MESSAGES] Result:', result);
+      // console.log('[MESSAGES] Result.success:', result.success);
+      // console.log('[MESSAGES] Result.data:', result.data);
       if (result.data && Array.isArray(result.data)) {
-        console.log('[MESSAGES] Количество сообщений в БД:', result.data.length);
+        // console.log('[MESSAGES] Количество сообщений в БД:', result.data.length);
         result.data.forEach((msg, index) => {
-          console.log(`[MESSAGES] Сообщение ${index}:`, msg);
+          // console.log(`[MESSAGES] Сообщение ${index}:`, msg);
         });
       }
-      console.log('[MESSAGES] ============================================');
+      // console.log('[MESSAGES] ============================================');
       
       if (result.success) {
         return result.data || [];
@@ -538,13 +538,13 @@ Object.assign(Dashboard.prototype, {
       
       if (!sessionId || !finalUserId) {
         console.error('[MESSAGES] Нет данных сессии для сохранения сообщения');
-        console.log('[MESSAGES] authManager:', authManager);
-        console.log('[MESSAGES] sessionId:', sessionId, 'finalUserId:', finalUserId);
-        console.log('[MESSAGES] currentUser:', authManager?.currentUser);
+        // console.log('[MESSAGES] authManager:', authManager);
+        // console.log('[MESSAGES] sessionId:', sessionId, 'finalUserId:', finalUserId);
+        // console.log('[MESSAGES] currentUser:', authManager?.currentUser);
         return null;
       }
       
-      console.log('[MESSAGES] Сохраняем сообщение в БД:', {
+      // console.log('[MESSAGES] Сохраняем сообщение в БД:', {
         sender_id: finalUserId,
         recipient_id: recipientId,
         message_text: messageText,
@@ -566,7 +566,7 @@ Object.assign(Dashboard.prototype, {
       });
       
       const result = await response.json();
-      console.log('[MESSAGES] Ответ сохранения в БД:', result);
+      // console.log('[MESSAGES] Ответ сохранения в БД:', result);
       
       if (result.success) {
         return result.data;
@@ -610,32 +610,32 @@ Object.assign(Dashboard.prototype, {
     
     const apiUrl = `/api/spice-multi-test?endpoint=/ajax_api/load_messages&method=GET&${messageParams.toString()}`;
     
-    console.log('[MESSAGES] API call for messages with user:', userId, 'contact:', contact.pseudo);
+    // console.log('[MESSAGES] API call for messages with user:', userId, 'contact:', contact.pseudo);
 
     const response = await fetch(apiUrl);
     const result = await response.json();
     
-    console.log('🔍 [MESSAGES] ========== ДЕТАЛЬНЫЙ АНАЛИЗ API ОТВЕТА ==========');
-    console.log('[MESSAGES] API URL:', apiUrl);
-    console.log('[MESSAGES] Response status:', response.status);
-    console.log('[MESSAGES] Raw API Response:', result);
-    console.log('[MESSAGES] result.success:', result.success);
-    console.log('[MESSAGES] result.data:', result.data);
+    // console.log('🔍 [MESSAGES] ========== ДЕТАЛЬНЫЙ АНАЛИЗ API ОТВЕТА ==========');
+    // console.log('[MESSAGES] API URL:', apiUrl);
+    // console.log('[MESSAGES] Response status:', response.status);
+    // console.log('[MESSAGES] Raw API Response:', result);
+    // console.log('[MESSAGES] result.success:', result.success);
+    // console.log('[MESSAGES] result.data:', result.data);
     
     if (result.data) {
-      console.log('[MESSAGES] result.data.result:', result.data.result);
-      console.log('[MESSAGES] result.data.messages:', result.data.messages);
-      console.log('[MESSAGES] Type of result.data.result:', typeof result.data.result);
-      console.log('[MESSAGES] Is Array result.data.result:', Array.isArray(result.data.result));
+      // console.log('[MESSAGES] result.data.result:', result.data.result);
+      // console.log('[MESSAGES] result.data.messages:', result.data.messages);
+      // console.log('[MESSAGES] Type of result.data.result:', typeof result.data.result);
+      // console.log('[MESSAGES] Is Array result.data.result:', Array.isArray(result.data.result));
       
       if (Array.isArray(result.data.result)) {
-        console.log('[MESSAGES] Количество сообщений в result.data.result:', result.data.result.length);
+        // console.log('[MESSAGES] Количество сообщений в result.data.result:', result.data.result.length);
         result.data.result.forEach((msg, index) => {
-          console.log(`[MESSAGES] Message ${index}:`, msg);
+          // console.log(`[MESSAGES] Message ${index}:`, msg);
         });
       }
     }
-    console.log('🔍 [MESSAGES] ===================================================');
+    // console.log('🔍 [MESSAGES] ===================================================');
 
     if (result.success && result.data) {
       return {
@@ -799,7 +799,7 @@ Object.assign(Dashboard.prototype, {
     const messageText = messageInput.value.trim();
     if (!messageText) return;
 
-    console.log('[MESSAGES] Sending message to:', this.currentChatUserId);
+    // console.log('[MESSAGES] Sending message to:', this.currentChatUserId);
     
     try {
       // Disable input during send
@@ -828,7 +828,7 @@ Object.assign(Dashboard.prototype, {
         // Reload contacts to update last message
         this.loadContacts();
         
-        console.log('[MESSAGES] Message sent successfully');
+        // console.log('[MESSAGES] Message sent successfully');
         
       } else {
         this.showNotification(`Failed to send message: ${result.error}`, 'error');
@@ -876,11 +876,11 @@ Object.assign(Dashboard.prototype, {
     
     const apiUrl = `/api/spice-multi-test?endpoint=/ajax_api/send_message&method=GET&${sendParams.toString()}`;
     
-    console.log('[MESSAGES] API call to send message to:', contact.pseudo, 'message:', message);
+    // console.log('[MESSAGES] API call to send message to:', contact.pseudo, 'message:', message);
 
     const response = await fetch(apiUrl);
     const result = await response.json();
-    console.log('[MESSAGES] Send message API Response:', result);
+    // console.log('[MESSAGES] Send message API Response:', result);
 
     if (result.success && result.data) {
       return {
@@ -921,7 +921,7 @@ Object.assign(Dashboard.prototype, {
         this.updateContactPreview(userId, text, time);
       }
     } catch (e) {
-      console.warn('[MESSAGES] Failed to update contact preview:', e);
+      // console.warn('[MESSAGES] Failed to update contact preview:', e);
     }
   },
 
@@ -948,7 +948,7 @@ Object.assign(Dashboard.prototype, {
   },
 
   openChatWithUser(userId, userName) {
-    console.log('[MESSAGES] Opening chat with user:', userId, userName);
+    // console.log('[MESSAGES] Opening chat with user:', userId, userName);
     
     // Switch to messages section if not already there
     if (this.currentSection !== 'messages') {

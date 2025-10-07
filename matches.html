@@ -276,7 +276,7 @@
         // Функция для загрузки статистики матчей
         async function loadMatchesStatistics(sessionId) {
             try {
-                console.log('[MATCHES] Loading matches statistics...');
+                // console.log('[MATCHES] Loading matches statistics...');
                 
                 // 1. Total Matches - из нашей БД
                 const totalMatches = await getTotalMatchesFromDB(sessionId);
@@ -290,7 +290,7 @@
                 const activeChats = await getActiveChatsCount(sessionId);
                 document.getElementById('activeChatsCount').textContent = activeChats;
                 
-                console.log('[MATCHES] Statistics loaded:', {
+                // console.log('[MATCHES] Statistics loaded:', {
                     total: totalMatches,
                     new: newMatches,
                     active: activeChats
@@ -315,7 +315,7 @@
                 
                 const result = await response.json();
                 if (result.success && result.data) {
-                    console.log('[MATCHES] Total matches from DB:', result.data.length);
+                    // console.log('[MATCHES] Total matches from DB:', result.data.length);
                     return result.data.length;
                 }
                 return 0;
@@ -339,7 +339,7 @@
                 
                 const result = await response.json();
                 if (result.success && result.data) {
-                    console.log('[MATCHES] All matches from DB:', result.data.length);
+                    // console.log('[MATCHES] All matches from DB:', result.data.length);
                     
                     // Получаем сегодняшнюю дату в формате YYYY-MM-DD
                     const today = new Date();
@@ -347,7 +347,7 @@
                         String(today.getMonth() + 1).padStart(2, '0') + '-' + 
                         String(today.getDate()).padStart(2, '0');
                     
-                    console.log('[MATCHES] Today date string:', todayDateString);
+                    // console.log('[MATCHES] Today date string:', todayDateString);
                     
                     const todayMatches = result.data.filter(match => {
                         // Используем правильное поле match_date из базы данных
@@ -357,13 +357,13 @@
                             String(matchDate.getDate()).padStart(2, '0');
                         
                         const isToday = matchDateString === todayDateString;
-                        console.log('[MATCHES] Match:', match.match_date, '-> date:', matchDateString, 'is today?', isToday);
+                        // console.log('[MATCHES] Match:', match.match_date, '-> date:', matchDateString, 'is today?', isToday);
                         
                         return isToday;
                     });
                     
-                    console.log('[MATCHES] New matches today:', todayMatches.length);
-                    console.log('[MATCHES] Today matches details:', todayMatches.map(m => ({ 
+                    // console.log('[MATCHES] New matches today:', todayMatches.length);
+                    // console.log('[MATCHES] Today matches details:', todayMatches.map(m => ({ 
                         id: m.matched_user_id, 
                         match_date: m.match_date,
                         user: m.matched_user_name 
@@ -381,7 +381,7 @@
         // Функция для получения количества активных чатов через load_contacts API
         async function getActiveChatsCount(sessionId) {
             try {
-                console.log('[MATCHES] Loading active chats count via load_contacts API...');
+                // console.log('[MATCHES] Loading active chats count via load_contacts API...');
                 
                 const apiConfigResponse = await fetch('/api/get-api-key');
                 const apiConfig = await apiConfigResponse.json();
@@ -397,12 +397,12 @@
                 });
                 
                 const apiUrl = `/api/spice-multi-test?endpoint=/ajax_api/load_contacts&method=GET&${contactsParams.toString()}`;
-                console.log('[MATCHES] Requesting contacts from:', apiUrl);
+                // console.log('[MATCHES] Requesting contacts from:', apiUrl);
                 
                 const response = await fetch(apiUrl);
                 const result = await response.json();
                 
-                console.log('[MATCHES] Load contacts API response:', result);
+                // console.log('[MATCHES] Load contacts API response:', result);
                 
                 if (result.success && result.data) {
                     // Проверяем разные возможные структуры ответа
@@ -418,16 +418,16 @@
                     
                     if (contactsList) {
                         const activeChats = contactsList.length;
-                        console.log('[MATCHES] Active chats count:', activeChats);
-                        console.log('[MATCHES] Contacts list sample:', contactsList.slice(0, 3));
+                        // console.log('[MATCHES] Active chats count:', activeChats);
+                        // console.log('[MATCHES] Contacts list sample:', contactsList.slice(0, 3));
                         return activeChats;
                     } else {
-                        console.log('[MATCHES] No contacts array found in response structure');
-                        console.log('[MATCHES] Available keys in result.data:', Object.keys(result.data));
+                        // console.log('[MATCHES] No contacts array found in response structure');
+                        // console.log('[MATCHES] Available keys in result.data:', Object.keys(result.data));
                         return 0;
                     }
                 } else {
-                    console.log('[MATCHES] API request failed or no data:', result);
+                    // console.log('[MATCHES] API request failed or no data:', result);
                     return 0;
                 }
             } catch (error) {
@@ -438,12 +438,12 @@
 
         async function loadMatches() {
             try {
-                console.log('[MATCHES] Loading matches from database...');
+                // console.log('[MATCHES] Loading matches from database...');
                 
                 // Используем MatchUtils для загрузки матчей из базы данных
                 const matches = await window.MatchUtils.loadUserMatches();
                 
-                console.log('[MATCHES] Loaded matches from database:', matches);
+                // console.log('[MATCHES] Loaded matches from database:', matches);
                 
                 if (matches && matches.length > 0) {
                     displayMatches(matches);
@@ -506,7 +506,7 @@
         }
 
         function createMatchCard(match) {
-            console.log('[MATCHES] Creating card for match:', match);
+            // console.log('[MATCHES] Creating card for match:', match);
             
             // Получаем базовую информацию
             const name = match.matched_user_name || 'Unknown';
@@ -531,7 +531,7 @@
                     }
                 }
             } catch (e) {
-                console.warn('[MATCHES] Error parsing photos:', e);
+                // console.warn('[MATCHES] Error parsing photos:', e);
                 photos = [];
             }
             
@@ -540,12 +540,12 @@
                 photoUrl = photos.find(photo => photo && photo.trim() !== '') || null;
             }
             
-            console.log('[MATCHES] ===== MATCH DEBUG =====');
-            console.log('[MATCHES] Match object:', match);
-            console.log('[MATCHES] User ID for photo loading:', match.matched_user_id);
-            console.log('[MATCHES] Photos from database:', photos);
-            console.log('[MATCHES] Final photo URL from DB:', photoUrl);
-            console.log('[MATCHES] ========================');
+            // console.log('[MATCHES] ===== MATCH DEBUG =====');
+            // console.log('[MATCHES] Match object:', match);
+            // console.log('[MATCHES] User ID for photo loading:', match.matched_user_id);
+            // console.log('[MATCHES] Photos from database:', photos);
+            // console.log('[MATCHES] Final photo URL from DB:', photoUrl);
+            // console.log('[MATCHES] ========================');
 
             const cardHtml = `
                 <div class="match-card ${isNew ? 'new-match' : ''}" data-match-id="${match.matched_user_id}">
@@ -638,7 +638,7 @@
         }
 
         async function startChat(matchId, matchName) {
-            console.log('[MATCHES] Starting chat with:', matchId, matchName);
+            // console.log('[MATCHES] Starting chat with:', matchId, matchName);
             
             // Отмечаем матч как прочитанный
             await markMatchAsRead(matchId);
@@ -649,13 +649,14 @@
 
         // Новая функция для создания контакта через API и начала чата
         async function startChatWithContact(matchId, matchName) {
-            console.log('[MATCHES] Starting chat with contact creation for:', matchId, matchName);
+            // console.log('[MATCHES] Starting chat with contact creation for:', matchId, matchName);
             
             try {
                 // Получаем sessionId
                 const sessionId = window.authManager?.sessionId;
                 if (!sessionId) {
-                    console.error('[MATCHES] No session ID available');
+                    // Security: Session info not logged
+                    console.error('[MATCHES] Authentication required');
                     alert('Authentication error. Please login again.');
                     return;
                 }
@@ -674,13 +675,13 @@
                     nom_complet: matchName
                 };
                 
-                console.log('[MATCHES] Creating contact through API...', matchProfile);
+                // console.log('[MATCHES] Creating contact through API...', matchProfile);
                 
                 // Создаем контакт через API (используем функцию из discover.html)
                 const contactResult = await createContactForMatch(sessionId, matchProfile);
                 
                 if (contactResult.success) {
-                    console.log('[MATCHES] ✅ Contact created successfully:', contactResult);
+                    // console.log('[MATCHES] ✅ Contact created successfully:', contactResult);
                     
                     // Отмечаем матч как прочитанный
                     await markMatchAsRead(matchId);
@@ -688,7 +689,7 @@
                     // Переходим к чату
                     window.location.href = `messages.html?contact=${matchId}&name=${encodeURIComponent(matchName)}`;
                 } else {
-                    console.warn('[MATCHES] Contact creation failed, but continuing to chat:', contactResult);
+                    // console.warn('[MATCHES] Contact creation failed, but continuing to chat:', contactResult);
                     // Все равно переходим к чату - возможно контакт уже существует
                     await markMatchAsRead(matchId);
                     window.location.href = `messages.html?contact=${matchId}&name=${encodeURIComponent(matchName)}`;
@@ -705,7 +706,7 @@
         // Функция создания контакта (копия РАБОЧЕЙ логики из discover.html)
         async function createContactForMatch(sessionId, profile) {
             try {
-                console.log('[CONTACT] Creating contact for profile (using working method):', profile);
+                // console.log('[CONTACT] Creating contact for profile (using working method):', profile);
                 
                 const profileId = profile.id || profile.id_membre;
                 if (!profileId) {
@@ -730,7 +731,7 @@
                     target_id: profileId
                 });
                 
-                console.log('[CONTACT] Contact params:', contactParams.toString());
+                // console.log('[CONTACT] Contact params:', contactParams.toString());
                 
                 // Пробуем через spice-multi-test proxy с GET методом (РАБОЧИЙ СПОСОБ)
                 const apiUrl = `/api/spice-multi-test?endpoint=/ajax_api/setContact&method=GET&${contactParams.toString()}`;
@@ -738,11 +739,11 @@
                 const response = await fetch(apiUrl);
                 const result = await response.json();
                 
-                console.log('[CONTACT] API Response:', result);
+                // console.log('[CONTACT] API Response:', result);
                 
                 // Проверяем успех согласно документации API: result.data.result должно быть 1
                 if (result.success && result.data && result.data.result === 1) {
-                    console.log('[CONTACT] ✅ Contact created successfully!');
+                    // console.log('[CONTACT] ✅ Contact created successfully!');
                     return { success: true, data: result.data };
                 } else {
                     console.error('[CONTACT] ❌ API returned error or result !== 1:', result);
@@ -758,11 +759,11 @@
         // Функция для загрузки высокого качества фото через user API
         async function tryLoadUserPhoto(userId, imgElement) {
             try {
-                console.log('[MATCHES] Trying to load high-quality photo for user ID:', userId);
+                // console.log('[MATCHES] Trying to load high-quality photo for user ID:', userId);
                 
                 const sessionId = window.authManager?.sessionId;
                 if (!sessionId) {
-                    console.warn('[MATCHES] No session ID for photo loading');
+                    // console.warn('[MATCHES] No session ID for photo loading');
                     return false;
                 }
                 
@@ -777,33 +778,33 @@
                 const response = await fetch(apiUrl);
                 
                 if (!response.ok) {
-                    console.warn('[MATCHES] Search API request failed:', response.status);
+                    // console.warn('[MATCHES] Search API request failed:', response.status);
                     return false;
                 }
                 
                 const result = await response.json();
-                console.log('[MATCHES] ===== USER API DEBUG =====');
-                console.log('[MATCHES] Request URL:', apiUrl);
-                console.log('[MATCHES] User API response:', result);
-                console.log('[MATCHES] Response success:', result.success);
-                console.log('[MATCHES] Response data:', result.data);
-                console.log('[MATCHES] ==============================');
+                // console.log('[MATCHES] ===== USER API DEBUG =====');
+                // console.log('[MATCHES] Request URL:', apiUrl);
+                // console.log('[MATCHES] User API response:', result);
+                // console.log('[MATCHES] Response success:', result.success);
+                // console.log('[MATCHES] Response data:', result.data);
+                // console.log('[MATCHES] ==============================');
                 
                 if (result.success && result.data) {
                     // ИСПРАВЛЕНИЕ: профиль находится в result.result, не в result напрямую
                     const profile = result.data.result || result.data; 
-                    console.log('[MATCHES] Extracting photo from user profile:', profile);
+                    // console.log('[MATCHES] Extracting photo from user profile:', profile);
                     const photoUrl = extractPhotoUrl(profile);
                     
                     if (photoUrl) {
-                        console.log('[MATCHES] Found high-quality photo URL:', photoUrl);
+                        // console.log('[MATCHES] Found high-quality photo URL:', photoUrl);
                         imgElement.src = photoUrl;
                         // handlePhotoLoad будет вызван автоматически через onload
                         return true;
                     }
                 }
                 
-                console.warn('[MATCHES] No high-quality photo found in user API response');
+                // console.warn('[MATCHES] No high-quality photo found in user API response');
                 return false;
                 
             } catch (error) {
@@ -816,45 +817,45 @@
         function extractPhotoUrl(profile) {
             let photoUrl = null;
             
-            console.log('[MATCHES] Extracting photo from profile:', profile);
+            // console.log('[MATCHES] Extracting photo from profile:', profile);
             
             // ПРИОРИТЕТ 1: main_photo с real_size (самое высокое качество)
             if (profile.main_photo && profile.main_photo.real_size) {
                 photoUrl = profile.main_photo.real_size;
-                console.log('[MATCHES] ✅ Found main_photo real_size:', photoUrl);
+                // console.log('[MATCHES] ✅ Found main_photo real_size:', photoUrl);
             }
             // ПРИОРИТЕТ 2: main_photo с другими размерами
             else if (profile.main_photo) {
                 photoUrl = profile.main_photo.sqmiddle || 
                            profile.main_photo.real_size || 
                            profile.main_photo.sqsmall;
-                console.log('[MATCHES] ✅ Found main_photo alternative:', photoUrl);
+                // console.log('[MATCHES] ✅ Found main_photo alternative:', photoUrl);
             }
             // ПРИОРИТЕТ 3: legacy поля для совместимости
             else if (profile.picture_430) {
                 photoUrl = profile.picture_430;
-                console.log('[MATCHES] ✅ Found picture_430:', photoUrl);
+                // console.log('[MATCHES] ✅ Found picture_430:', photoUrl);
             } 
             else if (profile.picture) {
                 photoUrl = profile.picture;
-                console.log('[MATCHES] ✅ Found picture:', photoUrl);
+                // console.log('[MATCHES] ✅ Found picture:', photoUrl);
             }
             else if (profile.photo) {
                 photoUrl = profile.photo;
-                console.log('[MATCHES] ✅ Found photo:', photoUrl);
+                // console.log('[MATCHES] ✅ Found photo:', photoUrl);
             }
             else {
-                console.log('[MATCHES] ❌ NO PHOTO FOUND in any field!');
-                console.log('[MATCHES] Available profile keys:', Object.keys(profile));
+                // console.log('[MATCHES] ❌ NO PHOTO FOUND in any field!');
+                // console.log('[MATCHES] Available profile keys:', Object.keys(profile));
             }
             
             // Исправляем URL если нужно
             if (photoUrl && !photoUrl.startsWith('http') && !photoUrl.startsWith('/')) {
                 photoUrl = 'https://dev2018.de5a7.com/' + photoUrl;
-                console.log('[MATCHES] Fixed URL to:', photoUrl);
+                // console.log('[MATCHES] Fixed URL to:', photoUrl);
             }
             
-            console.log('[MATCHES] Final extracted photo URL:', photoUrl);
+            // console.log('[MATCHES] Final extracted photo URL:', photoUrl);
             return photoUrl;
         }
         
@@ -872,7 +873,7 @@
 
         // Обработчик успешной загрузки фото
         function handlePhotoLoad(imgElement, userId) {
-            console.log('[MATCHES] Photo loaded successfully for user:', userId);
+            // console.log('[MATCHES] Photo loaded successfully for user:', userId);
             
             const container = document.getElementById(`photo-container-${userId}`);
             const placeholder = document.getElementById(`placeholder-${userId}`);
@@ -898,7 +899,7 @@
 
         // Обработчик ошибки загрузки фото
         function handlePhotoError(imgElement, userId, firstLetter) {
-            console.log('[MATCHES] Photo failed to load for user:', userId, 'showing letter placeholder');
+            // console.log('[MATCHES] Photo failed to load for user:', userId, 'showing letter placeholder');
             
             const placeholder = document.getElementById(`placeholder-${userId}`);
             
@@ -946,7 +947,7 @@
         }
 
         function viewMatchDetails(matchId) {
-            console.log('[MATCHES] Viewing match details:', matchId);
+            // console.log('[MATCHES] Viewing match details:', matchId);
             // Здесь можно добавить функциональность показа деталей матча
             alert(`View match details for user ${matchId} - coming soon!`);
         }
@@ -971,7 +972,7 @@
                 });
                 
                 const result = await response.json();
-                console.log('[MATCHES] Match marked as read:', result);
+                // console.log('[MATCHES] Match marked as read:', result);
                 
                 // Обновляем UI - убираем "new" бейдж
                 const matchCard = document.querySelector(`[data-match-id="${matchId}"]`);
@@ -993,7 +994,7 @@
 
         // Функция для добавления в друзья
         async function addToFriends(userId, userName, buttonElement) {
-            console.log('[MATCHES] Adding to friends:', userId, userName);
+            // console.log('[MATCHES] Adding to friends:', userId, userName);
             
             try {
                 // Обновляем UI кнопки сразу для лучшего UX
@@ -1002,7 +1003,8 @@
                 
                 const sessionId = window.authManager?.sessionId;
                 if (!sessionId) {
-                    console.error('[FRIENDS] No session ID available');
+                    // Security: Session info not logged
+                    console.error('[FRIENDS] Authentication required');
                     buttonElement.innerHTML = 'Error';
                     setTimeout(() => {
                         buttonElement.innerHTML = 'Add Friend';
@@ -1032,12 +1034,12 @@
                     id_user: userId
                 });
                 
-                console.log('[FRIENDS] Sending friend request with params:', params.toString());
+                // console.log('[FRIENDS] Sending friend request with params:', params.toString());
                 
                 const response = await fetch(`/api/spice-multi-test?endpoint=/ajax_api/setFriend&method=POST&${params}`);
                 const result = await response.json();
                 
-                console.log('[FRIENDS] API Response:', result);
+                // console.log('[FRIENDS] API Response:', result);
                 
                 if (result.success && result.data && result.data.result === 1) {
                     // Успешно добавлен в друзья
@@ -1048,7 +1050,7 @@
                     // Показываем уведомление
                     showNotification(`${userName} has been added to your friends!`, 'success');
                     
-                    console.log('[FRIENDS] ✅ Successfully added to friends:', userName);
+                    // console.log('[FRIENDS] ✅ Successfully added to friends:', userName);
                 } else {
                     // Ошибка API
                     console.error('[FRIENDS] API returned error:', result);
@@ -1160,7 +1162,7 @@
 
         // Функция для открытия страницы профиля пользователя
         function viewUserProfile(userId, userName) {
-            console.log('[MATCHES] Opening profile for user:', userId, userName);
+            // console.log('[MATCHES] Opening profile for user:', userId, userName);
             // Переход на страницу профиля с параметрами
             window.location.href = `user-profile.html?id=${userId}&name=${encodeURIComponent(userName)}`;
         }
@@ -1193,7 +1195,7 @@
                     const matchId = viewFullProfileBtn.dataset.userId; // Будем устанавливать при открытии модала
                     
                     if (matchId) {
-                        console.log('[MATCHES] Opening full profile for:', matchId, matchName);
+                        // console.log('[MATCHES] Opening full profile for:', matchId, matchName);
                         viewUserProfile(matchId, matchName);
                     }
                 });

@@ -398,7 +398,7 @@
     <script>
         // Глобальные функции для модального окна
         function proceedToPayment() {
-            console.log('[WALLET] Proceeding to payment...');
+            // console.log('[WALLET] Proceeding to payment...');
             
             // Валидация согласий
             if (!walletManager.validateAgreements()) {
@@ -410,7 +410,7 @@
             const currency = document.querySelector('.currency-select').value;
             const credits = Math.floor(amount / (walletManager.creditRates[currency] || walletManager.creditRates['EUR']));
             
-            console.log('[WALLET] Payment details:', { amount, currency, credits });
+            // console.log('[WALLET] Payment details:', { amount, currency, credits });
             
             // Сохраняем согласие в базе
             const sessionId = window.authManager?.sessionId;

@@ -323,7 +323,7 @@
             }
             
             showNotification(message, type = 'info') {
-                console.log(`[${type.toUpperCase()}] ${message}`);
+                // console.log(`[${type.toUpperCase()}] ${message}`);
                 // Показываем уведомление в консоли, можно позже добавить UI
             }
         }
@@ -337,7 +337,7 @@
     <script>
         // Функция инициализации страницы сообщений
         async function initializeMessagesPage() {
-            console.log('[MESSAGES] Initializing messages page...');
+            // console.log('[MESSAGES] Initializing messages page...');
             
             // Создаем объект с методами из messages-extension.js
             const messagesSystem = Object.assign({}, Dashboard.prototype);
@@ -352,7 +352,7 @@
                 // Настраиваем обработчики событий
                 setupEventListeners();
                 
-                console.log('[MESSAGES] ✅ Messages page initialized successfully');
+                // console.log('[MESSAGES] ✅ Messages page initialized successfully');
             } catch (error) {
                 console.error('[MESSAGES] ❌ Failed to initialize:', error);
             }
@@ -366,7 +366,7 @@
             if (searchContacts) {
                 searchContacts.addEventListener('input', (e) => {
                     // TODO: Фильтрация контактов
-                    console.log('[MESSAGES] Search:', e.target.value);
+                    // console.log('[MESSAGES] Search:', e.target.value);
                 });
             }
             
@@ -435,7 +435,7 @@
                     );
                     
                     if (savedMessage) {
-                        console.log('[MESSAGES] ✅ Message saved to database');
+                        // console.log('[MESSAGES] ✅ Message saved to database');
                         // Добавляем сообщение в чат
                         window.messagesSystem.addMessageToChat(message);
                     } else {
@@ -518,7 +518,7 @@
                 viewProfileOption.addEventListener('click', function() {
                     if (currentChatUserId) {
                         const userName = currentChatUserName || 'User';
-                        console.log('[MESSAGES] Opening profile for user:', currentChatUserId, userName);
+                        // console.log('[MESSAGES] Opening profile for user:', currentChatUserId, userName);
                         window.location.href = `user-profile.html?id=${currentChatUserId}&name=${encodeURIComponent(userName)}`;
                     }
                     chatOptionsDropdown.classList.remove('show');
@@ -539,7 +539,7 @@
             window.setChatOptionsUser = function(userId, userName) {
                 currentChatUserId = userId;
                 currentChatUserName = userName;
-                console.log('[MESSAGES] Set chat options for user:', userId, userName);
+                // console.log('[MESSAGES] Set chat options for user:', userId, userName);
             };
             
             // Delete contact confirmation and API call
@@ -593,7 +593,7 @@
                     // Call setContact API to remove contact (this also deletes conversation)
                     const url = `${baseUrl}/ajax_api/setContact?api_key=${apiKey}&session_id=${sessionId}&target_id=${userId}`;
                     
-                    console.log('[MESSAGES] Deleting contact with URL:', url);
+                    // console.log('[MESSAGES] Deleting contact with URL:', url);
                     
                     const response = await fetch(url, {
                         method: 'GET',
@@ -603,7 +603,7 @@
                     });
                     
                     const result = await response.json();
-                    console.log('[MESSAGES] Delete contact result:', result);
+                    // console.log('[MESSAGES] Delete contact result:', result);
                     
                     if (result.result !== 1) {
                         throw new Error(result.error || 'Failed to delete contact');

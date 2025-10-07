@@ -69,7 +69,7 @@ async function searchUsers(req, res, baseUrl, apiKey) {
         if (age_from) params.append('age_from', age_from);
         if (age_to) params.append('age_to', age_to);
 
-        console.log('[ADMIN-API] Searching users with params:', params.toString());
+        // console.log('[ADMIN-API] Searching users with params:', params.toString());
 
         const apiUrl = `${baseUrl}/index_api/search?${params.toString()}`;
         const response = await fetch(apiUrl, {
@@ -80,7 +80,7 @@ async function searchUsers(req, res, baseUrl, apiKey) {
         });
 
         const result = await response.json();
-        console.log('[ADMIN-API] Search response:', result);
+        // console.log('[ADMIN-API] Search response:', result);
 
         // Check if the result has users
         if (result && result.result) {

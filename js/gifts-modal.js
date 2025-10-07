@@ -10,7 +10,7 @@ class GiftsModalManager {
     }
 
     async init() {
-        console.log('[GIFTS_MODAL] Initializing gifts modal...');
+        // console.log('[GIFTS_MODAL] Initializing gifts modal...');
         
         this.setupEventListeners();
         await this.loadGiftsCatalog();
@@ -44,7 +44,7 @@ class GiftsModalManager {
 
     async loadGiftsCatalog() {
         try {
-            console.log('[GIFTS_MODAL] Loading gifts catalog...');
+            // console.log('[GIFTS_MODAL] Loading gifts catalog...');
             
             const response = await fetch('/api/database', {
                 method: 'POST',
@@ -57,7 +57,7 @@ class GiftsModalManager {
             const result = await response.json();
             if (result.success) {
                 this.gifts = result.data;
-                console.log('[GIFTS_MODAL] Loaded gifts catalog:', this.gifts.length, 'items');
+                // console.log('[GIFTS_MODAL] Loaded gifts catalog:', this.gifts.length, 'items');
             } else {
                 console.error('[GIFTS_MODAL] Error loading gifts:', result.error);
             }
@@ -83,7 +83,7 @@ class GiftsModalManager {
             const result = await response.json();
             if (result.success && result.data) {
                 this.userBalance = parseFloat(result.data.balance) || 0;
-                console.log('[GIFTS_MODAL] User balance:', this.userBalance, 'credits');
+                // console.log('[GIFTS_MODAL] User balance:', this.userBalance, 'credits');
             }
         } catch (error) {
             console.error('[GIFTS_MODAL] Error loading user balance:', error);
@@ -317,7 +317,7 @@ class GiftsModalManager {
         const userId = window.authManager?.userId;
 
         try {
-            console.log('[GIFTS_MODAL] Sending gift:', this.selectedGift.name, 'to', this.currentReceiverId);
+            // console.log('[GIFTS_MODAL] Sending gift:', this.selectedGift.name, 'to', this.currentReceiverId);
             
             const response = await fetch('/api/database', {
                 method: 'POST',
@@ -336,7 +336,7 @@ class GiftsModalManager {
             const result = await response.json();
             
             if (result.success) {
-                console.log('[GIFTS_MODAL] Gift sent successfully:', result.data);
+                // console.log('[GIFTS_MODAL] Gift sent successfully:', result.data);
                 
                 // Сохраняем ссылку до закрытия модалки
                 const sentGift = this.selectedGift;

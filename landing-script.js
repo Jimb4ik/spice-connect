@@ -10,7 +10,7 @@ class SpiceLanding {
     async init() {
         // Check if user is already logged in and redirect to profile
         if (window.authManager && window.authManager.isLoggedIn) {
-            console.log('[LANDING] User already logged in, redirecting to profile');
+            // console.log('[LANDING] User already logged in, redirecting to profile');
             window.location.href = 'profile.html';
             return;
         }
@@ -25,7 +25,7 @@ class SpiceLanding {
     // Load live statistics from API
     async loadLiveStats() {
         try {
-            console.log('🔄 Loading live stats...');
+            // console.log('🔄 Loading live stats...');
             
             // Get site info and online count
             const siteInfoResponse = await fetch(`${this.baseURL}/spice-multi-test?endpoint=/index_api/index&method=GET`);
@@ -46,7 +46,7 @@ class SpiceLanding {
                 document.getElementById('successStories').textContent = this.formatNumber(successStories) + '+';
                 document.getElementById('liveMemberCount').textContent = this.formatNumber(totalMembers) + '+';
                 
-                console.log('✅ Live stats loaded:', { online: onlineCount, total: totalMembers, success: successStories });
+                // console.log('✅ Live stats loaded:', { online: onlineCount, total: totalMembers, success: successStories });
             }
         } catch (error) {
             console.error('❌ Failed to load live stats:', error);
@@ -89,13 +89,13 @@ class SpiceLanding {
     // Load gender options from API
     async loadGenderFilters() {
         try {
-            console.log('🔄 Loading gender filters...');
+            // console.log('🔄 Loading gender filters...');
             
             const response = await fetch(`${this.baseURL}/spice-multi-test?endpoint=/index_api/array/get/SEXE&method=GET`);
             const data = await response.json();
             
             if (data.success && data.data && data.data.result && data.data.result.sexe) {
-                console.log('✅ Gender filters loaded:', data.data.result.sexe);
+                // console.log('✅ Gender filters loaded:', data.data.result.sexe);
                 // Gender filters are already in HTML, this confirms API works
             }
         } catch (error) {
@@ -106,7 +106,7 @@ class SpiceLanding {
     // Load real profiles from API
     async loadProfiles(country = null) {
         try {
-            console.log('🔄 Loading profiles...');
+            // console.log('🔄 Loading profiles...');
             
             // Show loading state
             this.showProfilesLoading();
@@ -122,10 +122,10 @@ class SpiceLanding {
             
             if (data.success && data.data && data.data.result && data.data.result.get_profils_global) {
                 this.currentProfiles = data.data.result.get_profils_global;
-                console.log('✅ Profiles loaded:', this.currentProfiles.length);
+                // console.log('✅ Profiles loaded:', this.currentProfiles.length);
                 this.renderProfiles();
             } else {
-                console.warn('⚠️ No profiles data received');
+                // console.warn('⚠️ No profiles data received');
                 this.showNoProfiles();
             }
         } catch (error) {
@@ -138,7 +138,7 @@ class SpiceLanding {
 
     // Load demo profiles as fallback
     loadDemoProfiles() {
-        console.log('🔄 Loading demo profiles...');
+        // console.log('🔄 Loading demo profiles...');
         
         this.currentProfiles = [
             {
@@ -191,7 +191,7 @@ class SpiceLanding {
             }
         ];
         
-        console.log('✅ Demo profiles loaded:', this.currentProfiles.length);
+        // console.log('✅ Demo profiles loaded:', this.currentProfiles.length);
         this.renderProfiles();
     }
 
@@ -448,7 +448,7 @@ class SpiceLanding {
 
 // Initialize the landing page when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🚀 Lavrilo Landing Page initializing v3.7...');
+    // console.log('🚀 Lavrilo Landing Page initializing v3.7...');
     window.spiceLanding = new SpiceLanding();
     
     // Handle navbar background on scroll

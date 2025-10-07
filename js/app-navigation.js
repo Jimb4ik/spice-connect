@@ -18,7 +18,7 @@
                 }
             }
         } catch (err) {
-            console.warn('[APP-NAV] init warning:', err && err.message);
+            // console.warn('[APP-NAV] init warning:', err && err.message);
         }
     });
 })();

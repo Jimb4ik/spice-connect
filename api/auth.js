@@ -26,9 +26,10 @@ export default async function handler(req, res) {
     try {
       const { action, ...params } = req.method === 'GET' ? req.query : req.body;
       
-      console.log(`[AUTH API] Raw request body:`, req.body);
-      console.log(`[AUTH API] Action:`, action);
-      console.log(`[AUTH API] Extracted params:`, params);
+      // Security: Logging removed to prevent credential leaks
+      // console.log(`[AUTH API] Raw request body:`, req.body);
+      // console.log(`[AUTH API] Action:`, action);
+      // console.log(`[AUTH API] Extracted params:`, params);
       
       let endpoint = '';
       let method = 'POST';
@@ -83,8 +84,9 @@ export default async function handler(req, res) {
   
       const apiUrl = `${BASE_URL}${endpoint}?${queryParams}`;
       
-      console.log(`[AUTH API] ${action.toUpperCase()} request to:`, apiUrl);
-      console.log(`[AUTH API] Parameters being sent:`, params);
+      // Security: URL with API key logging removed
+      // console.log(`[AUTH API] ${action.toUpperCase()} request to:`, apiUrl);
+      // console.log(`[AUTH API] Parameters being sent:`, params);
   
       const response = await fetch(apiUrl, {
         method: method,
@@ -96,7 +98,8 @@ export default async function handler(req, res) {
   
       const data = await response.json();
       
-      console.log(`[AUTH API] ${action.toUpperCase()} response:`, data);
+      // Security: API response logging removed
+      // console.log(`[AUTH API] ${action.toUpperCase()} response:`, data);
   
       // Enhance response with success flag
       // For registration: check accepted === 1 and presence of user_id/session_id

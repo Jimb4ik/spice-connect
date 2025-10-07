@@ -458,11 +458,11 @@
                 const userId = window.authManager?.currentUser?.id;
                 
                 if (!sessionId || !userId) {
-                    console.warn('[SETTINGS] Cannot load preferences: missing session or user ID');
+                    // console.warn('[SETTINGS] Cannot load preferences: missing session or user ID');
                     return;
                 }
                 
-                console.log('[SETTINGS] Loading discovery preferences...');
+                // console.log('[SETTINGS] Loading discovery preferences...');
                 
                 const response = await fetch(`/api/discovery-preferences?session_id=${sessionId}&user_id=${userId}`);
                 const data = await response.json();
@@ -481,9 +481,9 @@
                     currentPreferences.showCouples = cherche1 === 3; // Looking for couples
                     
                     updateDiscoveryPreferencesUI();
-                    console.log('[SETTINGS] Discovery preferences loaded:', currentPreferences);
+                    // console.log('[SETTINGS] Discovery preferences loaded:', currentPreferences);
                 } else {
-                    console.warn('[SETTINGS] Failed to load preferences:', data.error);
+                    // console.warn('[SETTINGS] Failed to load preferences:', data.error);
                     // Use defaults and update UI
                     updateDiscoveryPreferencesUI();
                 }
@@ -516,7 +516,7 @@
                 const sessionId = window.authManager?.sessionId;
                 
                 if (!sessionId) {
-                    console.warn('[SETTINGS] Cannot save preferences: missing session ID');
+                    // console.warn('[SETTINGS] Cannot save preferences: missing session ID');
                     return;
                 }
                 
@@ -544,7 +544,7 @@
                     pour: 1 // Default dating type
                 };
                 
-                console.log('[SETTINGS] Saving discovery preferences:', requestData);
+                // console.log('[SETTINGS] Saving discovery preferences:', requestData);
                 
                 const response = await fetch('/api/discovery-preferences', {
                     method: 'POST',
@@ -557,7 +557,7 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    console.log('[SETTINGS] Discovery preferences saved successfully');
+                    // console.log('[SETTINGS] Discovery preferences saved successfully');
                     showNotification('Discovery preferences saved!', 'success');
                     
                     // Уведомляем discover страницу об изменениях (если она открыта)
