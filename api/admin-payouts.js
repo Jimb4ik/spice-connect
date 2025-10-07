@@ -220,14 +220,11 @@ export default async function handler(req, res) {
                             // Also add to transactions table
                             await query(`
                                 INSERT INTO transactions (
-                                    id, from_user_id, to_user_id, from_user_name, to_user_name,
-                                    type, amount, credits, details, status, date
+                                    transaction_id, from_user_id, to_user_id,
+                                    type, amount, credits, details, status
                                 ) VALUES (
                                     gen_random_uuid()::text, $1, $2, 
-                                    'User #' || $1,
-                                    COALESCE((SELECT pseudo FROM user_profiles WHERE spice_user_id = $2 LIMIT 1), 'User #' || $2),
-                                    'gift', $3, $4, $5, 'completed',
-                                    CURRENT_TIMESTAMP - INTERVAL '${daysAgo} days'
+                                    'gift', $3, $4, $5, 'completed'
                                 )
                             `, [randomSenderId, userId, (randomGift.price * 0.20).toFixed(2), randomGift.price, randomGift.name]);
                             
@@ -245,13 +242,11 @@ export default async function handler(req, res) {
                         
                         await query(`
                             INSERT INTO transactions (
-                                id, from_user_id, to_user_id, from_user_name, to_user_name,
-                                type, amount, credits, status, date, payment_method
+                                transaction_id, from_user_id, to_user_id,
+                                type, amount, credits, status, payment_method
                             ) VALUES (
                                 gen_random_uuid()::text, $1, NULL, 
-                                COALESCE((SELECT pseudo FROM user_profiles WHERE spice_user_id = $1 LIMIT 1), 'User #' || $1),
-                                NULL, 'payout', $2, $3, 'completed',
-                                CURRENT_TIMESTAMP - INTERVAL '${daysAgo} days',
+                                'payout', $2, $3, 'completed',
                                 'Bank Transfer (OCT)'
                             )
                         `, [userId, amount, credits]);
@@ -339,19 +334,16 @@ export default async function handler(req, res) {
             // 1. Create payout transaction in transactions table
             await query(`
                 INSERT INTO transactions (
-                    id, from_user_id, to_user_id, from_user_name, to_user_name,
-                    type, amount, credits, status, date, payment_method, details
+                    transaction_id, from_user_id, to_user_id,
+                    type, amount, credits, status, payment_method, details
                 ) VALUES (
                     gen_random_uuid()::text, 
                     $1, 
-                    NULL,
-                    (SELECT COALESCE(pseudo, 'User') FROM user_profiles WHERE spice_user_id = $1 LIMIT 1),
                     NULL,
                     'payout', 
                     $2, 
                     $3, 
                     'completed',
-                    CURRENT_TIMESTAMP,
                     'Bank Transfer (OCT)',
                     'Gift monetization - ' || $4 || ' gifts approved'
                 )
