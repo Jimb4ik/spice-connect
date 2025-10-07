@@ -152,7 +152,7 @@ export default async function handler(req, res) {
                 // 2. DON'T clear old data - just add new gifts to existing ones
                 console.log('[ADMIN-PAYOUTS] Adding new demo gifts without clearing existing data...');
 
-                // 3. Insert gifts if they don't exist (use existing table)
+                // 3. Insert gifts if they don't exist (check first to avoid constraint errors)
                 const realGifts = [
                     { name: 'Red Rose', price: 5 },
                     { name: 'Tulip Bouquet', price: 15 },
@@ -176,12 +176,15 @@ export default async function handler(req, res) {
                     { name: 'Royal Crown', price: 2500 }
                 ];
 
+                // Check if gifts already exist, if not - insert them
                 for (const gift of realGifts) {
-                    await query(`
-                        INSERT INTO gifts (name, price_credits, image_url)
-                        VALUES ($1, $2, $3)
-                        ON CONFLICT (name) DO NOTHING
-                    `, [gift.name, gift.price, `/gifts/${gift.name.toLowerCase().replace(/\s+/g, '-')}.png`]);
+                    const existing = await query(`SELECT id FROM gifts WHERE name = $1`, [gift.name]);
+                    if (existing.rows.length === 0) {
+                        await query(`
+                            INSERT INTO gifts (name, price_credits, image_url)
+                            VALUES ($1, $2, $3)
+                        `, [gift.name, gift.price, `/gifts/${gift.name.toLowerCase().replace(/\s+/g, '-')}.png`]);
+                    }
                 }
 
                 let totalGiftsAdded = 0;
