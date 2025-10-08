@@ -1,7 +1,7 @@
 // Cache Buster - автоматическое обновление версий файлов
 class CacheBuster {
     constructor() {
-        this.version = '1.0.21'; // Увеличивайте при каждом обновлении
+        this.version = '1.0.22'; // v1.0.22 - Security: Fixed console.log syntax errors
         this.init();
         this.registerServiceWorker();
     }
