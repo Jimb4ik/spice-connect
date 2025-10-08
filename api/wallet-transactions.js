@@ -162,12 +162,12 @@ async function addWalletTransaction(pool, req) {
         } else {
             // console.log('[WALLET] ✅ EXISTING WALLET FOUND!');
             // console.log('[WALLET] Wallet details:', {
-                id: walletResult.rows[0].id,
-                user_id: walletResult.rows[0].user_id,
-                session_id: walletResult.rows[0].session_id,
-                balance: walletResult.rows[0].balance,
-                currency: walletResult.rows[0].currency
-            });
+                // id: walletResult.rows[0].id,
+                // user_id: walletResult.rows[0].user_id,
+                // session_id: walletResult.rows[0].session_id,
+                // balance: walletResult.rows[0].balance,
+                // currency: walletResult.rows[0].currency
+            // });
         }
 
         const wallet = walletResult.rows[0];
@@ -176,16 +176,16 @@ async function addWalletTransaction(pool, req) {
         const effectiveUserId = user_id || wallet.user_id; // Используем переданный user_id или из кошелька
 
         // console.log('[WALLET] Adding transaction:', {
-            wallet_id: wallet.id,
-            user_id: effectiveUserId,
-            transaction_type,
-            amount: transactionAmount, // Реальная сумма
-            credits: creditsAmount, // Кредиты
-            currency: currency || 'USD',
-            description,
-            payment_method,
-            payment_reference
-        });
+            // wallet_id: wallet.id,
+            // user_id: effectiveUserId,
+            // transaction_type,
+            // amount: transactionAmount, // Реальная сумма
+            // credits: creditsAmount, // Кредиты
+            // currency: currency || 'USD',
+            // description,
+            // payment_method,
+            // payment_reference
+        // });
 
         // Добавляем транзакцию (записываем реальную сумму в реальной валюте)
         const transactionResult = await pool.query(
@@ -210,14 +210,14 @@ async function addWalletTransaction(pool, req) {
         );
 
         // console.log('[WALLET] Transaction completed successfully:', {
-            transaction_id: transactionResult.rows[0].id,
-            old_balance: wallet.balance,
-            new_balance: newBalance,
-            real_amount: transactionAmount, // Реальная сумма в транзакции
-            credits_added: creditsAmount, // Кредиты добавленные к балансу
-            currency: currency,
-            type: transaction_type
-        });
+            // transaction_id: transactionResult.rows[0].id,
+            // old_balance: wallet.balance,
+            // new_balance: newBalance,
+            // real_amount: transactionAmount, // Реальная сумма в транзакции
+            // credits_added: creditsAmount, // Кредиты добавленные к балансу
+            // currency: currency,
+            // type: transaction_type
+        // });
 
         return {
             success: true,

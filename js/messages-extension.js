@@ -545,11 +545,11 @@ Object.assign(Dashboard.prototype, {
       }
       
       // console.log('[MESSAGES] Сохраняем сообщение в БД:', {
-        sender_id: finalUserId,
-        recipient_id: recipientId,
-        message_text: messageText,
-        session_id: sessionId
-      });
+        // sender_id: finalUserId,
+        // recipient_id: recipientId,
+        // message_text: messageText,
+        // session_id: sessionId
+      // });
       
       const response = await fetch('/api/messages', {
         method: 'POST',

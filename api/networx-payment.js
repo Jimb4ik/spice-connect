@@ -237,11 +237,12 @@ async function verifyPayment(req, res) {
             });
         }
 
+        // Security: Webhook data logging removed
         // console.log('[NETWORX] Webhook received:', {
-            orderId: webhookData.order_id,
-            status: webhookData.status,
-            amount: webhookData.amount
-        });
+        //     orderId: webhookData.order_id,
+        //     status: webhookData.status,
+        //     amount: webhookData.amount
+        // });
 
         // Process payment based on status
         if (webhookData.status === 'success') {
@@ -311,14 +312,15 @@ async function processSuccessfulPayment(webhookData) {
             throw new Error('Cannot extract session_id from webhook data');
         }
 
+        // Security: Payment processing data logging removed
         // console.log('[NETWORX] Processing successful payment:', {
-            transaction_uid: transaction.uid,
-            sessionId,
-            credits,
-            amount,
-            currency,
-            tracking_id: transaction.tracking_id
-        });
+        //     transaction_uid: transaction.uid,
+        //     sessionId,
+        //     credits,
+        //     amount,
+        //     currency,
+        //     tracking_id: transaction.tracking_id
+        // });
 
         // Add credits to user wallet
         const baseUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://lavrilo.com';
@@ -369,11 +371,11 @@ async function processDeclinedPayment(webhookData) {
     const transaction = webhookData.transaction;
     
     // console.log('[NETWORX] Payment declined:', {
-        transaction_uid: transaction?.uid,
-        tracking_id: transaction?.tracking_id,
-        status: transaction?.status,
-        message: transaction?.message || 'Unknown'
-    });
+        // transaction_uid: transaction?.uid,
+        // tracking_id: transaction?.tracking_id,
+        // status: transaction?.status,
+        // message: transaction?.message || 'Unknown'
+    // });
     
     // Here you could log declined payments for analytics
     // No credits are added in this case
@@ -398,13 +400,13 @@ function generateWebhookSignature(data, secretKey) {
     // Согласно документации Networx, подпись формируется из определенных полей
     // Проверяем разные варианты формирования подписи
     // console.log('[NETWORX] Webhook data for signature:', {
-        shop_id: data.shop_id,
-        order_id: data.order_id,
-        status: data.status,
-        amount: data.amount,
-        transaction_id: data.transaction_id,
-        currency: data.currency
-    });
+        // shop_id: data.shop_id,
+        // order_id: data.order_id,
+        // status: data.status,
+        // amount: data.amount,
+        // transaction_id: data.transaction_id,
+        // currency: data.currency
+    // });
 
     // Вариант 1: Стандартная подпись Networx
     const signatureString1 = [
@@ -439,11 +441,11 @@ function generateWebhookSignature(data, secretKey) {
     const signature3 = crypto.createHash('sha256').update(signatureString3).digest('hex');
 
     // console.log('[NETWORX] Generated signatures:', {
-        received: data.signature,
-        variant1: signature1,
-        variant2: signature2,
-        variant3: signature3
-    });
+        // received: data.signature,
+        // variant1: signature1,
+        // variant2: signature2,
+        // variant3: signature3
+    // });
 
     // Возвращаем первый вариант как основной
     return signature1;

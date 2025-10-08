@@ -689,11 +689,11 @@
                     }
                     
                     // console.log('[DISCOVER] Search parameters:', {
-                        page: currentPage,
-                        age_from: ageSettings.min,
-                        age_to: ageSettings.max,
-                        gender_preference: discoveryPreferences.cherche1
-                    });
+                        // page: currentPage,
+                        // age_from: ageSettings.min,
+                        // age_to: ageSettings.max,
+                        // gender_preference: discoveryPreferences.cherche1
+                    // });
                     
                     const apiUrl = `/api/spice-multi-test?endpoint=/index_api/search&method=POST&${searchParams.toString()}`;
                     
@@ -745,18 +745,18 @@
             // Логгируем доступные поля профиля для анализа API
             // console.log('[DISCOVER] Available profile fields:', Object.keys(profile));
             // console.log('[DISCOVER] Profile data sample:', {
-                id: profile.id,
-                nom_complet: profile.nom_complet,
-                pseudo: profile.pseudo,
-                age: profile.age,
-                date_naissance: profile.date_naissance,
-                ville: profile.ville,
-                region: profile.region,
-                a_propos: profile.a_propos,
-                description: profile.description,
-                presentation: profile.presentation,
-                bio: profile.bio
-            });
+                // id: profile.id,
+                // nom_complet: profile.nom_complet,
+                // pseudo: profile.pseudo,
+                // age: profile.age,
+                // date_naissance: profile.date_naissance,
+                // ville: profile.ville,
+                // region: profile.region,
+                // a_propos: profile.a_propos,
+                // description: profile.description,
+                // presentation: profile.presentation,
+                // bio: profile.bio
+            // });
             
             if (!profile) {
                 showNoProfilesState();
@@ -1058,10 +1058,10 @@
                         try {
                             // console.log('[DISCOVER] 🔍 Starting match save process...');
                             // console.log('[DISCOVER] Current session data:', {
-                                authManager: !!window.authManager,
-                                sessionId: window.authManager?.sessionId,
-                                isLoggedIn: window.authManager?.isLoggedIn
-                            });
+                                // authManager: !!window.authManager,
+                                // sessionId: window.authManager?.sessionId,
+                                // isLoggedIn: window.authManager?.isLoggedIn
+                            // });
                             
                             // Проверяем доступность MatchUtils
                             if (!window.MatchUtils) {

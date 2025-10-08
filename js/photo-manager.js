@@ -361,11 +361,11 @@ class PhotoManager {
     for (let [key, value] of formData.entries()) {
       if (value instanceof File) {
         // console.log(`  ${key}:`, {
-          name: value.name,
-          size: value.size,
-          type: value.type,
-          lastModified: new Date(value.lastModified)
-        });
+          // name: value.name,
+          // size: value.size,
+          // type: value.type,
+          // lastModified: new Date(value.lastModified)
+        // });
       } else {
         // console.log(`  ${key}:`, value);
       }
@@ -480,10 +480,10 @@ class PhotoManager {
     };
     
     // console.log('[PHOTO MANAGER] Set currentEditingPhoto:', {
-      id: this.currentEditingPhoto.id,
-      serverId: this.currentEditingPhoto.serverId,
-      photoNum: this.currentEditingPhoto.photoNum
-    });
+      // id: this.currentEditingPhoto.id,
+      // serverId: this.currentEditingPhoto.serverId,
+      // photoNum: this.currentEditingPhoto.photoNum
+    // });
     const modal = document.getElementById('photoCropModal');
     if (!modal) {
       console.error('[PHOTO MANAGER] Modal not found!');

@@ -69,11 +69,11 @@ class SearchManager {
             const result = await response.json();
             
             // console.log('[SEARCH] Basic test result:', {
-                success: result.success,
-                dataExists: !!result.data,
-                resultCount: result.data?.result?.length || 0,
-                sampleResult: result.data?.result?.[0] || 'no results'
-            });
+                // success: result.success,
+                // dataExists: !!result.data,
+                // resultCount: result.data?.result?.length || 0,
+                // sampleResult: result.data?.result?.[0] || 'no results'
+            // });
             
         } catch (error) {
             console.error('[SEARCH] Basic test failed:', error);
@@ -119,13 +119,13 @@ class SearchManager {
             
             // Детальная диагностика ответа
             // console.log('[SEARCH] Response analysis:', {
-                success: result.success,
-                hasData: !!result.data,
-                hasResult: !!(result.data && result.data.result),
-                resultLength: result.data?.result?.length || 0,
-                total: result.data?.total,
-                dataKeys: result.data ? Object.keys(result.data) : 'no data'
-            });
+                // success: result.success,
+                // hasData: !!result.data,
+                // hasResult: !!(result.data && result.data.result),
+                // resultLength: result.data?.result?.length || 0,
+                // total: result.data?.total,
+                // dataKeys: result.data ? Object.keys(result.data) : 'no data'
+            // });
 
             if (result.success && result.data) {
                 // Проверяем разные возможные структуры ответа
@@ -134,12 +134,12 @@ class SearchManager {
                 const totalPages = result.data.nb_pages || Math.ceil(total / 30) || 1;
                 
                 // console.log('[SEARCH] Extracted results:', { 
-                    searchResults, 
-                    total, 
-                    totalPages,
-                    currentPage: this.currentPage,
-                    length: searchResults.length 
-                });
+                    // searchResults,
+                    // total,
+                    // totalPages,
+                    // currentPage: this.currentPage,
+                    // length: searchResults.length
+                // });
                 
                 // Сохраняем данные пагинации
                 this.totalResults = total;
@@ -223,11 +223,11 @@ class SearchManager {
         
         // Диагностика DOM элементов
         // console.log('[SEARCH] Available elements:', {
-            searchGrid: !!document.getElementById('searchGrid'),
-            searchResults: !!document.getElementById('searchResults'),
-            resultsCount: !!document.getElementById('resultsCount'),
-            noResults: !!document.getElementById('noResults')
-        });
+            // searchGrid: !!document.getElementById('searchGrid'),
+            // searchResults: !!document.getElementById('searchResults'),
+            // resultsCount: !!document.getElementById('resultsCount'),
+            // noResults: !!document.getElementById('noResults')
+        // });
         
         // Используем существующий контейнер из HTML
         const container = document.getElementById('searchResults') || document.querySelector('.search-results');
@@ -311,11 +311,11 @@ class SearchManager {
         }
         
         // console.log('[SEARCH] User photo data:', {
-            pseudo: user.pseudo,
-            photos_v2: user.photos_v2,
-            photos: user.photos,
-            selectedUrl: photoUrl
-        });
+            // pseudo: user.pseudo,
+            // photos_v2: user.photos_v2,
+            // photos: user.photos,
+            // selectedUrl: photoUrl
+        // });
         
         // Generate avatar - только фото или заглушка
         const avatarHtml = photoUrl ? 

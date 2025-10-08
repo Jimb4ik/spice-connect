@@ -224,13 +224,14 @@ class AuthManager {
         this.tokenLogin = data.token_login || data.session_id; // Use session_id as fallback
         this.isLoggedIn = true;
         
+        // Security: User data logging removed
         // console.log('[AUTH] User data set:', {
-          id: this.currentUser.id,
-          pseudo: this.currentUser.pseudo,
-          sessionId: this.sessionId,
-          tokenLogin: this.tokenLogin,
-          isLoggedIn: this.isLoggedIn
-        });
+        //   id: this.currentUser.id,
+        //   pseudo: this.currentUser.pseudo,
+        //   sessionId: this.sessionId,
+        //   tokenLogin: this.tokenLogin,
+        //   isLoggedIn: this.isLoggedIn
+        // });
         
         this.saveSession();
         this.onLoginSuccess();

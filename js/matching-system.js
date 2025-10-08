@@ -378,11 +378,11 @@ class MatchingSystem {
 
     if (cardMainPhoto) {
       // console.log('[MATCHING] Profile photo data:', {
-        photos_v2: profile.photos_v2,
-        photos: profile.photos,
-        picture_430: profile.picture_430,
-        picture: profile.picture
-      });
+        // photos_v2: profile.photos_v2,
+        // photos: profile.photos,
+        // picture_430: profile.picture_430,
+        // picture: profile.picture
+      // });
       
       let photoUrl = '/images/default-avatar.png';
       

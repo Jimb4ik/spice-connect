@@ -247,10 +247,10 @@ async function loadUsers() {
             
             // console.log('[ADMIN] allUsers populated with', window.allUsers.length, 'users');
             // console.log('[ADMIN] Gender distribution:', {
-                male: window.allUsers.filter(u => parseInt(u.sexe1) === 1).length,
-                female: window.allUsers.filter(u => parseInt(u.sexe1) === 2).length,
-                couple: window.allUsers.filter(u => parseInt(u.sexe1) === 3).length
-            });
+                // male: window.allUsers.filter(u => parseInt(u.sexe1) === 1).length,
+                // female: window.allUsers.filter(u => parseInt(u.sexe1) === 2).length,
+                // couple: window.allUsers.filter(u => parseInt(u.sexe1) === 3).length
+            // });
             
             window.filteredUsers = [...window.allUsers];
             displayUsers();

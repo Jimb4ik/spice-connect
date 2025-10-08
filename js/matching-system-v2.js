@@ -119,11 +119,11 @@ class MatchingSystemV2 {
         this.currentProfileIndex = progress.last_profile_index || 0;
         
         // console.log('[MATCHING-V2] Progress loaded:', {
-          currentPage: this.currentPage,
-          profilesPerPage: this.profilesPerPage,
-          lastProfileIndex: this.currentProfileIndex,
-          isNew: result.is_new
-        });
+          // currentPage: this.currentPage,
+          // profilesPerPage: this.profilesPerPage,
+          // lastProfileIndex: this.currentProfileIndex,
+          // isNew: result.is_new
+        // });
       }
     } catch (error) {
       console.error('[MATCHING-V2] Error loading user progress:', error);
