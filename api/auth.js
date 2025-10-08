@@ -26,10 +26,10 @@ export default async function handler(req, res) {
     try {
       const { action, ...params } = req.method === 'GET' ? req.query : req.body;
       
-      // Security: Logging removed to prevent credential leaks
-      // console.log(`[AUTH API] Raw request body:`, req.body);
-      // console.log(`[AUTH API] Action:`, action);
-      // console.log(`[AUTH API] Extracted params:`, params);
+      // Temporary logging for debugging
+      console.log(`[AUTH API] Raw request body:`, req.body);
+      console.log(`[AUTH API] Action:`, action);
+      console.log(`[AUTH API] Extracted params (password hidden):`, { ...params, pass: params.pass ? '***' : undefined });
       
       let endpoint = '';
       let method = 'POST';
@@ -84,9 +84,9 @@ export default async function handler(req, res) {
   
       const apiUrl = `${BASE_URL}${endpoint}?${queryParams}`;
       
-      // Security: URL with API key logging removed
-      // console.log(`[AUTH API] ${action.toUpperCase()} request to:`, apiUrl);
-      // console.log(`[AUTH API] Parameters being sent:`, params);
+      // Temporary logging for debugging
+      console.log(`[AUTH API] ${action.toUpperCase()} request to:`, `${BASE_URL}${endpoint}`);
+      console.log(`[AUTH API] Parameters being sent (password hidden):`, { ...params, pass: params.pass ? '***' : undefined });
   
       const response = await fetch(apiUrl, {
         method: method,
@@ -98,8 +98,9 @@ export default async function handler(req, res) {
   
       const data = await response.json();
       
-      // Security: API response logging removed
-      // console.log(`[AUTH API] ${action.toUpperCase()} response:`, data);
+      // Temporary logging for debugging
+      console.log(`[AUTH API] ${action.toUpperCase()} response status:`, response.status);
+      console.log(`[AUTH API] ${action.toUpperCase()} response data:`, data);
   
       // Enhance response with success flag
       // For registration: check accepted === 1 and presence of user_id/session_id

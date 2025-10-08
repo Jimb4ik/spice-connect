@@ -98,7 +98,7 @@ class AuthManager {
    */
   async login(username, password, rememberMe = true) {
     try {
-      // console.log('[AUTH] Attempting login for:', username);
+      console.log('[AUTH] Attempting login for:', username);
       
       const response = await fetch('/api/auth', {
         method: 'POST',
@@ -114,6 +114,7 @@ class AuthManager {
       });
 
       const data = await response.json();
+      console.log('[AUTH] Login response:', data);
       
       if (data.success && (data.connected === 1 || data.connected === "1")) {
         // Login successful
@@ -136,13 +137,14 @@ class AuthManager {
         
         return { success: true, user: this.currentUser };
       } else {
-        // console.log('[AUTH] Login failed:', data);
+        console.log('[AUTH] Login failed:', data);
         return { success: false, error: data.error || 'Invalid credentials' };
       }
       
     } catch (error) {
       console.error('[AUTH] Login error:', error);
-      return { success: false, error: 'Network error' };
+      console.error('[AUTH] Error details:', error.message, error.stack);
+      return { success: false, error: 'Network error. Please try again.' };
     }
   }
 
