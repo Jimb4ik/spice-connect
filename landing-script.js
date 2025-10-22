@@ -55,7 +55,7 @@ class SpiceLanding {
             document.getElementById('totalProfiles').textContent = 'ERROR';
             document.getElementById('successStories').textContent = 'ERROR';
             document.getElementById('liveMemberCount').textContent = 'API ERROR';
-            alert('API Error in loadLiveStats: ' + error.message);
+            // Removed alert to avoid disrupting UX on first load
         }
     }
 
@@ -130,8 +130,7 @@ class SpiceLanding {
             }
         } catch (error) {
             console.error('❌ Failed to load profiles:', error);
-            // Show error instead of fallback
-            alert('API Error in loadProfiles: ' + error.message);
+            // Soft-fail without alert; show empty state
             this.showNoProfiles();
         }
     }

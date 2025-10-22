@@ -1621,13 +1621,13 @@ body {
 }
 
 .company-info p strong {
-    color: #fff;
+    color: var(--primary-color);
     font-weight: 600;
 }
 
 /* Footer Brand Styles */
 .footer-brand h3 {
-    color: #fff;
+    color: var(--primary-color);
     margin-bottom: 10px;
     font-size: 24px;
     font-weight: 700;
