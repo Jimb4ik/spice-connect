@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/discover-page.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- API Logger -->
+    <script src="js/api-logger.js"></script>
 </head>
 <body data-page="discover">
     <!-- Хедер -->
@@ -1202,16 +1204,16 @@
                                 yourPhoto.src = headerAvatar.src;
                                 yourPhoto.style.display = 'block';
                                 // console.log('[MATCH] ✅ Your photo set from header avatar');
-                                                    } else {
-                            // console.log('[MATCH] No header avatar, trying API...');
-                            // Попробуем API, но с fallback на placeholder
-                            loadCurrentUserPhoto(yourPhoto).then(success => {
-                                if (!success) {
-                                    // console.log('[MATCH] API failed, creating user placeholder...');
-                                    createUserPlaceholder(yourPhoto);
-                                }
-                            });
-                        }
+                            } else {
+                                // console.log('[MATCH] No header avatar, trying API...');
+                                // Попробуем API, но с fallback на placeholder
+                                loadCurrentUserPhoto(yourPhoto).then(success => {
+                                    if (!success) {
+                                        // console.log('[MATCH] API failed, creating user placeholder...');
+                                        createUserPlaceholder(yourPhoto);
+                                    }
+                                });
+                            }
                         }
                     } catch (e) {
                         // console.log('[MATCH] Failed to parse localStorage, trying API...');
