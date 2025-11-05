@@ -13,6 +13,256 @@
 
 ---
 
+## 🚀 QUICK START GUIDE ДЛЯ РАЗРАБОТЧИКОВ
+
+> **Инструкция для программистов, работающих с Spice API**
+
+### ⚠️ КРИТИЧЕСКИ ВАЖНО: Метод авторизации
+
+Spice API использует **нестандартный** метод авторизации:
+
+```javascript
+// ❌ НЕ РАБОТАЕТ - не делай так:
+fetch('https://dev2018.de5a7.com/index_api/search', {
+    headers: {
+        'Authorization': `Bearer ${API_KEY}`,  // ❌ НЕПРАВИЛЬНО
+        'X-API-Key': API_KEY                   // ❌ НЕПРАВИЛЬНО
+    },
+    body: JSON.stringify({ filters })          // ❌ НЕПРАВИЛЬНО
+});
+
+// ✅ РАБОТАЕТ - делай так:
+fetch(`https://dev2018.de5a7.com/index_api/search?api_key=${API_KEY}&session_id=${SESSION_ID}&page=0&pas=30`, {
+    method: 'POST',
+    headers: {
+        'Accept': 'application/json'
+        // БЕЗ Authorization!
+    }
+    // БЕЗ body (для большинства endpoints)!
+});
+```
+
+### 📝 Главные правила работы с Spice API:
+
+1. **api_key передается ТОЛЬКО через URL query параметры**
+   ```
+   ?api_key=YOUR_KEY
+   ```
+
+2. **Метод POST, но параметры в URL, а не в body**
+   ```javascript
+   // Все фильтры и параметры - в URL
+   const url = `${BASE_URL}/index_api/search?api_key=${KEY}&session_id=${SID}&sex=2&age_from=18&age_to=35`;
+   fetch(url, { method: 'POST' }); // body пустое!
+   ```
+
+3. **Content-Type для обычных запросов**
+   ```javascript
+   headers: {
+       'Accept': 'application/json'
+       // НЕ используй Authorization заголовки!
+   }
+   ```
+
+4. **Исключение: загрузка файлов**
+   ```javascript
+   // Только для upload фото используется body с multipart/form-data
+   const formData = new FormData();
+   formData.append('file', photoFile);
+   
+   fetch(`${BASE_URL}/index_api/user_edit_photos?api_key=${KEY}&session_id=${SID}`, {
+       method: 'POST',
+       body: formData  // ← здесь body нужен
+   });
+   ```
+
+---
+
+### 🎯 Пример: Поиск пользователей (Search API)
+
+```javascript
+// Настройки
+const BASE_URL = 'https://dev2018.de5a7.com';
+const API_KEY = 'your_api_key_here';
+const SESSION_ID = 'user_session_id';
+
+// Шаг 1: Формируем параметры поиска
+const searchParams = {
+    api_key: API_KEY,           // ← ОБЯЗАТЕЛЬНО
+    session_id: SESSION_ID,      // ← ОБЯЗАТЕЛЬНО
+    page: 0,                     // Страница (0-based)
+    pas: 30,                     // Результатов на страницу
+    sex: 2,                      // 1=мужчина, 2=женщина, 3=пара
+    age_from: 25,                // Мин возраст
+    age_to: 35,                  // Макс возраст
+    is_online: 1,                // Только онлайн
+    is_photo: 1,                 // Только с фото
+    get_picture_430: 1           // Получить photos_v2 (высокое качество)
+};
+
+// Шаг 2: Формируем URL со ВСЕМИ параметрами
+const queryString = new URLSearchParams(searchParams).toString();
+const url = `${BASE_URL}/index_api/search?${queryString}`;
+
+// Шаг 3: Отправляем запрос
+const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+        'Accept': 'application/json'
+    }
+    // Тело пустое!
+});
+
+const data = await response.json();
+
+// Шаг 4: Обработка ответа
+if (data.connected === 1) {
+    console.log(`Найдено: ${data.total} пользователей`);
+    console.log(`Страниц: ${data.nb_pages}`);
+    
+    data.result.forEach(user => {
+        console.log(`${user.pseudo}, ${user.age} лет`);
+        
+        // Получение фото
+        if (user.photos_v2 && user.photos_v2.length > 0) {
+            const photo = user.photos_v2[0];
+            console.log(`Фото: ${photo.sq_middle}`); // 215x215
+        }
+    });
+}
+```
+
+---
+
+### 🔧 Структура успешного ответа
+
+```json
+{
+    "connected": 1,
+    "result": [
+        {
+            "id_membre": 12345,
+            "pseudo": "Marie",
+            "age": 28,
+            "sexe1": 2,
+            "ville": "Paris",
+            "is_online": 1,
+            "photos_v2": [
+                {
+                    "sq_small": "https://...photo_80x80.jpg",
+                    "sq_middle": "https://...photo_215x215.jpg",
+                    "sq_430": "https://...photo_430x430.jpg",
+                    "normal": "https://...photo_original.jpg"
+                }
+            ]
+        }
+    ],
+    "total": 156,
+    "nb_pages": 6,
+    "page": 0
+}
+```
+
+---
+
+### 🛡️ Безопасность: Использование прокси
+
+**ВАЖНО:** НЕ передавай API_KEY на frontend!
+
+```javascript
+// ❌ ОПАСНО - api_key на клиенте:
+// frontend.js
+const API_KEY = 'my_secret_key'; // ← ЛЮБОЙ увидит в коде!
+fetch(`https://dev2018.de5a7.com/index_api/search?api_key=${API_KEY}`);
+
+// ✅ БЕЗОПАСНО - используй серверный прокси:
+// frontend.js
+fetch('/api/search-proxy', {  // ← обращение к СВОЕМУ серверу
+    method: 'POST',
+    body: JSON.stringify({ sex: 2, age_from: 25 })
+});
+
+// backend/api/search-proxy.js
+export default async function handler(req, res) {
+    const API_KEY = process.env.SPICE_API_KEY; // ← из env переменных
+    
+    const params = new URLSearchParams({
+        api_key: API_KEY,  // ← добавляем на сервере
+        ...req.body
+    });
+    
+    const response = await fetch(
+        `https://dev2018.de5a7.com/index_api/search?${params.toString()}`,
+        { method: 'POST' }
+    );
+    
+    const data = await response.json();
+    res.json(data);
+}
+```
+
+---
+
+### 📋 Основные endpoints для быстрого старта
+
+| Endpoint | Метод | Что делает | Обязательные параметры |
+|----------|-------|------------|------------------------|
+| `/index_api/search` | POST | Поиск пользователей | `api_key`, `session_id` |
+| `/ajax_api/online` | GET | Онлайн пользователи | `api_key`, `session_id` |
+| `/index_api/profile` | POST | Профиль пользователя | `api_key`, `session_id`, `id_membre` |
+| `/index_api/landing_module/profils_global` | POST | Глобальные профили | `api_key`, `force_pays=64` |
+| `/ajax_api/get_pubs` | POST | Получить сообщения | `api_key`, `session_id` |
+
+**Все параметры передаются в URL query string!**
+
+---
+
+### 🐛 Частые ошибки и их решение
+
+#### 1. Ошибка 401 Unauthorized
+```
+Причина: api_key не передан или неверный
+Решение: Проверь что api_key есть в URL query параметрах:
+         ?api_key=YOUR_KEY
+```
+
+#### 2. Пустой ответ или {"connected": 0}
+```
+Причина: session_id невалидный или пользователь не авторизован
+Решение: Сначала выполни login через /api/auth и получи session_id
+```
+
+#### 3. Параметры игнорируются
+```
+Причина: Параметры переданы в body вместо URL
+Решение: ВСЕ параметры должны быть в query string URL
+```
+
+---
+
+### 💾 Тестовый запрос через curl
+
+```bash
+# Базовый поиск
+curl -X POST "https://dev2018.de5a7.com/index_api/search?api_key=YOUR_KEY&session_id=YOUR_SESSION&page=0&pas=10"
+
+# С фильтрами
+curl -X POST "https://dev2018.de5a7.com/index_api/search?api_key=YOUR_KEY&session_id=YOUR_SESSION&sex=2&age_from=25&age_to=35&is_photo=1&page=0&pas=30"
+
+# Онлайн пользователи
+curl "https://dev2018.de5a7.com/ajax_api/online?api_key=YOUR_KEY&session_id=YOUR_SESSION"
+```
+
+---
+
+### 📚 Дополнительная документация
+
+- **Swagger UI:** https://dev2018.de5a7.com/swagger-ui-master/dist/index_V2.html
+- **JSON спецификация:** https://dev2018.de5a7.com/api/swagger_en_last_V2.json
+- **Подробная документация:** Смотри разделы ниже в этом файле
+
+---
+
 ## 📋 ОГЛАВЛЕНИЕ
 
 1. [Авторизация и регистрация](#1-авторизация-и-регистрация)
