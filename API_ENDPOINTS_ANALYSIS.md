@@ -179,6 +179,90 @@ session_id=abc123xyz
 
 ## 📖 ДЕТАЛЬНОЕ ОПИСАНИЕ РАБОТЫ SEARCH API
 
+### 🎯 Визуальная схема потока данных
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        ПОЛНЫЙ ПОТОК SEARCH ЗАПРОСА                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+ FRONTEND (Browser)                VERCEL (Serverless)              SPICE API
+┌──────────────────┐             ┌────────────────────┐         ┌─────────────┐
+│  search-page.js  │             │ spice-multi-test.js│         │ Spice Server│
+└────────┬─────────┘             └─────────┬──────────┘         └──────┬──────┘
+         │                                  │                           │
+         │ 1. Формирует параметры поиска   │                           │
+         │    {nick, age_from, sex, ...}   │                           │
+         │                                  │                           │
+         │ 2. POST /api/spice-multi-test   │                           │
+         │    ?endpoint=/index_api/search  │                           │
+         │    &session_id=abc123           │                           │
+         │    &page=1&pas=30&sex=2         │                           │
+         ├────────────────────────────────>│                           │
+         │                                  │                           │
+         │   Headers:                       │                           │
+         │   Content-Type: application/json│                           │
+         │                                  │                           │
+         │                                  │ 3. Извлекает параметры    │
+         │                                  │    из query string        │
+         │                                  │                           │
+         │                                  │ 4. Добавляет api_key      │
+         │                                  │    в query параметры      │
+         │                                  │                           │
+         │                                  │ 5. POST к Spice API       │
+         │                                  │    URL: /index_api/search │
+         │                                  │    ?api_key=XXX           │
+         │                                  │    &session_id=abc123     │
+         │                                  │    &page=1&pas=30&sex=2   │
+         │                                  ├──────────────────────────>│
+         │                                  │                           │
+         │                                  │   Headers:                │
+         │                                  │   Accept: application/json│
+         │                                  │   ❌ БЕЗ Authorization!   │
+         │                                  │                           │
+         │                                  │                           │ 6. Обрабатывает
+         │                                  │                           │    запрос
+         │                                  │                           │
+         │                                  │ 7. JSON Response          │
+         │                                  │<──────────────────────────┤
+         │                                  │    {                      │
+         │                                  │      "connected": 1,      │
+         │                                  │      "result": [...],     │
+         │                                  │      "total": 156,        │
+         │                                  │      "nb_pages": 6        │
+         │                                  │    }                      │
+         │                                  │                           │
+         │ 8. Wrapped Response              │                           │
+         │<─────────────────────────────────┤                           │
+         │    {                             │                           │
+         │      "success": true,            │                           │
+         │      "data": {                   │                           │
+         │        "connected": 1,           │                           │
+         │        "result": [...]           │                           │
+         │      }                           │                           │
+         │    }                             │                           │
+         │                                  │                           │
+         │ 9. Отображает результаты         │                           │
+         │    - Создает карточки            │                           │
+         │    - Показывает пагинацию        │                           │
+         │                                  │                           │
+         ▼                                  ▼                           ▼
+```
+
+### 🔑 Ключевые особенности авторизации
+
+```
+❌ НЕ РАБОТАЕТ:
+   Authorization: Basic base64(api_key:password)
+   Authorization: Bearer api_key
+   X-API-Key: api_key
+
+✅ РАБОТАЕТ:
+   URL Query Parameter: ?api_key=YOUR_KEY
+```
+
+---
+
 ### 🔄 Полный поток запроса (Frontend → Backend → Spice API)
 
 #### **Шаг 1: Frontend инициирует поиск**
@@ -411,6 +495,183 @@ if (result.success && result.data) {
 
 **Куда идет запрос:**
 - `https://dev2018.de5a7.com/index_api/search?api_key=${API_KEY}&session_id=${SESSION_ID}&page=0&pas=30`
+
+---
+
+### 💡 ПРИМЕРЫ ИСПОЛЬЗОВАНИЯ
+
+#### Пример 1: Простой поиск всех пользователей
+
+```javascript
+const searchParams = new URLSearchParams({
+    session_id: 'your_session_id',
+    page: 1,
+    pas: 30,
+    is_photo: 1
+});
+
+const response = await fetch(
+    `/api/spice-multi-test?endpoint=/index_api/search&method=POST&${searchParams.toString()}`
+);
+const result = await response.json();
+
+console.log(`Найдено пользователей: ${result.data.total}`);
+console.log(`Страниц: ${result.data.nb_pages}`);
+```
+
+#### Пример 2: Поиск женщин 25-35 лет онлайн
+
+```javascript
+const searchParams = new URLSearchParams({
+    session_id: 'your_session_id',
+    sex: 2,              // Женщины
+    age_from: 25,
+    age_to: 35,
+    is_online: 1,        // Только онлайн
+    is_photo: 1,         // С фото
+    get_picture_430: 1,  // Высокое разрешение
+    page: 1,
+    pas: 30
+});
+
+const response = await fetch(
+    `/api/spice-multi-test?endpoint=/index_api/search&method=POST&${searchParams.toString()}`
+);
+const result = await response.json();
+```
+
+#### Пример 3: Поиск по имени пользователя
+
+```javascript
+const searchParams = new URLSearchParams({
+    session_id: 'your_session_id',
+    nick: 'Marie',       // Поиск по username
+    page: 1,
+    pas: 30,
+    get_picture_430: 1
+});
+
+const response = await fetch(
+    `/api/spice-multi-test?endpoint=/index_api/search&method=POST&${searchParams.toString()}`
+);
+const result = await response.json();
+```
+
+#### Пример 4: Обработка результатов с фотографиями
+
+```javascript
+if (result.success && result.data.result) {
+    result.data.result.forEach(user => {
+        // Приоритет 1: photos_v2 (если был параметр get_picture_430=1)
+        let photoUrl = null;
+        
+        if (user.photos_v2 && user.photos_v2.length > 0) {
+            const photo = user.photos_v2[0];
+            photoUrl = photo.sq_middle;  // 215x215px
+            // или photo.sq_430 для 430x430px
+            // или photo.normal для оригинала
+        }
+        // Приоритет 2: photos (старый формат)
+        else if (user.photos && user.photos.length > 0) {
+            const photo = user.photos[0];
+            photoUrl = photo.url_middle;  // 215x215px
+        }
+        
+        console.log(`${user.pseudo}, ${user.age} лет, фото: ${photoUrl}`);
+    });
+}
+```
+
+---
+
+### 🐛 ТИПИЧНЫЕ ОШИБКИ И РЕШЕНИЯ
+
+#### Ошибка 1: 401 Unauthorized
+
+**Проблема:**
+```json
+{
+  "error": "Unauthorized",
+  "status": 401
+}
+```
+
+**Причина:** API ключ не передается или неверный
+
+**Решение:**
+- ✅ Убедитесь что `SPICE_API_KEY` настроен в `.env` или Vercel Environment Variables
+- ✅ Проверьте что прокси `spice-multi-test.js` добавляет `api_key` в query параметры
+- ❌ НЕ пытайтесь добавить api_key в Authorization заголовок
+
+---
+
+#### Ошибка 2: Пустые результаты
+
+**Проблема:**
+```json
+{
+  "success": true,
+  "data": {
+    "result": [],
+    "total": 0
+  }
+}
+```
+
+**Причина:** Слишком строгие фильтры или нет пользователей
+
+**Решение:**
+- Уберите некоторые фильтры (особенно `is_online`, `id_ville`)
+- Расширьте диапазон возраста
+- Проверьте что `sex` параметр правильный (1=мужчина, 2=женщина, 3=пара)
+
+---
+
+#### Ошибка 3: Фотографии не загружаются
+
+**Проблема:** В ответе есть пользователи, но нет `photos_v2` или `photos`
+
+**Причина:** Не указан параметр `get_picture_430`
+
+**Решение:**
+```javascript
+// ✅ Правильно - с фотографиями
+const params = new URLSearchParams({
+    session_id: sessionId,
+    get_picture_430: 1,  // ← Этот параметр обязателен!
+    page: 1
+});
+
+// ❌ Неправильно - без фотографий
+const params = new URLSearchParams({
+    session_id: sessionId,
+    page: 1
+});
+```
+
+---
+
+### 🔧 ОТЛАДКА ЗАПРОСОВ
+
+Для отладки можно добавить логирование в `api/spice-multi-test.js`:
+
+```javascript
+// Раскомментируйте эти строки для отладки
+console.log('📡 URL запроса:', finalUrl.replace(API_KEY, 'HIDDEN_KEY'));
+console.log('📋 Query params:', Object.fromEntries(queryParams.entries()));
+console.log('📊 Response data:', data);
+```
+
+Или в браузере:
+
+```javascript
+// В search-page.js
+console.log('[SEARCH] Request URL:', fullUrl);
+console.log('[SEARCH] Search params:', searchParams);
+console.log('[SEARCH] API Response:', result);
+```
+
+---
 
 ---
 
