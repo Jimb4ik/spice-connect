@@ -1629,9 +1629,8 @@
                 // console.log('Примеры значений:');
                 for (const [key, value] of Object.entries(currentProfile)) {
                     if (value !== null && value !== undefined && value !== '') {
-                        // console.log(`  ${key}:`, typeof value === 'string' && value.length > 50 
-                            ? value.substring(0, 50) + '...' 
-                            : value);
+                        // const displayValue = (typeof value === 'string' && value.length > 50) ? value.substring(0, 50) + '...' : value;
+                        // console.log(`  ${key}:`, displayValue);
                     }
                 }
                 // console.log('=== КОНЕЦ АНАЛИЗА ===');
