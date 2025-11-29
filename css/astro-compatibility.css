@@ -1,0 +1,629 @@
+/**
+ * AstroDate Compatibility Styles
+ * Стили для визуализации астрологической совместимости
+ */
+
+:root {
+  --astro-primary: #8b5cf6;
+  --astro-secondary: #ec4899;
+  --astro-accent: #f59e0b;
+  --astro-success: #10b981;
+  --astro-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --astro-gradient-warm: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --astro-gradient-cosmic: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+  
+  --color-excellent: #10b981;
+  --color-great: #3b82f6;
+  --color-good: #8b5cf6;
+  --color-moderate: #f59e0b;
+  
+  --shadow-soft: 0 2px 8px rgba(0,0,0,0.08);
+  --shadow-medium: 0 4px 16px rgba(0,0,0,0.12);
+  --shadow-strong: 0 8px 32px rgba(0,0,0,0.16);
+}
+
+/* ==================== Compatibility Card ==================== */
+
+.astro-compatibility-card {
+  background: white;
+  border-radius: 24px;
+  padding: 32px 24px;
+  box-shadow: var(--shadow-medium);
+  position: relative;
+  overflow: hidden;
+}
+
+.astro-compatibility-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--astro-gradient);
+}
+
+/* ==================== Overall Score Circle ==================== */
+
+.astro-overall-score {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.astro-score-circle {
+  position: relative;
+  display: inline-block;
+  margin: 0 auto 16px;
+}
+
+.astro-score-ring {
+  transform: rotate(-90deg);
+}
+
+.astro-ring-background {
+  fill: none;
+  stroke: #e5e7eb;
+  stroke-width: 8;
+}
+
+.astro-ring-progress {
+  fill: none;
+  stroke: url(#astroGradient);
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-dasharray: 339.292; /* 2 * π * 54 */
+  stroke-dashoffset: 339.292;
+  transition: stroke-dashoffset 1.5s ease-out;
+}
+
+.astro-ring-progress.animate {
+  stroke-dashoffset: calc(339.292 - (339.292 * var(--score) / 100));
+}
+
+.astro-score-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-weight: 700;
+  color: var(--astro-primary);
+}
+
+.astro-score-number {
+  font-size: 36px;
+  line-height: 1;
+}
+
+.astro-score-percent {
+  font-size: 18px;
+}
+
+.astro-match-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ==================== Zodiac Signs Display ==================== */
+
+.astro-signs-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  margin: 24px 0;
+  padding: 20px;
+  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+  border-radius: 16px;
+}
+
+.astro-sign-item {
+  text-align: center;
+  flex: 1;
+}
+
+.astro-sign-icon {
+  font-size: 48px;
+  margin-bottom: 8px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+.astro-sign-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.astro-heart-connector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.astro-heart-pulse {
+  font-size: 32px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+}
+
+/* ==================== Description ==================== */
+
+.astro-description {
+  text-align: center;
+  padding: 20px;
+  margin: 20px 0;
+  background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+  border-radius: 12px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: #92400e;
+  font-weight: 500;
+}
+
+/* ==================== Spheres Grid ==================== */
+
+.astro-spheres-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.astro-sphere-item {
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 12px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.astro-sphere-item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-soft);
+}
+
+.astro-sphere-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.astro-sphere-emoji {
+  font-size: 20px;
+}
+
+.astro-sphere-label {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.astro-sphere-score {
+  font-size: 16px;
+  font-weight: 700;
+  color: #6366f1;
+}
+
+.astro-sphere-bar-container {
+  position: relative;
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.astro-sphere-bar-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #e5e7eb;
+}
+
+.astro-sphere-bar-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0;
+  background: var(--color, var(--astro-primary));
+  border-radius: 4px;
+  transition: width 1s ease-out;
+}
+
+.astro-sphere-bar-fill.animate {
+  width: calc(var(--score) * 1%);
+}
+
+/* ==================== Details Section ==================== */
+
+.astro-details-section {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.astro-details-toggle {
+  width: 100%;
+  padding: 12px;
+  background: transparent;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.astro-details-toggle:hover {
+  background: #f9fafb;
+  border-color: var(--astro-primary);
+  color: var(--astro-primary);
+}
+
+.astro-details-toggle svg {
+  transition: transform 0.3s ease;
+}
+
+.astro-details-content {
+  margin-top: 16px;
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 12px;
+}
+
+.astro-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.astro-detail-row:last-child {
+  border-bottom: none;
+}
+
+.astro-detail-label {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.astro-detail-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+/* ==================== Compact Badge ==================== */
+
+.astro-compact-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: white;
+  border: 2px solid var(--badge-color, var(--astro-primary));
+  border-radius: 20px;
+  box-shadow: var(--shadow-soft);
+  font-weight: 700;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.astro-compact-badge:hover {
+  transform: scale(1.05);
+  box-shadow: var(--shadow-medium);
+}
+
+.astro-badge-emoji {
+  font-size: 16px;
+}
+
+.astro-badge-score {
+  font-size: 14px;
+  color: var(--badge-color, var(--astro-primary));
+}
+
+/* ==================== Mini Visualization ==================== */
+
+.astro-mini-viz {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: var(--shadow-soft);
+}
+
+.astro-mini-score {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--astro-primary);
+}
+
+.astro-mini-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 30px;
+  flex: 1;
+}
+
+.astro-mini-bar {
+  flex: 1;
+  border-radius: 2px 2px 0 0;
+  min-height: 4px;
+  transition: height 0.6s ease;
+}
+
+/* ==================== Modal ==================== */
+
+.astro-compatibility-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.astro-compatibility-modal.active {
+  opacity: 1;
+}
+
+.astro-modal-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+.astro-modal-content {
+  position: relative;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: white;
+  border-radius: 24px;
+  box-shadow: var(--shadow-strong);
+  transform: translateY(20px);
+  transition: transform 0.3s ease;
+}
+
+.astro-compatibility-modal.active .astro-modal-content {
+  transform: translateY(0);
+}
+
+.astro-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 50%;
+  font-size: 24px;
+  line-height: 1;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 1;
+}
+
+.astro-modal-close:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: #374151;
+  transform: rotate(90deg);
+}
+
+.astro-modal-header {
+  padding: 32px 24px 24px;
+  text-align: center;
+  background: var(--astro-gradient);
+  color: white;
+}
+
+.astro-modal-header h2 {
+  margin: 0 0 8px;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.astro-modal-subtitle {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.astro-modal-body {
+  padding: 0;
+}
+
+.astro-modal-body .astro-compatibility-card {
+  box-shadow: none;
+  border-radius: 0 0 24px 24px;
+}
+
+/* ==================== Starry Background ==================== */
+
+.astro-stars-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.astro-star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: white;
+  border-radius: 50%;
+  animation: twinkle 3s ease-in-out infinite;
+}
+
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.5);
+  }
+}
+
+/* ==================== Fade In Animation ==================== */
+
+.fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==================== Responsive Design ==================== */
+
+@media (min-width: 640px) {
+  .astro-spheres-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .astro-compatibility-card {
+    padding: 40px 32px;
+  }
+}
+
+@media (min-width: 768px) {
+  .astro-modal-content {
+    max-width: 600px;
+  }
+}
+
+/* ==================== Integration with Profile Cards ==================== */
+
+.astro-badge-container {
+  animation: slideInFromTop 0.5s ease-out;
+}
+
+@keyframes slideInFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==================== Additional Effects ==================== */
+
+.astro-glow {
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+}
+
+.astro-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* SVG Gradient Definition (add to HTML) */
+svg defs {
+  display: none;
+}
+
+/* ==================== Loading States ==================== */
+
+.astro-loading {
+  text-align: center;
+  padding: 40px;
+}
+
+.astro-loading-spinner {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e5e7eb;
+  border-top-color: var(--astro-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ==================== Print Styles ==================== */
+
+@media print {
+  .astro-modal-close,
+  .astro-details-toggle {
+    display: none;
+  }
+  
+  .astro-details-content {
+    display: block !important;
+  }
+}
+

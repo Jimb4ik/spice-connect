@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Discover - Lavrilo</title>
+    <title>AstroDate - Discover Your Cosmic Matches ✨</title>
     <!-- Favicon -->
     <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
@@ -13,12 +13,13 @@
     <link rel="stylesheet" href="css/app-styles.css">
     <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="css/discover-page.css">
+    <link rel="stylesheet" href="css/astro-compatibility.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"></head>
 <body data-page="discover">
     <!-- Хедер -->
     <header class="app-header">
         <div class="header-container">
-            <a href="main.html" class="logo">Lavrilo</a>
+            <a href="main.html" class="logo">✨ AstroDate</a>
             
             <nav>
                 <ul class="nav-menu">
@@ -108,7 +109,10 @@
     <!-- Основной контент -->
     <main class="app-main">
         <div class="page-header fade-in-up">
-            <h1 class="page-title">Discover</h1>
+            <h1 class="page-title">✨ Discover Your Cosmic Matches</h1>
+            <p class="page-subtitle" style="text-align: center; color: #6b7280; margin-top: 8px;">
+                Find people who are astrologically aligned with your stars
+            </p>
         </div>
 
         <!-- Discover Interface -->
@@ -403,7 +407,23 @@
     <script src="js/auth-manager.js?v=1.2"></script>
     <script src="js/header-avatar.js?v=1.4"></script>
     <script src="js/match-utils.js?v=1.0"></script>
+    
+    <!-- AstroDate Engine -->
+    <script src="js/astro-engine.js?v=1.0"></script>
+    <script src="js/astro-compatibility-ui.js?v=1.0"></script>
+    <script src="js/astro-matching-system.js?v=1.0"></script>
+    
     <script src="js/matching-system-v2.js?v=1.0"></script>
+    
+    <!-- SVG Definitions for Gradients -->
+    <svg style="position: absolute; width: 0; height: 0;">
+        <defs>
+            <linearGradient id="astroGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+            </linearGradient>
+        </defs>
+    </svg>
     
     <script>
         // Проверка авторизации при загрузке страницы
