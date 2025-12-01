@@ -225,12 +225,12 @@ class WalletManager {
     
     getTransactionIcon(type) {
         const iconMap = {
-            'deposit': 'wallet-topup.png',
-            'withdrawal': 'minus-circle.png',
-            'purchase': 'gift-purchase.png',
-            'refund': 'refresh.png'
+            'deposit': 'wallet-topup.svg',
+            'withdrawal': 'minus-circle.svg',
+            'purchase': 'gift-purchase.svg',
+            'refund': 'refresh.svg'
         };
-        return iconMap[type] || 'wallet.png';
+        return iconMap[type] || 'wallet.svg';
     }
     
     getTransactionTitle(type) {
@@ -389,7 +389,9 @@ class WalletManager {
         errorDiv.className = 'agreement-error';
         errorDiv.innerHTML = `
             <div class="error-content">
-                <span class="error-icon">⚠️</span>
+                <div class="error-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #ef4444;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                </div>
                 <div class="error-text">
                     <strong>Agreement Required</strong>
                     <p>To proceed with payment, please confirm that you are 18+ years old and agree to our Terms of Service and Privacy Policy by checking the boxes above.</p>
@@ -561,7 +563,7 @@ class WalletManager {
 
     showErrorMessage(message) {
         // Показываем ошибку пользователю
-        alert('❌ ' + message);
+        alert('Error: ' + message);
         
         // Возвращаем пользователя к модальному окну пополнения
         document.getElementById('topupModal').style.display = 'flex';
@@ -857,16 +859,16 @@ async function viewAllTransactions() {
 }
 
 // Success message
-function showSuccessMessage(message) {
-    // Create and show success notification
-    const notification = document.createElement('div');
-    notification.className = 'success-notification';
-    notification.innerHTML = `
-        <div class="notification-content">
-            <img src="icons/check-circle.png" alt="Success" class="notification-icon">
-            <span>${message}</span>
-        </div>
-    `;
+function     showSuccessMessage(message) {
+        // Create and show success notification
+        const notification = document.createElement('div');
+        notification.className = 'success-notification';
+        notification.innerHTML = `
+            <div class="notification-content">
+                <img src="icons/check-circle.svg" alt="Success" class="notification-icon">
+                <span>${message}</span>
+            </div>
+        `;
     
     // Add styles
     notification.style.cssText = `

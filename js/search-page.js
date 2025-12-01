@@ -449,7 +449,9 @@ class SearchManager {
         if (container) {
             container.innerHTML = `
                 <div class="search-status no-results">
-                    <div class="status-icon">⚠️</div>
+                    <div class="status-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-500 mx-auto mb-4"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    </div>
                     <h3>Search Error</h3>
                     <p>${message}</p>
                     <button class="app-btn app-btn-primary" onclick="searchManager.performSearch()">
@@ -594,9 +596,11 @@ class SearchManager {
                 font-size: 14px;
             `;
             warningDiv.innerHTML = `
-                ⚠️ <strong>Location "${locationName}" not found.</strong> 
-                Showing results without location filter. 
-                Try searching for a major city name.
+                <span class="inline-flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    <strong>Location "${locationName}" not found.</strong>
+                </span>
+                <span class="block mt-1 ml-6">Showing results without location filter. Try searching for a major city name.</span>
             `;
             
             // Удаляем предыдущие предупреждения

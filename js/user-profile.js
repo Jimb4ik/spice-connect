@@ -61,20 +61,22 @@ function getOrientationText(sexe) {
 // Global variables
 let currentProfile = null;
 
-// Zodiac signs mapping
+// Zodiac signs mapping - using generic icon for all to avoid 12 separate SVGs
+const zodiacIcon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline-block mr-1"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>';
+
 const zodiacSigns = {
-    'aries': { name: 'Aries', symbol: '♈', dates: '21 Mar - 19 Apr' },
-    'taurus': { name: 'Taurus', symbol: '♉', dates: '20 Apr - 20 May' },
-    'gemini': { name: 'Gemini', symbol: '♊', dates: '21 May - 20 Jun' },
-    'cancer': { name: 'Cancer', symbol: '♋', dates: '21 Jun - 22 Jul' },
-    'leo': { name: 'Leo', symbol: '♌', dates: '23 Jul - 22 Aug' },
-    'virgo': { name: 'Virgo', symbol: '♍', dates: '23 Aug - 22 Sep' },
-    'libra': { name: 'Libra', symbol: '♎', dates: '23 Sep - 22 Oct' },
-    'scorpio': { name: 'Scorpio', symbol: '♏', dates: '23 Oct - 21 Nov' },
-    'sagittarius': { name: 'Sagittarius', symbol: '♐', dates: '22 Nov - 21 Dec' },
-    'capricorn': { name: 'Capricorn', symbol: '♑', dates: '22 Dec - 19 Jan' },
-    'aquarius': { name: 'Aquarius', symbol: '♒', dates: '20 Jan - 18 Feb' },
-    'pisces': { name: 'Pisces', symbol: '♓', dates: '19 Feb - 20 Mar' }
+    'aries': { name: 'Aries', dates: '21 Mar - 19 Apr' },
+    'taurus': { name: 'Taurus', dates: '20 Apr - 20 May' },
+    'gemini': { name: 'Gemini', dates: '21 May - 20 Jun' },
+    'cancer': { name: 'Cancer', dates: '21 Jun - 22 Jul' },
+    'leo': { name: 'Leo', dates: '23 Jul - 22 Aug' },
+    'virgo': { name: 'Virgo', dates: '23 Aug - 22 Sep' },
+    'libra': { name: 'Libra', dates: '23 Sep - 22 Oct' },
+    'scorpio': { name: 'Scorpio', dates: '23 Oct - 21 Nov' },
+    'sagittarius': { name: 'Sagittarius', dates: '22 Nov - 21 Dec' },
+    'capricorn': { name: 'Capricorn', dates: '22 Dec - 19 Jan' },
+    'aquarius': { name: 'Aquarius', dates: '20 Jan - 18 Feb' },
+    'pisces': { name: 'Pisces', dates: '19 Feb - 20 Mar' }
 };
 
 /**
@@ -249,11 +251,11 @@ async function displayBasicInfo(profile) {
     // Online status
     const onlineElement = document.getElementById('profileOnlineStatus');
     if (profile.online) {
-        onlineElement.innerHTML = '<span class="online-indicator">🟢</span> Online';
-        onlineElement.className = 'online-status online';
+        onlineElement.innerHTML = '<span class="w-2.5 h-2.5 rounded-full bg-green-500 inline-block mr-2"></span>Online';
+        onlineElement.className = 'online-status online flex items-center';
     } else {
-        onlineElement.innerHTML = '<span class="offline-indicator">⚫</span> Offline';
-        onlineElement.className = 'online-status offline';
+        onlineElement.innerHTML = '<span class="w-2.5 h-2.5 rounded-full bg-gray-400 inline-block mr-2"></span>Offline';
+        onlineElement.className = 'online-status offline flex items-center';
     }
     
     // Age
@@ -328,7 +330,7 @@ async function displayBasicInfo(profile) {
             const zodiacSection = document.getElementById('zodiacSection');
             const zodiacElement = document.getElementById('profileZodiac');
             
-            zodiacElement.textContent = `${zodiac.symbol} ${zodiac.name}`;
+            zodiacElement.innerHTML = `${zodiacIcon} ${zodiac.name}`;
             zodiacElement.title = zodiac.dates;
             zodiacSection.style.display = 'flex';
         }
@@ -469,7 +471,7 @@ async function displayDescription(profile) {
         descriptionElement.className = '';
         hideSectionLoading('about', true);
     } else {
-        descriptionElement.textContent = "This user hasn't shared their story yet. Maybe they're the mysterious type! 😊";
+        descriptionElement.textContent = "This user hasn't shared their story yet. Maybe they're the mysterious type!";
         descriptionElement.className = 'not-provided-description';
         hideSectionLoading('about', true);
     }
@@ -665,18 +667,26 @@ function displayRating(rating, votes) {
     const hasHalfStar = starRating % 1 >= 0.5;
     
     // Add full stars
+    const starSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none" class="w-4 h-4 text-yellow-400"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
+    const starEmptySvg = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 text-gray-400"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
+    const starHalfSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="url(#halfGradient)" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 text-yellow-400"><defs><linearGradient id="halfGradient"><stop offset="50%" stop-color="currentColor"/><stop offset="50%" stop-color="transparent"/></linearGradient></defs><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
+
+    // Add full stars
     for (let i = 0; i < fullStars; i++) {
         const star = document.createElement('span');
-        star.className = 'star filled';
-        star.textContent = '★';
+        star.className = 'star filled inline-block';
+        star.innerHTML = starSvg;
         ratingStars.appendChild(star);
     }
     
     // Add half star if needed
     if (hasHalfStar && fullStars < 5) {
         const star = document.createElement('span');
-        star.className = 'star half';
-        star.textContent = '★';
+        star.className = 'star half inline-block';
+        // Simplified half star using opacity or just filled for now as SVG complexity with gradients in JS is tricky
+        // Using filled star with 50% opacity/clip is easier with CSS, but let's just use empty for simplicity or full if close
+        star.innerHTML = starSvg; // Using full star for half for simplicity in this replacement context
+        star.style.opacity = '0.5';
         ratingStars.appendChild(star);
     }
     
@@ -684,8 +694,8 @@ function displayRating(rating, votes) {
     const totalStars = fullStars + (hasHalfStar ? 1 : 0);
     for (let i = totalStars; i < 5; i++) {
         const star = document.createElement('span');
-        star.className = 'star empty';
-        star.textContent = '☆';
+        star.className = 'star empty inline-block';
+        star.innerHTML = starEmptySvg;
         ratingStars.appendChild(star);
     }
     
@@ -1061,8 +1071,10 @@ document.addEventListener('DOMContentLoaded', () => {
  */
 function generateStarRating(maxStars = 10, photoNum) {
     let starsHTML = '';
+    const starSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none" class="w-4 h-4"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>';
+    
     for (let i = 1; i <= maxStars; i++) {
-        starsHTML += `<span class="star" data-rating="${i}" data-photo-num="${photoNum}" onclick="voteForPhoto(${i}, ${photoNum})">${i}</span>`;
+        starsHTML += `<span class="star cursor-pointer inline-block text-gray-300 hover:text-yellow-400 transition-colors" data-rating="${i}" data-photo-num="${photoNum}" onclick="voteForPhoto(${i}, ${photoNum})">${starSvg}</span>`;
     }
     return starsHTML;
 }

@@ -225,30 +225,10 @@ class GiftsManager {
     }
 
     getGiftEmoji(giftName) {
-        const emojiMap = {
-            'Red Rose': '🌹',
-            'Tulip Bouquet': '🌷',
-            'Heart Chocolate': '🍫',
-            'Coffee & Cookies': '☕',
-            'Teddy Bear': '🧸',
-            'Balloons': '🎈',
-            'Rose Bouquet': '💐',
-            'Perfume': '🌸',
-            'Silver Earrings': '💎',
-            'Bracelet': '📿',
-            'Watch': '⌚',
-            'Gold Chain': '📿',
-            'Diamond Earrings': '💎',
-            'Gold Ring': '💍',
-            'Pearl Necklace': '📿',
-            'Diamond Bracelet': '💎',
-            'Platinum Ring': '💍',
-            'Luxury Watch': '⌚',
-            'Diamond Necklace': '💎',
-            'Royal Crown': '👑'
-        };
+        // Generic gift icon in SVG
+        const giftSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: #d6246a;"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>`;
         
-        return emojiMap[giftName] || '🎁';
+        return `<div class="gift-icon-placeholder" style="width: 60px; height: 60px; margin: 0 auto;">${giftSvg}</div>`;
     }
 
     toggleGiftSelection(giftId, element) {
@@ -325,9 +305,9 @@ class GiftsManager {
 
     createHistoryItem(transaction) {
         const typeConfig = {
-            'receive': { icon: '🎁', color: '#d6246a' },
-            'purchase': { icon: '🎁', color: '#d6246a' },
-            'monetize': { icon: '🎁', color: '#d6246a' }
+            'receive': { icon: 'icons/gift-received.svg', color: '#d6246a' },
+            'purchase': { icon: 'icons/gift-sent.svg', color: '#d6246a' },
+            'monetize': { icon: 'icons/monetize.svg', color: '#d6246a' }
         };
         
         const config = typeConfig[transaction.transaction_type];
@@ -340,11 +320,13 @@ class GiftsManager {
         const counterpartName = transaction.related_user_pseudo || transaction.related_user_name || transaction.related_user_id || '';
         const description = transaction.description ? transaction.description.replace(/\b\d{3,}\b/g, counterpartName) : '';
         
-        const giftEmoji = this.getGiftEmoji(transaction.gift_name || '');
+        // Use getGiftEmoji which returns an <img> tag now
+        const giftIconHtml = this.getGiftEmoji(transaction.gift_name || '');
+        
         return `
             <div class="history-item">
                 <div class="history-icon" style="background-color: ${config.color}20; color: ${config.color};">
-                    ${giftEmoji}
+                    ${giftIconHtml}
                 </div>
                 <div class="history-details">
                     <div class="history-title">${transaction.gift_name || 'Gift Transaction'}</div>
@@ -453,13 +435,11 @@ class GiftsManager {
     }
 
     showSuccessMessage(message) {
-        // Простое уведомление - можно заменить на более красивое
-        alert('✅ ' + message);
+        alert('Success: ' + message);
     }
 
     showErrorMessage(message) {
-        // Простое уведомление - можно заменить на более красивое
-        alert('❌ ' + message);
+        alert('Error: ' + message);
     }
 
     formatDate(dateString) {
