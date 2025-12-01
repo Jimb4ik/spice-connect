@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-brand-dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="profileTitle">Member Profile - Lumina</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="favicon/favicon-lumina.png">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            primary: '#7c3aed', // Violet 600
+                            secondary: '#8b5cf6', // Violet 500
+                            accent: '#f59e0b', // Amber 500
+                            dark: '#0f172a', // Slate 900
+                            surface: '#1e293b', // Slate 800
+                            surface2: '#334155', // Slate 700
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Voting Stars */
+        .star { cursor: pointer; color: #475569; font-size: 1.25rem; transition: color 0.2s; }
+        .star.filled { color: #f59e0b; }
+        .star:hover, .star:hover ~ .star { color: #fbbf24; } /* CSS hover limitation, handled better by JS usually */
+        
+        .photo-item { position: relative; aspect-ratio: 1; overflow: hidden; border-radius: 0.75rem; cursor: pointer; background: #1e293b; }
+        .photo-item img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+        .photo-item:hover img { transform: scale(1.05); }
+        
+        .photo-voting-widget {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            padding: 1rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .photo-item:hover .photo-voting-widget { opacity: 1; }
+    </style>
+</head>
+<body class="h-full bg-brand-dark text-slate-100 overflow-hidden flex">
+
+    <!-- Sidebar (Desktop) -->
+    <aside class="hidden md:flex flex-col w-64 bg-brand-surface border-r border-white/5 h-full flex-shrink-0">
+        <div class="h-16 flex items-center px-6 border-b border-white/5">
+            <div class="flex items-center gap-3">
+                <img src="images/logo-lumina.png" alt="Lumina" class="h-8 w-auto">
+                <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-brand-secondary to-brand-accent">Lumina</span>
+            </div>
+        </div>
+
+        <nav class="flex-1 px-4 py-6 space-y-1">
+            <a href="main.html" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl group transition-all">
+                <svg class="w-5 h-5 group-hover:text-brand-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                <span class="font-medium">Dashboard</span>
+            </a>
+            
+            <a href="explore.html" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl group transition-all">
+                <svg class="w-5 h-5 group-hover:text-brand-accent transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <span class="font-medium">Explore</span>
+            </a>
+            
+            <a href="connections.html" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl group transition-all">
+                <svg class="w-5 h-5 group-hover:text-red-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+                <span class="font-medium">Connections</span>
+            </a>
+            
+            <a href="inbox.html" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl group transition-all justify-between">
+                <div class="flex items-center gap-3">
+                    <svg class="w-5 h-5 group-hover:text-brand-secondary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                    </svg>
+                    <span class="font-medium">Inbox</span>
+                </div>
+            </a>
+            
+            <a href="browse.html" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl group transition-all">
+                <svg class="w-5 h-5 group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span class="font-medium">Browse</span>
+            </a>
+        </nav>
+
+        <div class="p-4 border-t border-white/5">
+            <div class="relative group">
+                <button class="flex items-center gap-3 w-full p-2 rounded-xl hover:bg-white/5 transition-colors text-left">
+                    <div class="relative">
+                        <div id="userAvatar" class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-secondary to-brand-primary flex items-center justify-center text-white font-bold overflow-hidden border border-white/10">
+                            <img id="userAvatarImg" class="w-full h-full object-cover hidden">
+                            <span id="userAvatarText" class="text-lg">U</span>
+                        </div>
+                        <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-brand-surface rounded-full"></div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-bold text-white truncate" id="dropdownUsername">User</p>
+                        <p class="text-xs text-slate-400 truncate">Online</p>
+                    </div>
+                </button>
+                
+                <div class="absolute bottom-full left-0 w-full mb-2 bg-brand-surface2 border border-white/10 rounded-xl shadow-xl overflow-hidden hidden group-hover:block transition-all z-20">
+                    <a href="identity.html" class="block px-4 py-3 text-sm text-slate-300 hover:text-white hover:bg-white/5 transition-colors">My Identity</a>
+                    <a href="preferences.html" class="block px-4 py-3 text-sm text-slate-300 hover:text-white hover:bg-white/5 transition-colors">Preferences</a>
+                    <a href="credits.html" class="block px-4 py-3 text-sm text-slate-300 hover:text-white hover:bg-white/5 transition-colors">Credits</a>
+                    <div class="border-t border-white/10 my-1"></div>
+                    <button id="logoutBtn" class="block w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-white/5 transition-colors">Sign Out</button>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-full relative overflow-hidden bg-brand-dark">
+        <!-- Mobile Header -->
+        <header class="md:hidden h-16 bg-brand-surface border-b border-white/5 flex items-center justify-between px-4 z-20 flex-shrink-0">
+            <button id="mobileMenuBtn" class="text-slate-300 hover:text-white">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+            <span class="text-lg font-bold text-white" id="profileName">Profile</span>
+            <div class="w-8"></div>
+        </header>
+
+        <!-- Content Area -->
+        <div class="flex-1 overflow-y-auto p-4 md:p-8 no-scrollbar">
+            
+            <!-- Loading -->
+            <div id="profileLoading" class="flex flex-col items-center justify-center py-20">
+                <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-brand-primary border-t-transparent"></div>
+                <p class="mt-4 text-slate-400">Loading profile...</p>
+            </div>
+
+            <!-- Error -->
+            <div id="profileError" class="hidden flex flex-col items-center justify-center py-20 text-center">
+                <div class="text-5xl mb-4">😕</div>
+                <h3 class="text-xl font-bold text-white mb-2">Profile not found</h3>
+                <p class="text-slate-400 mb-6">The user you're looking for is not available.</p>
+                <button onclick="history.back()" class="px-6 py-2 bg-slate-700 text-white rounded-xl hover:bg-slate-600 transition-colors">Go Back</button>
+            </div>
+
+            <!-- Profile Content -->
+            <div id="profileContent" class="hidden max-w-6xl mx-auto">
+                
+                <!-- Hero Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                    <!-- Left: Main Photo & Actions -->
+                    <div class="space-y-6">
+                        <div class="relative aspect-[3/4] bg-brand-surface rounded-3xl overflow-hidden shadow-2xl border border-white/5 group">
+                            <!-- Photo -->
+                            <img id="profileMainPhoto" src="" alt="Profile Photo" class="w-full h-full object-cover">
+                            <div id="photoPlaceholder" class="hidden absolute inset-0 flex flex-col items-center justify-center bg-brand-surface2">
+                                <span id="placeholderLetter" class="text-6xl font-bold text-slate-500">U</span>
+                            </div>
+                            
+                            <!-- Status -->
+                            <div class="absolute top-4 right-4">
+                                <span id="profileOnlineStatus" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-black/50 backdrop-blur-sm border border-white/10 text-white">
+                                    <span class="w-2 h-2 rounded-full bg-slate-500 mr-2"></span> Offline
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <button id="messageBtn" class="flex items-center justify-center gap-2 bg-brand-primary hover:bg-brand-secondary text-white font-bold py-4 rounded-2xl shadow-lg shadow-brand-primary/20 transition-all hover:scale-105">
+                                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                                </svg>
+                                Message
+                            </button>
+                            <button class="flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-white font-bold py-4 rounded-2xl border border-white/5 transition-all">
+                                <svg class="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                </svg>
+                                Like
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right: Info -->
+                    <div class="lg:col-span-2 space-y-8">
+                        
+                        <!-- Header Info -->
+                        <div class="bg-brand-surface p-8 rounded-3xl border border-white/5">
+                            <h1 id="profileFullName" class="text-4xl font-bold text-white mb-2">User Name</h1>
+                            <p id="profileNickname" class="text-brand-primary text-lg font-medium mb-4 hidden">Nickname</p>
+                            
+                            <div class="flex flex-wrap gap-4 text-slate-300 text-sm font-medium mb-6">
+                                <span class="flex items-center bg-slate-800 px-4 py-2 rounded-xl">
+                                    <span class="mr-2">🎂</span> <span id="profileAge">Age</span>
+                                </span>
+                                <span class="flex items-center bg-slate-800 px-4 py-2 rounded-xl">
+                                    <span class="mr-2">📍</span> <span id="profileLocation">Location</span>
+                                </span>
+                                <span class="flex items-center bg-slate-800 px-4 py-2 rounded-xl">
+                                    <span class="mr-2">👫</span> <span id="profileGender">Gender</span>
+                                </span>
+                                <span class="flex items-center bg-slate-800 px-4 py-2 rounded-xl">
+                                    <span class="mr-2">🏳️‍🌈</span> <span id="profileOrientation">Orientation</span>
+                                </span>
+                            </div>
+                            
+                            <div class="prose prose-invert max-w-none">
+                                <h3 class="text-white font-bold text-lg mb-2">About</h3>
+                                <p id="profileDescription" class="text-slate-400 leading-relaxed">No description available.</p>
+                            </div>
+                        </div>
+
+                        <!-- Details Grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Personal Info -->
+                            <div class="bg-brand-surface p-6 rounded-3xl border border-white/5">
+                                <h3 class="text-white font-bold text-lg mb-4 flex items-center gap-2">
+                                    <span class="w-1 h-6 bg-brand-accent rounded-full"></span>
+                                    Personal Details
+                                </h3>
+                                <div class="space-y-4 text-sm">
+                                    <div class="flex justify-between border-b border-white/5 pb-2" id="maritalStatusItem">
+                                        <span class="text-slate-500">Status</span>
+                                        <span class="text-white font-medium" id="maritalStatus">--</span>
+                                    </div>
+                                    <div class="flex justify-between border-b border-white/5 pb-2" id="childrenItem">
+                                        <span class="text-slate-500">Children</span>
+                                        <span class="text-white font-medium" id="children">--</span>
+                                    </div>
+                                    <div class="flex justify-between border-b border-white/5 pb-2" id="educationItem">
+                                        <span class="text-slate-500">Education</span>
+                                        <span class="text-white font-medium" id="education">--</span>
+                                    </div>
+                                    <div class="flex justify-between border-b border-white/5 pb-2" id="professionItem">
+                                        <span class="text-slate-500">Profession</span>
+                                        <span class="text-white font-medium" id="profession">--</span>
+                                    </div>
+                                    <div class="flex justify-between border-b border-white/5 pb-2" id="smokingItem">
+                                        <span class="text-slate-500">Smoking</span>
+                                        <span class="text-white font-medium" id="smoking">--</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Appearance -->
+                            <div class="bg-brand-surface p-6 rounded-3xl border border-white/5">
+                                <h3 class="text-white font-bold text-lg mb-4 flex items-center gap-2">
+                                    <span class="w-1 h-6 bg-brand-secondary rounded-full"></span>
+                                    Appearance & Lifestyle
+                                </h3>
+                                <div class="space-y-4 text-sm">
+                                    <div class="flex justify-between border-b border-white/5 pb-2" id="heightItem">
+                                        <span class="text-slate-500">Height</span>
+                                        <span class="text-white font-medium" id="height">--</span>
+                                    </div>
+                                    <div class="flex justify-between border-b border-white/5 pb-2" id="weightItem">
+                                        <span class="text-slate-500">Weight</span>
+                                        <span class="text-white font-medium" id="weight">--</span>
+                                    </div>
+                                    <div class="flex justify-between border-b border-white/5 pb-2" id="bodyTypeItem">
+                                        <span class="text-slate-500">Body Type</span>
+                                        <span class="text-white font-medium" id="bodyType">--</span>
+                                    </div>
+                                    <div class="flex justify-between border-b border-white/5 pb-2" id="hairColorItem">
+                                        <span class="text-slate-500">Hair</span>
+                                        <span class="text-white font-medium" id="hairColor">--</span>
+                                    </div>
+                                    <div class="flex justify-between border-b border-white/5 pb-2" id="eyeColorItem">
+                                        <span class="text-slate-500">Eyes</span>
+                                        <span class="text-white font-medium" id="eyeColor">--</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Interests (Placeholder) -->
+                        <div class="bg-brand-surface p-6 rounded-3xl border border-white/5" id="personalitySection" style="display: none;">
+                            <h3 class="text-white font-bold text-lg mb-4">Personality & Interests</h3>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="bg-slate-800 text-slate-300 px-3 py-1 rounded-lg text-sm" id="personality">--</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Photo Gallery -->
+                <div id="profilePhotosSection" class="bg-brand-surface p-8 rounded-3xl border border-white/5 mb-20">
+                    <h3 class="text-white font-bold text-xl mb-6 flex items-center justify-between">
+                        <span>Photo Gallery</span>
+                        <span class="text-sm font-normal text-slate-500">Click to enlarge</span>
+                    </h3>
+                    <div id="profilePhotosGrid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                        <!-- Photos injected here -->
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Photo Modal -->
+    <div id="photoModal" class="fixed inset-0 z-50 hidden bg-black/95 flex items-center justify-center p-4">
+        <button id="closePhotoModal" class="absolute top-4 right-4 text-white/70 hover:text-white z-50 p-2">
+            <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+        <img id="modalPhoto" class="max-w-full max-h-[90vh] rounded-lg shadow-2xl object-contain" src="">
+    </div>
+
+    <!-- Hidden elements for script compatibility if needed -->
+    <div id="zodiacSection" style="display:none;">
+        <span id="profileZodiac"></span>
+    </div>
+    <div id="lookingForItem" style="display:none;">
+        <span id="lookingFor"></span>
+        <span id="profileLookingForOrientation"></span>
+        <span id="profileLookingFor"></span>
+    </div>
+    <div id="personalityItem" style="display:none;"></div>
+    <div id="ratingSection" style="display:none;">
+        <div id="ratingStars"></div>
+        <div id="ratingValue"></div>
+        <div id="ratingVotes"></div>
+    </div>
+    
+    <!-- Section loaders hidden for Tailwind version simplicity, logic handles display -->
+    <div id="aboutLoading" style="display:none;"></div>
+    <div id="aboutContent" style="display:none;"></div>
+    <div id="personalDetailsLoading" style="display:none;"></div>
+    <div id="personalDetailsContent" style="display:none;"></div>
+    <div id="appearanceLoading" style="display:none;"></div>
+    <div id="appearanceContent" style="display:none;"></div>
+
+    <!-- Scripts -->
+    <script src="js/auth-manager.js"></script>
+    <script src="js/header-avatar.js"></script>
+    <script src="js/user-profile.js"></script>
+    
+    <script>
+        // Init
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!window.authManager || !window.authManager.isLoggedIn) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // Initialize User Profile using existing robust logic in user-profile.js
+            // We just ensure the DOM elements match, which they do in this rewrite
+            if (window.initializeUserProfile) {
+                window.initializeUserProfile();
+            }
+            
+            // Photo Modal Close
+            const modal = document.getElementById('photoModal');
+            const closeBtn = document.getElementById('closePhotoModal');
+            
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('active'); // legacy class support
+                });
+            }
+            
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.classList.add('hidden');
+            });
+        });
+    </script>
+</body>
+</html>

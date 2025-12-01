@@ -721,7 +721,7 @@ function setupActionButtons(profile) {
         }
         
         // Redirect to messages page with contact parameter
-        window.location.href = `messages.html?contact=${userId}`;
+        window.location.href = `inbox.html?contact=${userId}`;
     };
 }
 

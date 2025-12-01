@@ -114,7 +114,7 @@ async function loadUserAvatar() {
         
         const sessionId = window.authManager.sessionId;
         
-        // Получаем userId из localStorage как в profile.html
+        // Получаем userId из localStorage как в identity.html
         const userDataString = localStorage.getItem('lavrilo_user');
         if (!userDataString) {
             // console.log('[HEADER-AVATAR] No user data in localStorage');

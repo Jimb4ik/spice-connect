@@ -359,7 +359,7 @@ class SearchManager {
 
     async viewProfile(userId) {
         // console.log('[SEARCH] Viewing profile:', userId);
-        window.location.href = `user-profile.html?id=${userId}`;
+        window.location.href = `member.html?id=${userId}`;
     }
 
     async sendMessage(userId) {
@@ -384,7 +384,7 @@ class SearchManager {
             
             if (result.success) {
                 // Redirect to messages
-                window.location.href = `messages.html?contact=${userId}`;
+                window.location.href = `inbox.html?contact=${userId}`;
             } else {
                 console.error('[SEARCH] Failed to add contact:', result);
                 alert('Failed to start conversation. Please try again.');
