@@ -1,5 +1,5 @@
 // Service Worker for Lumina Cache Management
-const CACHE_NAME = 'lumina-v1.0.0';
+const CACHE_NAME = 'lumina-v2.0.0';
 const CACHE_URLS = [
     '/',
     '/index.html',
@@ -14,7 +14,7 @@ const CACHE_URLS = [
     '/inventory.html',
     '/preferences.html',
     '/guests.html',
-    '/favicon/favicon-lumina.png',
+    '/favicon/favicon-lumina-v2.png',
     '/js/auth-manager.js',
     '/js/cache-buster.js',
     '/js/main.js',
