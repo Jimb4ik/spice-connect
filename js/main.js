@@ -287,61 +287,61 @@ class MainDashboard {
         
         let content = '';
         let icon = '';
+        let typeClass = '';
 
         switch (activity.type) {
             case 'birthday':
-                content = `<span class="font-semibold text-white">${activity.pseudo}</span> is celebrating their birthday!`;
-                icon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-pink-500"><path d="M20 21v-8a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8"/><path d="M4 16s.5-1 2-1 2.5 2 4 2 2.5-2 4-2 2.5 2 4 2 2-1 2-1"/><path d="M2 21h20"/><path d="M7 8v2"/><path d="M12 8v2"/><path d="M17 8v2"/><path d="M7 4h.01"/><path d="M12 4h.01"/><path d="M17 4h.01"/></svg>';
+                content = `<span class="font-bold text-white">${activity.pseudo}</span> has a birthday today!`;
+                icon = '<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-pink-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6 3a1 1 0 011-1h.01a1 1 0 010 2H7a1 1 0 01-1-1zm2 3a1 1 0 00-2 0v1a2 2 0 00-2 2v1a2 2 0 00-2 2v.683a3.7 3.7 0 011.055.485 1.704 1.704 0 001.89 0 3.704 3.704 0 014.11 0 1.704 1.704 0 001.89 0 3.704 3.704 0 014.11 0 1.704 1.704 0 001.89 0A3.7 3.7 0 0118 12.683V12a2 2 0 00-2-2V9a2 2 0 00-2-2V6a1 1 0 10-2 0v1h-1V6a1 1 0 10-2 0v1H8V6zm10 8.868a3.704 3.704 0 01-4.055-.036 1.704 1.704 0 00-1.89 0 3.704 3.704 0 01-4.11 0 1.704 1.704 0 00-1.89 0A3.704 3.704 0 012 14.868V17a1 1 0 001 1h14a1 1 0 001-1v-2.132zM9 3a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1zm3 0a1 1 0 011-1h.01a1 1 0 110 2H13a1 1 0 01-1-1z" clip-rule="evenodd" /></svg>';
+                typeClass = 'border-l-2 border-pink-500/50 pl-3 bg-pink-500/5';
                 break;
             case 'visit':
-                content = `<span class="font-semibold text-white">${activity.pseudo}</span> visited your profile`;
-                icon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>';
+                content = `<span class="font-bold text-white">${activity.pseudo}</span> visited your profile`;
+                icon = '<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-blue-400" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg>';
+                typeClass = 'bg-brand-surface2/20';
                 break;
             case 'connection':
-                content = `<span class="font-semibold text-white">${activity.pseudo}</span> came online`;
-                icon = '<span class="w-3 h-3 rounded-full bg-green-500 inline-block"></span>';
+                content = `<span class="font-bold text-white">${activity.pseudo}</span> came online`;
+                icon = '<div class="w-2 h-2 bg-green-500 rounded-full shadow-[0_0_6px_rgba(34,197,94,0.6)]"></div>';
                 break;
             case 'new_member':
-                content = `<span class="font-semibold text-white">${activity.pseudo}</span> joined Lumina`;
-                icon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-500"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>'; // Using simple cross for generic icon or maybe user plus
-                // Changing to User Plus icon
-                icon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-500"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>';
+                content = `<span class="font-bold text-white">${activity.pseudo}</span> joined the community`;
+                icon = '<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM14 11a1 1 0 011 1v1h1a1 1 0 110 2h-1v1a1 1 0 11-2 0v-1h-1a1 1 0 110-2h1v-1a1 1 0 011-1z" /></svg>';
                 break;
             case 'profile_update':
-                content = `<span class="font-semibold text-white">${activity.pseudo}</span> updated their profile`;
-                icon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-500"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>';
-                break;
-            case 'new_friendship':
-                content = `<span class="font-semibold text-white">${activity.pseudo1}</span> and <span class="font-semibold text-white">${activity.pseudo2}</span> became friends`;
-                icon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-500"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>';
+                content = `<span class="font-bold text-white">${activity.pseudo}</span> updated their profile`;
+                icon = '<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-purple-400" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>';
                 break;
             case 'match':
-                content = `It's a match! You and <span class="font-semibold text-white">${activity.pseudo}</span> liked each other`;
-                icon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none" class="text-red-500"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
+                content = `You matched with <span class="font-bold text-white">${activity.pseudo}</span>!`;
+                icon = '<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-red-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" /></svg>';
+                typeClass = 'bg-gradient-to-r from-red-500/10 to-transparent border-l-2 border-red-500 pl-3';
                 break;
             case 'gift_received':
-                content = activity.title || 'You received a gift!';
-                icon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-pink-600"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>';
+                content = `You received a gift: <span class="font-bold text-white">${activity.title || 'Surprise'}</span>`;
+                icon = '<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-brand-accent" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5 5a3 3 0 015-2.236A3 3 0 0114.83 6H16a2 2 0 110 4h-5V9a1 1 0 10-2 0v1H4a2 2 0 110-4h1.17C5.06 5.687 5 5.35 5 5zm4 1V5a1 1 0 10-1 1h1zm3 0a1 1 0 10-1-1v1h1z" clip-rule="evenodd" /><path d="M9 11H3v5a2 2 0 002 2h4v-7zM11 18h4a2 2 0 002-2v-5h-6v7z" /></svg>';
+                typeClass = 'bg-brand-accent/5 border-l-2 border-brand-accent pl-3';
                 break;
             default:
-                content = `<span class="font-semibold text-white">${activity.pseudo}</span> was active`;
-                icon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-400"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>';
+                content = `<span class="font-bold text-white">${activity.pseudo}</span> was active`;
+                icon = '<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-slate-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" /></svg>';
         }
 
         return `
-            <div class="flex items-start space-x-4 p-4 rounded-xl hover:bg-white/5 transition-colors border border-transparent hover:border-white/5 group">
-                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br ${bgGradient} flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-purple-900/20">
+            <div class="flex items-center space-x-3 p-3 hover:bg-white/5 transition-colors group ${typeClass}">
+                <div class="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br ${bgGradient} flex items-center justify-center text-white text-xs font-bold shadow-sm ring-1 ring-white/10">
                     ${firstLetter}
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p class="text-sm text-slate-300">
+                    <p class="text-sm text-slate-300 leading-tight">
                         ${content}
                     </p>
-                    <p class="text-xs text-slate-500 mt-1 flex items-center">
-                        <span class="mr-2">${icon}</span>
-                        ${timeAgo}
-                        ${activity.zone_name ? `<span class="mx-1">•</span> ${activity.zone_name}` : ''}
-                    </p>
+                    <div class="flex items-center mt-1 space-x-2">
+                        <span class="flex items-center justify-center w-4 h-4 rounded-full bg-white/5">
+                            ${icon}
+                        </span>
+                        <span class="text-[10px] text-slate-500 uppercase tracking-wide font-medium">${timeAgo}</span>
+                    </div>
                 </div>
             </div>
         `;

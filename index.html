@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lumina - Connect Deeper</title>
+    <title>Lumina - Beyond Matching</title>
     
     <!-- Cache Control -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <meta name="app-version" content="2.0.0">
+    <meta name="app-version" content="2.1.0">
     
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="favicon/favicon-lumina.png">
+    <link rel="icon" type="image/png" href="favicon/favicon-lumina-v2.png">
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -22,15 +22,20 @@
                 extend: {
                     colors: {
                         brand: {
-                            primary: '#7c3aed', // Violet 600
+                            primary: '#6366f1', // Indigo 500
                             secondary: '#8b5cf6', // Violet 500
-                            accent: '#f59e0b', // Amber 500
+                            accent: '#f43f5e', // Rose 500
                             dark: '#0f172a', // Slate 900
                             surface: '#1e293b', // Slate 800
+                            surface2: '#334155', // Slate 700
                         }
                     },
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    backgroundImage: {
+                        'hero-pattern': "url('https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2049&q=80')",
                     }
                 }
             }
@@ -38,42 +43,49 @@
     </script>
     
     <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     
     <style>
         body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, h4, h5, h6 { font-family: 'Playfair Display', serif; }
         .glass-panel {
-            background: rgba(30, 41, 59, 0.7);
+            background: rgba(15, 23, 42, 0.7);
             backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .text-gradient {
+            background: linear-gradient(to right, #8b5cf6, #f43f5e);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
     </style>
 </head>
-<body class="bg-brand-dark text-slate-100 antialiased selection:bg-brand-primary selection:text-white">
+<body class="bg-brand-dark text-slate-100 antialiased selection:bg-brand-accent selection:text-white">
 
     <!-- Navigation -->
-    <nav class="fixed w-full z-40 transition-all duration-300" id="navbar">
+    <nav class="fixed w-full z-50 transition-all duration-300" id="navbar">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-20">
+            <div class="flex justify-between items-center h-24">
                 <!-- Logo -->
-                <div class="flex-shrink-0 flex items-center gap-3">
-                    <img src="images/logo-lumina.png" alt="Lumina" class="h-10 w-auto">
-                    <span class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-brand-secondary to-brand-accent hidden md:block">Lumina</span>
+                <div class="flex-shrink-0 flex items-center gap-4">
+                    <img src="images/logo-lumina-v2.png" alt="Lumina" class="h-12 w-auto">
+                    <span class="text-3xl font-bold text-white tracking-tight">Lumina</span>
                 </div>
                 
                 <!-- Desktop Menu -->
-                <div class="hidden md:flex items-center space-x-8">
-                    <a href="#features" class="text-sm font-medium text-slate-300 hover:text-white transition-colors">Features</a>
-                    <a href="#safety" class="text-sm font-medium text-slate-300 hover:text-white transition-colors">Safety</a>
-                    <button class="login-btn text-sm font-medium text-white bg-white/10 hover:bg-white/20 px-5 py-2.5 rounded-full transition-all border border-white/10">Log In</button>
-                    <button class="signup-btn text-sm font-medium text-white bg-brand-primary hover:bg-brand-secondary px-5 py-2.5 rounded-full shadow-lg shadow-brand-primary/25 transition-all transform hover:-translate-y-0.5">Join Free</button>
+                <div class="hidden md:flex items-center space-x-10">
+                    <a href="#about" class="text-sm font-medium text-slate-300 hover:text-white transition-colors">Philosophy</a>
+                    <a href="#how-it-works" class="text-sm font-medium text-slate-300 hover:text-white transition-colors">How it Works</a>
+                    <div class="h-6 w-px bg-white/10"></div>
+                    <button class="login-btn text-sm font-medium text-white hover:text-brand-accent transition-colors">Log In</button>
+                    <button class="signup-btn text-sm font-bold text-white bg-gradient-to-r from-brand-secondary to-brand-accent hover:opacity-90 px-8 py-3 rounded-full transition-all shadow-lg shadow-brand-accent/20">Get Started</button>
                 </div>
 
                 <!-- Mobile menu button -->
                 <div class="md:hidden flex items-center">
-                    <button id="hamburger" class="text-slate-300 hover:text-white focus:outline-none">
+                    <button id="hamburger" class="text-slate-300 hover:text-white focus:outline-none p-2">
                         <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
                     </button>
                 </div>
@@ -81,332 +93,227 @@
         </div>
 
         <!-- Mobile Menu -->
-        <div id="navMenu" class="hidden md:hidden bg-brand-surface border-b border-white/10 absolute w-full left-0">
-            <div class="px-4 pt-2 pb-6 space-y-2">
-                <a href="#features" class="block px-3 py-3 text-base font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-lg">Features</a>
-                <a href="#safety" class="block px-3 py-3 text-base font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-lg">Safety</a>
-                <div class="pt-4 flex flex-col gap-3">
-                    <button class="login-btn w-full text-center text-white bg-white/10 px-5 py-3 rounded-xl">Log In</button>
-                    <button class="signup-btn w-full text-center text-white bg-brand-primary px-5 py-3 rounded-xl shadow-lg">Join Free</button>
+        <div id="navMenu" class="hidden md:hidden bg-brand-dark/95 backdrop-blur-xl border-b border-white/5 absolute w-full left-0 shadow-2xl">
+            <div class="px-6 pt-4 pb-8 space-y-4">
+                <a href="#about" class="block py-3 text-lg font-medium text-slate-300 hover:text-white border-b border-white/5">Philosophy</a>
+                <a href="#how-it-works" class="block py-3 text-lg font-medium text-slate-300 hover:text-white border-b border-white/5">How it Works</a>
+                <div class="pt-6 flex flex-col gap-4">
+                    <button class="login-btn w-full text-center text-white bg-white/5 hover:bg-white/10 px-6 py-4 rounded-xl border border-white/10 font-medium transition-colors">Log In</button>
+                    <button class="signup-btn w-full text-center text-white bg-brand-accent hover:bg-rose-600 px-6 py-4 rounded-xl shadow-lg font-bold transition-colors">Join Now</button>
                 </div>
             </div>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <div class="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
-        <!-- Background Image -->
+    <header class="relative min-h-screen flex items-center justify-center pt-24 overflow-hidden">
+        <!-- Background -->
         <div class="absolute inset-0 z-0">
-            <img src="images/hero-bg-lumina.png" alt="Background" class="w-full h-full object-cover opacity-60">
-            <div class="absolute inset-0 bg-gradient-to-b from-brand-dark/80 via-brand-dark/50 to-brand-dark"></div>
+            <div class="absolute inset-0 bg-hero-pattern bg-cover bg-center bg-no-repeat opacity-30 transform scale-105 animate-[pulse-slow_10s_infinite]"></div>
+            <div class="absolute inset-0 bg-gradient-to-b from-brand-dark via-brand-dark/80 to-brand-dark"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-brand-dark/90 via-transparent to-brand-dark/90"></div>
         </div>
 
-        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex flex-col lg:flex-row items-center gap-12 lg:gap-24">
+        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full grid lg:grid-cols-2 gap-16 items-center">
             
-            <!-- Hero Content -->
-            <div class="flex-1 text-center lg:text-left">
-                <div class="inline-flex items-center px-3 py-1 rounded-full border border-brand-accent/30 bg-brand-accent/10 text-brand-accent text-xs font-semibold tracking-wide uppercase mb-6 backdrop-blur-md">
-                    <span class="w-2 h-2 rounded-full bg-brand-accent mr-2 animate-pulse"></span>
-                    Now Live in France
-                </div>
-                <h1 class="text-5xl lg:text-7xl font-bold tracking-tight mb-6 text-white leading-tight">
-                    Find meaningful <br>
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-secondary to-brand-accent">connections</span>
+            <!-- Hero Text -->
+            <div class="text-center lg:text-left">
+                <h1 class="text-5xl lg:text-7xl font-bold tracking-tight mb-8 text-white leading-[1.1]">
+                    Curated connections for the <br>
+                    <span class="text-gradient italic">modern soul.</span>
                 </h1>
-                <p class="text-xl text-slate-300 mb-10 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
-                    Lumina uses advanced compatibility matching to help you find genuine partners who share your values and lifestyle.
+                <p class="text-xl text-slate-400 mb-12 max-w-xl mx-auto lg:mx-0 font-light leading-relaxed">
+                    Lumina is an exclusive community for those seeking depth, intelligence, and genuine chemistry. Stop swiping, start connecting.
                 </p>
                 
-                <div class="flex flex-wrap gap-8 justify-center lg:justify-start mb-12">
-                    <div class="text-center lg:text-left">
-                        <p class="text-3xl font-bold text-white stat-number-animated" data-target="50000">0</p>
-                        <p class="text-sm text-slate-400 uppercase tracking-wider font-medium">Active Members</p>
-                    </div>
-                    <div class="w-px h-12 bg-white/10 hidden sm:block"></div>
-                    <div class="text-center lg:text-left">
-                        <p class="text-3xl font-bold text-white stat-number-animated" data-target="1500">0</p>
-                        <p class="text-sm text-slate-400 uppercase tracking-wider font-medium">Online Now</p>
-                    </div>
-                    <div class="w-px h-12 bg-white/10 hidden sm:block"></div>
-                    <div class="text-center lg:text-left">
-                        <p class="text-3xl font-bold text-white stat-number-animated" data-target="12000">0</p>
-                        <p class="text-sm text-slate-400 uppercase tracking-wider font-medium">Success Stories</p>
-                    </div>
+                <div class="flex flex-col sm:flex-row gap-6 justify-center lg:justify-start">
+                    <button class="signup-btn px-10 py-4 bg-white text-brand-dark font-bold rounded-full hover:bg-slate-100 transition-colors shadow-xl text-lg">
+                        Start Your Journey
+                    </button>
+                    <a href="#how-it-works" class="px-10 py-4 border border-white/20 text-white font-medium rounded-full hover:bg-white/5 transition-colors text-lg flex items-center justify-center gap-2">
+                        Explore
+                        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                    </a>
                 </div>
             </div>
 
-            <!-- Registration Card -->
-            <div class="w-full max-w-md">
-                <div class="glass-panel rounded-2xl p-8 shadow-2xl relative overflow-hidden group">
-                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-brand-secondary to-brand-accent"></div>
-                    
-                    <h2 class="text-2xl font-bold text-white mb-2">Create Account</h2>
-                    <p class="text-slate-400 mb-6 text-sm">Join the community in less than 30 seconds.</p>
+            <!-- Auth Card -->
+            <div class="w-full max-w-md mx-auto lg:ml-auto relative">
+                <div class="absolute -inset-1 bg-gradient-to-r from-brand-secondary to-brand-accent rounded-3xl blur opacity-30"></div>
+                <div class="glass-panel rounded-2xl p-8 lg:p-10 relative">
+                    <h2 class="text-3xl font-bold text-white mb-2 text-center">Join Lumina</h2>
+                    <p class="text-slate-400 mb-8 text-center font-light">Your story begins here.</p>
 
-                    <form id="registrationForm" class="space-y-4">
+                    <form id="registrationForm" class="space-y-5">
                         <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1 uppercase">First Name</label>
-                                <input type="text" id="regFirstName" required class="w-full bg-brand-dark/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-colors placeholder-slate-600" placeholder="John">
+                            <div class="space-y-1">
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider pl-1">Name</label>
+                                <input type="text" id="regFirstName" required class="w-full bg-brand-dark border border-white/10 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-brand-accent transition-colors placeholder-slate-700" placeholder="Your Name">
                             </div>
-                            <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1 uppercase">Username</label>
-                                <input type="text" id="regUsername" required minlength="3" class="w-full bg-brand-dark/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-colors placeholder-slate-600" placeholder="johndoe">
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-1 uppercase">Email Address</label>
-                            <input type="email" id="regEmail" required class="w-full bg-brand-dark/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-colors placeholder-slate-600" placeholder="john@example.com">
-                        </div>
-
-                        <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-1 uppercase">Password</label>
-                            <input type="password" id="regPassword" required minlength="6" class="w-full bg-brand-dark/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-colors placeholder-slate-600" placeholder="••••••••">
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1 uppercase">I am a</label>
-                                <div class="relative">
-                                    <select id="regGender" required class="w-full bg-brand-dark/50 border border-white/10 rounded-lg px-4 py-3 text-white appearance-none focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary cursor-pointer">
-                                        <option value="" class="bg-brand-surface text-slate-400">Select</option>
-                                        <option value="1" class="bg-brand-surface">Man</option>
-                                        <option value="2" class="bg-brand-surface">Woman</option>
-                                        <option value="3" class="bg-brand-surface">Couple</option>
-                                    </select>
-                                    <div class="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none text-slate-500">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                                    </div>
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1 uppercase">Looking for</label>
-                                <div class="relative">
-                                    <select id="regLookingFor" required class="w-full bg-brand-dark/50 border border-white/10 rounded-lg px-4 py-3 text-white appearance-none focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary cursor-pointer">
-                                        <option value="" class="bg-brand-surface text-slate-400">Select</option>
-                                        <option value="1" class="bg-brand-surface">Men</option>
-                                        <option value="2" class="bg-brand-surface">Women</option>
-                                        <option value="3" class="bg-brand-surface">Couples</option>
-                                    </select>
-                                    <div class="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none text-slate-500">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                                    </div>
-                                </div>
+                            <div class="space-y-1">
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider pl-1">Age</label>
+                                <input type="number" id="regAge" min="18" max="99" required class="w-full bg-brand-dark border border-white/10 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-brand-accent transition-colors placeholder-slate-700" placeholder="18+">
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1 uppercase">Birth Date</label>
-                                <input type="date" id="regBirthdate" required max="2006-01-01" class="w-full bg-brand-dark/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-colors [color-scheme:dark]">
+                        <div class="space-y-1">
+                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider pl-1">Email</label>
+                            <input type="email" id="regEmail" required class="w-full bg-brand-dark border border-white/10 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-brand-accent transition-colors placeholder-slate-700" placeholder="hello@example.com">
+                        </div>
+
+                        <div class="space-y-1">
+                            <label class="text-xs font-bold text-slate-500 uppercase tracking-wider pl-1">Password</label>
+                            <input type="password" id="regPassword" required class="w-full bg-brand-dark border border-white/10 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-brand-accent transition-colors placeholder-slate-700" placeholder="••••••••">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4 pt-2">
+                            <div class="space-y-1">
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider pl-1">I am</label>
+                                <select id="regGender" required class="w-full bg-brand-dark border border-white/10 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-brand-accent transition-colors appearance-none cursor-pointer">
+                                    <option value="1">Man</option>
+                                    <option value="2">Woman</option>
+                                    <option value="3">Non-binary</option>
+                                </select>
                             </div>
-                            <div>
-                                <label class="block text-xs font-medium text-slate-400 mb-1 uppercase">City</label>
-                                <input type="text" id="regCity" placeholder="Paris" required class="w-full bg-brand-dark/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-colors placeholder-slate-600">
+                            <div class="space-y-1">
+                                <label class="text-xs font-bold text-slate-500 uppercase tracking-wider pl-1">Seeking</label>
+                                <select id="regLookingFor" required class="w-full bg-brand-dark border border-white/10 rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-brand-accent transition-colors appearance-none cursor-pointer">
+                                    <option value="2">Women</option>
+                                    <option value="1">Men</option>
+                                    <option value="3">Everyone</option>
+                                </select>
                             </div>
                         </div>
 
-                        <button type="submit" id="submitRegistration" class="w-full bg-gradient-to-r from-brand-secondary to-brand-primary hover:from-brand-primary hover:to-brand-secondary text-white font-bold py-4 rounded-xl shadow-xl shadow-brand-primary/20 transition-all transform hover:scale-[1.02] flex items-center justify-center mt-6">
-                            <span id="regButtonText">Start Free Trial</span>
-                            <div id="regButtonLoader" class="hidden w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        <button type="submit" id="submitRegistration" class="w-full bg-brand-accent hover:bg-rose-600 text-white font-bold py-4 rounded-xl shadow-lg transition-all mt-6 flex justify-center items-center gap-2">
+                            <span>Create Account</span>
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
                         </button>
-
-                        <p class="text-center text-xs text-slate-500 mt-4">
-                            By joining, you agree to our <a href="terms.html" class="text-slate-400 hover:text-brand-accent underline">Terms</a> & <a href="privacy.html" class="text-slate-400 hover:text-brand-accent underline">Privacy</a>.
-                        </p>
                     </form>
                 </div>
             </div>
         </div>
-    </div>
+    </header>
 
-    <!-- Features Section -->
-    <section id="features" class="py-24 bg-brand-surface relative overflow-hidden">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div class="text-center max-w-3xl mx-auto mb-16">
-                <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">Designed for real connection</h2>
-                <p class="text-lg text-slate-400">We've stripped away the noise to focus on what matters most: helping you find someone who truly gets you.</p>
-            </div>
-
-            <div class="grid md:grid-cols-3 gap-8">
-                <!-- Feature 1 -->
-                <div class="glass-panel p-8 rounded-2xl hover:bg-white/5 transition-colors">
-                    <div class="w-14 h-14 bg-brand-primary/20 rounded-xl flex items-center justify-center mb-6 text-brand-primary">
-                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.2-2.85.5-4.171" />
-                        </svg>
+    <!-- Philosophy Section -->
+    <section id="about" class="py-32 bg-brand-dark relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-2 gap-20 items-center">
+                <div>
+                    <h2 class="text-4xl md:text-5xl font-bold text-white mb-8 leading-tight">Authenticity is our <br><span class="text-gradient">love language.</span></h2>
+                    <div class="space-y-6 text-lg text-slate-400 font-light">
+                        <p>In a world of infinite swipes, finding someone who resonates with your core can feel impossible. Lumina changes the narrative.</p>
+                        <p>We prioritize deep compatibility over superficial metrics. Our platform is a sanctuary for those who value meaningful conversation, shared visions, and emotional intelligence.</p>
+                        <p>No games. No endless scrolling. Just curated introductions to people who are looking for exactly what you are.</p>
                     </div>
-                    <h3 class="text-xl font-bold text-white mb-3">Smart Matching</h3>
-                    <p class="text-slate-400 leading-relaxed">Our algorithms analyze deeper personality traits to suggest partners with high long-term compatibility.</p>
                 </div>
-
-                <!-- Feature 2 -->
-                <div class="glass-panel p-8 rounded-2xl hover:bg-white/5 transition-colors">
-                    <div class="w-14 h-14 bg-brand-accent/20 rounded-xl flex items-center justify-center mb-6 text-brand-accent">
-                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-3">Verified Profiles</h3>
-                    <p class="text-slate-400 leading-relaxed">We take safety seriously. Manual verification ensures you're talking to real, genuine people.</p>
-                </div>
-
-                <!-- Feature 3 -->
-                <div class="glass-panel p-8 rounded-2xl hover:bg-white/5 transition-colors">
-                    <div class="w-14 h-14 bg-brand-secondary/20 rounded-xl flex items-center justify-center mb-6 text-brand-secondary">
-                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-white mb-3">Intuitive Chat</h3>
-                    <p class="text-slate-400 leading-relaxed">Break the ice easily with our modern messaging interface and virtual gifting system.</p>
+                <div class="relative">
+                    <div class="absolute -inset-4 bg-gradient-to-tr from-brand-secondary to-brand-accent rounded-[2rem] opacity-20 blur-xl"></div>
+                    <img src="https://images.unsplash.com/photo-1621252179027-94459d27d3ee?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Couple connecting" class="relative rounded-[2rem] shadow-2xl w-full object-cover aspect-[4/5]">
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Stats Section -->
-    <div class="py-20 border-t border-white/5">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-             <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
-                 <div class="text-center">
-                     <p class="text-3xl font-bold text-white mb-1">50k+</p>
-                     <p class="text-xs text-slate-500 uppercase tracking-widest">Members</p>
-                 </div>
-                 <div class="text-center">
-                     <p class="text-3xl font-bold text-white mb-1">24/7</p>
-                     <p class="text-xs text-slate-500 uppercase tracking-widest">Support</p>
-                 </div>
-                 <div class="text-center">
-                     <p class="text-3xl font-bold text-white mb-1">100%</p>
-                     <p class="text-xs text-slate-500 uppercase tracking-widest">Secure</p>
-                 </div>
-                 <div class="text-center">
-                     <p class="text-3xl font-bold text-white mb-1">4.8</p>
-                     <p class="text-xs text-slate-500 uppercase tracking-widest">App Rating</p>
-                 </div>
-             </div>
+    <!-- How It Works -->
+    <section id="how-it-works" class="py-32 bg-brand-surface relative overflow-hidden">
+        <!-- Decoration -->
+        <div class="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-brand-dark/50 to-transparent"></div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center max-w-3xl mx-auto mb-20">
+                <span class="text-brand-accent font-bold tracking-widest uppercase text-sm mb-4 block">The Process</span>
+                <h2 class="text-4xl md:text-5xl font-bold text-white mb-6">Elevated dating experience</h2>
+                <p class="text-slate-400 text-lg font-light">We've removed the friction so you can focus on the chemistry.</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-12">
+                <div class="group">
+                    <div class="w-20 h-20 bg-brand-dark rounded-2xl flex items-center justify-center mb-8 border border-white/10 group-hover:border-brand-primary/50 transition-colors shadow-lg">
+                        <span class="text-3xl">✦</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-4">Curate Your Profile</h3>
+                    <p class="text-slate-400 leading-relaxed">Share your passions, values, and what makes you unique. Our detailed profile builder helps you shine.</p>
+                </div>
+                <div class="group">
+                    <div class="w-20 h-20 bg-brand-dark rounded-2xl flex items-center justify-center mb-8 border border-white/10 group-hover:border-brand-secondary/50 transition-colors shadow-lg">
+                        <span class="text-3xl">★</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-4">Discover Matches</h3>
+                    <p class="text-slate-400 leading-relaxed">Explore a community of verified, like-minded individuals. Use advanced filters to find your ideal partner.</p>
+                </div>
+                <div class="group">
+                    <div class="w-20 h-20 bg-brand-dark rounded-2xl flex items-center justify-center mb-8 border border-white/10 group-hover:border-brand-accent/50 transition-colors shadow-lg">
+                        <span class="text-3xl">♥</span>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white mb-4">Connect Deeply</h3>
+                    <p class="text-slate-400 leading-relaxed">Engage in meaningful conversations with our secure messaging. Send virtual gifts to show interest.</p>
+                </div>
+            </div>
         </div>
-    </div>
+    </section>
 
     <!-- Footer -->
-    <footer class="bg-brand-dark border-t border-white/10 pt-16 pb-8">
+    <footer class="bg-brand-dark pt-32 pb-12 border-t border-white/5">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-                <div class="col-span-1 md:col-span-1">
-                    <div class="flex items-center gap-2 mb-6">
-                        <img src="images/logo-lumina.png" alt="Lumina" class="h-8 w-auto">
-                        <span class="text-xl font-bold text-white">Lumina</span>
+            <div class="grid md:grid-cols-4 gap-12 mb-20">
+                <div class="md:col-span-2">
+                    <div class="flex items-center gap-4 mb-8">
+                        <img src="images/logo-lumina-v2.png" alt="Lumina" class="h-10 w-auto">
+                        <span class="text-2xl font-bold text-white tracking-tight">Lumina</span>
                     </div>
-                    <p class="text-slate-500 text-sm leading-relaxed mb-6">
-                        Redefining online dating with a focus on privacy, security, and meaningful connections.
+                    <p class="text-slate-500 max-w-sm mb-8 font-light leading-relaxed">
+                        Lumina is more than a dating site; it's a movement towards authentic relationships in the digital age.
                     </p>
-                    <div class="flex space-x-4">
-                        <!-- Social placeholders -->
-                        <a href="#" class="text-slate-500 hover:text-white transition-colors"><span class="sr-only">Twitter</span><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" /></svg></a>
-                        <a href="#" class="text-slate-500 hover:text-white transition-colors"><span class="sr-only">Instagram</span><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.048-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.024-.06-1.379-.06-3.808v-.63c0-2.43.013-2.784.06-3.808.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 014.15 2.06c.636-.247 1.363-.416 2.427-.465C7.673 1.54 8.004 1.54 12.315 1.54h-.002zM12.315 4.615c-3.27 0-3.66.012-4.437.047-.723.033-1.116.143-1.378.245-.347.135-.595.295-.856.556-.26.26-.42.508-.556.856-.102.262-.212.655-.245 1.378-.035.777-.047 1.167-.047 4.437v.001c0 3.27.012 3.66.047 4.437.033.723.143 1.116.245 1.378.135.347.295.595.556.856.26.26.508.42.856.556.262.102.655.212 1.378.245.777.035 1.167.047 4.437.047 3.27 0 3.66-.012 4.437-.047.723-.033 1.116-.143 1.378-.245.347-.135.595-.295.856-.556.26-.26.42-.508.556-.856.102-.262.212-.655.245-1.378.035-.777.047-1.167.047-4.437 0-3.27-.012-3.66-.047-4.437-.033-.723-.143-1.116-.245-1.378-.135-.347-.295-.595-.556-.856-.26-.26-.508-.42-.856-.556-.262-.102-.655-.212-1.378-.245-.777-.035-1.167-.047-4.437-.047zM12.315 7.153a5.162 5.162 0 110 10.324 5.162 5.162 0 010-10.324zM12.315 15.684a3.369 3.369 0 100-6.738 3.369 3.369 0 000 6.738z" clip-rule="evenodd" /></svg></a>
-                    </div>
                 </div>
-
-                <div class="col-span-1">
-                    <h4 class="text-white font-bold mb-6">Company</h4>
-                    <ul class="space-y-4">
-                        <li><a href="about.html" class="text-slate-400 hover:text-brand-primary transition-colors text-sm">About Us</a></li>
-                        <li><a href="careers.html" class="text-slate-400 hover:text-brand-primary transition-colors text-sm">Careers</a></li>
-                        <li><a href="press.html" class="text-slate-400 hover:text-brand-primary transition-colors text-sm">Press</a></li>
+                <div>
+                    <h4 class="text-white font-bold mb-6">Explore</h4>
+                    <ul class="space-y-4 text-slate-400 font-light">
+                        <li><a href="#" class="hover:text-brand-accent transition-colors">Success Stories</a></li>
+                        <li><a href="#about" class="hover:text-brand-accent transition-colors">About Us</a></li>
+                        <li><a href="#" class="hover:text-brand-accent transition-colors">Safety</a></li>
+                        <li><a href="#" class="hover:text-brand-accent transition-colors">Blog</a></li>
                     </ul>
                 </div>
-
-                <div class="col-span-1">
-                    <h4 class="text-white font-bold mb-6">Support</h4>
-                    <ul class="space-y-4">
-                        <li><a href="help.html" class="text-slate-400 hover:text-brand-primary transition-colors text-sm">Help Center</a></li>
-                        <li><a href="safety.html" class="text-slate-400 hover:text-brand-primary transition-colors text-sm">Safety Tips</a></li>
-                        <li><a href="contact.html" class="text-slate-400 hover:text-brand-primary transition-colors text-sm">Contact Us</a></li>
-                    </ul>
-                </div>
-
-                <div class="col-span-1">
+                <div>
                     <h4 class="text-white font-bold mb-6">Legal</h4>
-                    <ul class="space-y-4">
-                        <li><a href="privacy.html" class="text-slate-400 hover:text-brand-primary transition-colors text-sm">Privacy Policy</a></li>
-                        <li><a href="terms.html" class="text-slate-400 hover:text-brand-primary transition-colors text-sm">Terms of Service</a></li>
-                        <li><a href="cookies.html" class="text-slate-400 hover:text-brand-primary transition-colors text-sm">Cookie Policy</a></li>
+                    <ul class="space-y-4 text-slate-400 font-light">
+                        <li><a href="terms.html" class="hover:text-brand-accent transition-colors">Terms of Service</a></li>
+                        <li><a href="privacy.html" class="hover:text-brand-accent transition-colors">Privacy Policy</a></li>
+                        <li><a href="#" class="hover:text-brand-accent transition-colors">Cookie Policy</a></li>
+                        <li><a href="help.html" class="hover:text-brand-accent transition-colors">Help Center</a></li>
                     </ul>
                 </div>
             </div>
-
-            <div class="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
-                <p class="text-slate-600 text-sm">&copy; 2025 Dream Formula OU. All rights reserved.</p>
-                <div class="flex gap-4 text-xs text-slate-600">
-                    <p>Registration Number: 14844598</p>
-                    <p>Tallinn, Estonia</p>
+            <div class="pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
+                <p class="text-slate-600 text-sm font-light">&copy; 2025 Lumina. All rights reserved.</p>
+                <div class="flex gap-6">
+                    <!-- Social icons would go here -->
                 </div>
             </div>
         </div>
     </footer>
 
-    <!-- Scripts -->
-    <!-- Essential JS -->
-    <script src="js/cache-buster.js?v=2.0.0"></script>
-    <script src="js/auth-manager.js?v=2.0.0"></script>
-    <script src="js/auth-modal.js?v=2.0.0"></script>
-    <script src="js/cookie-consent.js?v=2.0.0"></script>
-    <script src="landing-script.js?v=2.0.0"></script>
+    <!-- Essential Scripts -->
+    <script src="js/cache-buster.js?v=2.1.0"></script>
+    <script src="js/auth-manager.js?v=2.1.0"></script>
+    <script src="js/auth-modal.js?v=2.1.0"></script>
+    <script src="js/cookie-consent.js?v=2.1.0"></script>
+    <script src="landing-script.js?v=2.1.0"></script>
     
     <script>
-        // Hamburger Menu Toggle
-        document.getElementById('hamburger').addEventListener('click', function() {
-            const menu = document.getElementById('navMenu');
-            menu.classList.toggle('hidden');
-        });
-
-        // Navbar Scroll Effect
-        window.addEventListener('scroll', function() {
-            const navbar = document.getElementById('navbar');
-            if (window.scrollY > 10) {
-                navbar.classList.add('bg-brand-dark/95', 'backdrop-blur-md', 'shadow-lg');
+        // Navbar interaction
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 20) {
+                nav.classList.add('bg-brand-dark/95', 'backdrop-blur-xl', 'shadow-lg');
             } else {
-                navbar.classList.remove('bg-brand-dark/95', 'backdrop-blur-md', 'shadow-lg');
+                nav.classList.remove('bg-brand-dark/95', 'backdrop-blur-xl', 'shadow-lg');
             }
         });
-        
-        // Animated Counter for Stats
-        function animateCounters() {
-            const counters = document.querySelectorAll('.stat-number-animated');
-            
-            counters.forEach(counter => {
-                const target = parseInt(counter.getAttribute('data-target'));
-                let current = 0;
-                
-                if (target === 0) {
-                    counter.textContent = '0';
-                    return;
-                }
-                
-                const increment = target / 50; 
-                
-                const timer = setInterval(() => {
-                    current += increment;
-                    if (current >= target) {
-                        current = target;
-                        clearInterval(timer);
-                    }
-                    // Format with K/M if large
-                    if (current >= 1000) {
-                         counter.textContent = Math.floor(current / 1000) + 'K+';
-                    } else {
-                        counter.textContent = Math.floor(current);
-                    }
-                }, 30);
-            });
-        }
-        
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
-                animateCounters();
-            }, 500);
+
+        document.getElementById('hamburger').addEventListener('click', () => {
+            document.getElementById('navMenu').classList.toggle('hidden');
         });
     </script>
 </body>

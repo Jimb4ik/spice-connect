@@ -3,370 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Terms of Service - Lavrilo</title>
-    <link rel="stylesheet" href="landing-styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        body {
-            background: white;
-            color: var(--text-primary);
+    <title>Terms of Service - Lumina</title>
+    <link rel="icon" type="image/png" href="favicon/favicon-lumina-v2.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            primary: '#6366f1',
+                            secondary: '#8b5cf6',
+                            accent: '#f43f5e',
+                            dark: '#0f172a',
+                            surface: '#1e293b',
+                        }
+                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'] }
+                }
+            }
         }
-        .legal-page {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 120px 20px 40px;
-            line-height: 1.6;
-            color: var(--text-primary);
-        }
-        .legal-page h1 {
-            color: var(--primary-color);
-            margin-bottom: 30px;
-            text-align: center;
-        }
-        .legal-page h2 {
-            color: var(--text-primary);
-            margin: 30px 0 15px 0;
-            border-bottom: 2px solid var(--primary-color);
-            padding-bottom: 5px;
-        }
-        .legal-page h3 {
-            color: var(--text-primary);
-            margin: 20px 0 10px 0;
-        }
-        .legal-page p {
-            margin-bottom: 15px;
-            color: var(--text-primary);
-        }
-        .legal-page ul {
-            margin: 15px 0;
-            padding-left: 30px;
-        }
-        .legal-page li {
-            margin-bottom: 8px;
-            color: var(--text-primary);
-        }
-        .last-updated {
-            text-align: center;
-            color: #6b7280;
-            font-style: italic;
-            margin-top: 40px;
-            padding-top: 20px;
-            border-top: 1px solid #e5e7eb;
-        }
-        .company-info {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 12px;
-            margin: 30px 0;
-            border-left: 4px solid var(--primary-color);
-        }
-    </style>
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body>
-    <!-- Navigation -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="nav-logo">
-                <a href="index.html"><h2>Lavrilo</h2></a>
-            </div>
-            
-            <div class="nav-menu">
-                <a href="index.html#features" class="nav-link">Features</a>
-                <a href="index.html#inclusivity" class="nav-link">Inclusivity</a>
-                <a href="index.html#monetization" class="nav-link">Earnings</a>
-                <button onclick="window.location.href='index.html'" class="btn-secondary login-btn">Back to Home</button>
+<body class="bg-brand-dark text-slate-100 font-sans">
+    <nav class="fixed w-full z-50 bg-brand-dark/95 backdrop-blur-xl border-b border-white/5">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <a href="index.html" class="flex items-center gap-3">
+                    <img src="images/logo-lumina-v2.png" alt="Lumina" class="h-10 w-auto">
+                    <span class="text-2xl font-bold text-white">Lumina</span>
+                </a>
+                <a href="index.html" class="text-sm font-medium text-slate-300 hover:text-white transition-colors">Back to Home</a>
             </div>
         </div>
     </nav>
 
-    <div class="legal-page">
+    <main class="pt-32 pb-20 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 class="text-4xl font-bold text-white mb-8">Terms of Service</h1>
         
-        <h1>Terms of Service</h1>
-        
-        <div class="company-info">
-            <h3>Company Information</h3>
-            <p><strong>Dream Formula OU</strong><br>
-            Registration Number: 14844598<br>
-            Address: Narva mnt 13, 10151 Tallinn, Kesklinna linnaosa, Harju maakond, Estonia</p>
+        <div class="prose prose-invert prose-lg max-w-none">
+            <p class="text-slate-400 mb-6">Last updated: December 1, 2025</p>
+            
+            <section class="mb-10">
+                <h2 class="text-2xl font-bold text-white mb-4">1. Agreement to Terms</h2>
+                <p class="text-slate-300">By accessing or using the Lumina website and services, you agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree with any of these terms, you are prohibited from using or accessing this site.</p>
+            </section>
+
+            <section class="mb-10">
+                <h2 class="text-2xl font-bold text-white mb-4">2. Eligibility</h2>
+                <p class="text-slate-300">You must be at least 18 years of age to create an account on Lumina and use the Service. By creating an account and using the Service, you represent and warrant that:</p>
+                <ul class="list-disc pl-6 text-slate-300 space-y-2 mt-4">
+                    <li>You can form a binding contract with Lumina.</li>
+                    <li>You are not a person who is barred from using the Service under the laws of the United States or any other applicable jurisdiction.</li>
+                    <li>You will comply with this Agreement and all applicable local, state, national and international laws, rules and regulations.</li>
+                </ul>
+            </section>
+
+            <section class="mb-10">
+                <h2 class="text-2xl font-bold text-white mb-4">3. Account Security</h2>
+                <p class="text-slate-300">You are responsible for maintaining the confidentiality of your login credentials you use to sign up for Lumina, and you are solely responsible for all activities that occur under those credentials. If you think someone has gained access to your account, please immediately contact us.</p>
+            </section>
+            
+            <section class="mb-10">
+                <h2 class="text-2xl font-bold text-white mb-4">4. Community Guidelines</h2>
+                <p class="text-slate-300">You agree to treat other users with respect and to not post any content that is hateful, threatening, sexually explicit, or pornographic; incites violence; or contains nudity or graphic or gratuitous violence.</p>
+            </section>
         </div>
+    </main>
 
-        <h2>1. Acceptance of Terms</h2>
-        <p>By accessing and using Lavrilo ("the Service"), you accept and agree to be bound by the terms and provisions of this agreement. The Terms of Service are binding upon you from the moment you click "I accept the Terms of Service" during your first connection to the Service.</p>
-        <p>In all cases, from the date of first use of the Service by the user, these Terms of Service are deemed to have been read and accepted without reservation. If you do not agree to abide by these terms, please do not use this service.</p>
-        <p>The Company reserves the right to modify these Terms of Service at any time to evolve the Service and its functionalities, such modification being notified to the user via their email address. Continued use of the Service following such notification constitutes unreserved acceptance by the user of the new Terms of Service.</p>
-        
-        <h2>2. Description of Service</h2>
-        <p>Lavrilo is an online virtual meeting service for adults for strictly private purposes, allowing dialogue with other users. The Service provided by the Company should in no case be confused by the user as a matrimonial advice or brokerage service; the Company can only be qualified as a technical provider of an online platform.</p>
-        
-        <p>The motivations of members are specific to each member and in no case can the Company be subject to an obligation of result and cannot guarantee to the member that they will make meetings satisfying their expectations such as marriage, cohabitation or real meetings. The proposed service can also be considered as a dialogue and entertainment service.</p>
-        
-        <p>Lavrilo is a social networking and dating platform that allows users to:</p>
-        <ul>
-            <li>Create personal profiles with photos and information</li>
-            <li>Discover and connect with other users</li>
-            <li>Send and receive messages</li>
-            <li>Match with compatible users</li>
-            <li>Search for users based on preferences</li>
-            <li>Purchase and send virtual gifts</li>
-            <li>Manage a virtual wallet with credits</li>
-            <li>Monetize received gifts</li>
-        </ul>
-        
-        <p><strong>Important Safety Notice:</strong> In case of physical meeting between Service members following use of the Service, the Company recommends taking all necessary precautions such as informing a close person or never being alone with another member. The Company recommends being particularly vigilant when using the Service as it is reminded that the internet can allow any user to impersonate a person they are not and that there are malicious people.</p>
-        
-        <h2>3. User Accounts and Registration</h2>
-        <h3>3.1 Account Creation</h3>
-        <p>To use our Service, you must create an account by providing accurate and complete information. You are responsible for maintaining the confidentiality of your account credentials.</p>
-        
-        <h3>3.2 Age Requirement</h3>
-        <p>You must be at least 18 years old to use this Service. By using the Service, you represent and warrant that you are at least 18 years of age.</p>
-        
-        <h3>3.3 Account Security</h3>
-        <p>You are responsible for all activities that occur under your account. You must notify us immediately of any unauthorized use of your account.</p>
-        
-        <h2>4. User Conduct and Responsibilities</h2>
-        
-        <h3>4.1 Personal Use and Account Security</h3>
-        <p>Use of the Service is strictly personal. The Service cannot be used by the member for commercial purposes, whatever the nature of the service. The member's personal account is intuitu personae, meaning it is at their sole discretion and cannot under any circumstances be shared with other users or members, and access cannot be provided to a minor.</p>
-        
-        <p>The member is entirely responsible for the use they make of the Service and therefore for the consequences of any inappropriate, abusive, fraudulent or illicit use they might make through the Service. They undertake to use it loyally, in compliance with these Terms of Service, applicable laws and regulations, particularly those relating to privacy.</p>
-        
-        <h3>4.2 Profile Information and Authenticity</h3>
-        <p>To ensure reliable and honest exchanges between members, each member undertakes to provide accurate and truthful information, particularly concerning age, gender and sexual orientation. The member is prohibited from usurping the identity of a person, particularly by using their name or first name, their username and, more than anything, their image.</p>
-        
-        <p>Photographs posted online by the member must only represent the member as a natural person and cannot represent an animal, a third party or a minor. In particular, the member is prohibited from publishing content of a pedopornographic or pedophile nature or inciting solicitation, prostitution or any other paid sexual service.</p>
-        
-        <h3>4.3 Prohibited Activities</h3>
-        <p>You agree not to use the Service to:</p>
-        <ul>
-            <li>Upload, post, or transmit any content that is unlawful, harmful, threatening, abusive, harassing, defamatory, vulgar, obscene, or otherwise objectionable</li>
-            <li>Impersonate any person or entity or falsely state or misrepresent your affiliation with a person or entity</li>
-            <li>Upload, post, or transmit any content that infringes any patent, trademark, trade secret, copyright, or other proprietary rights</li>
-            <li>Upload, post, or transmit any unsolicited or unauthorized advertising, promotional materials, spam, or any other form of solicitation</li>
-            <li>Interfere with or disrupt the Service or servers or networks connected to the Service</li>
-            <li>Attempt to gain unauthorized access to any portion of the Service</li>
-            <li>Share personal contact information such as postal address, email address, real identity or telephone number with other Service members</li>
-            <li>Request or accept money from other members, regardless of the reason given</li>
-            <li>Introduce viruses or any other technology harmful to the Service</li>
-        </ul>
-        
-        <h3>4.4 Communication Standards</h3>
-        <p>The member must express themselves with courtesy, politely and kindly and must respond to another member correctly by declining the offer if it does not correspond to the member's expectations. Each member can report suspicious behavior or content through the "Report" feature.</p>
-        
-        <p>The member respects the privacy of members and is prohibited from disclosing, through the Service, the names, first names and personal addresses of members, whether postal or email addresses. The member must respect strict confidentiality of information transmitted to them by other members when using the Service.</p>
-        
-        <h2>5. Virtual Currency, Gifts, and Monetization System</h2>
-        
-        <h3>5.1 Credits System</h3>
-        <p>Lavrilo operates a virtual currency system using "Credits". Credits are an internal virtual currency valid only on this platform and cannot be used for payments on any other services or websites. Credits have no monetary value outside of the Lavrilo platform.</p>
-        
-        <h3>5.2 Credit Purchases</h3>
-        <p>Users can purchase Credits using real money through secure payment methods including credit cards, debit cards, and other approved payment processors. All Credit purchases are final and non-refundable except as required by applicable law. The exchange rate between real currency and Credits is determined by Lavrilo and may change at any time without notice.</p>
-        
-        <h3>5.3 Virtual Gift System</h3>
-        <p>Users can purchase virtual gifts using Credits and send them to other users as tokens of appreciation, interest, or affection. Virtual gifts have no real-world value and exist solely within the Lavrilo platform. The variety and pricing of virtual gifts may change at Lavrilo's discretion.</p>
-        
-        <h3>5.4 Gift Monetization Program</h3>
-        <p>Recipients of virtual gifts may participate in our monetization program, which allows them to convert received gifts into real money. Key terms of this program include:</p>
-        <ul>
-            <li><strong>Conversion Rate:</strong> Received gifts can be monetized at 10% of their original Credit value</li>
-            <li><strong>Minimum Withdrawal:</strong> A minimum threshold must be reached before withdrawal requests can be processed</li>
-            <li><strong>Processing Time:</strong> Withdrawal requests are processed within 5-10 business days</li>
-            <li><strong>Payment Methods:</strong> Withdrawals are made to verified bank cards or approved payment methods</li>
-        </ul>
-        
-        <h3>5.5 Age and Identity Verification</h3>
-        <p>To participate in the monetization program, users must:</p>
-        <ul>
-            <li>Be at least 18 years of age with valid government-issued identification</li>
-            <li>Complete our identity verification process</li>
-            <li>Provide proof of ownership for the bank card or payment method used for withdrawals</li>
-            <li>Comply with all applicable tax obligations in their jurisdiction</li>
-        </ul>
-        
-        <h3>5.6 Financial Compliance and Limitations</h3>
-        <p><strong>Important Notice:</strong> Lavrilo is not a financial institution, money service business, or payment processor. We do not provide financial services, investment advice, or banking services. The monetization program is a platform feature that allows users to receive compensation for engagement, similar to content creator programs on other platforms.</p>
-        
-        <p>Lavrilo reserves the right to:</p>
-        <ul>
-            <li>Request additional documentation to verify user identity and payment method ownership</li>
-            <li>Suspend or terminate monetization privileges for users who violate these terms</li>
-            <li>Modify the monetization program terms with 30 days' notice</li>
-            <li>Comply with anti-money laundering (AML) and know your customer (KYC) regulations</li>
-            <li>Report transactions as required by applicable financial regulations</li>
-        </ul>
-        
-        <h3>5.7 Tax Responsibilities</h3>
-        <p>Users participating in the monetization program are solely responsible for:</p>
-        <ul>
-            <li>Reporting income from gift monetization to appropriate tax authorities</li>
-            <li>Paying all applicable taxes on monetized amounts</li>
-            <li>Maintaining records of all transactions for tax purposes</li>
-            <li>Consulting with tax professionals regarding their obligations</li>
-        </ul>
-        
-        <h3>5.8 Prohibited Activities</h3>
-        <p>The following activities are strictly prohibited and may result in account termination:</p>
-        <ul>
-            <li>Creating fake accounts to send gifts to yourself or affiliated accounts</li>
-            <li>Manipulating the gift system through fraudulent means</li>
-            <li>Using stolen payment methods to purchase Credits</li>
-            <li>Attempting to circumvent identity verification requirements</li>
-            <li>Money laundering or other illegal financial activities</li>
-            <li>Coordinating with other users to artificially inflate gift exchanges</li>
-        </ul>
-        
-        <h3>5.9 Platform Fees and Charges</h3>
-        <p>Lavrilo may charge processing fees for:</p>
-        <ul>
-            <li>Credit purchases (included in the purchase price)</li>
-            <li>Withdrawal processing (deducted from withdrawal amount)</li>
-            <li>Currency conversion (if applicable)</li>
-            <li>Additional verification services (if required)</li>
-        </ul>
-        
-        <h3>5.10 Dispute Resolution</h3>
-        <p>For disputes related to the monetization program:</p>
-        <ul>
-            <li>Users must first contact our support team through official channels</li>
-            <li>All disputes must be reported within 30 days of the transaction</li>
-            <li>Lavrilo will investigate disputes in good faith but reserves final decision-making authority</li>
-            <li>Decisions regarding gift monetization are final and binding</li>
-        </ul>
-        
-        <h2>6. Service Availability and Performance</h2>
-        <p>The Company makes its best efforts to provide a quality and efficient service, accessible 24/24 hours and 7/7 days, subject to maintenance operations or technical difficulties and constraints.</p>
-        
-        <p>Nevertheless, due to the nature and complexity of the internet network, and in particular, its technical performance and response times for consulting, querying or transferring data, the Company cannot ensure absolute accessibility or availability of its Service.</p>
-        
-        <p>The Company reserves the right, without notice or compensation, to temporarily or permanently close access to the Service to perform updates and maintenance operations or in case of risk to Service security or threat to the integrity of members' personal data.</p>
-        
-        <h2>7. Moderation and Content Management</h2>
-        <p>The Company encourages members to become familiar with the various Service functionalities and attempts to optimize its Service to provide the best possible experience to members. Members accept the deployment of moderation services via instant messaging or email as well as sending photographs to members to encourage broad member participation in the Service and functionalities or to improve member security by detecting and fighting against malicious members.</p>
-        
-        <p>The member declares to be informed that photographs and profiles belonging to these persons do not relate to a real person but have been created by the Company for the aforementioned reasons. The member recognizes the Service as a dating site but also for entertainment. They may accept that in certain cases dialogues are initiated with a profile created for entertainment purposes.</p>
-        
-        <h2>8. Right of Withdrawal</h2>
-        <p>In accordance with consumer protection laws, users have a fourteen (14) day period from subscription to exercise their right of withdrawal without penalty and without reason for premium services.</p>
-        
-        <p>The withdrawal period expires fourteen (14) calendar days after the day of subscription to the extended Service, formalized by a paid subscription order. To exercise the right of withdrawal, the subscriber must notify their decision to withdraw by means of an unambiguous statement via the contact form or postal address indicated in the Legal Notices.</p>
-        
-        <p><strong>Effects of withdrawal:</strong> In case of withdrawal by the subscriber, the Company undertakes to refund all amounts paid without undue delay and, in any case, no later than fourteen (14) days from the day the Company is informed of the subscriber's intention to withdraw.</p>
-        
-        <h2>9. Privacy and Data Protection</h2>
-        <p>Your privacy is important to us. Please review our Privacy Policy, which also governs your use of the Service, to understand our practices. Personal data may be transferred to commercial partners. Users have the option to deactivate the transfer via the "Manage my alerts and newsletters" section by unchecking the "I accept to receive partner offers" box.</p>
-        
-        <h2>10. Content and Intellectual Property</h2>
-        <h3>10.1 User Content</h3>
-        <p>You retain ownership of content you submit to the Service. By submitting content, you grant us a worldwide, non-exclusive, royalty-free license to use, reproduce, modify, and distribute your content in connection with the Service.</p>
-        
-        <h3>10.2 Service Content and Intellectual Property Protection</h3>
-        <p>The Service and its original content, features, and functionality are owned by Lavrilo and are protected by international copyright, trademark, patent, trade secret, and other intellectual property laws.</p>
-        
-        <p>The site, trademarks, designs, models, images, texts, photos, logos, graphic charters, software, search engines, databases and domain names, without this list being exhaustive, are the exclusive property of the Company or its partners who have granted it a license.</p>
-        
-        <p>Any reproduction, representation and/or extraction, total or partial, of any of these rights, without the express authorization of the Company, is prohibited and would constitute counterfeiting sanctioned by applicable intellectual property laws.</p>
-        
-        <h2>11. Payment Terms and Financial Regulations</h2>
-        
-        <h3>11.1 Credit Purchase Terms</h3>
-        <p>Credits can be purchased through our integrated payment gateway using secure payment methods. All Credit purchases are final and non-refundable unless required by applicable law. Prices are subject to change without notice.</p>
-        
-        <h3>11.2 Payment Processing and Security</h3>
-        <p>All financial transactions are processed through certified payment processors that comply with industry security standards including PCI DSS. Lavrilo does not store complete payment card information on our servers.</p>
-        
-        <h3>11.3 Regulatory Compliance</h3>
-        <p>Our monetization program operates in compliance with:</p>
-        <ul>
-            <li>European Union Payment Services Directive (PSD2)</li>
-            <li>Anti-Money Laundering (AML) regulations</li>
-            <li>Know Your Customer (KYC) requirements</li>
-            <li>Estonian financial services regulations</li>
-            <li>International sanctions and compliance requirements</li>
-        </ul>
-        
-        <h3>11.4 Transaction Monitoring</h3>
-        <p>All transactions are monitored for suspicious activity. We reserve the right to freeze accounts, request additional documentation, or report transactions to relevant authorities as required by law.</p>
-
-        
-        <h2>12. Account Termination</h2>
-        
-        <h3>12.1 Termination by User</h3>
-        <p>The member may unsubscribe from the Service and request deletion of their profile at any time by clicking on the "Unsubscribe" tab in the "My Account" section accessible via the Service homepage. Unsubscription from the free Service occurs immediately after validation by the member of their unsubscription request.</p>
-        
-        <h3>12.2 Termination by Company</h3>
-        <p>We may terminate or suspend your account and bar access to the Service immediately, without prior notice or liability, under our sole discretion, for any reason whatsoever, including without limitation if you breach the Terms. When a member has not connected or used their account for a period of five (5) years, the Company reserves the right to close the account, this closure being notified to the member by email.</p>
-        
-        <h3>12.3 Consequences of Account Closure</h3>
-        <p>The member is informed that their personal account is permanently deleted within 48 hours from the effective unsubscription of the account. From this deletion, the member can no longer recover data and information collected through the Service.</p>
-        
-        <h2>13. Force Majeure</h2>
-        <p>Initially, force majeure suspends the execution of the Service. If this impediment is permanent, the Service is terminated by right. Both the member and the Company are released from their obligations under the conditions provided for in applicable civil law.</p>
-        
-        <p>Expressly, the following are considered cases of force majeure: war, riot, fire, internal or external strikes, lock-out, occupation of Company premises, bad weather, earthquake, flood, water damage, restrictions on forms of marketing, accidents of all kinds, epidemic, pandemic, disease affecting more than 10% of Company personnel in a period of two consecutive months, absence of energy supply, partial or total shutdown of the internet network and, more generally, private or public electronic communications networks, road blockages and supply impossibilities, power cuts and any other case independent of the express will of the parties preventing normal execution of the terms.</p>
-        
-        <h2>14. Disclaimers and Limitation of Liability</h2>
-        
-        <h3>14.1 Service Disclaimers</h3>
-        <p>The information on this Service is provided on an "as is" basis. To the fullest extent permitted by law, this Company excludes all representations, warranties, conditions and terms relating to this Service. The Company's responsibility cannot be held in case of absence of meeting or in the case where registration has not led to the member's expectations.</p>
-        
-        <h3>14.2 Limitation of Liability</h3>
-        <p>In no event shall Lavrilo, nor its directors, employees, partners, agents, suppliers, or affiliates, be liable for any indirect, incidental, special, consequential, or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from your use of the Service.</p>
-        
-        <p>The Company's responsibility cannot be sought or held in case of temporary or total unavailability of all or part of access to the Service, difficulty related to response time, and in general, any performance defect whatsoever. The Company's responsibility cannot be sought in case of fraudulent or abusive use of the account due to voluntary or accidental disclosure to anyone of the member's password.</p>
-        
-        <h2>15. Nullity</h2>
-        <p>If one or more stipulations of these Terms are held to be invalid or declared as such in application of a law, regulation or following a decision having become final of a competent jurisdiction, the other stipulations will retain all their force and scope.</p>
-        
-        <h2>16. Evidence Convention</h2>
-        <p>Data collected and stored by the Company are kept under reasonable security conditions and are considered as evidence of communications between the member and the Company. Acceptance of the Terms by electronic means and subscription to premium services as well as any contractual commitment made online by the member have, between them and the Company, the same probative value as on paper support.</p>
-        
-        <h2>17. Governing Law</h2>
-        <p>These Terms shall be interpreted and governed by the laws of Estonia, without regard to its conflict of law provisions. Any disputes arising from these Terms or your use of the Service shall be subject to the exclusive jurisdiction of the courts of Estonia.</p>
-        
-        <h2>18. Changes to Terms</h2>
-        <p>We reserve the right, at our sole discretion, to modify or replace these Terms at any time. If a revision is material, we will provide at least 30 days notice prior to any new terms taking effect.</p>
-        
-        <h2>19. Contact Information</h2>
-        <p>If you have any questions about these Terms of Service, please contact us through our Help Center or support channels available on the platform.</p>
-        
-        <div class="last-updated">
-            Last updated: January 2025
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-brand">
-                    <h3>Lavrilo</h3>
-                    <p>Connecting hearts worldwide</p>
-                </div>
-                <div class="footer-links">
-                    <div class="footer-column">
-                        <h4>Company</h4>
-                        <a href="about.html">About Us</a>
-                        <a href="careers.html">Careers</a>
-                        <a href="press.html">Press</a>
-                    </div>
-                    <div class="footer-column">
-                        <h4>Support</h4>
-                        <a href="help.html">Help Center</a>
-                        <a href="safety.html">Safety Tips</a>
-                        <a href="contact.html">Contact Us</a>
-                    </div>
-                    <div class="footer-column">
-                        <h4>Legal</h4>
-                        <a href="privacy.html">Privacy Policy</a>
-                        <a href="terms.html">Terms of Service</a>
-                        <a href="cookies.html">Cookie Policy</a>
-                    </div>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2025 Lavrilo. All rights reserved.</p>
-            </div>
+    <footer class="bg-brand-surface border-t border-white/5 py-12">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p class="text-slate-500 text-sm">&copy; 2025 Lumina. All rights reserved.</p>
         </div>
     </footer>
 </body>
