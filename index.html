@@ -1,464 +1,377 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lavrilo - Find Your Perfect Match</title>
+    <title>Lumina - Connect Deeper</title>
     
     <!-- Cache Control -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <meta name="app-version" content="1.0.23">
+    <meta name="app-version" content="2.0.0">
     
     <!-- Favicon -->
-    <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
-    <link rel="manifest" href="favicon/site.webmanifest">
+    <link rel="icon" type="image/png" href="favicon/favicon-lumina.png">
     
-    <link rel="stylesheet" href="landing-styles.css?v=3.14">
-    <link rel="stylesheet" href="css/auth-modal.css?v=1.1">
-    <link rel="stylesheet" href="css/cookie-consent.css?v=1.1">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"></head>
-<body>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            primary: '#7c3aed', // Violet 600
+                            secondary: '#8b5cf6', // Violet 500
+                            accent: '#f59e0b', // Amber 500
+                            dark: '#0f172a', // Slate 900
+                            surface: '#1e293b', // Slate 800
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-brand-dark text-slate-100 antialiased selection:bg-brand-primary selection:text-white">
+
     <!-- Navigation -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <div class="nav-logo">
-                <a href="index.html"><h2>Lavrilo</h2></a>
+    <nav class="fixed w-full z-40 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center gap-3">
+                    <img src="images/logo-lumina.png" alt="Lumina" class="h-10 w-auto">
+                    <span class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-brand-secondary to-brand-accent hidden md:block">Lumina</span>
+                </div>
+                
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#features" class="text-sm font-medium text-slate-300 hover:text-white transition-colors">Features</a>
+                    <a href="#safety" class="text-sm font-medium text-slate-300 hover:text-white transition-colors">Safety</a>
+                    <button class="login-btn text-sm font-medium text-white bg-white/10 hover:bg-white/20 px-5 py-2.5 rounded-full transition-all border border-white/10">Log In</button>
+                    <button class="signup-btn text-sm font-medium text-white bg-brand-primary hover:bg-brand-secondary px-5 py-2.5 rounded-full shadow-lg shadow-brand-primary/25 transition-all transform hover:-translate-y-0.5">Join Free</button>
+                </div>
+
+                <!-- Mobile menu button -->
+                <div class="md:hidden flex items-center">
+                    <button id="hamburger" class="text-slate-300 hover:text-white focus:outline-none">
+                        <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
             </div>
-            
-            <!-- Hamburger Menu Button -->
-            <button class="hamburger" id="hamburger">
-                <span class="hamburger-line"></span>
-                <span class="hamburger-line"></span>
-                <span class="hamburger-line"></span>
-            </button>
-            
-            <!-- Navigation Menu -->
-            <div class="nav-menu" id="navMenu">
-                <a href="#features" class="nav-link">Features</a>
-                <a href="#inclusivity" class="nav-link">Inclusivity</a>
-                <a href="#monetization" class="nav-link">Earnings</a>
-                <button id="loginBtn" class="btn-secondary login-btn">Log In</button>
-                <button id="signupBtn" class="btn-primary signup-btn">Sign Up</button>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="navMenu" class="hidden md:hidden bg-brand-surface border-b border-white/10 absolute w-full left-0">
+            <div class="px-4 pt-2 pb-6 space-y-2">
+                <a href="#features" class="block px-3 py-3 text-base font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-lg">Features</a>
+                <a href="#safety" class="block px-3 py-3 text-base font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-lg">Safety</a>
+                <div class="pt-4 flex flex-col gap-3">
+                    <button class="login-btn w-full text-center text-white bg-white/10 px-5 py-3 rounded-xl">Log In</button>
+                    <button class="signup-btn w-full text-center text-white bg-brand-primary px-5 py-3 rounded-xl shadow-lg">Join Free</button>
+                </div>
             </div>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <section class="hero" id="hero">
-        <div class="hero-background">
-            <img src="images/hero-background.jpeg" alt="Dating background" class="hero-bg-image">
-            <div class="floating-elements">
-                <div class="float-element element-1"></div>
-                <div class="float-element element-2"></div>
-                <div class="float-element element-3"></div>
-                <div class="float-element element-4"></div>
-                <div class="float-element element-5"></div>
-                <div class="float-element element-6"></div>
-            </div>
+    <div class="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
+        <!-- Background Image -->
+        <div class="absolute inset-0 z-0">
+            <img src="images/hero-bg-lumina.png" alt="Background" class="w-full h-full object-cover opacity-60">
+            <div class="absolute inset-0 bg-gradient-to-b from-brand-dark/80 via-brand-dark/50 to-brand-dark"></div>
         </div>
-        <div class="hero-container">
-            <div class="hero-content">
-                <h1 class="hero-title">
-                    Find Your <span class="gradient-text">Perfect Match</span>
+
+        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex flex-col lg:flex-row items-center gap-12 lg:gap-24">
+            
+            <!-- Hero Content -->
+            <div class="flex-1 text-center lg:text-left">
+                <div class="inline-flex items-center px-3 py-1 rounded-full border border-brand-accent/30 bg-brand-accent/10 text-brand-accent text-xs font-semibold tracking-wide uppercase mb-6 backdrop-blur-md">
+                    <span class="w-2 h-2 rounded-full bg-brand-accent mr-2 animate-pulse"></span>
+                    Now Live in France
+                </div>
+                <h1 class="text-5xl lg:text-7xl font-bold tracking-tight mb-6 text-white leading-tight">
+                    Find meaningful <br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-secondary to-brand-accent">connections</span>
                 </h1>
-                <p class="hero-subtitle">
-                    Connect with genuine people looking for meaningful relationships. 
-                    Join thousands of singles finding love every day.
+                <p class="text-xl text-slate-300 mb-10 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+                    Lumina uses advanced compatibility matching to help you find genuine partners who share your values and lifestyle.
                 </p>
                 
-                <!-- Live Stats -->
-                <div class="hero-stats" id="heroStats">
-                    <div class="stat-item">
-                        <span class="stat-number" id="onlineCount">1,495</span>
-                        <span class="stat-label">Online Now</span>
+                <div class="flex flex-wrap gap-8 justify-center lg:justify-start mb-12">
+                    <div class="text-center lg:text-left">
+                        <p class="text-3xl font-bold text-white stat-number-animated" data-target="50000">0</p>
+                        <p class="text-sm text-slate-400 uppercase tracking-wider font-medium">Active Members</p>
                     </div>
-                    <div class="stat-item">
-                        <span class="stat-number" id="totalProfiles">50K+</span>
-                        <span class="stat-label">Active Profiles</span>
+                    <div class="w-px h-12 bg-white/10 hidden sm:block"></div>
+                    <div class="text-center lg:text-left">
+                        <p class="text-3xl font-bold text-white stat-number-animated" data-target="1500">0</p>
+                        <p class="text-sm text-slate-400 uppercase tracking-wider font-medium">Online Now</p>
                     </div>
-                    <div class="stat-item">
-                        <span class="stat-number" id="successStories">12K+</span>
-                        <span class="stat-label">Success Stories</span>
+                    <div class="w-px h-12 bg-white/10 hidden sm:block"></div>
+                    <div class="text-center lg:text-left">
+                        <p class="text-3xl font-bold text-white stat-number-animated" data-target="12000">0</p>
+                        <p class="text-sm text-slate-400 uppercase tracking-wider font-medium">Success Stories</p>
                     </div>
                 </div>
+            </div>
 
-                <div class="hero-actions">
-                    <button class="btn-hero-primary" id="startMatchingBtn">
-                        Start Matching Now
-                    </button>
-                    <button class="btn-hero-secondary" id="browseProfilesBtn">
-                        Browse Profiles
-                    </button>
+            <!-- Registration Card -->
+            <div class="w-full max-w-md">
+                <div class="glass-panel rounded-2xl p-8 shadow-2xl relative overflow-hidden group">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-brand-secondary to-brand-accent"></div>
+                    
+                    <h2 class="text-2xl font-bold text-white mb-2">Create Account</h2>
+                    <p class="text-slate-400 mb-6 text-sm">Join the community in less than 30 seconds.</p>
+
+                    <form id="registrationForm" class="space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-400 mb-1 uppercase">First Name</label>
+                                <input type="text" id="regFirstName" required class="w-full bg-brand-dark/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-colors placeholder-slate-600" placeholder="John">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-400 mb-1 uppercase">Username</label>
+                                <input type="text" id="regUsername" required minlength="3" class="w-full bg-brand-dark/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-colors placeholder-slate-600" placeholder="johndoe">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400 mb-1 uppercase">Email Address</label>
+                            <input type="email" id="regEmail" required class="w-full bg-brand-dark/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-colors placeholder-slate-600" placeholder="john@example.com">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400 mb-1 uppercase">Password</label>
+                            <input type="password" id="regPassword" required minlength="6" class="w-full bg-brand-dark/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-colors placeholder-slate-600" placeholder="••••••••">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-400 mb-1 uppercase">I am a</label>
+                                <div class="relative">
+                                    <select id="regGender" required class="w-full bg-brand-dark/50 border border-white/10 rounded-lg px-4 py-3 text-white appearance-none focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary cursor-pointer">
+                                        <option value="" class="bg-brand-surface text-slate-400">Select</option>
+                                        <option value="1" class="bg-brand-surface">Man</option>
+                                        <option value="2" class="bg-brand-surface">Woman</option>
+                                        <option value="3" class="bg-brand-surface">Couple</option>
+                                    </select>
+                                    <div class="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none text-slate-500">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-400 mb-1 uppercase">Looking for</label>
+                                <div class="relative">
+                                    <select id="regLookingFor" required class="w-full bg-brand-dark/50 border border-white/10 rounded-lg px-4 py-3 text-white appearance-none focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary cursor-pointer">
+                                        <option value="" class="bg-brand-surface text-slate-400">Select</option>
+                                        <option value="1" class="bg-brand-surface">Men</option>
+                                        <option value="2" class="bg-brand-surface">Women</option>
+                                        <option value="3" class="bg-brand-surface">Couples</option>
+                                    </select>
+                                    <div class="absolute right-4 top-1/2 transform -translate-y-1/2 pointer-events-none text-slate-500">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-400 mb-1 uppercase">Birth Date</label>
+                                <input type="date" id="regBirthdate" required max="2006-01-01" class="w-full bg-brand-dark/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-colors [color-scheme:dark]">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-medium text-slate-400 mb-1 uppercase">City</label>
+                                <input type="text" id="regCity" placeholder="Paris" required class="w-full bg-brand-dark/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-colors placeholder-slate-600">
+                            </div>
+                        </div>
+
+                        <button type="submit" id="submitRegistration" class="w-full bg-gradient-to-r from-brand-secondary to-brand-primary hover:from-brand-primary hover:to-brand-secondary text-white font-bold py-4 rounded-xl shadow-xl shadow-brand-primary/20 transition-all transform hover:scale-[1.02] flex items-center justify-center mt-6">
+                            <span id="regButtonText">Start Free Trial</span>
+                            <div id="regButtonLoader" class="hidden w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                        </button>
+
+                        <p class="text-center text-xs text-slate-500 mt-4">
+                            By joining, you agree to our <a href="terms.html" class="text-slate-400 hover:text-brand-accent underline">Terms</a> & <a href="privacy.html" class="text-slate-400 hover:text-brand-accent underline">Privacy</a>.
+                        </p>
+                    </form>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
 
     <!-- Features Section -->
-    <section class="features" id="features">
-        <div class="container">
-            <div class="section-header">
-                <h2>Why Choose Lavrilo?</h2>
-                <p>Experience dating like never before with our advanced matching system</p>
+    <section id="features" class="py-24 bg-brand-surface relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">Designed for real connection</h2>
+                <p class="text-lg text-slate-400">We've stripped away the noise to focus on what matters most: helping you find someone who truly gets you.</p>
             </div>
-            
-            <div class="features-grid">
-                                <div class="feature-card">
-                    <div class="feature-icon">
-                        <div class="feature-icon-image">
-                            <img src="images/icon-smart-matching.png" alt="Smart Matching">
-                        </div>
+
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="glass-panel p-8 rounded-2xl hover:bg-white/5 transition-colors">
+                    <div class="w-14 h-14 bg-brand-primary/20 rounded-xl flex items-center justify-center mb-6 text-brand-primary">
+                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.2-2.85.5-4.171" />
+                        </svg>
                     </div>
-                    <h3>Smart Matching</h3>
-                    <p>Our AI-powered algorithm finds your perfect match based on compatibility, interests, and preferences.</p>
+                    <h3 class="text-xl font-bold text-white mb-3">Smart Matching</h3>
+                    <p class="text-slate-400 leading-relaxed">Our algorithms analyze deeper personality traits to suggest partners with high long-term compatibility.</p>
                 </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <div class="feature-icon-image">
-                            <img src="images/icon-security.png" alt="Security">
-                        </div>
+
+                <!-- Feature 2 -->
+                <div class="glass-panel p-8 rounded-2xl hover:bg-white/5 transition-colors">
+                    <div class="w-14 h-14 bg-brand-accent/20 rounded-xl flex items-center justify-center mb-6 text-brand-accent">
+                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
                     </div>
-                    <h3>100% Safe & Secure</h3>
-                    <p>Your privacy matters. All profiles are verified and your data is protected with bank-level security.</p>
+                    <h3 class="text-xl font-bold text-white mb-3">Verified Profiles</h3>
+                    <p class="text-slate-400 leading-relaxed">We take safety seriously. Manual verification ensures you're talking to real, genuine people.</p>
                 </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <div class="feature-icon-image">
-                            <img src="images/icon-messaging.png" alt="Messaging">
-                        </div>
+
+                <!-- Feature 3 -->
+                <div class="glass-panel p-8 rounded-2xl hover:bg-white/5 transition-colors">
+                    <div class="w-14 h-14 bg-brand-secondary/20 rounded-xl flex items-center justify-center mb-6 text-brand-secondary">
+                        <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
                     </div>
-                    <h3>Instant Messaging</h3>
-                    <p>Connect instantly with matches through our real-time chat system. Break the ice with ease.</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <div class="feature-icon-image">
-                            <img src="images/icon-location.png" alt="Location">
-                        </div>
-                    </div>
-                    <h3>Location-Based</h3>
-                    <p>Find singles near you or expand your search globally. Distance shouldn't limit love.</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <div class="feature-icon-image">
-                            <img src="images/icon-gifts.png" alt="Gifts">
-                        </div>
-                    </div>
-                    <h3>Virtual Gifts</h3>
-                    <p>Express your feelings with our unique gift system. Send meaningful gifts to show you care.</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <div class="feature-icon-image">
-                            <img src="images/icon-notifications.png" alt="Notifications">
-                        </div>
-                    </div>
-                    <h3>Real-Time Notifications</h3>
-                    <p>Never miss a message or match with instant notifications across all your devices.</p>
+                    <h3 class="text-xl font-bold text-white mb-3">Intuitive Chat</h3>
+                    <p class="text-slate-400 leading-relaxed">Break the ice easily with our modern messaging interface and virtual gifting system.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Live Profiles Section -->
-    <section class="live-profiles" id="profiles">
-        <div class="container">
-            <div class="section-header">
-                <h2>Meet Amazing Singles</h2>
-                <p>Browse real profiles of people looking for meaningful connections</p>
-                
-
-            </div>
-
-            <div class="profiles-grid" id="profilesGrid">
-                <!-- Profiles will be loaded here via API -->
-                <div class="profile-skeleton" id="profilesLoading">
-                    <div class="skeleton-image"></div>
-                    <div class="skeleton-text"></div>
-                    <div class="skeleton-text short"></div>
-                </div>
-            </div>
-
-            <div class="profiles-actions">
-                <button class="btn-secondary" id="loadMoreProfiles">View More Profiles</button>
-                <button class="btn-primary" id="joinNowBtn">Join Now - It's Free!</button>
-            </div>
+    <!-- Stats Section -->
+    <div class="py-20 border-t border-white/5">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+             <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                 <div class="text-center">
+                     <p class="text-3xl font-bold text-white mb-1">50k+</p>
+                     <p class="text-xs text-slate-500 uppercase tracking-widest">Members</p>
+                 </div>
+                 <div class="text-center">
+                     <p class="text-3xl font-bold text-white mb-1">24/7</p>
+                     <p class="text-xs text-slate-500 uppercase tracking-widest">Support</p>
+                 </div>
+                 <div class="text-center">
+                     <p class="text-3xl font-bold text-white mb-1">100%</p>
+                     <p class="text-xs text-slate-500 uppercase tracking-widest">Secure</p>
+                 </div>
+                 <div class="text-center">
+                     <p class="text-3xl font-bold text-white mb-1">4.8</p>
+                     <p class="text-xs text-slate-500 uppercase tracking-widest">App Rating</p>
+                 </div>
+             </div>
         </div>
-    </section>
-
-    <!-- How It Works Section -->
-    <section class="how-it-works" id="how-it-works">
-        <div class="container">
-            <div class="section-header">
-                <h2>How It Works</h2>
-                <p>Get started in just 3 simple steps</p>
-            </div>
-            
-            <div class="steps-grid">
-                <div class="step-card">
-                    <div class="step-icon">
-                        <div class="step-icon-image">
-                            <img src="images/step-profile.png" alt="Create Profile">
-                        </div>
-                    </div>
-                    <h3>Create Your Profile</h3>
-                    <p>Sign up and create an attractive profile with your best photos and interests.</p>
-                </div>
-                
-                <div class="step-card">
-                    <div class="step-icon">
-                        <div class="step-icon-image">
-                            <img src="images/step-search.png" alt="Discover Matches">
-                        </div>
-                    </div>
-                    <h3>Discover Matches</h3>
-                    <p>Browse through profiles and let our smart algorithm find your perfect matches.</p>
-                </div>
-                
-                <div class="step-card">
-                    <div class="step-icon">
-                        <div class="step-icon-image">
-                            <img src="images/step-chat.png" alt="Start Chatting">
-                        </div>
-                    </div>
-                    <h3>Start Chatting</h3>
-                    <p>Connect with your matches and start meaningful conversations that lead to real relationships.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-
-
-    <!-- Inclusivity Section -->
-    <section class="inclusivity-section" id="inclusivity">
-        <div class="container">
-            <div class="inclusivity-content">
-                <div class="inclusivity-text">
-                    <h2>🏳️‍🌈 Love Knows No Boundaries</h2>
-                    <p class="inclusivity-subtitle">
-                        At Lavrilo, we celebrate diversity and believe that everyone deserves to find meaningful connections, 
-                        regardless of sexual orientation or gender identity.
-                    </p>
-                    <div class="inclusivity-features">
-                        <div class="inclusivity-feature">
-                            <div class="feature-icon">
-                                <img src="images/features/lgbtq-heart.png" alt="LGBTQ+ Friendly">
-                            </div>
-                            <div class="feature-content">
-                                <h4>LGBTQ+ Friendly</h4>
-                                <p>Our platform welcomes all individuals seeking genuine relationships in a safe, respectful environment.</p>
-                            </div>
-                        </div>
-                        <div class="inclusivity-feature">
-                            <div class="feature-icon">
-                                <img src="images/features/safety-shield.png" alt="Safe Space">
-                            </div>
-                            <div class="feature-content">
-                                <h4>Safe Space</h4>
-                                <p>We maintain strict community guidelines to ensure everyone feels comfortable expressing their authentic self.</p>
-                            </div>
-                        </div>
-                        <div class="inclusivity-feature">
-                            <div class="feature-icon">
-                                <img src="images/features/equal-opportunities.png" alt="Equal Opportunities">
-                            </div>
-                            <div class="feature-content">
-                                <h4>Equal Opportunities</h4>
-                                <p>Every member has the same chance to connect, match, and build meaningful relationships.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="inclusivity-visual">
-                    <div class="animated-stats-container">
-                        <div class="animated-stat-card">
-                            <div class="stat-number-animated" data-target="100">0</div>
-                            <div class="stat-label-animated">% Inclusive</div>
-                        </div>
-                        <div class="animated-stat-card">
-                            <div class="stat-number-animated" data-target="24">0</div>
-                            <div class="stat-label-animated">/7 Support</div>
-                        </div>
-                        <div class="animated-stat-card">
-                            <div class="stat-number-animated" data-target="0">0</div>
-                            <div class="stat-label-animated">Tolerance for Hate</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Monetization Section -->
-    <section class="monetization-section" id="monetization">
-        <div class="container">
-            <div class="monetization-content">
-                <div class="monetization-visual">
-                    <div class="monetization-hero-image">
-                        <img src="images/features/monetization-hero.png" alt="Turn Connections into Earnings">
-                    </div>
-                </div>
-                <div class="monetization-text">
-                    <h2>Turn Connections into Earnings</h2>
-                    <p class="monetization-subtitle">
-                        Lavrilo offers a unique opportunity to earn while building meaningful relationships. 
-                        Receive gifts from admirers and convert them into real earnings.
-                    </p>
-                    <div class="monetization-features">
-                        <div class="monetization-feature">
-                            <div class="feature-icon">
-                                <img src="images/features/gift-box.png" alt="Receive Gifts">
-                            </div>
-                            <div class="feature-content">
-                                <h4>Receive Gifts</h4>
-                                <p>Members can send you virtual gifts as tokens of appreciation and interest.</p>
-                            </div>
-                        </div>
-                        <div class="monetization-feature">
-                            <div class="feature-icon">
-                                <img src="images/features/earn-money.png" alt="Earn Real Money">
-                            </div>
-                            <div class="feature-content">
-                                <h4>Earn Real Money</h4>
-                                <p>Convert received gifts into cash and withdraw directly to your bank card.</p>
-                            </div>
-                        </div>
-                        <div class="monetization-feature">
-                            <div class="feature-icon">
-                                <img src="images/features/build-profile.png" alt="Build Your Profile">
-                            </div>
-                            <div class="feature-content">
-                                <h4>Build Your Profile</h4>
-                                <p>The more engaging your profile, the more gifts you're likely to receive from interested members.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="monetization-note">
-                        <p><strong>Note:</strong> All transactions are secure and comply with financial regulations. 
-                        Age verification (18+) and identity confirmation required for withdrawals.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Registration CTA Section -->
-    <section class="cta-section">
-        <div class="container">
-            <div class="cta-content">
-                <h2>Ready to Find Your Perfect Match?</h2>
-                <p>Join <span id="liveMemberCount">50,000+</span> singles who trust Lavrilo to find meaningful relationships</p>
-                
-                <form class="registration-form" id="registrationForm">
-                    <div class="form-steps">
-                        <div class="form-step active">
-                            <h3>Join Free in 30 Seconds</h3>
-                            <div class="form-row">
-                                <input type="text" id="regFirstName" placeholder="First Name" required>
-                                <input type="email" id="regEmail" placeholder="Email Address" required>
-                            </div>
-                            <div class="form-row">
-                                <input type="password" id="regPassword" placeholder="Choose Password" required minlength="6">
-                                <input type="text" id="regUsername" placeholder="Username" required minlength="3">
-                            </div>
-                            <div class="form-row">
-                                <div class="custom-select">
-                                    <select id="regGender" required>
-                                        <option value="">I am a...</option>
-                                        <option value="1">Man</option>
-                                        <option value="2">Woman</option>
-                                        <option value="3">Couple</option>
-                                    </select>
-                                </div>
-                                <div class="custom-select">
-                                    <select id="regLookingFor" required>
-                                        <option value="">Looking for...</option>
-                                        <option value="1">Men</option>
-                                        <option value="2">Women</option>
-                                        <option value="3">Couples</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <input type="date" id="regBirthdate" required max="2006-01-01">
-                                <input type="text" id="regCity" placeholder="Your City" required>
-                            </div>
-                            <button class="btn-registration" type="submit" id="submitRegistration">
-                                <span id="regButtonText">Create My Profile - Free!</span>
-                                <div id="regButtonLoader" class="button-loader" style="display: none;"></div>
-                            </button>
-                            <p class="form-disclaimer">
-                                By clicking "Create My Profile", you agree to our <a href="terms.html">Terms of Service</a> and <a href="privacy.html">Privacy Policy</a>. 
-                                It's free and always will be.
-                            </p>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </section>
+    </div>
 
     <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-brand">
-                    <h3>Lavrilo</h3>
-                    <p>Connecting hearts worldwide</p>
-                    <div class="company-info">
-                        <p><strong>Dream Formula OU</strong></p>
-                        <p>Registration Number: 14844598</p>
-                        <p>Address: Narva mnt 13, 10151 Tallinn, Kesklinna linnaosa, Harju maakond, Estonia</p>
-                        <p>Email: support@lavrilo.com</p>
+    <footer class="bg-brand-dark border-t border-white/10 pt-16 pb-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+                <div class="col-span-1 md:col-span-1">
+                    <div class="flex items-center gap-2 mb-6">
+                        <img src="images/logo-lumina.png" alt="Lumina" class="h-8 w-auto">
+                        <span class="text-xl font-bold text-white">Lumina</span>
+                    </div>
+                    <p class="text-slate-500 text-sm leading-relaxed mb-6">
+                        Redefining online dating with a focus on privacy, security, and meaningful connections.
+                    </p>
+                    <div class="flex space-x-4">
+                        <!-- Social placeholders -->
+                        <a href="#" class="text-slate-500 hover:text-white transition-colors"><span class="sr-only">Twitter</span><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" /></svg></a>
+                        <a href="#" class="text-slate-500 hover:text-white transition-colors"><span class="sr-only">Instagram</span><svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.048-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.024-.06-1.379-.06-3.808v-.63c0-2.43.013-2.784.06-3.808.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 014.15 2.06c.636-.247 1.363-.416 2.427-.465C7.673 1.54 8.004 1.54 12.315 1.54h-.002zM12.315 4.615c-3.27 0-3.66.012-4.437.047-.723.033-1.116.143-1.378.245-.347.135-.595.295-.856.556-.26.26-.42.508-.556.856-.102.262-.212.655-.245 1.378-.035.777-.047 1.167-.047 4.437v.001c0 3.27.012 3.66.047 4.437.033.723.143 1.116.245 1.378.135.347.295.595.556.856.26.26.508.42.856.556.262.102.655.212 1.378.245.777.035 1.167.047 4.437.047 3.27 0 3.66-.012 4.437-.047.723-.033 1.116-.143 1.378-.245.347-.135.595-.295.856-.556.26-.26.42-.508.556-.856.102-.262.212-.655.245-1.378.035-.777.047-1.167.047-4.437 0-3.27-.012-3.66-.047-4.437-.033-.723-.143-1.116-.245-1.378-.135-.347-.295-.595-.556-.856-.26-.26-.508-.42-.856-.556-.262-.102-.655-.212-1.378-.245-.777-.035-1.167-.047-4.437-.047zM12.315 7.153a5.162 5.162 0 110 10.324 5.162 5.162 0 010-10.324zM12.315 15.684a3.369 3.369 0 100-6.738 3.369 3.369 0 000 6.738z" clip-rule="evenodd" /></svg></a>
                     </div>
                 </div>
-                <div class="footer-links">
-                    <div class="footer-column">
-                        <h4>Company</h4>
-                        <a href="about.html">About Us</a>
-                        <a href="careers.html">Careers</a>
-                        <a href="press.html">Press</a>
-                    </div>
-                    <div class="footer-column">
-                        <h4>Support</h4>
-                        <a href="help.html">Help Center</a>
-                        <a href="safety.html">Safety Tips</a>
-                        <a href="contact.html">Contact Us</a>
-                    </div>
-                    <div class="footer-column">
-                        <h4>Legal</h4>
-                        <a href="privacy.html">Privacy Policy</a>
-                        <a href="terms.html">Terms of Service</a>
-                        <a href="cookies.html">Cookie Policy</a>
-                        <a href="#" class="cookie-settings-link" onclick="showCookieSettings(); return false;">Cookie Settings</a>
-                    </div>
+
+                <div class="col-span-1">
+                    <h4 class="text-white font-bold mb-6">Company</h4>
+                    <ul class="space-y-4">
+                        <li><a href="about.html" class="text-slate-400 hover:text-brand-primary transition-colors text-sm">About Us</a></li>
+                        <li><a href="careers.html" class="text-slate-400 hover:text-brand-primary transition-colors text-sm">Careers</a></li>
+                        <li><a href="press.html" class="text-slate-400 hover:text-brand-primary transition-colors text-sm">Press</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-span-1">
+                    <h4 class="text-white font-bold mb-6">Support</h4>
+                    <ul class="space-y-4">
+                        <li><a href="help.html" class="text-slate-400 hover:text-brand-primary transition-colors text-sm">Help Center</a></li>
+                        <li><a href="safety.html" class="text-slate-400 hover:text-brand-primary transition-colors text-sm">Safety Tips</a></li>
+                        <li><a href="contact.html" class="text-slate-400 hover:text-brand-primary transition-colors text-sm">Contact Us</a></li>
+                    </ul>
+                </div>
+
+                <div class="col-span-1">
+                    <h4 class="text-white font-bold mb-6">Legal</h4>
+                    <ul class="space-y-4">
+                        <li><a href="privacy.html" class="text-slate-400 hover:text-brand-primary transition-colors text-sm">Privacy Policy</a></li>
+                        <li><a href="terms.html" class="text-slate-400 hover:text-brand-primary transition-colors text-sm">Terms of Service</a></li>
+                        <li><a href="cookies.html" class="text-slate-400 hover:text-brand-primary transition-colors text-sm">Cookie Policy</a></li>
+                    </ul>
                 </div>
             </div>
-            <div class="footer-bottom">
-                <p>&copy; 2025 Lavrilo. All rights reserved.</p>
+
+            <div class="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-slate-600 text-sm">&copy; 2025 Dream Formula OU. All rights reserved.</p>
+                <div class="flex gap-4 text-xs text-slate-600">
+                    <p>Registration Number: 14844598</p>
+                    <p>Tallinn, Estonia</p>
+                </div>
             </div>
         </div>
     </footer>
 
-    <!-- Cache Buster должен загружаться первым -->
-    <script src="js/cache-buster.js?v=1.0.23"></script>
-    <script src="js/auth-manager.js?v=1.4"></script>
-    <script src="js/auth-modal.js?v=1.1"></script>
-    <script src="js/cookie-consent.js?v=1.1"></script>
-    <script src="landing-script.js?v=3.11"></script>
+    <!-- Scripts -->
+    <!-- Essential JS -->
+    <script src="js/cache-buster.js?v=2.0.0"></script>
+    <script src="js/auth-manager.js?v=2.0.0"></script>
+    <script src="js/auth-modal.js?v=2.0.0"></script>
+    <script src="js/cookie-consent.js?v=2.0.0"></script>
+    <script src="landing-script.js?v=2.0.0"></script>
     
     <script>
+        // Hamburger Menu Toggle
+        document.getElementById('hamburger').addEventListener('click', function() {
+            const menu = document.getElementById('navMenu');
+            menu.classList.toggle('hidden');
+        });
+
+        // Navbar Scroll Effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 10) {
+                navbar.classList.add('bg-brand-dark/95', 'backdrop-blur-md', 'shadow-lg');
+            } else {
+                navbar.classList.remove('bg-brand-dark/95', 'backdrop-blur-md', 'shadow-lg');
+            }
+        });
+        
         // Animated Counter for Stats
         function animateCounters() {
             const counters = document.querySelectorAll('.stat-number-animated');
@@ -468,12 +381,11 @@
                 let current = 0;
                 
                 if (target === 0) {
-                    // Special case for zero - just set it directly
                     counter.textContent = '0';
                     return;
                 }
                 
-                const increment = target / 50; // Faster animation
+                const increment = target / 50; 
                 
                 const timer = setInterval(() => {
                     current += increment;
@@ -481,194 +393,21 @@
                         current = target;
                         clearInterval(timer);
                     }
-                    counter.textContent = Math.floor(current);
+                    // Format with K/M if large
+                    if (current >= 1000) {
+                         counter.textContent = Math.floor(current / 1000) + 'K+';
+                    } else {
+                        counter.textContent = Math.floor(current);
+                    }
                 }, 30);
             });
         }
         
-        // Start animation when page loads
         document.addEventListener('DOMContentLoaded', () => {
-            // Delay animation slightly to ensure elements are rendered
             setTimeout(() => {
                 animateCounters();
-            }, 1000);
+            }, 500);
         });
-    </script>
-    
-    <script>
-        // Quick Registration Handler
-        document.addEventListener('DOMContentLoaded', function() {
-            const registrationForm = document.getElementById('registrationForm');
-            
-            if (registrationForm) {
-                registrationForm.addEventListener('submit', handleQuickRegistration);
-            }
-        });
-        
-        async function handleQuickRegistration(e) {
-            e.preventDefault();
-            
-            const submitBtn = document.getElementById('submitRegistration');
-            const buttonText = document.getElementById('regButtonText');
-            const buttonLoader = document.getElementById('regButtonLoader');
-            
-            // Get form data
-            const formData = {
-                firstName: document.getElementById('regFirstName').value.trim(),
-                email: document.getElementById('regEmail').value.trim(),
-                password: document.getElementById('regPassword').value,
-                username: document.getElementById('regUsername').value.trim(),
-                gender: document.getElementById('regGender').value,
-                lookingFor: document.getElementById('regLookingFor').value,
-                birthdate: document.getElementById('regBirthdate').value,
-                city: document.getElementById('regCity').value.trim()
-            };
-            
-            // Validate form
-            if (!validateRegistrationForm(formData)) {
-                return;
-            }
-            
-            // Show loading state
-            submitBtn.disabled = true;
-            buttonText.style.display = 'none';
-            buttonLoader.style.display = 'inline-block';
-            
-            try {
-                // Check if authManager is available
-                if (!window.authManager) {
-                    throw new Error('Authentication system not available');
-                }
-                
-                // Parse birthdate
-                const birthDate = new Date(formData.birthdate);
-                const year = birthDate.getFullYear();
-                const month = birthDate.getMonth() + 1;
-                const day = birthDate.getDate();
-                
-                // Prepare data for authManager registration (same as modal)
-                const userData = {
-                    login: formData.username,
-                    pass: formData.password,
-                    email: formData.email,
-                    gender: formData.gender,
-                    looking_for: formData.lookingFor,
-                    birth_year: year,
-                    birth_month: month,
-                    birth_day: day,
-                    city: 1, // Default city
-                    region: 1, // Default region
-                    country: 64, // France by default
-                    fastRegistration: false
-                };
-                
-                // Use authManager registration (same as modal)
-                const result = await window.authManager.register(userData);
-                
-                if (result.success) {
-                    // Registration successful
-                    showRegistrationSuccess();
-                    
-                    // Redirect to main page after 2 seconds
-                    setTimeout(() => {
-                        window.location.href = 'main.html';
-                    }, 2000);
-                    
-                } else {
-                    // Registration failed
-                    throw new Error(result.error || 'Registration failed');
-                }
-                
-            } catch (error) {
-                console.error('Registration error:', error);
-                showRegistrationError(error.message);
-            } finally {
-                // Reset button state
-                submitBtn.disabled = false;
-                buttonText.style.display = 'inline';
-                buttonLoader.style.display = 'none';
-            }
-        }
-        
-        function validateRegistrationForm(data) {
-            if (!data.firstName || data.firstName.length < 2) {
-                alert('Please enter your first name (at least 2 characters)');
-                return false;
-            }
-            
-            if (!data.email || !isValidEmail(data.email)) {
-                alert('Please enter a valid email address');
-                return false;
-            }
-            
-            if (!data.password || data.password.length < 6) {
-                alert('Password must be at least 6 characters long');
-                return false;
-            }
-            
-            if (!data.username || data.username.length < 3) {
-                alert('Username must be at least 3 characters long');
-                return false;
-            }
-            
-            if (!data.gender) {
-                alert('Please select your gender');
-                return false;
-            }
-            
-            if (!data.lookingFor) {
-                alert('Please select who you are looking for');
-                return false;
-            }
-            
-            if (!data.birthdate) {
-                alert('Please enter your birth date');
-                return false;
-            }
-            
-            // Check age (must be 18+)
-            const birthDate = new Date(data.birthdate);
-            const today = new Date();
-            let age = today.getFullYear() - birthDate.getFullYear();
-            const monthDiff = today.getMonth() - birthDate.getMonth();
-            
-            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-                age--;
-            }
-            
-            if (age < 18) {
-                alert('You must be at least 18 years old to register');
-                return false;
-            }
-            
-            if (!data.city || data.city.length < 2) {
-                alert('Please enter your city');
-                return false;
-            }
-            
-            return true;
-        }
-        
-        function isValidEmail(email) {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return emailRegex.test(email);
-        }
-        
-        function showRegistrationSuccess() {
-            const form = document.getElementById('registrationForm');
-            form.innerHTML = `
-                <div class="registration-success">
-                    <div class="success-icon">✅</div>
-                    <h3>Welcome to Lavrilo!</h3>
-                    <p>Your account has been created successfully.</p>
-                    <p>Redirecting you to your dashboard...</p>
-                </div>
-            `;
-        }
-        
-        function showRegistrationError(message) {
-            alert('Registration failed: ' + message + '\nPlease try again or contact support.');
-        }
     </script>
 </body>
 </html>

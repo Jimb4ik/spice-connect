@@ -1,11 +1,12 @@
 /**
- * GDPR Cookie Consent Manager
+ * GDPR Cookie Consent Manager for Lumina
  * Compliant with EU regulations
+ * Styled with Tailwind CSS
  */
 
 class CookieConsent {
     constructor() {
-        this.cookieName = 'lavrilo_cookie_consent';
+        this.cookieName = 'lumina_cookie_consent';
         this.consentData = {
             necessary: true, // Always true, cannot be disabled
             analytics: false,
@@ -32,101 +33,89 @@ class CookieConsent {
         const banner = this.createConsentBanner();
         document.body.appendChild(banner);
         
-        // Add backdrop blur effect
-        document.body.classList.add('cookie-consent-active');
-        
         // Animate in
         setTimeout(() => {
-            banner.classList.add('show');
+            const container = banner.querySelector('.cookie-container');
+            container.classList.remove('translate-y-full', 'opacity-0');
         }, 100);
     }
 
     createConsentBanner() {
         const banner = document.createElement('div');
-        banner.className = 'cookie-consent-banner';
+        banner.className = 'fixed bottom-0 left-0 right-0 z-[60] p-4 pointer-events-none flex justify-center';
+        banner.id = 'cookieConsentBanner';
+        
         banner.innerHTML = `
-            <div class="cookie-consent-overlay"></div>
-            <div class="cookie-consent-modal">
-                <div class="cookie-consent-header">
-                    <h3>🍪 We Value Your Privacy</h3>
-                    <p>We use cookies to enhance your browsing experience, serve personalized content, and analyze our traffic. By clicking "Accept All", you consent to our use of cookies.</p>
-                </div>
-                
-                <div class="cookie-consent-details">
-                    <div class="cookie-category">
-                        <div class="cookie-category-header">
-                            <label class="cookie-switch">
-                                <input type="checkbox" checked disabled>
-                                <span class="cookie-slider"></span>
-                            </label>
-                            <div class="cookie-category-info">
-                                <h4>Necessary Cookies</h4>
-                                <p>Essential for the website to function properly. Cannot be disabled.</p>
-                            </div>
-                        </div>
+            <div class="cookie-container pointer-events-auto bg-slate-900 border border-white/10 rounded-2xl shadow-2xl p-6 max-w-4xl w-full transform transition-all duration-500 translate-y-full opacity-0 flex flex-col md:flex-row gap-6 items-center md:items-start">
+                <div class="flex-1 space-y-3">
+                    <div class="flex items-center gap-2">
+                        <span class="text-2xl">🍪</span>
+                        <h3 class="text-lg font-bold text-white">We Value Your Privacy</h3>
                     </div>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        We use cookies to enhance your browsing experience, serve personalized content, and analyze our traffic. 
+                        By clicking "Accept All", you consent to our use of cookies.
+                    </p>
                     
-                    <div class="cookie-category">
-                        <div class="cookie-category-header">
-                            <label class="cookie-switch">
-                                <input type="checkbox" id="analytics-cookies">
-                                <span class="cookie-slider"></span>
-                            </label>
-                            <div class="cookie-category-info">
-                                <h4>Analytics Cookies</h4>
-                                <p>Help us understand how visitors interact with our website by collecting and reporting information anonymously.</p>
+                    <!-- Expanded Settings (Hidden by default) -->
+                    <div id="cookieSettings" class="hidden space-y-4 pt-4 border-t border-white/10 mt-4">
+                        <div class="flex items-center justify-between">
+                            <div class="pr-4">
+                                <h4 class="text-white font-medium text-sm">Necessary Cookies</h4>
+                                <p class="text-slate-500 text-xs">Essential for the website to function properly.</p>
                             </div>
+                            <input type="checkbox" checked disabled class="w-5 h-5 rounded bg-slate-700 border-slate-600 text-brand-primary">
                         </div>
-                    </div>
-                    
-                    <div class="cookie-category">
-                        <div class="cookie-category-header">
-                            <label class="cookie-switch">
-                                <input type="checkbox" id="marketing-cookies">
-                                <span class="cookie-slider"></span>
-                            </label>
-                            <div class="cookie-category-info">
-                                <h4>Marketing Cookies</h4>
-                                <p>Used to track visitors across websites to display relevant and engaging advertisements.</p>
+                        
+                        <div class="flex items-center justify-between">
+                            <div class="pr-4">
+                                <h4 class="text-white font-medium text-sm">Analytics Cookies</h4>
+                                <p class="text-slate-500 text-xs">Help us understand how visitors interact with our website.</p>
                             </div>
+                            <input type="checkbox" id="analytics-cookies" class="w-5 h-5 rounded bg-slate-700 border-slate-600 text-brand-primary focus:ring-brand-primary">
                         </div>
-                    </div>
-                    
-                    <div class="cookie-category">
-                        <div class="cookie-category-header">
-                            <label class="cookie-switch">
-                                <input type="checkbox" id="preferences-cookies">
-                                <span class="cookie-slider"></span>
-                            </label>
-                            <div class="cookie-category-info">
-                                <h4>Preference Cookies</h4>
-                                <p>Enable the website to remember information that changes how it behaves or looks, like your preferred language.</p>
+                        
+                        <div class="flex items-center justify-between">
+                            <div class="pr-4">
+                                <h4 class="text-white font-medium text-sm">Marketing Cookies</h4>
+                                <p class="text-slate-500 text-xs">Used to track visitors across websites to display relevant ads.</p>
                             </div>
+                            <input type="checkbox" id="marketing-cookies" class="w-5 h-5 rounded bg-slate-700 border-slate-600 text-brand-primary focus:ring-brand-primary">
                         </div>
                     </div>
                 </div>
                 
-                <div class="cookie-consent-actions">
-                    <button class="btn-cookie btn-cookie-reject" onclick="cookieConsent.rejectAll()">
-                        Reject All
-                    </button>
-                    <button class="btn-cookie btn-cookie-customize" onclick="cookieConsent.saveCustomPreferences()">
-                        Save Preferences
-                    </button>
-                    <button class="btn-cookie btn-cookie-accept" onclick="cookieConsent.acceptAll()">
+                <div class="flex flex-col gap-3 min-w-[200px]">
+                    <button class="bg-brand-primary hover:bg-brand-secondary text-white font-bold py-2 px-4 rounded-xl transition-colors shadow-lg shadow-brand-primary/20 text-sm" onclick="cookieConsent.acceptAll()">
                         Accept All
                     </button>
-                </div>
-                
-                <div class="cookie-consent-footer">
-                    <p>You can change your preferences at any time by clicking the cookie settings link in our footer. 
-                    For more information, please read our <a href="privacy.html" target="_blank">Privacy Policy</a> and 
-                    <a href="cookies.html" target="_blank">Cookie Policy</a>.</p>
+                    <button class="bg-slate-800 hover:bg-slate-700 text-white font-medium py-2 px-4 rounded-xl transition-colors border border-white/10 text-sm" onclick="cookieConsent.toggleSettings()">
+                        Customize
+                    </button>
+                    <button class="text-slate-500 hover:text-slate-300 text-xs transition-colors py-1" onclick="cookieConsent.rejectAll()">
+                        Reject All
+                    </button>
+                    <button id="savePreferencesBtn" class="hidden bg-brand-accent hover:bg-amber-400 text-slate-900 font-bold py-2 px-4 rounded-xl transition-colors shadow-lg text-sm" onclick="cookieConsent.saveCustomPreferences()">
+                        Save Preferences
+                    </button>
                 </div>
             </div>
         `;
         
         return banner;
+    }
+
+    toggleSettings() {
+        const settings = document.getElementById('cookieSettings');
+        const saveBtn = document.getElementById('savePreferencesBtn');
+        
+        if (settings.classList.contains('hidden')) {
+            settings.classList.remove('hidden');
+            saveBtn.classList.remove('hidden');
+        } else {
+            settings.classList.add('hidden');
+            saveBtn.classList.add('hidden');
+        }
     }
 
     acceptAll() {
@@ -160,7 +149,7 @@ class CookieConsent {
             necessary: true,
             analytics: document.getElementById('analytics-cookies').checked,
             marketing: document.getElementById('marketing-cookies').checked,
-            preferences: document.getElementById('preferences-cookies').checked
+            preferences: false // Not used in this simplified version
         };
         
         this.saveConsent();
@@ -172,7 +161,7 @@ class CookieConsent {
         const consentObject = {
             ...this.consentData,
             timestamp: new Date().toISOString(),
-            version: '1.0'
+            version: '2.0'
         };
         
         // Save for 1 year
@@ -201,62 +190,55 @@ class CookieConsent {
     }
 
     hideConsentBanner() {
-        const banner = document.querySelector('.cookie-consent-banner');
+        const banner = document.getElementById('cookieConsentBanner');
         if (banner) {
-            banner.classList.remove('show');
-            document.body.classList.remove('cookie-consent-active');
+            const container = banner.querySelector('.cookie-container');
+            container.classList.remove('translate-y-0');
+            container.classList.add('translate-y-full', 'opacity-0');
             
             setTimeout(() => {
                 banner.remove();
-            }, 300);
+            }, 500);
         }
     }
 
     loadApprovedCookies() {
-        // Load analytics cookies (Google Analytics, etc.)
         if (this.consentData.analytics) {
             this.loadAnalyticsCookies();
         }
-        
-        // Load marketing cookies (Facebook Pixel, etc.)
         if (this.consentData.marketing) {
             this.loadMarketingCookies();
-        }
-        
-        // Load preference cookies
-        if (this.consentData.preferences) {
-            this.loadPreferenceCookies();
         }
     }
 
     loadAnalyticsCookies() {
-        // Example: Google Analytics
-        // console.log('Loading analytics cookies...');
-        // gtag('config', 'GA_MEASUREMENT_ID');
+        // Placeholder for Google Analytics or similar
     }
 
     loadMarketingCookies() {
-        // Example: Facebook Pixel
-        // console.log('Loading marketing cookies...');
-        // fbq('init', 'FACEBOOK_PIXEL_ID');
-    }
-
-    loadPreferenceCookies() {
-        // Example: Language preferences, theme preferences
-        // console.log('Loading preference cookies...');
+        // Placeholder for marketing pixels
     }
 
     // Method to show cookie settings (can be called from footer link)
     showCookieSettings() {
-        this.showConsentBanner();
-        
-        // Pre-fill current preferences
-        const existingConsent = this.getCookieConsent();
-        if (existingConsent) {
-            document.getElementById('analytics-cookies').checked = existingConsent.analytics;
-            document.getElementById('marketing-cookies').checked = existingConsent.marketing;
-            document.getElementById('preferences-cookies').checked = existingConsent.preferences;
-        }
+        // Remove existing banner if any
+        this.hideConsentBanner();
+        setTimeout(() => {
+            this.showConsentBanner();
+            // Open settings immediately
+            setTimeout(() => {
+                this.toggleSettings();
+                
+                // Pre-fill current preferences
+                const existingConsent = this.getCookieConsent();
+                if (existingConsent) {
+                    const analytics = document.getElementById('analytics-cookies');
+                    const marketing = document.getElementById('marketing-cookies');
+                    if (analytics) analytics.checked = existingConsent.analytics;
+                    if (marketing) marketing.checked = existingConsent.marketing;
+                }
+            }, 200);
+        }, 600);
     }
 }
 

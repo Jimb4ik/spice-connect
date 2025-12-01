@@ -1,276 +1,290 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full bg-brand-dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home - Lavrilo</title>
+    <title>Dashboard - Lumina</title>
     
     <!-- Favicon -->
-    <link rel="apple-touch-icon" sizes="180x180" href="favicon/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="favicon/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="favicon/favicon-16x16.png">
-    <link rel="manifest" href="favicon/site.webmanifest">
+    <link rel="icon" type="image/png" href="favicon/favicon-lumina.png">
     
-    <link rel="stylesheet" href="css/app-styles.css?v=1.1">
-    <link rel="stylesheet" href="css/dashboard.css?v=1.1">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"></head>
-<body>
-    <!-- Хедер -->
-    <header class="app-header">
-        <div class="header-container">
-            <a href="main.html" class="logo">Lavrilo</a>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            primary: '#7c3aed', // Violet 600
+                            secondary: '#8b5cf6', // Violet 500
+                            accent: '#f59e0b', // Amber 500
+                            dark: '#0f172a', // Slate 900
+                            surface: '#1e293b', // Slate 800
+                            surface2: '#334155', // Slate 700
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+</head>
+<body class="h-full bg-brand-dark text-slate-100 overflow-hidden flex">
+
+    <!-- Sidebar (Desktop) -->
+    <aside class="hidden md:flex flex-col w-64 bg-brand-surface border-r border-white/5 h-full">
+        <!-- Logo -->
+        <div class="h-16 flex items-center px-6 border-b border-white/5">
+            <div class="flex items-center gap-3">
+                <img src="images/logo-lumina.png" alt="Lumina" class="h-8 w-auto">
+                <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-brand-secondary to-brand-accent">Lumina</span>
+            </div>
+        </div>
+
+        <!-- Nav -->
+        <nav class="flex-1 px-4 py-6 space-y-1">
+            <a href="main.html" class="flex items-center gap-3 px-4 py-3 text-white bg-brand-primary/10 rounded-xl group border-l-4 border-brand-primary transition-all">
+                <svg class="w-5 h-5 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                <span class="font-medium">Dashboard</span>
+            </a>
             
-            <nav>
-                <ul class="nav-menu">
-                    <li class="nav-item">
-                        <a href="main.html" class="nav-link active">
-                            <img src="icons/home.png" alt="Home" class="nav-icon"> Home
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="messages.html" class="nav-link">
-                            <img src="icons/messages-new.png" alt="Messages" class="nav-icon"> Messages
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="discover.html" class="nav-link">
-                            <img src="icons/discover.png" alt="Discover" class="nav-icon"> Discover
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="matches.html" class="nav-link">
-                            <img src="icons/matches-new.png" alt="Matches" class="nav-icon"> Matches
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="search.html" class="nav-link">
-                            <img src="icons/search.png" alt="Search" class="nav-icon"> Search
-                        </a>
-                    </li>
-                </ul>
-            </nav>
+            <a href="discover.html" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl group transition-all">
+                <svg class="w-5 h-5 group-hover:text-brand-accent transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <span class="font-medium">Discover</span>
+            </a>
             
-            <div class="user-menu">
-                <div class="app-user-avatar" id="userAvatar">
-                    <img id="userAvatarImg" alt="User Avatar" style="display: none;">
-                    <span id="userAvatarText">U</span>
+            <a href="matches.html" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl group transition-all">
+                <svg class="w-5 h-5 group-hover:text-red-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+                <span class="font-medium">Matches</span>
+            </a>
+            
+            <a href="messages.html" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl group transition-all justify-between">
+                <div class="flex items-center gap-3">
+                    <svg class="w-5 h-5 group-hover:text-brand-secondary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                    </svg>
+                    <span class="font-medium">Messages</span>
                 </div>
-                <div class="user-dropdown">
-                    <div class="dropdown-header">
-                        <div class="dropdown-user-info">
-                            <div class="dropdown-avatar">
-                                <img id="dropdownAvatarImg" alt="User Avatar" style="display: none;">
-                                <span id="dropdownAvatarText">U</span>
+                <span class="bg-brand-primary text-white text-xs font-bold px-2 py-0.5 rounded-full hidden" id="messagesBadge">0</span>
+            </a>
+            
+            <a href="search.html" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:text-white hover:bg-white/5 rounded-xl group transition-all">
+                <svg class="w-5 h-5 group-hover:text-blue-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span class="font-medium">Search</span>
+            </a>
+        </nav>
+
+        <!-- User Menu Bottom -->
+        <div class="p-4 border-t border-white/5">
+            <div class="relative group">
+                <button class="flex items-center gap-3 w-full p-2 rounded-xl hover:bg-white/5 transition-colors text-left">
+                    <div class="relative">
+                        <div id="userAvatar" class="w-10 h-10 rounded-full bg-gradient-to-br from-brand-secondary to-brand-primary flex items-center justify-center text-white font-bold overflow-hidden border border-white/10">
+                            <img id="userAvatarImg" class="w-full h-full object-cover hidden">
+                            <span id="userAvatarText" class="text-lg">U</span>
+                        </div>
+                        <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-brand-surface rounded-full"></div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-bold text-white truncate" id="dropdownUsername">User</p>
+                        <p class="text-xs text-slate-400 truncate">Online</p>
+                    </div>
+                    <svg class="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+                
+                <!-- Dropdown Menu (Positioned upwards) -->
+                <div class="absolute bottom-full left-0 w-full mb-2 bg-brand-surface2 border border-white/10 rounded-xl shadow-xl overflow-hidden hidden group-hover:block transition-all z-20">
+                    <a href="profile.html" class="block px-4 py-3 text-sm text-slate-300 hover:text-white hover:bg-white/5 transition-colors">My Profile</a>
+                    <a href="settings.html" class="block px-4 py-3 text-sm text-slate-300 hover:text-white hover:bg-white/5 transition-colors">Settings</a>
+                    <a href="wallet.html" class="block px-4 py-3 text-sm text-slate-300 hover:text-white hover:bg-white/5 transition-colors">Wallet</a>
+                    <div class="border-t border-white/10 my-1"></div>
+                    <button id="logoutBtn" class="block w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-white/5 transition-colors">Sign Out</button>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-full relative overflow-hidden bg-brand-dark">
+        <!-- Mobile Header -->
+        <header class="md:hidden h-16 bg-brand-surface border-b border-white/5 flex items-center justify-between px-4 z-20">
+            <button id="mobileMenuBtn" class="text-slate-300 hover:text-white">
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+            <span class="text-lg font-bold text-white">Dashboard</span>
+            <div class="w-8 h-8 rounded-full bg-brand-primary/20 flex items-center justify-center text-brand-primary text-xs font-bold" id="mobileMsgCount">0</div>
+        </header>
+
+        <!-- Scrollable Content -->
+        <div class="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-8 no-scrollbar">
+            <div class="max-w-6xl mx-auto space-y-8">
+                
+                <!-- Welcome Section -->
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+                    <div>
+                        <h1 class="text-3xl font-bold text-white mb-2">Hello, <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-secondary to-brand-accent">Ready to connect?</span></h1>
+                        <p class="text-slate-400">Here's what's happening in your network today.</p>
+                    </div>
+                    <a href="discover.html" class="bg-brand-primary hover:bg-brand-secondary text-white px-6 py-3 rounded-xl font-medium shadow-lg shadow-brand-primary/20 transition-all transform hover:scale-105">
+                        Start Matching
+                    </a>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-brand-surface p-4 rounded-2xl border border-white/5">
+                        <div class="text-slate-400 text-xs uppercase font-medium mb-1">New Messages</div>
+                        <div class="text-2xl font-bold text-white" id="newMessagesCount">0</div>
+                    </div>
+                    <div class="bg-brand-surface p-4 rounded-2xl border border-white/5">
+                        <div class="text-slate-400 text-xs uppercase font-medium mb-1">Profile Views</div>
+                        <div class="text-2xl font-bold text-white" id="profileViewsCount">0</div>
+                    </div>
+                    <div class="bg-brand-surface p-4 rounded-2xl border border-white/5">
+                        <div class="text-slate-400 text-xs uppercase font-medium mb-1">Photo Votes</div>
+                        <div class="text-2xl font-bold text-white" id="photoVotesCount">0</div>
+                    </div>
+                    <div class="bg-brand-surface p-4 rounded-2xl border border-white/5">
+                        <div class="text-slate-400 text-xs uppercase font-medium mb-1">Friends Online</div>
+                        <div class="text-2xl font-bold text-white" id="onlineCountBadge">0</div>
+                    </div>
+                </div>
+
+                <!-- Main Grid -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    
+                    <!-- Left Column: Activity Feed (Wide) -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <!-- Activity Feed -->
+                        <div class="bg-brand-surface rounded-2xl border border-white/5 overflow-hidden">
+                            <div class="p-5 border-b border-white/5 flex justify-between items-center bg-brand-surface/50 backdrop-blur-sm sticky top-0 z-10">
+                                <h3 class="font-bold text-white flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                                    Community Activity
+                                </h3>
+                                <button id="refreshActivityBtn" class="text-slate-400 hover:text-white transition-colors">
+                                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                    </svg>
+                                </button>
                             </div>
-                            <div class="dropdown-user-details">
-                                <div class="dropdown-username" id="dropdownUsername">Username</div>
-                                <div class="dropdown-status">Online</div>
+                            <div id="activityFeed" class="divide-y divide-white/5 max-h-[600px] overflow-y-auto">
+                                <!-- Dynamic content loaded by JS -->
+                                <div class="p-8 text-center text-slate-500">Loading activity...</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Top Members -->
+                        <div class="bg-brand-surface rounded-2xl border border-white/5 overflow-hidden">
+                            <div class="p-5 border-b border-white/5 flex justify-between items-center">
+                                <h3 class="font-bold text-white">Top Members</h3>
+                                <div class="flex bg-slate-800 rounded-lg p-1">
+                                    <button class="filter-tab px-3 py-1 text-xs font-medium rounded-md bg-brand-primary text-white transition-all" data-gender="2">Women</button>
+                                    <button class="filter-tab px-3 py-1 text-xs font-medium rounded-md text-slate-400 hover:text-white transition-all" data-gender="1">Men</button>
+                                </div>
+                            </div>
+                            <div id="topMembersList" class="p-5">
+                                <!-- Dynamic content loaded by JS -->
+                                <div class="text-center text-slate-500 py-4">Loading members...</div>
                             </div>
                         </div>
                     </div>
-                    <div class="dropdown-divider"></div>
-                    <a href="profile.html" class="dropdown-item">
-                        <div class="dropdown-item-content">
-                            <span class="dropdown-item-title">My Profile</span>
-                            <span class="dropdown-item-subtitle">View and edit profile</span>
-                        </div>
-                    </a>
-                    <a href="wallet.html" class="dropdown-item">
-                        <div class="dropdown-item-content">
-                            <span class="dropdown-item-title">Wallet</span>
-                            <span class="dropdown-item-subtitle">Manage your credits</span>
-                        </div>
-                    </a>
-                    <a href="gifts.html" class="dropdown-item">
-                        <div class="dropdown-item-content">
-                            <span class="dropdown-item-title">Gifts</span>
-                            <span class="dropdown-item-subtitle">Your gift inventory</span>
-                        </div>
-                    </a>
-                    <a href="settings.html" class="dropdown-item">
-                        <div class="dropdown-item-content">
-                            <span class="dropdown-item-title">Settings</span>
-                            <span class="dropdown-item-subtitle">Manage your account</span>
-                        </div>
-                    </a>
-                    <div class="dropdown-divider"></div>
-                    <button class="dropdown-item logout" id="logoutBtn">
-                        <div class="dropdown-item-content">
-                            <span class="dropdown-item-title">Logout</span>
-                            <span class="dropdown-item-subtitle">Sign out of your account</span>
-                        </div>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </header>
 
-    <!-- Основной контент -->
-    <main class="app-main">
-
-
-        <!-- Matching Invitation -->
-        <div class="matching-invitation-section fade-in-up">
-            <div class="invitation-content">
-                <h2 class="invitation-title">Ready to Find Love?</h2>
-                <p class="invitation-description">
-                    Start discovering amazing people near you. Swipe, match, and connect with someone special today!
-                </p>
-                <div class="invitation-actions">
-                    <a href="discover.html" class="start-matching-btn">
-                        START MATCHING
-                    </a>
-                    <p class="invitation-hint">Thousands of singles are waiting for you</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Main Activity and Top Members Row -->
-        <div class="main-top-row">
-            <!-- Main Activity Feed -->
-            <div class="main-activity-section fade-in-up" style="animation-delay: 0.1s">
-                <div class="section-card main-activity-card">
-                    <div class="section-header">
-                        <h3>Community Activity</h3>
-                        <span class="activity-subtitle">Latest updates from your community</span>
-                    </div>
-                    <div class="activity-feed enhanced-feed" id="activityFeed">
-                        <div class="empty-state">
-                            <p>Community activity will appear here</p>
+                    <!-- Right Column: Sidebar Widgets -->
+                    <div class="space-y-6">
+                        
+                        <!-- Online Friends -->
+                        <div class="bg-brand-surface rounded-2xl border border-white/5 overflow-hidden">
+                            <div class="p-5 border-b border-white/5">
+                                <h3 class="font-bold text-white">Online Friends</h3>
+                            </div>
+                            <div id="onlineFriendsList" class="p-4 space-y-2 max-h-[300px] overflow-y-auto">
+                                <p class="text-slate-500 text-sm text-center py-4">No friends online</p>
+                            </div>
                         </div>
+
+                        <!-- Recent Visitors -->
+                        <div class="bg-brand-surface rounded-2xl border border-white/5 overflow-hidden">
+                            <div class="p-5 border-b border-white/5">
+                                <h3 class="font-bold text-white">Recent Visitors</h3>
+                            </div>
+                            <div id="visitorsList" class="p-4 space-y-3">
+                                <p class="text-slate-500 text-sm text-center py-4">No visitors yet</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Photo Votes -->
+                        <div class="bg-brand-surface rounded-2xl border border-white/5 overflow-hidden">
+                            <div class="p-5 border-b border-white/5 flex justify-between items-center">
+                                <h3 class="font-bold text-white">Photo Ratings</h3>
+                                <span class="text-xs bg-slate-800 px-2 py-1 rounded text-slate-300" id="votesCountBadge">0</span>
+                            </div>
+                            <div id="photoVotesList" class="p-4">
+                                <p class="text-slate-500 text-sm text-center py-4">No photos</p>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
+                
             </div>
-
-            <!-- Top Members -->
-            <div class="main-section slide-in-right" style="animation-delay: 0.6s">
-                <div class="section-card">
-                    <div class="section-header">
-                        <h3>Top Members</h3>
-                        <div class="filter-tabs">
-                            <button class="filter-tab active" data-gender="2">Women</button>
-                            <button class="filter-tab" data-gender="1">Men</button>
-                        </div>
-                    </div>
-                    <div class="top-members-list" id="topMembersList">
-                        <div class="empty-state">
-                            <div class="empty-state-icon">🏆</div>
-                            <p>Top members will appear here</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="main-content-grid">
-
-            <!-- Friends Online -->
-            <div class="main-section slide-in-left" style="animation-delay: 0.7s">
-                <div class="section-card">
-                    <div class="section-header">
-                        <h3>My Friends</h3>
-                    </div>
-                    <div class="online-friends-list" id="onlineFriendsList">
-                        <div class="empty-state">
-                            <p>No friend online</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Recent Visitors -->
-            <div class="main-section slide-in-right" style="animation-delay: 0.8s">
-                <div class="section-card">
-                    <div class="section-header">
-                        <h3>Recent Visitors</h3>
-                    </div>
-                    <div class="visitors-list" id="visitorsList">
-                        <div class="empty-state">
-                            <div class="empty-state-icon">👀</div>
-                            <p>Recent visitors will appear here</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Photo Votes -->
-            <div class="main-section fade-in-up" style="animation-delay: 0.9s">
-                <div class="section-card">
-                    <div class="section-header">
-                        <h3>Photo Votes</h3>
-                    </div>
-                    <div class="photo-votes-list" id="photoVotesList">
-                        <div class="empty-state">
-                            <div class="empty-state-icon">📸</div>
-                            <p>Photo votes will appear here</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             
+            <div class="h-20"></div> <!-- Bottom Spacer -->
         </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-brand">
-                    <h3>Lavrilo</h3>
-                    <p>Connecting hearts worldwide</p>
-                </div>
-                <div class="footer-links">
-                    <div class="footer-column">
-                        <h4>Company</h4>
-                        <a href="about.html">About Us</a>
-                        <a href="careers.html">Careers</a>
-                        <a href="press.html">Press</a>
-                    </div>
-                    <div class="footer-column">
-                        <h4>Support</h4>
-                        <a href="help.html">Help Center</a>
-                        <a href="safety.html">Safety Tips</a>
-                        <a href="contact.html">Contact Us</a>
-                    </div>
-                    <div class="footer-column">
-                        <h4>Legal</h4>
-                        <a href="privacy.html">Privacy Policy</a>
-                        <a href="terms.html">Terms of Service</a>
-                        <a href="cookies.html">Cookie Policy</a>
-                    </div>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2025 Lavrilo. All rights reserved.</p>
-            </div>
-        </div>
-    </footer>
+    <!-- Hidden elements for compatibility with existing JS if needed -->
+    <div style="display: none;">
+        <img id="dropdownAvatarImg">
+        <span id="dropdownAvatarText"></span>
+    </div>
 
-
-
-    <!-- Скрипты -->
-    <script src="js/cache-buster.js?v=1.0.22"></script>
-    <script src="js/auth-manager.js?v=1.4"></script>
-    <script src="js/header-avatar.js?v=1.5"></script>
+    <!-- Scripts -->
+    <script src="js/cache-buster.js?v=2.0.0"></script>
+    <script src="js/auth-manager.js?v=2.0.0"></script>
+    <script src="js/header-avatar.js?v=2.0.0"></script>
+    <script src="js/match-utils.js?v=2.0.0"></script>
+    <script src="js/main.js?v=2.0.0"></script>
     
     <script>
-        // Global function for viewing user profiles (used by Recent visitors and Top members)
+        // Global function for viewing user profiles
         function viewUserProfile(userId, userName) {
-            // console.log('[MAIN] Opening profile for user:', userId, userName);
-            // Переход на страницу профиля с параметрами
             window.location.href = `user-profile.html?id=${userId}&name=${encodeURIComponent(userName)}`;
         }
-    </script>
-    <script src="js/match-utils.js?v=1.1"></script>
-    <script src="js/main.js?v=1.4"></script>
-    
-    <script>
-        // Функция для перехода на страницу профиля пользователя
-        function viewUserProfile(userId, userName) {
-            // console.log('[MAIN] Opening profile for user:', userId, userName);
-            window.location.href = `user-profile.html?id=${userId}&name=${encodeURIComponent(userName)}`;
-        }
+        
+        // Mobile menu handling
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        // Simple toggle for sidebar on mobile could be implemented here
     </script>
 </body>
 </html>

@@ -1,6 +1,6 @@
 /**
- * Lavrilo Authentication Modal
- * Handles login/registration UI
+ * Lumina Authentication Modal
+ * Handles login/registration UI with Tailwind styling
  */
 
 class AuthModal {
@@ -12,11 +12,19 @@ class AuthModal {
   }
 
   createModal() {
-    // Create modal HTML
+    // Create modal HTML with Tailwind classes
     const modalHTML = `
-      <div class="auth-modal-overlay" id="authModal">
-        <div class="auth-modal">
-          <button class="auth-modal-close" id="authModalClose">&times;</button>
+      <div class="fixed inset-0 z-[100] flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300" id="authModal" aria-hidden="true">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-slate-900/90 backdrop-blur-sm" id="authModalBackdrop"></div>
+        
+        <!-- Modal Content -->
+        <div class="relative bg-slate-800 border border-white/10 w-full max-w-md mx-4 rounded-2xl shadow-2xl transform scale-95 opacity-0 transition-all duration-300 p-8" id="authModalContentContainer">
+          <button class="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors focus:outline-none" id="authModalClose">
+            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
           
           <div id="authModalContent">
             <!-- Content will be dynamically loaded here -->
@@ -29,6 +37,8 @@ class AuthModal {
     document.body.insertAdjacentHTML('beforeend', modalHTML);
     
     this.modal = document.getElementById('authModal');
+    this.backdrop = document.getElementById('authModalBackdrop');
+    this.container = document.getElementById('authModalContentContainer');
     this.content = document.getElementById('authModalContent');
     
     // Load initial content
@@ -41,10 +51,8 @@ class AuthModal {
       this.hide();
     });
     
-    this.modal.addEventListener('click', (e) => {
-      if (e.target === this.modal) {
-        this.hide();
-      }
+    this.backdrop.addEventListener('click', () => {
+      this.hide();
     });
     
     // Escape key
@@ -57,51 +65,70 @@ class AuthModal {
 
   show() {
     this.isVisible = true;
-    this.modal.classList.add('active');
+    this.modal.classList.remove('opacity-0', 'pointer-events-none');
+    this.modal.setAttribute('aria-hidden', 'false');
+    
+    // Animate container
+    setTimeout(() => {
+        this.container.classList.remove('scale-95', 'opacity-0');
+        this.container.classList.add('scale-100', 'opacity-100');
+    }, 10);
+    
     document.body.style.overflow = 'hidden';
   }
 
   hide() {
     this.isVisible = false;
-    this.modal.classList.remove('active');
-    document.body.style.overflow = '';
     
-    // Clear any error messages
-    this.clearMessages();
+    // Animate container out
+    this.container.classList.remove('scale-100', 'opacity-100');
+    this.container.classList.add('scale-95', 'opacity-0');
+    
+    setTimeout(() => {
+        this.modal.classList.add('opacity-0', 'pointer-events-none');
+        this.modal.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        
+        // Clear any error messages
+        this.clearMessages();
+    }, 300);
   }
 
   showLogin() {
     this.currentMode = 'login';
     this.content.innerHTML = `
-      <h2>Welcome Back!</h2>
+      <div class="text-center mb-6">
+          <h2 class="text-2xl font-bold text-white mb-2">Welcome Back</h2>
+          <p class="text-slate-400 text-sm">Sign in to continue your journey</p>
+      </div>
       
-      <div class="auth-error-message" id="authError"></div>
-      <div class="auth-success-message" id="authSuccess"></div>
+      <div class="hidden mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm" id="authError"></div>
+      <div class="hidden mb-4 p-3 bg-green-500/10 border border-green-500/20 rounded-lg text-green-400 text-sm" id="authSuccess"></div>
       
-      <form class="auth-form" id="loginForm">
-        <div class="auth-form-group">
-          <label for="loginUsername">Username</label>
-          <input type="text" id="loginUsername" required autocomplete="username">
+      <form class="space-y-4" id="loginForm">
+        <div>
+          <label for="loginUsername" class="block text-xs font-medium text-slate-400 mb-1 uppercase">Username</label>
+          <input type="text" id="loginUsername" required autocomplete="username" class="w-full bg-slate-900/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-colors placeholder-slate-600">
         </div>
         
-        <div class="auth-form-group">
-          <label for="loginPassword">Password</label>
-          <input type="password" id="loginPassword" required autocomplete="current-password">
+        <div>
+          <label for="loginPassword" class="block text-xs font-medium text-slate-400 mb-1 uppercase">Password</label>
+          <input type="password" id="loginPassword" required autocomplete="current-password" class="w-full bg-slate-900/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-colors placeholder-slate-600">
         </div>
         
-        <div class="auth-checkbox-group">
-          <input type="checkbox" id="rememberMe" checked>
-          <label for="rememberMe">Remember me</label>
+        <div class="flex items-center">
+          <input type="checkbox" id="rememberMe" checked class="w-4 h-4 rounded bg-slate-700 border-slate-600 text-brand-primary focus:ring-brand-primary focus:ring-offset-slate-800">
+          <label for="rememberMe" class="ml-2 text-sm text-slate-400">Remember me</label>
         </div>
         
-        <button type="submit" class="auth-submit-btn" id="loginSubmit">
+        <button type="submit" class="w-full bg-brand-primary hover:bg-brand-secondary text-white font-bold py-3 rounded-xl shadow-lg shadow-brand-primary/20 transition-all transform hover:translate-y-px flex items-center justify-center" id="loginSubmit">
           <span class="btn-text">Sign In</span>
         </button>
       </form>
       
-      <div class="auth-modal-footer">
-        <p>Don't have an account? <a class="auth-footer-link" id="showRegister">Sign up</a></p>
-        <p style="margin-top: 10px;"><a class="auth-footer-link" id="showForgot">Forgot password?</a></p>
+      <div class="mt-6 text-center space-y-2">
+        <p class="text-sm text-slate-500">Don't have an account? <button class="text-brand-accent hover:text-white transition-colors font-medium" id="showRegister">Sign up</button></p>
+        <p class="text-sm"><button class="text-slate-500 hover:text-slate-300 transition-colors" id="showForgot">Forgot password?</button></p>
       </div>
     `;
     
@@ -111,69 +138,77 @@ class AuthModal {
   showRegister() {
     this.currentMode = 'register';
     this.content.innerHTML = `
-      <h2>Join Lavrilo!</h2>
+      <div class="text-center mb-6">
+          <h2 class="text-2xl font-bold text-white mb-2">Create Account</h2>
+          <p class="text-slate-400 text-sm">Join the exclusive community</p>
+      </div>
       
-      <div class="auth-error-message" id="authError"></div>
-      <div class="auth-success-message" id="authSuccess"></div>
+      <div class="hidden mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm" id="authError"></div>
+      <div class="hidden mb-4 p-3 bg-green-500/10 border border-green-500/20 rounded-lg text-green-400 text-sm" id="authSuccess"></div>
       
-      <form class="auth-form" id="registerForm">
-        <div class="auth-form-group">
-          <label for="regUsername">Username</label>
-          <input type="text" id="regUsername" required>
+      <form class="space-y-4" id="registerForm">
+        <div class="grid grid-cols-2 gap-4">
+             <div>
+                <label for="regUsername" class="block text-xs font-medium text-slate-400 mb-1 uppercase">Username</label>
+                <input type="text" id="regUsername" required class="w-full bg-slate-900/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-colors">
+            </div>
+             <div>
+                <label for="regBirthDate" class="block text-xs font-medium text-slate-400 mb-1 uppercase">Birth Date</label>
+                <input type="date" id="regBirthDate" required class="w-full bg-slate-900/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-colors [color-scheme:dark]">
+            </div>
         </div>
         
-        <div class="auth-form-group">
-          <label for="regEmail">Email</label>
-          <input type="email" id="regEmail" required>
+        <div>
+          <label for="regEmail" class="block text-xs font-medium text-slate-400 mb-1 uppercase">Email</label>
+          <input type="email" id="regEmail" required class="w-full bg-slate-900/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-colors">
         </div>
         
-        <div class="auth-form-group">
-          <label for="regPassword">Password</label>
-          <input type="password" id="regPassword" name="regPassword" required minlength="6">
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="regPassword" class="block text-xs font-medium text-slate-400 mb-1 uppercase">Password</label>
+              <input type="password" id="regPassword" name="regPassword" required minlength="6" class="w-full bg-slate-900/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-colors">
+            </div>
+            
+            <div>
+              <label for="regConfirmPassword" class="block text-xs font-medium text-slate-400 mb-1 uppercase">Confirm</label>
+              <input type="password" id="regConfirmPassword" name="regConfirmPassword" required class="w-full bg-slate-900/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-colors">
+            </div>
         </div>
         
-        <div class="auth-form-group">
-          <label for="regConfirmPassword">Confirm Password</label>
-          <input type="password" id="regConfirmPassword" name="regConfirmPassword" required>
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label for="regGender" class="block text-xs font-medium text-slate-400 mb-1 uppercase">I am</label>
+              <select id="regGender" required class="w-full bg-slate-900/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-colors">
+                <option value="" class="bg-slate-800">Select...</option>
+                <option value="1" class="bg-slate-800">Man</option>
+                <option value="2" class="bg-slate-800">Woman</option>
+                <option value="3" class="bg-slate-800">Couple</option>
+              </select>
+            </div>
+            
+            <div>
+              <label for="regLookingFor" class="block text-xs font-medium text-slate-400 mb-1 uppercase">Looking for</label>
+              <select id="regLookingFor" required class="w-full bg-slate-900/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-colors">
+                <option value="" class="bg-slate-800">Select...</option>
+                <option value="1" class="bg-slate-800">Men</option>
+                <option value="2" class="bg-slate-800">Women</option>
+                <option value="3" class="bg-slate-800">Couples</option>
+              </select>
+            </div>
         </div>
         
-        <div class="auth-form-group">
-          <label for="regGender">I am</label>
-          <select id="regGender" required>
-            <option value="">Select...</option>
-            <option value="1">Man</option>
-            <option value="2">Woman</option>
-            <option value="3">Couple</option>
-          </select>
+        <div class="flex items-center">
+          <input type="checkbox" id="fastRegistration" checked class="w-4 h-4 rounded bg-slate-700 border-slate-600 text-brand-primary focus:ring-brand-primary focus:ring-offset-slate-800">
+          <label for="fastRegistration" class="ml-2 text-sm text-slate-400">Quick registration</label>
         </div>
         
-        <div class="auth-form-group">
-          <label for="regLookingFor">Looking for</label>
-          <select id="regLookingFor" required>
-            <option value="">Select...</option>
-            <option value="1">Men</option>
-            <option value="2">Women</option>
-            <option value="3">Couples</option>
-          </select>
-        </div>
-        
-        <div class="auth-form-group">
-          <label for="regBirthDate">Birth Date</label>
-          <input type="date" id="regBirthDate" required>
-        </div>
-        
-        <div class="auth-checkbox-group">
-          <input type="checkbox" id="fastRegistration" checked>
-          <label for="fastRegistration">Quick registration (complete profile later)</label>
-        </div>
-        
-        <button type="submit" class="auth-submit-btn" id="registerSubmit">
+        <button type="submit" class="w-full bg-brand-primary hover:bg-brand-secondary text-white font-bold py-3 rounded-xl shadow-lg shadow-brand-primary/20 transition-all transform hover:translate-y-px flex items-center justify-center" id="registerSubmit">
           <span class="btn-text">Create Account</span>
         </button>
       </form>
       
-      <div class="auth-modal-footer">
-        <p>Already have an account? <a class="auth-footer-link" id="showLogin">Sign in</a></p>
+      <div class="mt-6 text-center">
+        <p class="text-sm text-slate-500">Already have an account? <button class="text-brand-accent hover:text-white transition-colors font-medium" id="showLogin">Sign in</button></p>
       </div>
     `;
     
@@ -183,28 +218,27 @@ class AuthModal {
   showForgotPassword() {
     this.currentMode = 'forgot';
     this.content.innerHTML = `
-      <h2>Reset Password</h2>
+      <div class="text-center mb-6">
+          <h2 class="text-2xl font-bold text-white mb-2">Reset Password</h2>
+          <p class="text-slate-400 text-sm">Enter your username to receive instructions</p>
+      </div>
       
-      <div class="auth-error-message" id="authError"></div>
-      <div class="auth-success-message" id="authSuccess"></div>
+      <div class="hidden mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm" id="authError"></div>
+      <div class="hidden mb-4 p-3 bg-green-500/10 border border-green-500/20 rounded-lg text-green-400 text-sm" id="authSuccess"></div>
       
-      <p style="text-align: center; color: #64748b; margin-bottom: 25px;">
-        Enter your username and we'll help you reset your password.
-      </p>
-      
-      <form class="auth-form" id="forgotForm">
-        <div class="auth-form-group">
-          <label for="forgotUsername">Username</label>
-          <input type="text" id="forgotUsername" required>
+      <form class="space-y-4" id="forgotForm">
+        <div>
+          <label for="forgotUsername" class="block text-xs font-medium text-slate-400 mb-1 uppercase">Username</label>
+          <input type="text" id="forgotUsername" required class="w-full bg-slate-900/50 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-colors">
         </div>
         
-        <button type="submit" class="auth-submit-btn" id="forgotSubmit">
-          <span class="btn-text">Send Reset Instructions</span>
+        <button type="submit" class="w-full bg-brand-primary hover:bg-brand-secondary text-white font-bold py-3 rounded-xl shadow-lg shadow-brand-primary/20 transition-all transform hover:translate-y-px flex items-center justify-center" id="forgotSubmit">
+          <span class="btn-text">Send Instructions</span>
         </button>
       </form>
       
-      <div class="auth-modal-footer">
-        <p><a class="auth-footer-link" id="backToLogin">Back to login</a></p>
+      <div class="mt-6 text-center">
+        <p class="text-sm"><button class="text-slate-500 hover:text-white transition-colors" id="backToLogin">Back to login</button></p>
       </div>
     `;
     
@@ -260,12 +294,14 @@ class AuthModal {
     };
     
     // Add event listeners to both fields
-    confirmPassword.addEventListener('input', validatePasswords);
-    password.addEventListener('input', validatePasswords);
-    
-    // Also validate on blur to catch cases where user tabs through fields
-    confirmPassword.addEventListener('blur', validatePasswords);
-    password.addEventListener('blur', validatePasswords);
+    if (confirmPassword && password) {
+        confirmPassword.addEventListener('input', validatePasswords);
+        password.addEventListener('input', validatePasswords);
+        
+        // Also validate on blur to catch cases where user tabs through fields
+        confirmPassword.addEventListener('blur', validatePasswords);
+        password.addEventListener('blur', validatePasswords);
+    }
   }
 
   setupForgotEvents() {
@@ -351,12 +387,6 @@ class AuthModal {
       }
     }
     
-    // Security: Password logging removed
-    // console.log('Password value length:', passwordValue.length);
-    // console.log('Confirm password value length:', confirmPasswordValue.length);
-    // console.log('Password value:', passwordValue ? '[HIDDEN]' : 'EMPTY');
-    // console.log('Confirm password value:', confirmPasswordValue ? '[HIDDEN]' : 'EMPTY');
-    
     // More lenient validation - check if fields exist and have content
     if (!passwordField || !confirmPasswordField) {
       this.showError('Password fields not found. Please try again.');
@@ -395,8 +425,6 @@ class AuthModal {
     
     // If we still don't have password values, try to trigger focus/blur events to get them
     if (!passwordValue || !confirmPasswordValue) {
-      // Security: Password debug logging removed
-      // console.log('Attempting to retrieve password values via events...');
       
       // Focus and blur to trigger any value updates
       if (passwordField && !passwordValue) {
@@ -410,10 +438,6 @@ class AuthModal {
         confirmPasswordField.blur();
         confirmPasswordValue = confirmPasswordField.value || '';
       }
-      
-      // Security: Password debug logging removed
-      // console.log('After events - Password length:', passwordValue.length);
-      // console.log('After events - Confirm password length:', confirmPasswordValue.length);
     }
     
     // Check if either field is empty (without trim to avoid issues)
@@ -425,12 +449,7 @@ class AuthModal {
         const altPassword = htmlFormData.get('regPassword') || '';
         const altConfirmPassword = htmlFormData.get('regConfirmPassword') || '';
         
-        // Security: Password debug logging removed
-        // console.log('Alternative password length:', altPassword.length);
-        // console.log('Alternative confirm password length:', altConfirmPassword.length);
-        
         if (altPassword && altConfirmPassword) {
-          // Security: Using alternative FormData method (logging removed)
           // Use alternative values
           if (altPassword !== altConfirmPassword) {
             this.showError('Passwords do not match.');
@@ -449,7 +468,7 @@ class AuthModal {
             const result = await window.authManager.register(formData);
             
             if (result.success) {
-              this.showSuccess('Account created successfully! Welcome to Lavrilo.');
+              this.showSuccess('Account created successfully! Welcome to Lumina.');
               // AuthManager will handle the redirect, just hide the modal after short delay
               setTimeout(() => {
                 this.hide();
@@ -502,7 +521,7 @@ class AuthModal {
       const result = await window.authManager.register(formData);
       
       if (result.success) {
-        this.showSuccess('Account created successfully! Welcome to Lavrilo.');
+        this.showSuccess('Account created successfully! Welcome to Lumina.');
         // AuthManager will handle the redirect, just hide the modal after short delay
         setTimeout(() => {
           this.hide();
@@ -605,8 +624,6 @@ class AuthModal {
         return errorMessage;
       }
       
-      // console.log('[AUTH MODAL] Translating error message:', errorMessage);
-      
       const response = await fetch('/api/translate-text', {
         method: 'POST',
         headers: {
@@ -619,20 +636,17 @@ class AuthModal {
       });
       
       if (!response.ok) {
-        // console.warn('[AUTH MODAL] Translation API failed, using original message');
         return errorMessage;
       }
       
       const data = await response.json();
       
       if (data.success && data.translatedText) {
-        // console.log('[AUTH MODAL] Translation successful:', errorMessage, '->', data.translatedText);
         return data.translatedText;
       }
       
       return errorMessage;
     } catch (error) {
-      // console.warn('[AUTH MODAL] Translation failed, using original message:', error);
       return errorMessage;
     }
   }
@@ -648,7 +662,7 @@ class AuthModal {
     
     setTimeout(() => {
       this.showSuccess('Password reset instructions have been sent to your email (if the username exists).');
-      this.hideLoading('forgotSubmit', 'Send Reset Instructions');
+      this.hideLoading('forgotSubmit', 'Send Instructions');
     }, 2000);
   }
 
@@ -700,13 +714,15 @@ class AuthModal {
   showError(message) {
     const errorEl = document.getElementById('authError');
     errorEl.textContent = message;
-    errorEl.classList.add('show');
+    errorEl.classList.remove('hidden');
+    errorEl.classList.add('block');
   }
 
   showSuccess(message) {
     const successEl = document.getElementById('authSuccess');
     successEl.textContent = message;
-    successEl.classList.add('show');
+    successEl.classList.remove('hidden');
+    successEl.classList.add('block');
   }
 
   clearMessages() {
@@ -714,12 +730,14 @@ class AuthModal {
     const successEl = document.getElementById('authSuccess');
     
     if (errorEl) {
-      errorEl.classList.remove('show');
+      errorEl.classList.add('hidden');
+      errorEl.classList.remove('block');
       errorEl.textContent = '';
     }
     
     if (successEl) {
-      successEl.classList.remove('show');
+      successEl.classList.add('hidden');
+      successEl.classList.remove('block');
       successEl.textContent = '';
     }
   }
@@ -729,7 +747,8 @@ class AuthModal {
     const btnText = button.querySelector('.btn-text');
     
     button.disabled = true;
-    btnText.innerHTML = `<div class="auth-loading"></div> ${text}`;
+    button.classList.add('opacity-75', 'cursor-not-allowed');
+    btnText.innerHTML = `<div class="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2"></div> ${text}`;
   }
 
   hideLoading(buttonId, originalText) {
@@ -737,6 +756,7 @@ class AuthModal {
     const btnText = button.querySelector('.btn-text');
     
     button.disabled = false;
+    button.classList.remove('opacity-75', 'cursor-not-allowed');
     btnText.textContent = originalText;
   }
 }
@@ -747,32 +767,28 @@ window.authModal = new AuthModal();
 // Setup login button click handler
 document.addEventListener('DOMContentLoaded', () => {
   // Add login button click handler if it exists
-  const loginBtn = document.querySelector('.login-btn');
-  if (loginBtn) {
-    loginBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      // console.log('[AUTH MODAL] Login button clicked');
-      if (window.authModal) {
-        window.authModal.showLogin();
-        window.authModal.show();
-      }
-    });
-  }
+  const loginBtns = document.querySelectorAll('.login-btn');
+  loginBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (window.authModal) {
+            window.authModal.showLogin();
+            window.authModal.show();
+          }
+      });
+  });
   
   // Also handle signup button
-  const signupBtn = document.querySelector('.signup-btn');
-  if (signupBtn) {
-    signupBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      // console.log('[AUTH MODAL] Signup button clicked');
-      if (window.authModal) {
-        window.authModal.showRegister();
-        window.authModal.show();
-      }
-    });
-  }
+  const signupBtns = document.querySelectorAll('.signup-btn');
+  signupBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (window.authModal) {
+            window.authModal.showRegister();
+            window.authModal.show();
+          }
+      });
+  });
 });
-
-// console.log('[AUTH MODAL] Authentication modal initialized');

@@ -1,5 +1,5 @@
 /**
- * Main Dashboard JavaScript
+ * Main Dashboard JavaScript for Lumina
  * Handles Activity Feed, Quick Stats, Top Members, Friends Online, Recent Visitors, Photo Votes
  */
 
@@ -8,13 +8,9 @@ class MainDashboard {
         this.sessionId = null;
         this.currentUser = null;
         this.refreshInterval = null;
-        
-        // console.log('[MAIN] MainDashboard initialized');
     }
 
     async init() {
-        // console.log('[MAIN] Initializing MainDashboard...');
-        
         // Check authentication
         if (!window.authManager || !window.authManager.isLoggedIn) {
             console.error('[MAIN] User not authenticated, redirecting...');
@@ -30,9 +26,6 @@ class MainDashboard {
             return;
         }
 
-        // Security: Session ID logging removed
-        // console.log('[MAIN] Session ID:', this.sessionId);
-        
         // Initialize all sections
         await this.loadAllSections();
         
@@ -41,60 +34,50 @@ class MainDashboard {
         
         // Set up auto-refresh for online status
         this.startAutoRefresh();
-        
-        // console.log('[MAIN] MainDashboard initialization complete');
     }
 
     async loadAllSections() {
-        // console.log('[MAIN] Loading all sections...');
-        
         // Load sections in parallel for better performance
-                    const promises = [
-                this.loadQuickStats(),
-                this.loadActivityFeed(),
-                this.loadTopMembers(2), // Default to women
-                this.loadOnlineFriends(),
-                this.loadRecentVisitors(),
-                this.loadPhotoVotes(),
-                this.loadGiftNotifications()
-            ];
+        const promises = [
+            this.loadQuickStats(),
+            this.loadActivityFeed(),
+            this.loadTopMembers(2), // Default to women
+            this.loadOnlineFriends(),
+            this.loadRecentVisitors(),
+            this.loadPhotoVotes(),
+            this.loadGiftNotifications()
+        ];
 
         try {
             await Promise.allSettled(promises);
-            // console.log('[MAIN] All sections loaded');
         } catch (error) {
             console.error('[MAIN] Error loading sections:', error);
         }
     }
 
     async loadQuickStats() {
-        // console.log('[MAIN] Loading quick stats...');
-        
         try {
             // Get online status and message count
             const onlineResponse = await fetch(`/api/spice-multi-test?endpoint=/ajax_api/online&method=GET&session_id=${this.sessionId}`);
             const onlineData = await onlineResponse.json();
-            
-            // console.log('[MAIN] Online API response:', onlineData);
             
             if (onlineData.success && onlineData.data?.result) {
                 const result = onlineData.data.result;
                 
                 // Update new messages count
                 const newMessages = result.nb_new_message || 0;
-                document.getElementById('newMessagesCount').textContent = newMessages;
+                const msgCountEl = document.getElementById('newMessagesCount');
+                if (msgCountEl) msgCountEl.textContent = newMessages;
                 
                 // Update message badge in header
                 const messagesBadge = document.getElementById('messagesBadge');
                 if (messagesBadge) {
                     messagesBadge.textContent = newMessages;
-                    messagesBadge.style.display = newMessages > 0 ? 'inline' : 'none';
+                    messagesBadge.style.display = newMessages > 0 ? 'flex' : 'none';
                 }
             }
             
-            // Note: Friends count is now loaded in loadOnlineFriends() function
-            
-            // Mock data for profile views and photo votes (these would need specific API endpoints)
+            // Mock data for profile views and photo votes
             const profileViewsElement = document.getElementById('profileViewsCount');
             if (profileViewsElement) {
                 profileViewsElement.textContent = Math.floor(Math.random() * 50) + 10;
@@ -111,10 +94,7 @@ class MainDashboard {
     }
 
     async loadActivityFeed() {
-        // console.log('[MAIN] Loading enhanced activity feed...');
-        
         try {
-            // Загружаем все источники данных
             const [wallResponse, activitiesResponse, matches, giftNotifications] = await Promise.all([
                 fetch(`/api/spice-multi-test?endpoint=/index_api/wall&method=POST&session_id=${this.sessionId}`),
                 fetch(`/api/spice-multi-test?endpoint=/ajax_api/getActivities&method=GET&session_id=${this.sessionId}`),
@@ -124,32 +104,24 @@ class MainDashboard {
             
             const wallData = await wallResponse.json();
             const activitiesData = await activitiesResponse.json();
-            // console.log('[MAIN] Wall API response:', wallData);
-            // console.log('[MAIN] Activities API response:', activitiesData);
-            // console.log('[MAIN] Recent matches:', matches);
             
             const feedContainer = document.getElementById('activityFeed');
             
-            // Собираем все активности
             let allActivities = [];
             
-                    // Обрабатываем Wall API данные (основной источник активности)
-        if (wallData.success && wallData.data?.result) {
-            const wallActivities = Object.values(wallData.data.result);
-            allActivities = wallActivities.map(activity => ({
-                ...activity,
-                type: this.getActivityType(activity.action)
-            }));
+            // Wall API data
+            if (wallData.success && wallData.data?.result) {
+                const wallActivities = Object.values(wallData.data.result);
+                allActivities = wallActivities.map(activity => ({
+                    ...activity,
+                    type: this.getActivityType(activity.action)
+                }));
+            }
             
-            // Фотографии отключены для избежания проблем с одинаковыми изображениями
-            // await this.loadPhotosForWallActivities(allActivities);
-        }
-            
-            // Добавляем данные из Activities API
+            // Activities API data
             if (activitiesData.success && activitiesData.data) {
                 const activities = activitiesData.data;
                 
-                // Новые участники (wall_online)
                 if (activities.wall_online) {
                     allActivities.push({
                         type: 'new_member',
@@ -160,7 +132,6 @@ class MainDashboard {
                     });
                 }
                 
-                // Обновления профиля (wall_change)
                 if (activities.wall_change) {
                     allActivities.push({
                         type: 'profile_update',
@@ -171,7 +142,6 @@ class MainDashboard {
                     });
                 }
                 
-                // Новые дружбы (wall_friends)
                 if (activities.wall_friends) {
                     allActivities.push({
                         type: 'new_friendship',
@@ -185,9 +155,9 @@ class MainDashboard {
                 }
             }
             
-            // Добавляем матчи как активность
+            // Matches
             if (matches && matches.length > 0) {
-                const recentMatches = matches.slice(0, 5); // Последние 5 матчей
+                const recentMatches = matches.slice(0, 5);
                 const matchActivities = recentMatches.map(match => ({
                     type: 'match',
                     pseudo: match.matched_user_name,
@@ -199,9 +169,9 @@ class MainDashboard {
                 allActivities = [...matchActivities, ...allActivities];
             }
             
-            // Добавляем уведомления о подарках
+            // Gift notifications
             if (giftNotifications && giftNotifications.length > 0) {
-                const recentGifts = giftNotifications.slice(0, 10); // Последние 10 подарков
+                const recentGifts = giftNotifications.slice(0, 10);
                 const giftActivities = recentGifts.map(notification => ({
                     type: 'gift_received',
                     title: notification.title,
@@ -215,18 +185,21 @@ class MainDashboard {
                 allActivities = [...giftActivities, ...allActivities];
             }
             
-            // Сортируем по дате
             allActivities.sort((a, b) => new Date(b.date_action) - new Date(a.date_action));
             
-            // Показываем последние 15 активностей для расширенной ленты
             const displayActivities = allActivities.slice(0, 15);
             
             if (displayActivities.length === 0) {
-                feedContainer.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📰</div><p>Community activity will appear here</p></div>';
+                feedContainer.innerHTML = `
+                    <div class="flex flex-col items-center justify-center py-12 text-slate-500">
+                        <svg class="w-12 h-12 mb-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        </svg>
+                        <p>Community activity will appear here</p>
+                    </div>`;
                 return;
             }
 
-            // Создаем HTML для всех активностей
             const feedHTML = displayActivities.map(activity => {
                 return this.createEnhancedActivityItem(activity);
             }).join('');
@@ -235,11 +208,10 @@ class MainDashboard {
             
         } catch (error) {
             console.error('[MAIN] Error loading activity feed:', error);
-            document.getElementById('activityFeed').innerHTML = '<div class="error-state">Failed to load activities</div>';
+            document.getElementById('activityFeed').innerHTML = '<div class="p-8 text-center text-red-400 bg-red-500/10 rounded-xl">Failed to load activities</div>';
         }
     }
 
-    // Определяем тип активности на основе action
     getActivityType(action) {
         switch (action) {
             case 'birthday': return 'birthday';
@@ -249,312 +221,145 @@ class MainDashboard {
         }
     }
 
-    // Загружаем фотографии для пользователей из wall активностей
-    async loadPhotosForWallActivities(activities) {
-        // console.log('[MAIN] Loading photos for wall activities...');
-        
-        // Группируем активности по user ID чтобы не загружать фото одного пользователя несколько раз
-        const userIds = [...new Set(activities.map(activity => activity.id).filter(id => id))];
-        const photoCache = {};
-        
-        // Загружаем фотографии пользователей параллельно (максимум 3 одновременно для стабильности)
-        const batchSize = 3;
-        for (let i = 0; i < userIds.length; i += batchSize) {
-            const batch = userIds.slice(i, i + batchSize);
-            const promises = batch.map(async (userId) => {
-                try {
-                    // Используем /index_api/user API с get_picture_430=1 для получения качественных фотографий
-                    const response = await fetch(`/api/spice-multi-test?endpoint=/index_api/user&method=POST&session_id=${this.sessionId}&id=${userId}&get_picture_430=1`);
-                    const data = await response.json();
-                    
-                    // console.log(`[MAIN] Photo API response for user ${userId}:`, data);
-                    
-                    if (data.success && data.data?.result) {
-                        const user = data.data.result;
-                        const photoUrl = this.getPhotoUrl(user);
-                        if (photoUrl) {
-                            photoCache[userId] = photoUrl;
-                            // console.log(`[MAIN] ✅ Loaded photo for user ${userId}:`, photoUrl);
-                        } else {
-                            // console.log(`[MAIN] ❌ No photo found for user ${userId}`);
-                        }
-                    } else {
-                        // console.log(`[MAIN] ❌ API failed for user ${userId}:`, data);
-                    }
-                } catch (error) {
-                    // console.warn(`[MAIN] Failed to load photo for user ${userId}:`, error);
+    // Utility to get photo URL (kept for potential future use, currently we focus on text/avatars)
+    getPhotoUrl(user) {
+        let photoUrl = null;
+        if (user.photos_v2) {
+            if (user.photos_v2.public && typeof user.photos_v2.public === 'object') {
+                const publicPhotos = user.photos_v2.public;
+                const firstPhotoKey = Object.keys(publicPhotos)[0];
+                if (firstPhotoKey && publicPhotos[firstPhotoKey]) {
+                    const photo = publicPhotos[firstPhotoKey];
+                    photoUrl = photo.sq_430 || photo.normal || photo.sq_middle || photo.url_big;
                 }
-            });
-            
-            await Promise.allSettled(promises);
-        }
-        
-        // Применяем загруженные фотографии к активностям
-        activities.forEach(activity => {
-            if (activity.id && photoCache[activity.id]) {
-                activity.photoUrl = photoCache[activity.id];
+            } else if (Array.isArray(user.photos_v2) && user.photos_v2.length > 0) {
+                const mainPhoto = user.photos_v2.find(p => p.num === 0 || p.is_main === 1) || user.photos_v2[0];
+                photoUrl = mainPhoto.sq_430 || mainPhoto.normal || mainPhoto.sq_middle || mainPhoto.url_big;
             }
-        });
+        } 
+        if (!photoUrl && user.photos && Array.isArray(user.photos) && user.photos.length > 0) {
+            const firstPhoto = user.photos[0];
+            photoUrl = firstPhoto.url_big || firstPhoto.normal || firstPhoto.sq_430 || firstPhoto.sq_middle || firstPhoto.url_middle;
+        }
+        if (!photoUrl) {
+            photoUrl = user.picture_430 || user.picture || user.photo_profil_url || 
+                      user.photo_profil || user.photo || user.avatar || user.pic || 
+                      user.image || user.main_photo;
+        }
+        if (photoUrl && !photoUrl.startsWith('http') && !photoUrl.startsWith('//')) {
+            if (photoUrl.startsWith('/')) {
+                photoUrl = 'https://dev2018.de5a7.com' + photoUrl;
+            } else {
+                photoUrl = 'https://dev2018.de5a7.com/' + photoUrl;
+            }
+        }
+        return photoUrl;
+    }
+    
+    getPhotoUrlFromPhotoData(photo) {
+        let photoUrl = null;
+        if (photo.sq_430) photoUrl = photo.sq_430;
+        else if (photo.normal) photoUrl = photo.normal;
+        else if (photo.sq_middle) photoUrl = photo.sq_middle;
+        else if (photo.url_big) photoUrl = photo.url_big;
+        else if (photo.url_middle) photoUrl = photo.url_middle;
         
-        // console.log('[MAIN] Photo loading completed. Cache:', photoCache);
+        if (photoUrl && !photoUrl.startsWith('http') && !photoUrl.startsWith('/')) {
+            photoUrl = 'https://dev2018.de5a7.com/' + photoUrl;
+        }
+        return photoUrl;
     }
 
-    // Получаем URL фотографии из различных источников
-    getPhotoUrl(photos, activity = null) {
-        if (!photos) return null;
-        
-        // Если это массив фотографий из Activities API (wall_ методы)
-        if (Array.isArray(photos) && photos.length > 0) {
-            const photo = photos[0];
-            return photo.url_middle || photo.url_big || photo.url_small || photo.normal || photo.sq_middle;
-        }
-        
-        // Если это объект фотографий из Wall API (all_photos или tab_photo)
-        if (typeof photos === 'object' && photos !== null) {
-            // Сначала проверяем all_photos
-            if (photos.all_photos) {
-                const mainPhoto = Object.values(photos.all_photos).find(photo => photo.is_main === '1' || photo.is_main === 1);
-                if (mainPhoto) {
-                    return mainPhoto.sq_middle || mainPhoto.normal || mainPhoto.sq_small;
-                }
-                
-                const firstPhoto = Object.values(photos.all_photos)[0];
-                if (firstPhoto) {
-                    return firstPhoto.sq_middle || firstPhoto.normal || firstPhoto.sq_small;
-                }
-            }
-            
-            // Затем проверяем tab_photo
-            if (photos.tab_photo && Array.isArray(photos.tab_photo) && photos.tab_photo.length > 0) {
-                const photo = photos.tab_photo[0];
-                return photo.sq_middle || photo.normal || photo.sq_small;
-            }
-            
-            // Ищем главную фотографию в корневом объекте
-            const mainPhoto = Object.values(photos).find(photo => photo && (photo.is_main === '1' || photo.is_main === 1));
-            if (mainPhoto) {
-                return mainPhoto.sq_middle || mainPhoto.normal || mainPhoto.sq_small;
-            }
-            
-            // Берем первую доступную фотографию
-            const firstPhoto = Object.values(photos)[0];
-            if (firstPhoto && typeof firstPhoto === 'object') {
-                return firstPhoto.sq_middle || firstPhoto.normal || firstPhoto.sq_small;
-            }
-        }
-        
-        return null;
-    }
-
-    // Создаем расширенный элемент активности
     createEnhancedActivityItem(activity) {
         const timeAgo = this.formatTimeAgo(activity.date_action);
         
-        // Фотографии отключены - используем только буквенные аватары
-        // let photoUrl = null;
-        
-        const activityClass = `activity-item ${activity.type}-activity`;
+        // Generate consistent avatar color based on name
+        const firstLetter = (activity.pseudo || activity.pseudo1 || 'U').charAt(0).toUpperCase();
+        const colors = [
+            'from-purple-500 to-indigo-500',
+            'from-pink-500 to-rose-500',
+            'from-amber-500 to-orange-500',
+            'from-emerald-500 to-teal-500',
+            'from-blue-500 to-cyan-500'
+        ];
+        const colorIndex = firstLetter.charCodeAt(0) % colors.length;
+        const bgGradient = colors[colorIndex];
         
         let content = '';
-        let avatarContent = '';
-        
-        // Создаем аватар - используем только буквенные аватары для надежности
-        // Это решает проблему с одинаковыми фотографиями у разных пользователей
-        const firstLetter = (activity.pseudo || activity.pseudo1 || 'U').charAt(0).toUpperCase();
-        const avatarColors = [
-            'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-            'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-            'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-            'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-            'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
-            'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
-            'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)'
-        ];
-        // Выбираем цвет на основе первой буквы имени для консистентности
-        const colorIndex = firstLetter.charCodeAt(0) % avatarColors.length;
-        const avatarColor = avatarColors[colorIndex];
-        
-        avatarContent = `<div class="avatar-fallback" style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: ${avatarColor}; color: white; font-weight: bold; font-size: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">${firstLetter}</div>`;
-        
-        // Создаем контент в зависимости от типа активности
+        let icon = '';
+
         switch (activity.type) {
-                    case 'birthday':
-            content = `
-                <div class="activity-text">
-                    <strong>${activity.pseudo}</strong> is celebrating their birthday today!
-                </div>
-                <div class="activity-time">${timeAgo}</div>
-                ${activity.zone_name ? `<div class="activity-location">${activity.zone_name}</div>` : ''}
-            `;
+            case 'birthday':
+                content = `<span class="font-semibold text-white">${activity.pseudo}</span> is celebrating their birthday!`;
+                icon = '🎂';
                 break;
-                
             case 'visit':
-                content = `
-                    <div class="activity-text">
-                        <strong>${activity.pseudo}</strong> visited your profile
-                    </div>
-                    <div class="activity-time">${timeAgo}</div>
-                    ${activity.zone_name ? `<div class="activity-location">${activity.zone_name}</div>` : ''}
-                `;
+                content = `<span class="font-semibold text-white">${activity.pseudo}</span> visited your profile`;
+                icon = '👀';
                 break;
-                
             case 'connection':
-                content = `
-                    <div class="activity-text">
-                        <strong>${activity.pseudo}</strong> came online
-                    </div>
-                    <div class="activity-time">${timeAgo}</div>
-                    ${activity.zone_name ? `<div class="activity-location">${activity.zone_name}</div>` : ''}
-                `;
+                content = `<span class="font-semibold text-white">${activity.pseudo}</span> came online`;
+                icon = '🟢';
                 break;
-                
             case 'new_member':
-                content = `
-                    <div class="activity-text">
-                        <strong>${activity.pseudo}</strong> joined the community
-                    </div>
-                    <div class="activity-time">${timeAgo}</div>
-                `;
+                content = `<span class="font-semibold text-white">${activity.pseudo}</span> joined Lumina`;
+                icon = '👋';
                 break;
-                
             case 'profile_update':
-                content = `
-                    <div class="activity-text">
-                        <strong>${activity.pseudo}</strong> updated their profile
-                    </div>
-                    <div class="activity-time">${timeAgo}</div>
-                `;
+                content = `<span class="font-semibold text-white">${activity.pseudo}</span> updated their profile`;
+                icon = '✏️';
                 break;
-                
             case 'new_friendship':
-                content = `
-                    <div class="activity-text">
-                        <strong>${activity.pseudo1}</strong> and <strong>${activity.pseudo2}</strong> became friends
-                    </div>
-                    <div class="activity-time">${timeAgo}</div>
-                `;
+                content = `<span class="font-semibold text-white">${activity.pseudo1}</span> and <span class="font-semibold text-white">${activity.pseudo2}</span> became friends`;
+                icon = '🤝';
                 break;
-                
             case 'match':
-                content = `
-                    <div class="activity-text">
-                        <strong>It's a match!</strong> You and <strong>${activity.pseudo}</strong> liked each other
-                        ${activity.is_new ? '<span class="new-indicator">NEW</span>' : ''}
-                    </div>
-                    <div class="activity-time">${timeAgo}</div>
-                `;
+                content = `It's a match! You and <span class="font-semibold text-white">${activity.pseudo}</span> liked each other`;
+                icon = '❤️';
                 break;
-                
             case 'gift_received':
-                content = `
-                    <div class="activity-text">
-                        ${activity.title || 'You received a gift!'}
-                        ${activity.is_new ? '<span class="new-indicator">NEW</span>' : ''}
-                    </div>
-                    <div class="activity-time">${timeAgo}</div>
-                `;
+                content = activity.title || 'You received a gift!';
+                icon = '🎁';
                 break;
-                
             default:
-                content = `
-                    <div class="activity-text">
-                        <strong>${activity.pseudo}</strong> was active
-                    </div>
-                    <div class="activity-time">${timeAgo}</div>
-                `;
+                content = `<span class="font-semibold text-white">${activity.pseudo}</span> was active`;
+                icon = '✨';
         }
-        
+
         return `
-            <div class="${activityClass}">
-                <div class="activity-avatar">
-                    ${avatarContent}
+            <div class="flex items-start space-x-4 p-4 rounded-xl hover:bg-white/5 transition-colors border border-transparent hover:border-white/5 group">
+                <div class="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br ${bgGradient} flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-purple-900/20">
+                    ${firstLetter}
                 </div>
-                <div class="activity-content">
-                    ${content}
-                </div>
-            </div>
-        `;
-    }
-    
-    createMatchActivityItem(match) {
-        let photos = [];
-        try {
-            photos = typeof match.matched_user_photos === 'string' 
-                ? JSON.parse(match.matched_user_photos) 
-                : match.matched_user_photos || [];
-        } catch (e) {
-            photos = [];
-        }
-        
-        const photoUrl = photos.length > 0 ? photos[0] : null;
-        const timeAgo = this.formatTimeAgo(match.date_action);
-        const isNew = match.is_new;
-        
-        return `
-            <div class="activity-item match-activity ${isNew ? 'new-match-activity' : ''}" onclick="window.location.href='matches.html'">
-                <div class="activity-content">
-                    <div class="activity-text">
-                        <strong>It's a match!</strong> You and <strong>${match.pseudo}</strong> liked each other
-                        ${isNew ? '<span class="new-indicator">NEW</span>' : ''}
-                    </div>
-                    <div class="activity-time">${timeAgo}</div>
-                </div>
-            </div>
-        `;
-    }
-    
-    createRegularActivityItem(activity) {
-        // Фотографии отключены - используем только текст
-        const activityText = this.formatActivityText(activity);
-        const timeAgo = this.formatTimeAgo(activity.date_action);
-        
-        // Создаем буквенный аватар для консистентности
-        const firstLetter = (activity.pseudo || activity.pseudo1 || 'U').charAt(0).toUpperCase();
-        const avatarColors = [
-            'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-            'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-            'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
-            'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-            'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
-            'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
-            'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)'
-        ];
-        const colorIndex = firstLetter.charCodeAt(0) % avatarColors.length;
-        const avatarColor = avatarColors[colorIndex];
-        
-        return `
-            <div class="activity-item">
-                <div class="avatar-fallback" style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background: ${avatarColor}; color: white; font-weight: bold; font-size: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); margin-right: 12px;">${firstLetter}</div>
-                <div class="activity-content">
-                    <div class="activity-text">${activityText}</div>
-                    <div class="activity-time">${timeAgo}</div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm text-slate-300">
+                        ${content}
+                    </p>
+                    <p class="text-xs text-slate-500 mt-1 flex items-center">
+                        <span class="mr-2">${icon}</span>
+                        ${timeAgo}
+                        ${activity.zone_name ? `<span class="mx-1">•</span> ${activity.zone_name}` : ''}
+                    </p>
                 </div>
             </div>
         `;
     }
 
     async loadTopMembers(gender = 2) {
-        // console.log('[MAIN] Loading top members for gender:', gender);
-        
         try {
             const response = await fetch(`/api/spice-multi-test?endpoint=/index_api/topmembers&method=POST&session_id=${this.sessionId}&sex=${gender}&age_range=18-65&page=0&is_photo=1`);
             const data = await response.json();
             
-            // console.log('[MAIN] Top members API response:', data);
-            
             const listContainer = document.getElementById('topMembersList');
             
             if (data.success && data.data?.result && Array.isArray(data.data.result)) {
-                // Filter out test users and get top 5
                 const filteredMembers = data.data.result.filter(member => 
                     member.pseudo && member.pseudo.toLowerCase() !== 'test'
                 );
-                const members = filteredMembers.slice(0, 5); // Show top 5
+                const members = filteredMembers.slice(0, 5);
                 
                 if (members.length === 0) {
-                    listContainer.innerHTML = '<div class="empty-state">No top members found</div>';
+                    listContainer.innerHTML = '<div class="text-center p-4 text-slate-500">No top members found</div>';
                     return;
                 }
                 
@@ -562,143 +367,114 @@ class MainDashboard {
                     const photoUrl = this.getPhotoUrl(member);
                     const age = member.age || '--';
                     const location = member.ville || member.region || 'Unknown';
+                    const firstLetter = (member.pseudo || 'U').charAt(0).toUpperCase();
                     
                     return `
-                        <div class="member-item" onclick="viewUserProfile('${member.id || member.id_membre}', '${member.pseudo || 'Anonymous'}')" style="cursor: pointer;">
-                            <div class="member-rank">#${index + 1}</div>
-                            <div class="member-avatar">
-                                ${photoUrl ? `<img src="${photoUrl}" alt="${member.pseudo}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''}
-                                <div class="avatar-fallback" style="${photoUrl ? 'display: none;' : ''}">${(member.pseudo || 'U').charAt(0).toUpperCase()}</div>
-                            </div>
-                            <div class="member-info">
-                                <div class="member-name">${member.pseudo || 'Anonymous'}</div>
-                                <div class="member-details">${age} years • ${location}</div>
+                        <div class="relative group cursor-pointer" onclick="viewUserProfile('${member.id || member.id_membre}', '${member.pseudo || 'Anonymous'}')">
+                            <div class="aspect-[3/4] rounded-2xl overflow-hidden bg-slate-800 relative">
+                                ${photoUrl ? 
+                                    `<img src="${photoUrl}" alt="${member.pseudo}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` 
+                                    : ''}
+                                <div class="${photoUrl ? 'hidden' : 'flex'} w-full h-full items-center justify-center bg-slate-800 text-slate-600 text-4xl font-bold">
+                                    ${firstLetter}
+                                </div>
+                                <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-80"></div>
+                                <div class="absolute top-2 left-2 bg-brand-primary text-white text-xs font-bold px-2 py-1 rounded-md shadow-lg">
+                                    #${index + 1}
+                                </div>
+                                <div class="absolute bottom-0 left-0 w-full p-3">
+                                    <h4 class="text-white font-bold truncate">${member.pseudo || 'Anonymous'}</h4>
+                                    <p class="text-xs text-slate-300 flex items-center">
+                                        <span>${age}</span>
+                                        <span class="mx-1">•</span>
+                                        <span class="truncate">${location}</span>
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     `;
                 }).join('');
                 
-                listContainer.innerHTML = membersHTML;
+                listContainer.innerHTML = `<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">${membersHTML}</div>`;
                 
             } else {
-                listContainer.innerHTML = '<div class="empty-state">No top members available</div>';
+                listContainer.innerHTML = '<div class="text-center p-4 text-slate-500">No top members available</div>';
             }
             
         } catch (error) {
             console.error('[MAIN] Error loading top members:', error);
-            document.getElementById('topMembersList').innerHTML = '<div class="error-state">Failed to load top members</div>';
+            document.getElementById('topMembersList').innerHTML = '<div class="text-center p-4 text-red-400">Failed to load members</div>';
         }
     }
 
     async loadOnlineFriends() {
-        // console.log('[MAIN] Loading friends list...');
-        
         try {
-            // Load friends list using load_contacts API with filter=3 (friends)
             const response = await fetch(`/api/spice-multi-test?endpoint=/ajax_api/load_contacts&method=GET&session_id=${this.sessionId}&filter=3`);
             const data = await response.json();
-            
-            // console.log('[MAIN] Friends API response:', data);
             
             const listContainer = document.getElementById('onlineFriendsList');
             
             if (data.success && data.data) {
-                // API returns friends in 'contacts' or 'result' field
                 const friends = data.data.contacts || data.data.result || [];
                 
                 if (!Array.isArray(friends) || friends.length === 0) {
-                    listContainer.innerHTML = `
-                        <div class="empty-state">
-                            <p>No friend online</p>
-                        </div>
-                    `;
-                    
-                    // Update the badge count to match actual friends count
-                    const onlineCountBadge = document.getElementById('onlineCountBadge');
-                    if (onlineCountBadge) {
-                        onlineCountBadge.textContent = '0';
-                    }
+                    listContainer.innerHTML = '<p class="text-slate-500 text-sm">No friends online</p>';
                     return;
                 }
                 
-                // Update the badge count to match actual friends count
-                const onlineCountBadge = document.getElementById('onlineCountBadge');
-                if (onlineCountBadge) {
-                    onlineCountBadge.textContent = friends.length;
-                }
-                
-                // Show up to 8 friends
                 const displayFriends = friends.slice(0, 8);
                 
                 const friendsHTML = displayFriends.map(friend => {
                     const photoUrl = this.getPhotoUrl(friend);
-                    const age = friend.age || '--';
                     const isOnline = friend.is_online === 1 || friend.is_online === '1';
+                    const firstLetter = (friend.pseudo || 'U').charAt(0).toUpperCase();
                     
                     return `
-                        <div class="friend-item">
-                            <div class="friend-avatar">
-                                ${photoUrl ? `<img src="${photoUrl}" alt="${friend.pseudo}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''}
-                                <div class="avatar-fallback" style="${photoUrl ? 'display: none;' : ''}">${(friend.pseudo || 'U').charAt(0).toUpperCase()}</div>
-                                ${isOnline ? '<div class="online-indicator"></div>' : ''}
+                        <div class="flex items-center space-x-3 p-2 rounded-lg hover:bg-white/5 transition-colors cursor-pointer" onclick="viewUserProfile('${friend.id}', '${friend.pseudo}')">
+                            <div class="relative">
+                                <div class="w-10 h-10 rounded-full bg-slate-700 overflow-hidden flex items-center justify-center text-slate-300 font-bold border-2 border-slate-600">
+                                    ${photoUrl ? `<img src="${photoUrl}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''}
+                                    <span class="${photoUrl ? 'hidden' : 'block'}">${firstLetter}</span>
+                                </div>
+                                ${isOnline ? '<div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-slate-800 rounded-full"></div>' : ''}
                             </div>
-                            <div class="friend-info">
-                                <div class="friend-name">${friend.pseudo || 'Anonymous'}</div>
-                                <div class="friend-age">${age} years</div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-white truncate">${friend.pseudo || 'Anonymous'}</p>
+                                <p class="text-xs text-slate-400">${friend.age || '--'} years</p>
                             </div>
                         </div>
                     `;
                 }).join('');
                 
-                listContainer.innerHTML = friendsHTML;
+                listContainer.innerHTML = `<div class="space-y-2">${friendsHTML}</div>`;
                 
             } else {
-                listContainer.innerHTML = `
-                    <div class="empty-state">
-                        <p>No friend online</p>
-                    </div>
-                `;
-                const onlineCountBadge = document.getElementById('onlineCountBadge');
-                if (onlineCountBadge) {
-                    onlineCountBadge.textContent = '0';
-                }
+                listContainer.innerHTML = '<p class="text-slate-500 text-sm">No friends online</p>';
             }
             
         } catch (error) {
             console.error('[MAIN] Error loading friends:', error);
-            document.getElementById('onlineFriendsList').innerHTML = `
-                <div class="empty-state">
-                    <p>No friend online</p>
-                </div>
-            `;
-            document.getElementById('onlineCountBadge').textContent = '0';
+            document.getElementById('onlineFriendsList').innerHTML = '<p class="text-slate-500 text-sm">No friends online</p>';
         }
     }
 
     async loadRecentVisitors() {
-        // console.log('[MAIN] Loading recent visitors...');
-        
         try {
-            // Use proper visits API to get real visitors
             const response = await fetch(`/api/spice-multi-test?endpoint=/index_api/guest/get/visites&method=POST&session_id=${this.sessionId}&page=0`);
             const data = await response.json();
-            
-            // console.log('[MAIN] Recent visitors API response:', data);
             
             const listContainer = document.getElementById('visitorsList');
             
             if (data.success && data.data?.result && Array.isArray(data.data.result)) {
-                let visitors = data.data.result.slice(0, 6); // Show 6 recent visitors
+                let visitors = data.data.result.slice(0, 6);
                 
-                // Sort by visit time (most recent first)
                 visitors.sort((a, b) => {
                     const timeA = new Date(a.date_visite || a.date_action || 0);
                     const timeB = new Date(b.date_visite || b.date_action || 0);
-                    return timeB - timeA; // Descending order (newest first)
+                    return timeB - timeA;
                 });
                 
                 if (visitors.length === 0) {
-                    // console.log('[MAIN] No visitors from API, using fallback search');
                     await this.loadRecentVisitorsFallback();
                     return;
                 }
@@ -707,32 +483,33 @@ class MainDashboard {
                     const photoUrl = this.getPhotoUrl(visitor);
                     const age = visitor.age || '--';
                     const visitTime = visitor.date_visite || visitor.date_action;
-                    const timeAgo = visitTime ? this.getTimeAgo(visitTime) : 'Recently';
+                    const timeAgo = visitTime ? this.formatTimeAgo(visitTime) : 'Recently';
+                    const firstLetter = (visitor.pseudo || visitor.nom_complet || 'U').charAt(0).toUpperCase();
                     
                     return `
-                        <div class="visitor-item" onclick="viewUserProfile('${visitor.id || visitor.id_membre}', '${visitor.pseudo || visitor.nom_complet || 'Anonymous'}')" style="cursor: pointer;">
-                            <div class="visitor-avatar">
-                                ${photoUrl ? `<img src="${photoUrl}" alt="${visitor.pseudo}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''}
-                                <div class="avatar-fallback" style="${photoUrl ? 'display: none;' : ''}">${(visitor.pseudo || 'U').charAt(0).toUpperCase()}</div>
+                        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-800/50 border border-white/5 hover:border-brand-primary/30 transition-all cursor-pointer group" onclick="viewUserProfile('${visitor.id || visitor.id_membre}', '${visitor.pseudo || visitor.nom_complet || 'Anonymous'}')">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 rounded-full bg-slate-700 overflow-hidden flex items-center justify-center text-slate-300 font-bold">
+                                    ${photoUrl ? `<img src="${photoUrl}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''}
+                                    <span class="${photoUrl ? 'hidden' : 'block'}">${firstLetter}</span>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold text-white group-hover:text-brand-primary transition-colors">${visitor.pseudo || visitor.nom_complet || 'Anonymous'}</p>
+                                    <p class="text-xs text-slate-400">${age} years</p>
+                                </div>
                             </div>
-                            <div class="visitor-info">
-                                <div class="visitor-name">${visitor.pseudo || visitor.nom_complet || 'Anonymous'}</div>
-                                <div class="visitor-details">${age} years • ${timeAgo}</div>
-                            </div>
+                            <span class="text-xs text-slate-500 bg-slate-900 px-2 py-1 rounded-full">${timeAgo}</span>
                         </div>
                     `;
                 }).join('');
                 
-                listContainer.innerHTML = visitorsHTML;
+                listContainer.innerHTML = `<div class="space-y-3">${visitorsHTML}</div>`;
                 
             } else {
-                // console.log('[MAIN] No visitors from API, using fallback search');
                 await this.loadRecentVisitorsFallback();
             }
             
         } catch (error) {
-            console.error('[MAIN] Error loading recent visitors:', error);
-            // Fallback to search API
             await this.loadRecentVisitorsFallback();
         }
     }
@@ -748,99 +525,94 @@ class MainDashboard {
                 const visitors = data.data.result.slice(0, 6);
                 
                 if (visitors.length === 0) {
-                    listContainer.innerHTML = '<div class="empty-state">No recent visitors</div>';
+                    listContainer.innerHTML = '<p class="text-slate-500 text-sm text-center">No recent visitors</p>';
                     return;
                 }
                 
                 const visitorsHTML = visitors.map((visitor, index) => {
                     const photoUrl = this.getPhotoUrl(visitor);
                     const age = visitor.age || '--';
-                    // Generate realistic time progression: most recent first
                     const timeAgo = this.getProgressiveTimeAgo(index);
+                    const firstLetter = (visitor.pseudo || 'U').charAt(0).toUpperCase();
                     
                     return `
-                        <div class="visitor-item" onclick="viewUserProfile('${visitor.id || visitor.id_membre}', '${visitor.pseudo || 'Anonymous'}')" style="cursor: pointer;">
-                            <div class="visitor-avatar">
-                                ${photoUrl ? `<img src="${photoUrl}" alt="${visitor.pseudo}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''}
-                                <div class="avatar-fallback" style="${photoUrl ? 'display: none;' : ''}">${(visitor.pseudo || 'U').charAt(0).toUpperCase()}</div>
+                        <div class="flex items-center justify-between p-3 rounded-xl bg-slate-800/50 border border-white/5 hover:border-brand-primary/30 transition-all cursor-pointer group" onclick="viewUserProfile('${visitor.id || visitor.id_membre}', '${visitor.pseudo || 'Anonymous'}')">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 rounded-full bg-slate-700 overflow-hidden flex items-center justify-center text-slate-300 font-bold">
+                                    ${photoUrl ? `<img src="${photoUrl}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''}
+                                    <span class="${photoUrl ? 'hidden' : 'block'}">${firstLetter}</span>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold text-white group-hover:text-brand-primary transition-colors">${visitor.pseudo || 'Anonymous'}</p>
+                                    <p class="text-xs text-slate-400">${age} years</p>
+                                </div>
                             </div>
-                            <div class="visitor-info">
-                                <div class="visitor-name">${visitor.pseudo || 'Anonymous'}</div>
-                                <div class="visitor-details">${age} years • ${timeAgo}</div>
-                            </div>
+                            <span class="text-xs text-slate-500 bg-slate-900 px-2 py-1 rounded-full">${timeAgo}</span>
                         </div>
                     `;
                 }).join('');
                 
-                listContainer.innerHTML = visitorsHTML;
+                listContainer.innerHTML = `<div class="space-y-3">${visitorsHTML}</div>`;
             } else {
-                listContainer.innerHTML = '<div class="empty-state">No recent visitors</div>';
+                listContainer.innerHTML = '<p class="text-slate-500 text-sm text-center">No recent visitors</p>';
             }
         } catch (error) {
-            console.error('[MAIN] Error in fallback visitors:', error);
-            document.getElementById('visitorsList').innerHTML = '<div class="error-state">Failed to load recent visitors</div>';
+            document.getElementById('visitorsList').innerHTML = '<p class="text-slate-500 text-sm text-center">No recent visitors</p>';
         }
     }
 
     async loadPhotoVotes() {
-        // console.log('[MAIN] Loading photo votes...');
-        
         try {
-            // Get user's photos
             const response = await fetch(`/api/spice-multi-test?endpoint=/index_api/user_edit_photos&method=POST&session_id=${this.sessionId}`);
             const data = await response.json();
-            
-            // console.log('[MAIN] Photo votes API response:', data);
             
             const listContainer = document.getElementById('photoVotesList');
             
             if (data.success && data.data?.result && Array.isArray(data.data.result)) {
-                const photos = data.data.result.slice(0, 4); // Show 4 photos with votes
+                const photos = data.data.result.slice(0, 4);
                 
                 if (photos.length === 0) {
-                    listContainer.innerHTML = '<div class="empty-state">No photos to display</div>';
+                    listContainer.innerHTML = '<p class="text-slate-500 text-sm text-center">No photos uploaded</p>';
                     return;
                 }
                 
                 const photosHTML = photos.map(photo => {
                     const photoUrl = this.getPhotoUrlFromPhotoData(photo);
-                    const votes = Math.floor(Math.random() * 50) + 1; // Mock votes
-                    const rating = (Math.random() * 2 + 3).toFixed(1); // Mock rating 3.0-5.0
+                    const votes = Math.floor(Math.random() * 50) + 1;
+                    const rating = (Math.random() * 2 + 3).toFixed(1);
                     
                     return `
-                        <div class="photo-vote-item">
-                            <div class="photo-thumbnail">
-                                ${photoUrl ? `<img src="${photoUrl}" alt="Photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''}
-                                <div class="photo-fallback" style="${photoUrl ? 'display: none;' : ''}">📷</div>
-                            </div>
-                            <div class="photo-vote-info">
-                                <div class="photo-votes">${votes} votes</div>
-                                <div class="photo-rating">⭐ ${rating}</div>
-                            </div>
+                        <div class="relative group rounded-xl overflow-hidden aspect-square bg-slate-800">
+                             ${photoUrl ? `<img src="${photoUrl}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : ''}
+                             <div class="${photoUrl ? 'hidden' : 'flex'} w-full h-full items-center justify-center text-slate-600">
+                                <svg class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                             </div>
+                             
+                             <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-between p-3">
+                                <div class="text-white text-xs font-bold">⭐ ${rating}</div>
+                                <div class="text-white text-xs">${votes} votes</div>
+                             </div>
                         </div>
                     `;
                 }).join('');
                 
-                listContainer.innerHTML = photosHTML;
+                listContainer.innerHTML = `<div class="grid grid-cols-2 gap-3">${photosHTML}</div>`;
                 
                 // Update votes count badge
                 const totalVotes = photos.length * Math.floor(Math.random() * 20 + 10);
-                document.getElementById('votesCountBadge').textContent = totalVotes;
+                const votesBadge = document.getElementById('votesCountBadge');
+                if (votesBadge) votesBadge.textContent = totalVotes;
                 
             } else {
-                listContainer.innerHTML = '<div class="empty-state">No photos available</div>';
+                listContainer.innerHTML = '<p class="text-slate-500 text-sm text-center">No photos available</p>';
             }
             
         } catch (error) {
-            console.error('[MAIN] Error loading photo votes:', error);
-            document.getElementById('photoVotesList').innerHTML = '<div class="error-state">Failed to load photo votes</div>';
+            document.getElementById('photoVotesList').innerHTML = '<p class="text-slate-500 text-sm text-center">Failed to load</p>';
         }
     }
 
     setupEventListeners() {
-        // console.log('[MAIN] Setting up event listeners...');
-        
-        // Refresh activity button
         const refreshBtn = document.getElementById('refreshActivityBtn');
         if (refreshBtn) {
             refreshBtn.addEventListener('click', () => {
@@ -848,21 +620,21 @@ class MainDashboard {
             });
         }
         
-        // Top members gender filter tabs
         const filterTabs = document.querySelectorAll('.filter-tab');
         filterTabs.forEach(tab => {
             tab.addEventListener('click', (e) => {
-                // Update active tab
-                filterTabs.forEach(t => t.classList.remove('active'));
-                e.target.classList.add('active');
+                filterTabs.forEach(t => {
+                    t.classList.remove('bg-brand-primary', 'text-white');
+                    t.classList.add('bg-slate-800', 'text-slate-400');
+                });
+                e.target.classList.remove('bg-slate-800', 'text-slate-400');
+                e.target.classList.add('bg-brand-primary', 'text-white');
                 
-                // Load members for selected gender
                 const gender = parseInt(e.target.dataset.gender);
                 this.loadTopMembers(gender);
             });
         });
         
-        // Logout button
         const logoutBtn = document.getElementById('logoutBtn');
         if (logoutBtn) {
             logoutBtn.addEventListener('click', () => {
@@ -874,125 +646,21 @@ class MainDashboard {
     }
 
     startAutoRefresh() {
-        // Refresh online status every 30 seconds
         this.refreshInterval = setInterval(() => {
             this.loadQuickStats();
         }, 30000);
-        
-        // console.log('[MAIN] Auto-refresh started');
     }
 
     stopAutoRefresh() {
         if (this.refreshInterval) {
             clearInterval(this.refreshInterval);
             this.refreshInterval = null;
-            // console.log('[MAIN] Auto-refresh stopped');
         }
     }
-
-    // Utility methods
-    getPhotoUrl(user) {
-        let photoUrl = null;
-        
-        // console.log('[MAIN] Getting photo URL for user:', user);
-        
-        // Try various photo field formats from different API endpoints
-        // Приоритет: photos_v2 (высокое качество) > photos > другие поля
-        if (user.photos_v2) {
-            // console.log('[MAIN] Found photos_v2:', user.photos_v2);
-            
-            if (user.photos_v2.public && typeof user.photos_v2.public === 'object') {
-                const publicPhotos = user.photos_v2.public;
-                const firstPhotoKey = Object.keys(publicPhotos)[0];
-                if (firstPhotoKey && publicPhotos[firstPhotoKey]) {
-                    const photo = publicPhotos[firstPhotoKey];
-                    photoUrl = photo.sq_430 || photo.normal || photo.sq_middle || photo.url_big;
-                    // console.log('[MAIN] Using photos_v2.public photo:', photoUrl);
-                }
-            } else if (Array.isArray(user.photos_v2) && user.photos_v2.length > 0) {
-                // Ищем главную фотографию (num === 0) или берем первую
-                const mainPhoto = user.photos_v2.find(p => p.num === 0 || p.is_main === 1) || user.photos_v2[0];
-                photoUrl = mainPhoto.sq_430 || mainPhoto.normal || mainPhoto.sq_middle || mainPhoto.url_big;
-                // console.log('[MAIN] Using photos_v2 array photo:', photoUrl);
-            }
-        } 
-        
-        // Fallback к обычным photos
-        if (!photoUrl && user.photos && Array.isArray(user.photos) && user.photos.length > 0) {
-            const firstPhoto = user.photos[0];
-            photoUrl = firstPhoto.url_big || firstPhoto.normal || firstPhoto.sq_430 || firstPhoto.sq_middle || firstPhoto.url_middle;
-            // console.log('[MAIN] Using photos array photo:', photoUrl);
-        }
-        
-        // Fallback к другим полям фотографий
-        if (!photoUrl) {
-            photoUrl = user.picture_430 || user.picture || user.photo_profil_url || 
-                      user.photo_profil || user.photo || user.avatar || user.pic || 
-                      user.image || user.main_photo;
-            if (photoUrl) {
-                // console.log('[MAIN] Using fallback photo field:', photoUrl);
-            }
-        }
-        
-        // Fix URL if relative
-        if (photoUrl && !photoUrl.startsWith('http') && !photoUrl.startsWith('//')) {
-            if (photoUrl.startsWith('/')) {
-                photoUrl = 'https://dev2018.de5a7.com' + photoUrl;
-            } else {
-                photoUrl = 'https://dev2018.de5a7.com/' + photoUrl;
-            }
-        }
-        
-        // console.log('[MAIN] Final photo URL:', photoUrl);
-        return photoUrl;
-    }
-
-    getPhotoUrlFromPhotoData(photo) {
-        let photoUrl = null;
-        
-        if (photo.sq_430) {
-            photoUrl = photo.sq_430;
-        } else if (photo.normal) {
-            photoUrl = photo.normal;
-        } else if (photo.sq_middle) {
-            photoUrl = photo.sq_middle;
-        } else if (photo.url_big) {
-            photoUrl = photo.url_big;
-        } else if (photo.url_middle) {
-            photoUrl = photo.url_middle;
-        }
-        
-        // Fix URL if relative
-        if (photoUrl && !photoUrl.startsWith('http') && !photoUrl.startsWith('/')) {
-            photoUrl = 'https://dev2018.de5a7.com/' + photoUrl;
-        }
-        
-        return photoUrl;
-    }
-
-    formatActivityText(activity) {
-        const pseudo = activity.pseudo || 'Someone';
-        const action = activity.action || 'unknown';
-        
-        switch (action) {
-            case 'con':
-                return `<strong>${pseudo}</strong> connected`;
-            case 'visite':
-                return `<strong>${pseudo}</strong> visited your profile`;
-            case 'vote':
-                return `<strong>${pseudo}</strong> voted for your photo`;
-            case 'modif':
-                return `<strong>${pseudo}</strong> updated their profile`;
-            case 'add_tof':
-                return `<strong>${pseudo}</strong> added new photos`;
-            default:
-                return `<strong>${pseudo}</strong> was active`;
-        }
-    }
-
+    
+    // ... helper methods from original code ...
     formatTimeAgo(dateString) {
         if (!dateString) return 'Recently';
-        
         try {
             const date = new Date(dateString);
             const now = new Date();
@@ -1012,23 +680,16 @@ class MainDashboard {
     }
 
     getProgressiveTimeAgo(index) {
-        // Generate realistic time progression: most recent first
         const times = ['15m ago', '1h ago', '3h ago', '5h ago', '1d ago', '2d ago'];
         return times[index] || times[times.length - 1];
     }
-
-    // ============ GIFTS NOTIFICATIONS METHODS ============
     
     async loadGiftNotifications() {
-        // console.log('[MAIN] Loading gift notifications...');
-        // This method is called from loadAllSections but doesn't need separate UI rendering
-        // Notifications are integrated into activity feed via loadActivityFeed
+        // Method placeholder
     }
 
     async loadGiftNotificationsData() {
         try {
-            // console.log('[MAIN] Loading gift notifications data...');
-            
             const response = await fetch('/api/database', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1038,162 +699,29 @@ class MainDashboard {
                     limit: 20
                 })
             });
-            
             const result = await response.json();
-            if (result.success) {
-                // console.log('[MAIN] Loaded gift notifications:', result.data.length);
-                return result.data || [];
-            } else {
-                console.error('[MAIN] Error loading gift notifications:', result.error);
-                return [];
-            }
+            return result.success ? result.data || [] : [];
         } catch (error) {
-            console.error('[MAIN] Error loading gift notifications:', error);
             return [];
         }
     }
-
-    createGiftActivityItem(notification) {
-        const timeAgo = this.formatTimeAgo(notification.date_action);
-        const isNew = notification.is_new;
-        const giftEmoji = this.getGiftEmojiFromMessage(notification.message);
-        
-        return `
-            <div class="activity-item gift-activity ${isNew ? 'new-gift-activity' : ''}" 
-                 onclick="this.markAsRead(${notification.notification_id}); window.location.href='gifts.html';">
-                <div class="activity-content">
-                    <div class="activity-text">
-                        ${notification.message}
-                        ${isNew ? '<span class="new-indicator">NEW</span>' : ''}
-                    </div>
-                    <div class="activity-time">${timeAgo}</div>
-                </div>
-            </div>
-        `;
-    }
-
-    getGiftEmojiFromMessage(message) {
-        // Извлекаем название подарка из сообщения и возвращаем соответствующий эмодзи
-        const giftEmojiMap = {
-            'Red Rose': '🌹',
-            'Tulip Bouquet': '🌷',
-            'Heart Chocolate': '🍫',
-            'Coffee & Cookies': '☕',
-            'Teddy Bear': '🧸',
-            'Balloons': '🎈',
-            'Rose Bouquet': '💐',
-            'Perfume': '🌸',
-            'Silver Earrings': '💎',
-            'Bracelet': '📿',
-            'Watch': '⌚',
-            'Gold Chain': '📿',
-            'Diamond Earrings': '💍',
-            'Gold Ring': '💍',
-            'Pearl Necklace': '📿',
-            'Diamond Bracelet': '💎',
-            'Platinum Ring': '💍',
-            'Luxury Watch': '⌚',
-            'Diamond Necklace': '💎',
-            'Royal Crown': '👑'
-        };
-        
-        for (const [giftName, emoji] of Object.entries(giftEmojiMap)) {
-            if (message.includes(giftName)) {
-                return emoji;
-            }
-        }
-        
-        return '🎁'; // Default gift emoji
-    }
-
-    async markNotificationAsRead(notificationId) {
-        try {
-            await fetch('/api/database', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'mark_notification_read',
-                    session_id: this.sessionId,
-                    notification_id: notificationId
-                })
-            });
-        } catch (error) {
-            console.error('[MAIN] Error marking notification as read:', error);
-        }
-    }
-
-
-
-    createNewMemberActivityItem(activity) {
-        const timeAgo = this.formatTimeAgo(activity.date_action);
-        
-        return `
-            <div class="activity-item new-member-activity">
-                <div class="activity-content">
-                    <div class="activity-text">
-                        <strong>${activity.pseudo}</strong> joined the community
-                    </div>
-                    <div class="activity-time">${timeAgo}</div>
-                </div>
-            </div>
-        `;
-    }
-
-    createProfileUpdateActivityItem(activity) {
-        const timeAgo = this.formatTimeAgo(activity.date_action);
-        
-        return `
-            <div class="activity-item profile-update-activity">
-                <div class="activity-content">
-                    <div class="activity-text">
-                        <strong>${activity.pseudo}</strong> updated their profile
-                    </div>
-                    <div class="activity-time">${timeAgo}</div>
-                </div>
-            </div>
-        `;
-    }
-
-    createNewFriendshipActivityItem(activity) {
-        const timeAgo = this.formatTimeAgo(activity.date_action);
-        
-        return `
-            <div class="activity-item friendship-activity">
-                <div class="activity-content">
-                    <div class="activity-text">
-                        <strong>${activity.pseudo1}</strong> and <strong>${activity.pseudo2}</strong> became friends
-                    </div>
-                    <div class="activity-time">${timeAgo}</div>
-                </div>
-            </div>
-        `;
-    }
 }
 
-// Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    // console.log('[MAIN] DOM loaded, initializing MainDashboard...');
-    
-    // Wait for auth manager to be ready
     function initMainDashboard(attempt = 1, maxAttempts = 20) {
         if (window.authManager && window.authManager.isLoggedIn) {
-            // console.log('[MAIN] AuthManager ready, creating MainDashboard instance');
             window.mainDashboard = new MainDashboard();
             window.mainDashboard.init();
         } else if (attempt < maxAttempts) {
-            // console.log(`[MAIN] AuthManager not ready, retrying... (${attempt}/${maxAttempts})`);
             setTimeout(() => initMainDashboard(attempt + 1, maxAttempts), 1000);
         } else {
             console.error('[MAIN] Failed to initialize MainDashboard - AuthManager not ready');
             window.location.href = 'index.html';
         }
     }
-    
-    // Start initialization with longer delay after registration
     setTimeout(() => initMainDashboard(), 500);
 });
 
-// Cleanup on page unload
 window.addEventListener('beforeunload', () => {
     if (window.mainDashboard) {
         window.mainDashboard.stopAutoRefresh();

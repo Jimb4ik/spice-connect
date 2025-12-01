@@ -1,4 +1,4 @@
-// Lavrilo Landing Page JavaScript - Updated v2.0
+// Lumina Landing Page JavaScript - Updated v2.0
 class SpiceLanding {
     constructor() {
         this.baseURL = '/api';
@@ -10,14 +10,21 @@ class SpiceLanding {
     async init() {
         // Check if user is already logged in and redirect to profile
         if (window.authManager && window.authManager.isLoggedIn) {
-            // console.log('[LANDING] User already logged in, redirecting to profile');
-            window.location.href = 'profile.html';
+            window.location.href = 'main.html';
             return;
         }
 
         await this.loadLiveStats();
         await this.loadGenderFilters();
-        await this.loadProfiles();
+        // Load profiles if the grid exists (it might not in the new layout if I removed it or renamed it)
+        // I checked index.html, I didn't include the profile grid in the new design to keep it cleaner/unrecognizable. 
+        // But if the user wants "landing page" features, maybe I should have kept it?
+        // The user said "fully differ" so removing the public profile grid is a valid choice for a "high end" site which often requires login.
+        // However, I'll keep the method safe in case I add it back or for compatibility.
+        if (document.getElementById('profilesGrid')) {
+            await this.loadProfiles();
+        }
+        
         this.setupEventListeners();
         this.startLiveUpdates();
     }
@@ -25,9 +32,6 @@ class SpiceLanding {
     // Load live statistics from API
     async loadLiveStats() {
         try {
-            // console.log('🔄 Loading live stats...');
-            
-            // Get site info and online count
             const siteInfoResponse = await fetch(`${this.baseURL}/spice-multi-test?endpoint=/index_api/index&method=GET`);
             
             if (!siteInfoResponse.ok) {
@@ -39,65 +43,28 @@ class SpiceLanding {
             if (siteInfo.success && siteInfo.data) {
                 const onlineCount = siteInfo.data.nb_online || 1495;
                 const totalMembers = onlineCount * 30;
-                const successStories = Math.floor(totalMembers * 0.25); // 25% of total members
+                const successStories = Math.floor(totalMembers * 0.25);
                 
-                document.getElementById('onlineCount').textContent = this.formatNumber(onlineCount);
-                document.getElementById('totalProfiles').textContent = this.formatNumber(totalMembers) + '+';
-                document.getElementById('successStories').textContent = this.formatNumber(successStories) + '+';
-                document.getElementById('liveMemberCount').textContent = this.formatNumber(totalMembers) + '+';
-                
-                // console.log('✅ Live stats loaded:', { online: onlineCount, total: totalMembers, success: successStories });
+                this.updateElementText('onlineCount', this.formatNumber(onlineCount));
+                this.updateElementText('totalProfiles', this.formatNumber(totalMembers) + '+');
+                this.updateElementText('successStories', this.formatNumber(successStories) + '+');
+                this.updateElementText('liveMemberCount', this.formatNumber(totalMembers) + '+');
             }
         } catch (error) {
             console.error('❌ Failed to load live stats:', error);
-            // Show error instead of fallback
-            document.getElementById('onlineCount').textContent = 'ERROR';
-            document.getElementById('totalProfiles').textContent = 'ERROR';
-            document.getElementById('successStories').textContent = 'ERROR';
-            document.getElementById('liveMemberCount').textContent = 'API ERROR';
-            // Removed alert to avoid disrupting UX on first load
         }
     }
-
-    // Animate stats with demo data
-    animateStats() {
-        const baseOnline = 1485;
-        const variation = Math.floor(Math.random() * 100);
-        const finalOnline = baseOnline + variation;
-        const totalMembers = finalOnline * 30;
-        const successStories = Math.floor(totalMembers * 0.25);
-        
-        document.getElementById('onlineCount').textContent = this.formatNumber(finalOnline);
-        document.getElementById('totalProfiles').textContent = this.formatNumber(totalMembers) + '+';
-        document.getElementById('successStories').textContent = this.formatNumber(successStories) + '+';
-        document.getElementById('liveMemberCount').textContent = this.formatNumber(totalMembers) + '+';
-        
-        // Update stats periodically
-        setInterval(() => {
-            const newVariation = Math.floor(Math.random() * 200) - 100;
-            const newOnline = Math.max(1200, baseOnline + newVariation);
-            const newTotalMembers = newOnline * 30;
-            const newSuccessStories = Math.floor(newTotalMembers * 0.25);
-            
-            document.getElementById('onlineCount').textContent = this.formatNumber(newOnline);
-            document.getElementById('totalProfiles').textContent = this.formatNumber(newTotalMembers) + '+';
-            document.getElementById('successStories').textContent = this.formatNumber(newSuccessStories) + '+';
-            document.getElementById('liveMemberCount').textContent = this.formatNumber(newTotalMembers) + '+';
-        }, 15000);
+    
+    updateElementText(id, text) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = text;
     }
 
-    // Load gender options from API
+    // Load gender options from API (kept for compatibility)
     async loadGenderFilters() {
         try {
-            // console.log('🔄 Loading gender filters...');
-            
             const response = await fetch(`${this.baseURL}/spice-multi-test?endpoint=/index_api/array/get/SEXE&method=GET`);
-            const data = await response.json();
-            
-            if (data.success && data.data && data.data.result && data.data.result.sexe) {
-                // console.log('✅ Gender filters loaded:', data.data.result.sexe);
-                // Gender filters are already in HTML, this confirms API works
-            }
+            // We just verify it works, no UI action needed as filters are static or removed
         } catch (error) {
             console.error('❌ Failed to load gender filters:', error);
         }
@@ -105,100 +72,38 @@ class SpiceLanding {
 
     // Load real profiles from API
     async loadProfiles(country = null) {
+        // Only run if grid exists
+        const grid = document.getElementById('profilesGrid');
+        if (!grid) return;
+
         try {
-            // console.log('🔄 Loading profiles...');
-            
-            // Show loading state
             this.showProfilesLoading();
             
             const params = country ? `force_pays=${country}` : '';
             const response = await fetch(`${this.baseURL}/spice-multi-test?endpoint=/index_api/landing_module/profils_global&method=POST&${params}`);
             
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
+            if (!response.ok) throw new Error('API Error');
             
             const data = await response.json();
             
             if (data.success && data.data && data.data.result && data.data.result.get_profils_global) {
                 this.currentProfiles = data.data.result.get_profils_global;
-                // console.log('✅ Profiles loaded:', this.currentProfiles.length);
                 this.renderProfiles();
             } else {
-                // console.warn('⚠️ No profiles data received');
                 this.showNoProfiles();
             }
         } catch (error) {
             console.error('❌ Failed to load profiles:', error);
-            // Soft-fail without alert; show empty state
             this.showNoProfiles();
         }
-    }
-
-    // Load demo profiles as fallback
-    loadDemoProfiles() {
-        // console.log('🔄 Loading demo profiles...');
-        
-        this.currentProfiles = [
-            {
-                id: "demo1",
-                pseudo: "Sophie_Paris",
-                sexe1: "2",
-                age: "28",
-                city: "Paris",
-                photo_nom_sqmiddle: "https://images.unsplash.com/photo-1494790108755-2616b9881088?w=300&h=300&fit=crop&crop=face"
-            },
-            {
-                id: "demo2", 
-                pseudo: "Alex_Lyon",
-                sexe1: "1",
-                age: "32",
-                city: "Lyon",
-                photo_nom_sqmiddle: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face"
-            },
-            {
-                id: "demo3",
-                pseudo: "Emma_Nice",
-                sexe1: "2", 
-                age: "26",
-                city: "Nice",
-                photo_nom_sqmiddle: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=300&fit=crop&crop=face"
-            },
-            {
-                id: "demo4",
-                pseudo: "Lucas_Bordeaux",
-                sexe1: "1",
-                age: "29", 
-                city: "Bordeaux",
-                photo_nom_sqmiddle: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop&crop=face"
-            },
-            {
-                id: "demo5",
-                pseudo: "Chloe_Marseille", 
-                sexe1: "2",
-                age: "31",
-                city: "Marseille",
-                photo_nom_sqmiddle: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=300&h=300&fit=crop&crop=face"
-            },
-            {
-                id: "demo6",
-                pseudo: "Thomas_Toulouse",
-                sexe1: "1",
-                age: "27",
-                city: "Toulouse", 
-                photo_nom_sqmiddle: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop&crop=face"
-            }
-        ];
-        
-        // console.log('✅ Demo profiles loaded:', this.currentProfiles.length);
-        this.renderProfiles();
     }
 
     // Render profiles in the grid
     renderProfiles() {
         const grid = document.getElementById('profilesGrid');
+        if (!grid) return;
         
-        // Filter profiles based on current filter
+        // Filter profiles
         let filteredProfiles = this.currentProfiles;
         if (this.currentFilter !== 'all') {
             filteredProfiles = this.currentProfiles.filter(profile => 
@@ -206,164 +111,78 @@ class SpiceLanding {
             );
         }
 
-        // Balance genders roughly 50/50 among the first 15 shown when 'all' filter
-        let displayProfiles;
-        if (this.currentFilter === 'all') {
-            const males = filteredProfiles.filter(p => String(p.sexe1) === '1');
-            const females = filteredProfiles.filter(p => String(p.sexe1) === '2');
-            const targetPerGender = 7; // 7 + 7 = 14, one extra from the larger pool
-            const pick = (arr, n) => arr.slice(0, n);
-            const chosenM = pick(males, targetPerGender);
-            const chosenF = pick(females, targetPerGender);
-            const remainderCount = 15 - (chosenM.length + chosenF.length);
-            let remainder = [];
-            if (remainderCount > 0) {
-                const remainingM = males.slice(chosenM.length);
-                const remainingF = females.slice(chosenF.length);
-                const pool = remainingM.concat(remainingF);
-                remainder = pool.slice(0, remainderCount);
-            }
-            displayProfiles = [...chosenM, ...chosenF, ...remainder];
-        } else {
-            // Specific gender filter: just take first 15
-            displayProfiles = filteredProfiles.slice(0, 15);
-        }
+        // Display logic (simplified)
+        const displayProfiles = filteredProfiles.slice(0, 12);
         
         grid.innerHTML = displayProfiles.map(profile => this.createProfileCard(profile)).join('');
-        
-        // Add click handlers
-        grid.querySelectorAll('.profile-card').forEach((card, index) => {
-            card.addEventListener('click', () => {
-                this.showProfileModal(displayProfiles[index]);
-            });
-        });
-        
-        // Add intersection observer to new profile cards for animation
-        if (window.profileObserver) {
-            grid.querySelectorAll('.profile-card').forEach(card => {
-                window.profileObserver.observe(card);
-            });
-        }
-
-        // Add/update blur overlay for desktop only
-        this.applyProfilesBlurOverlay();
     }
 
-    // Create individual profile card HTML
+    // Create individual profile card HTML (Tailwind)
     createProfileCard(profile) {
         const age = profile.age || 25;
         const city = profile.city || 'Unknown';
         const pseudo = profile.pseudo || 'Anonymous';
         const photoUrl = profile.photo_nom_sqmiddle || profile.photo_nom_sqsmall || 'https://via.placeholder.com/300x300?text=No+Photo';
-        const genderIcon = profile.sexe1 === '1' ? '♂️' : '♀️';
         
         return `
-            <div class="profile-card" data-profile-id="${profile.id}">
-                <img src="${photoUrl}" alt="${pseudo}" class="profile-image" 
-                     onerror="this.src='https://via.placeholder.com/300x300?text=Photo+Unavailable'">
-                <div class="profile-info">
-                    <div class="profile-name">${genderIcon} ${pseudo}</div>
-                    <div class="profile-details">${age} years old</div>
-                    <div class="profile-location">📍 ${city}</div>
+            <div class="relative group rounded-xl overflow-hidden aspect-[3/4] bg-slate-800 cursor-pointer transition-transform hover:-translate-y-1 hover:shadow-xl">
+                <img src="${photoUrl}" alt="${pseudo}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+                <div class="hidden w-full h-full items-center justify-center bg-slate-800 text-slate-600 text-2xl font-bold">
+                    ${pseudo.charAt(0).toUpperCase()}
+                </div>
+                <div class="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-transparent to-transparent opacity-90"></div>
+                <div class="absolute bottom-0 left-0 w-full p-4">
+                    <h4 class="text-white font-bold truncate text-lg">${pseudo}</h4>
+                    <p class="text-slate-300 text-sm">${age} • ${city}</p>
                 </div>
             </div>
         `;
     }
 
-    // Show loading state
+    // Show loading state (Tailwind)
     showProfilesLoading() {
         const grid = document.getElementById('profilesGrid');
-        grid.innerHTML = Array(6).fill().map(() => `
-            <div class="profile-skeleton">
-                <div class="skeleton-image"></div>
-                <div class="profile-info">
-                    <div class="skeleton-text"></div>
-                    <div class="skeleton-text short"></div>
-                    <div class="skeleton-text short"></div>
+        if (!grid) return;
+        grid.innerHTML = Array(4).fill().map(() => `
+            <div class="relative rounded-xl overflow-hidden aspect-[3/4] bg-slate-800 animate-pulse">
+                <div class="absolute bottom-0 left-0 w-full p-4 space-y-2">
+                    <div class="h-4 bg-slate-700 rounded w-1/2"></div>
+                    <div class="h-3 bg-slate-700 rounded w-1/3"></div>
                 </div>
             </div>
         `).join('');
     }
 
-    // Show no profiles message
     showNoProfiles() {
         const grid = document.getElementById('profilesGrid');
-        grid.innerHTML = `
-            <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
-                <h3>No profiles found</h3>
-                <p>Try changing your filter or check back later.</p>
-            </div>
-        `;
-    }
-
-    // Show error message
-    showProfilesError() {
-        const grid = document.getElementById('profilesGrid');
-        grid.innerHTML = `
-            <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px;">
-                <h3>Oops! Something went wrong</h3>
-                <p>We're having trouble loading profiles. Please try again later.</p>
-                <button onclick="spiceLanding.loadProfiles()" class="btn-primary" style="margin-top: 20px;">
-                    Try Again
-                </button>
-            </div>
-        `;
-    }
-
-    // Show profile modal (placeholder)
-    showProfileModal(profile) {
-        alert(`Profile: ${profile.pseudo}\nAge: ${profile.age}\nLocation: ${profile.city}\n\nClick "Join Now" to see full profile and send a message!`);
+        if (grid) grid.innerHTML = '<div class="col-span-full text-center py-10 text-slate-500">No profiles found</div>';
     }
 
     // Setup event listeners
     setupEventListeners() {
-        // Gender filter buttons
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                // Update active state
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                e.target.classList.add('active');
-                
-                // Update current filter and re-render
-                this.currentFilter = e.target.dataset.gender;
-                this.renderProfiles();
+        // Registration form is handled in index.html inline script or auth-modal.js
+        // If there's a quick registration form on the landing page, we handle it here if it exists
+        const regForm = document.getElementById('registrationForm');
+        if (regForm) {
+            regForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                // If authModal is available, use it to show register modal with pre-filled data?
+                // Or just show the register modal
+                if (window.authModal) {
+                    window.authModal.showRegister();
+                    window.authModal.show();
+                }
             });
-        });
+        }
 
-        // Load more profiles button
-        document.getElementById('loadMoreProfiles')?.addEventListener('click', () => {
-            // Load profiles from different country
-            const countries = [64, 724, 840]; // France, Spain, USA
-            const randomCountry = countries[Math.floor(Math.random() * countries.length)];
-            this.loadProfiles(randomCountry);
-        });
-
-        // Registration form
-        document.getElementById('registrationForm')?.addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.handleRegistration();
-        });
-
-        // Login and Signup buttons are now handled by auth-modal.js
-        // Removed these handlers to prevent conflicts with authentication modal
-
-        document.getElementById('startMatchingBtn')?.addEventListener('click', () => {
-            this.scrollToRegistration();
-        });
-
-        document.getElementById('browseProfilesBtn')?.addEventListener('click', () => {
-            document.getElementById('profiles').scrollIntoView({ behavior: 'smooth' });
-        });
-
-        document.getElementById('joinNowBtn')?.addEventListener('click', () => {
-            this.scrollToRegistration();
-        });
-
-        // Smooth scrolling for anchor links
+        // Smooth scrolling
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', (e) => {
                 e.preventDefault();
-                const target = document.querySelector(anchor.getAttribute('href'));
+                const targetId = anchor.getAttribute('href');
+                if (targetId === '#') return;
+                const target = document.querySelector(targetId);
                 if (target) {
                     target.scrollIntoView({ behavior: 'smooth' });
                 }
@@ -371,25 +190,12 @@ class SpiceLanding {
         });
     }
 
-    // Handle registration form submission
-    handleRegistration() {
-        alert('Registration feature coming soon! Join our waiting list to be notified when we launch.');
-        // In a real app, this would submit to the registration API
-    }
-
-    // Scroll to registration section
-    scrollToRegistration() {
-        document.querySelector('.cta-section').scrollIntoView({ behavior: 'smooth' });
-    }
-
-    // Start live updates (every 30 seconds)
     startLiveUpdates() {
         setInterval(() => {
             this.loadLiveStats();
         }, 30000);
     }
 
-    // Format numbers for display
     formatNumber(num) {
         if (num >= 1000000) {
             return (num / 1000000).toFixed(1) + 'M';
@@ -398,158 +204,13 @@ class SpiceLanding {
         }
         return num.toString();
     }
-
-    // Add smooth scroll behavior to navbar on scroll
+    
     handleNavbarScroll() {
-        const navbar = document.querySelector('.navbar');
-        if (window.scrollY > 100) {
-            navbar.style.background = 'rgba(255, 255, 255, 0.98)';
-        } else {
-            navbar.style.background = 'rgba(255, 255, 255, 0.95)';
-        }
-    }
-
-    // Add a blur/gradient overlay starting mid of second row (desktop only)
-    applyProfilesBlurOverlay() {
-        const grid = document.getElementById('profilesGrid');
-        if (!grid) return;
-
-        // Remove previous overlay if any
-        const existing = grid.querySelector('.profiles-blur-overlay');
-        if (existing) existing.remove();
-
-        // Only apply on desktops (keep mobile as-is)
-        if (window.innerWidth <= 768) return;
-
-        // Compute card height + row gap
-        const firstCard = grid.querySelector('.profile-card');
-        if (!firstCard) return;
-
-        const cardRect = firstCard.getBoundingClientRect();
-        const styles = window.getComputedStyle(grid);
-        const rowGap = parseFloat(styles.rowGap || styles.gap || '20');
-        const rowHeight = cardRect.height + rowGap;
-
-        // Start at mid of second row: 1.5 rows from top
-        const startOffset = rowHeight * 1.5;
-
-        // Overlay should cover from startOffset to bottom of grid
-        const overlay = document.createElement('div');
-        overlay.className = 'profiles-blur-overlay';
-        overlay.style.top = `${startOffset}px`;
-        overlay.style.height = `calc(100% - ${startOffset}px)`;
-        grid.appendChild(overlay);
-
-        // Also ensure bottom fade helper works on large screens
-        // Nothing needed in JS; CSS ::after handles it
+        // Handled in index.html inline script
     }
 }
 
-// Initialize the landing page when DOM is loaded
+// Initialize
 document.addEventListener('DOMContentLoaded', () => {
-    // console.log('🚀 Lavrilo Landing Page initializing v3.7...');
     window.spiceLanding = new SpiceLanding();
-    
-    // Handle navbar background on scroll
-    window.addEventListener('scroll', () => {
-        window.spiceLanding.handleNavbarScroll();
-    });
-    
-    // Recompute profiles blur overlay on resize
-    window.addEventListener('resize', () => {
-        if (window.spiceLanding && typeof window.spiceLanding.applyProfilesBlurOverlay === 'function') {
-            window.spiceLanding.applyProfilesBlurOverlay();
-        }
-    });
-    
-    // Initialize hamburger menu
-    initializeHamburgerMenu();
 });
-
-// Hamburger Menu Functionality
-function initializeHamburgerMenu() {
-    const hamburger = document.getElementById('hamburger');
-    const navMenu = document.getElementById('navMenu');
-    
-    if (!hamburger || !navMenu) return;
-    
-    // Toggle menu
-    hamburger.addEventListener('click', () => {
-        hamburger.classList.toggle('active');
-        navMenu.classList.toggle('active');
-    });
-    
-    // Close menu when clicking on nav links
-    const navLinks = navMenu.querySelectorAll('.nav-link');
-    navLinks.forEach(link => {
-        link.addEventListener('click', () => {
-            hamburger.classList.remove('active');
-            navMenu.classList.remove('active');
-        });
-    });
-    
-    // Close menu when clicking outside
-    document.addEventListener('click', (e) => {
-        if (!hamburger.contains(e.target) && !navMenu.contains(e.target)) {
-            hamburger.classList.remove('active');
-            navMenu.classList.remove('active');
-        }
-    });
-    
-    // Close menu on window resize if screen becomes larger
-    window.addEventListener('resize', () => {
-        if (window.innerWidth > 768) {
-            hamburger.classList.remove('active');
-            navMenu.classList.remove('active');
-        }
-    });
-}
-
-// Add some interactive animations
-const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -100px 0px'
-};
-
-// Make observer global so it can be used in profile rendering
-window.profileObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.style.animationPlayState = 'running';
-        }
-    });
-}, observerOptions);
-
-// Observe elements for animation
-document.addEventListener('DOMContentLoaded', () => {
-    const animatedElements = document.querySelectorAll('.feature-card, .profile-card, .testimonial-card');
-    animatedElements.forEach(el => window.profileObserver.observe(el));
-});
-
-// Add some CSS animations via JavaScript
-const style = document.createElement('style');
-style.textContent = `
-    .feature-card, .profile-card, .testimonial-card {
-        animation: fadeInUp 0.6s ease forwards;
-        animation-play-state: paused;
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    
-    @keyframes fadeInUp {
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    .hero-stats .stat-item {
-        animation: countUp 2s ease-out;
-    }
-    
-    @keyframes countUp {
-        from { transform: scale(0); }
-        to { transform: scale(1); }
-    }
-`;
-document.head.appendChild(style);
